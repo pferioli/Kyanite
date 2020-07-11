@@ -19,7 +19,7 @@ router.get("/", function (req, res, next) {
   );
 });
 
-router.get("/nuevo", function (req, res, next) {
+router.get("/new", function (req, res, next) {
   mysql.connection.query(
     "SELECT DESCRIPCION FROM CATEGORIAS_IMPOSITIVAS WHERE ACTIVO=1",
     function (err, rows) {

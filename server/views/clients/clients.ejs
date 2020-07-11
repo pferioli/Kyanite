@@ -7,7 +7,7 @@
         <div class="table-header">
           <span class="table-title">Listado de Clientes</span>
           <div class="actions">
-            <a href="/clientes/nuevo" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
+            <a href="/clients/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
                 class="material-icons">add_box</i></a>
             <a href="#" id="button-delete" class="search-toggle waves-effect btn-flat nopadding"><i
                 class="material-icons">search</i></a>
@@ -44,9 +44,9 @@
               <td><%= data.rows[i].TELEFONO %></td>
               <td><%= data.rows[i].EMAIL %></td>
               <td>
-                <a href=" /clientes/info/<%= data.rows[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
+                <a href=" /clients/info/<%= data.rows[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
                     class="material-icons">info</i></a>
-                <a href="/clientes/editar/<%= data.rows[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
+                <a href="/clients/editar/<%= data.rows[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
                     class="material-icons">edit</i></a>
                 <a class="btn-flat btn-small waves-effect waves-light modal-trigger" data-target="modal_delete"
                   data-id="<%= data.rows[i].ID %>"></button><i class="material-icons">delete</i></a>
