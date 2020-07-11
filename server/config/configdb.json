@@ -1,0 +1,17 @@
+{
+  "development": {
+    "user": "root",
+    "password": "root",
+    "database": "kyanite",
+    "host": "34.95.177.222",
+    "port": 3306,
+    "dialect": "mysql"
+  },
+  "production": {
+    "user": "",
+    "password": null,
+    "database": "",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

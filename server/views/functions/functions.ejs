@@ -1,0 +1,9 @@
+<%
+compareTime = function(time1, time2) {
+    return new Date(time1) > new Date(time2); // true if time1 is later
+};
+
+formatDate = function(date) {
+    return new Date(date).toLocaleDateString("en-US");
+}
+%>

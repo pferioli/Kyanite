@@ -1,0 +1,43 @@
+{
+  "name": "kyanite",
+  "version": "0.0.0",
+  "private": true,
+  "config": {
+    "entrypoint": "server/bin/server.js"
+  },
+  "scripts": {
+    "start": "node $npm_package_config_entrypoint",
+    "debug": "node --inspect=0.0.0.0:9229 $npm_package_config_entrypoint",
+    "debug:brk": "node --inspect-brk=0.0.0.0:9229 $npm_package_config_entrypoint",
+    "debug:legacy": "node --debug=0.0.0.0:5858 $npm_package_config_entrypoint",
+    "dev": "nodemon $npm_package_config_entrypoint"
+  },
+  "nodemonConfig": {
+    "env": {
+      "NODE_HEAPDUMP_OPTIONS": "nosignal"
+    }
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "debug": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
+    "express-flash": "0.0.2",
+    "express-mysql-session": "^2.1.4",
+    "express-session": "^1.17.1",
+    "express-validator": "^6.6.0",
+    "fs": "0.0.1-security",
+    "http-errors": "~1.6.3",
+    "morgan": "^1.9.1",
+    "mysql": "^2.18.1",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "path": "^0.12.7",
+    "sequelize": "^6.1.0",
+    "serve-favicon": "^2.5.0"
+  },
+  "devDependencies": {}
+}

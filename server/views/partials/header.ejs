@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+
+<head>
+  <title>AAII Administraciones Integrales</title>
+
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+  <!--Import materialize.css from my website directory stylesheets/-->
+  <link type="text/css" rel="stylesheet" href="/css/materialize.css" media="screen,projection" />
+
+  <link type="text/css" rel="stylesheet" href="/stylesheets/styles.css" media="screen,projection" />
+
+  <link type="text/css" rel="stylesheet" href="/stylesheets/table.css" media="screen,projection" />
+
+  <link type="text/css" rel="stylesheet" href="/stylesheets/materialert.css" media="screen,projection" />
+
+  <link rel="icon" href="/public/images/favicon.ico" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--Let browser know website is optimized for mobile-->
+</head>
+
+<body class="site grey lighten-3">
+  <header>
+    <nav>
+      <div class="nav-wrapper grey darken-4">
+        <a href="#" data-target="slide-out" class="sidenav-trigger show-on-large"><i class="material-icons">menu</i></a>
+
+        <ul class="left" id="ul_header_buttons">
+          <li id="li_incomes">
+            <a href="/incomes"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="Ingresos">monetization_on</i>
+            </a>
+          </li>
+
+          <li id="li_outcomes">
+            <a href="/outcomes"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="Egresos">receipt</i>
+            </a>
+          </li>
+          <li id="li_accounts_banks">
+            <a href="/accountsandbanks"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="Cajas y Bancos">account_balance</i></a>
+          </li>
+          <li id="li_periods">
+            <a href="/periods"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="Periodos">event</i></a>
+          </li>
+          <li id="li_clients">
+            <a href="/clients"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="Clientes">business</i></a>
+          </li>
+          <li id="li_properties">
+            <a href="/properties"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="Propiedades">home</i></a>
+          </li>
+          <li id="li_homeowners">
+            <a href="/homeowners"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="Propietarios">people</i></a>
+          </li>
+          <li id="li_suppliers">
+            <a href="/suppliers"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="Proveedores">store</i></a>
+          </li>
+
+          <li>
+            <a href="/settings"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="settings">more_vert</i></a>
+          </li>
+        </ul>
+
+
+
+        <ul class="right">
+          <li>
+            <span style="margin-right: 20px;"><i class="material-icons tiny left">account_circle</i>
+              <% if (locals.user) { %>
+              <%=user.NOMBRE%>
+              <% } %>
+            </span>
+          </li>
+          <li>
+            <a href="/logout"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                data-tooltip="log out">exit_to_app</i></a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+    <!--Import materialize.js from my website directory materialization-->
+    <script type="text/javascript" src="/javascripts/materialize.js"></script>
+
+    <script type="text/javascript" src="/javascripts/header.js"></script>
+
+    <script type="text/javascript" src="/javascripts/htmlDecode.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".sidenav");
+        var instances = M.Sidenav.init(elems, {});
+      });
+    </script>
+  </header>
+</body>
+
+</html>

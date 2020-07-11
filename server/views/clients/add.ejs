@@ -1,0 +1,90 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+  <div class="container">
+    <div class="col s12 m6">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Alta de un nuevo cliente</span>
+          <div class="row" style="margin-top: 20px;">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">home</i>
+              <input id="razon_social" type="text" class="validate" />
+              <label for="razon_social">Nombre del Barrio</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="input-field col s3">
+              <i class="material-icons prefix">info_outline</i>
+              <input id="codigo" type="text" class="validate" />
+              <label for="codigo">Codigo Interno</label>
+            </div>
+            <div class="input-field col s3">
+              <input id="cuit" type="text" class="validate" />
+              <label for="cuit">C.U.I.T.</label>
+            </div>
+            <div class="input-field col s6">
+              <select>
+                <% for(var i=0; i < categories.rows.length; i++) { %>
+                <option value=<%= categories.rows[i].ID %>><%= categories.rows[i].DESCRIPCION %></option>
+                <% } %>
+              </select>
+              <label>Categoria Impositiva</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s9">
+              <i class="material-icons prefix">mail</i>
+              <input id="correo_electronico" type="text" class="validate" />
+              <label for="correo_electronico">Correo Electronico</label>
+            </div>
+            <div class="input-field col s3">
+              <i class="material-icons prefix">local_phone</i>
+              <input id="telefono" type="text" class="validate" />
+              <label for="telefono">Telefono</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s6">
+              <i class="material-icons prefix">location_on</i>
+              <input id="direccion" type="text" class="validate" />
+              <label for="direccion">Direccion</label>
+            </div>
+            <div class="input-field col s3">
+              <i class="material-icons prefix">location_city</i>
+              <input id="ciudad" type="text" class="validate" />
+              <label for="ciudad">Ciudad</label>
+            </div>
+            <div class="input-field col s3">
+              <i class="material-icons prefix">details</i>
+              <input id="codigo_postal" type="text" class="validate" />
+              <label for="codigo_postal">Codigo Postal</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <textarea id="observaciones" class="materialize-textarea"></textarea>
+              <label for="observaciones">Observaciones</label>
+            </div>
+          </div>
+        </div>
+        <div class="card-action right-align ">
+          <a class="waves-effect waves-light btn green" style="margin-right: 10px"><i
+              class="material-icons right">save</i>Guardar</a>
+          <a href="/clientes" class="waves-effect waves-light btn red"><i
+              class="material-icons right">cancel</i>Cancelar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include ("../partials/footer") %>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var elems = document.querySelectorAll("select");
+    var instances = M.FormSelect.init(elems, {});
+  });
+</script>
