@@ -1,0 +1,44 @@
+<ul id="slide-out" class="sidenav">
+    <li>
+        <div class="user-view">
+            <div class="background">
+                <img src="images/background.jpg" />
+            </div>
+            <a href="#user"><img class="circle"
+                    src="https://www.pngitem.com/pimgs/m/513-5137780_businessman-png-transparent-png.png" /></a>
+            <a href="#name"><span class="white-text name">
+                    <% if (locals.user) { %> <%=user.nombre%> <%} else {%> usuario
+                    desconocido <% } %>
+                </span></a>
+            <a href="#email"><span class="white-text email">
+                    <%if (user) { %> <%=user.email%> <% } %>
+                </span></a>
+        </div>
+    </li>
+
+    <% if (locals.menu === 'home') { %>
+    <li>
+        <a class="subheader"><i class="material-icons">supervisor_account</i>General</a>
+    </li>
+    <li>
+        <div class="divider"></div>
+    </li>
+
+    <li>
+        <a class="waves-effect" href="#!"><i class="material-icons">settings</i>Ajustes</a>
+    </li>
+    <li>
+        <a class="waves-effect" href="#!"><i class="material-icons">help_center</i>Soporte</a>
+    </li>
+    <li>
+        <div class="divider"></div>
+    </li>
+    <li>
+        <a class="waves-effect" href="#!"><i class="material-icons">exit_to_app</i>Cerrar Sesión</a>
+    </li>
+    <% } %>
+
+    <% if (locals.menu === 'incomes') { %>
+    <%- include ("../incomes/sidenav") %>
+    <% } %>
+</ul>

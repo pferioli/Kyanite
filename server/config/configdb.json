@@ -3,15 +3,14 @@
     "user": "root",
     "password": "root",
     "database": "kyanite",
-    "host": "34.95.177.222",
-    "port": 3306,
-    "dialect": "mysql"
+    "host": "localhost",
+    "port": 3306
   },
   "production": {
-    "user": "",
-    "password": null,
-    "database": "",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+    "user": "root",
+    "password": "root",
+    "database": "kyanite",
+    "host": "localhost",
+    "port": 3306
   }
 }

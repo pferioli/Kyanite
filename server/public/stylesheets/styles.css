@@ -1,84 +1,96 @@
-.sidenav{
-    top: 65px;
-    width: 250px;
+.sidenav {
+  top: 65px;
+  width: 250px;
 }
 
 .brand-logo {
-   display: inline-block;
-    height: 100%;
+  display: inline-block;
+  height: 100%;
 }
 
-.brand-logo>img {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+.brand-logo > img {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 hr {
-    display: block;
-    height: 1px;
-    border: 0;
-    border-top: 1px solid #ccc;
-    margin: 1em auto;
-    padding: 0;
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #ccc;
+  margin: 1em auto;
+  padding: 0;
 }
 
 .modal {
-    left: 0;
-    right: 0;
-    background-color: #fafafa;
-    padding: 0;
-    max-height: 40%;
-    width: 35%;
-    will-change: top, opacity;
+  left: 0;
+  right: 0;
+  background-color: #fafafa;
+  padding: 0;
+  max-height: 40%;
+  width: 35%;
+  will-change: top, opacity;
 }
 
 .alternate-option {
-    margin-left: 20px;
-    vertical-align: baseline;
-    position: relative;
-    top: 8px;
-  }
+  margin-left: 20px;
+  vertical-align: baseline;
+  position: relative;
+  top: 8px;
+}
 
 .survey_img {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 5px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-  }
-
-  .user_pic { 
-    max-height: 48px;
-    line-height: 56px;
-    vertical-align: middle;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
 }
 
-.modal_privacy { 
-    width: 75% !important ; 
-    height: 75% !important ; 
-}  /* increase the height and width as you desire */
+.user_pic {
+  max-height: 48px;
+  line-height: 56px;
+  vertical-align: middle;
+}
+
+.modal_privacy {
+  width: 75% !important ;
+  height: 75% !important ;
+} /* increase the height and width as you desire */
 
 .input-group {
-    display: table;
+  display: table;
 }
 
-.input-group input, .suffix {
-    display: table-cell;
+.input-group input,
+.suffix {
+  display: table-cell;
 }
 
 .suffix {
-    width:1%;
+  width: 1%;
 }
 
-.carousel{
-    height: auto !important;
-    min-height: 450px !important;
+.carousel {
+  height: auto !important;
+  min-height: 450px !important;
 }
 
-.carousel-item { 
-    height: auto !important;
-    width: auto !important;
- }
+.carousel-item {
+  height: auto !important;
+  width: auto !important;
+}
+
+.roundtextstyle {
+  text-align: center;
+  background-color: #fafafa; /* Changing background color */
+  font-weight: bold; /* Making font bold */
+  border-radius: 10px; /* Making border radius */
+  width: fit-content; /* Making auto-sizable width */
+  height: auto; /* Making auto-sizable height */
+  padding: 5px 30px 10px 30px; /* Making space around letters */
+  font-size: 36px; /* Changing font size */
+}

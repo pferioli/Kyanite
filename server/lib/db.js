@@ -1,21 +1,15 @@
 const mysql = require("mysql");
-const env = require("dotenv").config();
-const ConfigDB = require("../config/configdb.json")
 
-var settings = ConfigDB.development;
+module.exports = function (settings) {
+  let connection = mysql.createConnection(settings);
 
-if (env.NODE_ENV === 'production')
-  settings = ConfigDB.production;
+  connection.connect(function (error) {
+    if (!!error) {
+      console.log(error);
+    } else {
+      console.log(`Connected to ${settings.database} db:)`);
+    }
+  });
 
-var connection = mysql.createConnection(settings);
-
-connection.connect(function (error) {
-  if (!!error) {
-    console.log(error);
-  } else {
-    console.log("Connected!:)");
-  }
-});
-
-exports.connection = connection;
-exports.settings = settings;
+  exports.connection;
+};

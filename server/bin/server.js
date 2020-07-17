@@ -5,14 +5,13 @@
 const dotenv = require("dotenv").config();
 
 var app = require("../app");
-var debug = require("debug")("kyanite");
 var http = require("http");
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || "3000");
+var port = normalizePort(process.env.PORT || "8080");
 app.set("port", port);
 
 /**
@@ -33,27 +32,27 @@ server.on("listening", onListening);
  * Enable HTTPS if running locally
  */
 
-if (process.env.LOCAL_HTTPS_PORT) {
-  var https = require("https");
-  var fs = require("fs");
-  var path = require("path");
-  var sslOptions = {
-    key: fs.readFileSync(
-      path.join(__dirname, "..", "..", "server/certs/server.key")
-    ),
-    cert: fs.readFileSync(
-      path.join(__dirname, "..", "..", "server/certs/server.cert")
-    ),
-  };
+// if (process.env.LOCAL_HTTPS_PORT) {
+//   var https = require("https");
+//   var fs = require("fs");
+//   var path = require("path");
+//   var sslOptions = {
+//     key: fs.readFileSync(
+//       path.join(__dirname, "..", "..", "server/certs/server.key")
+//     ),
+//     cert: fs.readFileSync(
+//       path.join(__dirname, "..", "..", "server/certs/server.cert")
+//     ),
+//   };
 
-  https
-    .createServer(sslOptions, app)
-    .listen(normalizePort(process.env.LOCAL_HTTPS_PORT), function () {
-      console.log(
-        "server starting on https://localhost:" + process.env.LOCAL_HTTPS_PORT
-      );
-    });
-}
+//   https
+//     .createServer(sslOptions, app)
+//     .listen(normalizePort(process.env.LOCAL_HTTPS_PORT), function () {
+//       console.log(
+//         "server starting on https://localhost:" + process.env.LOCAL_HTTPS_PORT
+//       );
+//     });
+// };
 
 /**
  * Normalize a port into a number, string, or false.
@@ -108,5 +107,5 @@ function onError(error) {
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-  debug("Listening on " + bind);
+  console.log("Listening on " + bind);
 }
