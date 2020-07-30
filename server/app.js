@@ -175,6 +175,9 @@ app.get("/login", function (req, res) {
   res.render("login");
 });
 
+var upload = require('./routes/google.upload.route')
+app.use('/upload', upload)
+
 app.post(
   "/login",
   passport.authenticate("local-login", {
