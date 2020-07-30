@@ -11,11 +11,9 @@ const Multer = require('multer');
 // These environment variables are set automatically on Google App Engine
 const { Storage } = require('@google-cloud/storage');
 
-const AUTH_JSON_FILE_PATH = process.env.GCS_AUTH_JSON_FILE_PATH;
-
 const storageoptions = {
-    projectId: process.env.GCLOUD_PROJECT,
-    keyFilename: process.env.GCS_AUTH_JSON_FILE_PATH
+    projectId: process.env.GOOGLE_CLOUD_PROJECT,
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
 };
 
 const storage = new Storage(storageoptions);    // Instantiate a storage client
@@ -29,8 +27,10 @@ const multer = Multer({
     },
 });
 
+const GCLOUD_STORAGE_BUCKET = process.env.GOOGLE_CLOUD_PROJECT + '_bucket';
+
 // A bucket is a container for objects (files).
-const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
+const bucket = storage.bucket(GCLOUD_STORAGE_BUCKET);
 
 async function listBuckets() {
     // Lists all buckets in the current project
@@ -42,7 +42,7 @@ async function listBuckets() {
     });
 };
 
-listBuckets().catch(console.error);
+//listBuckets().catch(console.error);
 
 
 
