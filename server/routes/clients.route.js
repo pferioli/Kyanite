@@ -1,8 +1,18 @@
 const express = require("express");
 const router = express.Router();
+const connectEnsureLogin = require('connect-ensure-login');
+const clients = require('../controllers/clients.controller');
 
-//var mysql = require("../lib/db");
+router.get("/", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  clients.listAll(req, res);
+});
 
-module.exports = function (mysql) {
-  module.exports = router;
-};
+router.get("/new", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  clients.addNew(req, res);
+});
+
+router.get("/info/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  clients.getInfo(req, res);
+});
+
+module.exports = router;

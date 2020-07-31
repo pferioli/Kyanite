@@ -11,7 +11,7 @@
                     desconocido <% } %>
                 </span></a>
             <a href="#email"><span class="white-text email">
-                    <%if (user) { %> <%=user.email%> <% } %>
+                    <%if (locals.user) { %> <%=user.email%> <% } %>
                 </span></a>
         </div>
     </li>
@@ -44,3 +44,10 @@
     <%- include ("../incomes/sidenav") %>
     <% } %>
 </ul>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".sidenav");
+        var instances = M.Sidenav.init(elems, {});
+    });
+</script>

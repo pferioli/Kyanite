@@ -44,8 +44,6 @@ async function listBuckets() {
 
 //listBuckets().catch(console.error);
 
-
-
 // Process the file upload and upload to Google Cloud Storage.
 router.post('/', [multer.single('attachment')], (req, res, next) => {
     if (!req.file) {

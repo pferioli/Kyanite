@@ -1,0 +1,66 @@
+<nav>
+    <div class="nav-wrapper grey darken-4">
+        <a href="#" data-target="slide-out" class="sidenav-trigger show-on-large"><i class="material-icons">menu</i></a>
+
+        <ul class="left" id="ul_header_buttons">
+            <li id="li_home">
+                <a href="/"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="Inicio">home</i></a>
+            </li>
+            <li id="li_incomes">
+                <a href="/incomes"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="Ingresos">monetization_on</i>
+                </a>
+            </li>
+            <li id="li_outcomes">
+                <a href="/outcomes"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="Egresos">receipt</i>
+                </a>
+            </li>
+            <li id="li_accounts_banks">
+                <a href="/accountsandbanks"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="Cajas y Bancos">account_balance</i></a>
+            </li>
+            <li id="li_periods">
+                <a href="/periods"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="Periodos">event</i></a>
+            </li>
+            <li id="li_clients">
+                <a href="/clients"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="Clientes">business</i></a>
+            </li>
+            <li id="li_homeowners">
+                <a href="/homeowners"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="Propietarios">people</i></a>
+            </li>
+            <li id="li_suppliers">
+                <a href="/suppliers"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="Proveedores">store</i></a>
+            </li>
+            <li>
+                <a href="/settings"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                        data-tooltip="settings">more_vert</i></a>
+            </li>
+        </ul>
+
+        <!-- BREADCRUMBS -->
+
+        <% if (locals.menu === 'incomes') { %>
+        <a href="#!" class="breadcrumb">Home</a>
+        <a href="#!" class="breadcrumb">Ingresos</a>
+        <a href="#!" class="breadcrumb">Listado de Cobranzas</a>
+        <%}%>
+
+        <ul class="right">
+          <li>
+            <span style="margin-right: 20px;"><i class="material-icons tiny left">account_circle</i>
+              <% if (locals.user) { %> <%=user.nombre%> <% } %>
+        </span>
+        </li>
+        <li>
+            <a href="/logout"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
+                    data-tooltip="log out">exit_to_app</i></a>
+        </li>
+        </ul>
+    </div>
+</nav>
