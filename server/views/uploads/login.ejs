@@ -10,8 +10,6 @@
     <!--Import materialize.css from my website directory stylesheets/-->
     <link type="text/css" rel="stylesheet" href="/css/materialize.css" media="screen,projection" />
 
-    <link type="text/css" rel="stylesheet" href="/stylesheets/materialert.css" media="screen,projection" />
-
     <link rel="icon" href="/public/images/favicon.ico" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,7 +17,6 @@
 </head>
 
 <body class="site grey lighten-3">
-
     <header>
 
         <!--Import jQuery before materialize.js-->
@@ -48,7 +45,7 @@
                 <form class="col s12" method="post" action='/login'>
                     <div class='row'>
                         <div class='col s12'>
-                            <img src="/images/aaii.png" style="width: 150px;" alt="" class="responsive-img">
+                            <img src="images/aaii.png" style="width: 150px;" alt="" class="responsive-img">
                         </div>
                     </div>
 
@@ -58,6 +55,7 @@
                             <label for='email'>Correo Electronico</label>
                         </div>
                     </div>
+
                     <div class='row'>
                         <div class='input-field col s12'>
                             <input class='validate' type='password' name='password' id='password' />
@@ -75,12 +73,12 @@
             </div>
         </div>
 
-        <%if(locals.error && error.length > 0){%>
+        <%if(error && error.length > 0){%>
         <div class="materialert warning">
             <div class="material-icons">info_outline</div><%=error%>
         </div>
         <%}%>
-        <%if(locals.success && success.length > 0){%>
+        <%if(success && success.length > 0){%>
         <div class="materialert success">
             <div class="material-icons">info_outline</div><%=success%>
         </div>

@@ -12,8 +12,8 @@ const connectEnsureLogin = require('connect-ensure-login');
 
 //---------------------------------------------------------------------------//
 
-const winston = require('./helpers/winston.helper');
 const mysql = require("./lib/db");
+const winston = require('./helpers/winston.helper');
 const passport = require('./helpers/passport.helper');
 
 //---------------------------------------------------------------------------//
@@ -61,6 +61,8 @@ app.get("/", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
 app.use('/login', require('./routes/login.route'))
 
 app.use('/logout', require('./routes/logout.route'))
+
+app.use('/password', require('./routes/resetPassword.route'))
 
 app.use('/clients', require('./routes/clients.route'))
 

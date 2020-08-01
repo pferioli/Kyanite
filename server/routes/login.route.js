@@ -3,7 +3,6 @@ const router = express.Router();
 
 const passport = require('../helpers/passport.helper');
 const connectEnsureLogin = require('connect-ensure-login');
-
 const bcrypt = require("bcrypt");
 
 router.get("/", connectEnsureLogin.ensureLoggedOut(), function (req, res) {
