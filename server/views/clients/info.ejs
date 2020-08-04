@@ -9,12 +9,7 @@
           <div class="row" style="margin-top: 20px;">
             <div class="input-field col s12">
               <i class="material-icons prefix">home</i>
-              <input
-                id="razon_social"
-                value="<%=information.razon_social%>"
-                type="text"
-                class="validate"
-              />
+              <input id="razon_social" value="<%=information.razon_social%>" type="text" class="validate" />
               <label for="razon_social">Nombre del Barrio</label>
             </div>
           </div>
@@ -22,101 +17,60 @@
           <div class="row">
             <div class="input-field col s3">
               <i class="material-icons prefix">info_outline</i>
-              <input
-                id="codigo"
-                value="<%=information.codigo%>"
-                type="text"
-                class="validate"
-              />
+              <input id="codigo" value="<%=information.codigo%>" type="text" class="validate" />
               <label for="codigo">Codigo Interno</label>
             </div>
             <div class="input-field col s3">
-              <input
-                id="cuit"
-                value="<%=information.cuit%>"
-                type="text"
-                class="validate"
-              />
+              <input id="cuit" value="<%=information.cuit%>" type="text" class="validate" />
               <label for="cuit">C.U.I.T.</label>
             </div>
             <div class="input-field col s6">
-              <input
-                id="categoria_impositiva"
-                value="<%=information.categoria_impositiva%>"
-                type="text"
-                class="validate"
-              />
+              <input id="categoria_impositiva" value="<%=information.categoria_impositiva%>" type="text"
+                class="validate" />
               <label for="categoria_impositiva">Categoria Impositiva</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s9">
               <i class="material-icons prefix">mail</i>
-              <input
-                id="correo_electronico"
-                value="<%=information.email%>"
-                type="text"
-                class="validate"
-              />
+              <input id="correo_electronico" value="<%=information.email%>" type="text" class="validate" />
               <label for="correo_electronico">Correo Electronico</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">local_phone</i>
-              <input
-                id="telefono"
-                value="<%=information.telefono%>"
-                type="text"
-                class="validate"
-              />
+              <input id="telefono" value="<%=information.telefono%>" type="text" class="validate" />
               <label for="telefono">Telefono</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s6">
               <i class="material-icons prefix">location_on</i>
-              <input
-                id="direccion"
-                value="<%=information.direccion%>"
-                type="text"
-                class="validate"
-              />
+              <input id="direccion" value="<%=information.direccion%>" type="text" class="validate" />
               <label for="direccion">Direccion</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">location_city</i>
-              <input
-                id="ciudad"
-                value="<%=information.ciudad%>"
-                type="text"
-                class="validate"
-              />
+              <input id="ciudad" value="<%=information.ciudad%>" type="text" class="validate" />
               <label for="ciudad">Ciudad</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">details</i>
-              <input
-                id="codigo_postal"
-                value="<%=information.codigo_postal%>"
-                type="text"
-                class="validate"
-              />
+              <input id="codigo_postal" value="<%=information.codigo_postal%>" type="text" class="validate" />
               <label for="codigo_postal">Codigo Postal</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s12">
-              <textarea
-                id="observaciones"
-                class="materialize-textarea"
-              ></textarea>
+              <textarea id="observaciones" class="materialize-textarea"></textarea>
               <label for="observaciones">Observaciones</label>
             </div>
           </div>
         </div>
         <div class="card-action right-align">
-          <a href="/clients" class="waves-effect waves-light btn"
-            ><i class="material-icons right">cancel</i>Volver</a
-          >
+          <a href="/bankaccounts/<%=information.id%>" class="waves-effect waves-light btn"><i
+              class="material-icons right">cancel</i>Cuentas</a>
+          <a href="/clients" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
+              class="material-icons right">cancel</i>Volver</a>
         </div>
       </div>
     </div>

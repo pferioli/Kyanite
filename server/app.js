@@ -8,7 +8,6 @@ const flash = require("express-flash");
 const favicon = require("serve-favicon");
 const morgan = require('morgan');
 const MySQLStore = require("express-mysql-session")(session);
-const connectEnsureLogin = require('connect-ensure-login');
 
 //---------------------------------------------------------------------------//
 
@@ -40,6 +39,8 @@ app.use(
     secret: "session_cookie_secret",
     resave: false,
     saveUninitialized: false,
+    duration: 30 * 60 * 1000,
+    activeDuration: 5 * 60 * 1000,
     cookie: { maxAge: 60000 },
   })
 );
@@ -54,23 +55,25 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get("/", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
-  res.render("home.ejs", { menu: 'home', user: req.user });
-});
+app.use('/', require('./routes/home.route'));
 
-app.use('/login', require('./routes/login.route'))
+app.use('/login', require('./routes/login.route'));
 
-app.use('/logout', require('./routes/logout.route'))
+app.use('/logout', require('./routes/logout.route'));
 
-app.use('/password', require('./routes/resetPassword.route'))
+app.use('/logout', require('./routes/logout.route'));
 
-app.use('/clients', require('./routes/clients.route'))
+app.use('/password', require('./routes/resetPassword.route'));
 
-app.use('/incomes', require('./routes/incomes.route'))
+app.use('/clients', require('./routes/clients.route'));
 
-app.use('/upload', require('./routes/google.upload.route'))
+app.use('/incomes', require('./routes/incomes.route'));
 
-app.use('/email', require('./routes/email.route'))
+app.use('/upload', require('./routes/google.upload.route'));
+
+app.use('/email', require('./routes/email.route'));
+
+const sse = require('./routes/serverSentEvents.route')(app);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -87,5 +90,7 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
+
+const scheduledTasks = require('./helpers/scheduledTasks.helper');
 
 module.exports = app;

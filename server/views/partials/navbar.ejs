@@ -52,11 +52,18 @@
         <%}%>
 
         <ul class="right">
-          <li>
+        <li>
             <span style="margin-right: 20px;"><i class="material-icons tiny left">account_circle</i>
-              <% if (locals.user) { %> <%=user.nombre%> <% } %>
+                <% if (locals.user) { %> <%=user.nombre%> <% } %>
         </span>
         </li>
+
+        <!--
+        <li>
+            <i class="material-icons tiny left red-text" data-position="bottom" data-delay="50"
+                data-tooltip="Alertas Pendientes">notification_important</i>
+        </li>
+        -->
         <li>
             <a href="/logout"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
                     data-tooltip="log out">exit_to_app</i></a>
