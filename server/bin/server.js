@@ -32,27 +32,27 @@ server.on("listening", onListening);
  * Enable HTTPS if running locally
  */
 
-// if (process.env.LOCAL_HTTPS_PORT) {
-//   var https = require("https");
-//   var fs = require("fs");
-//   var path = require("path");
-//   var sslOptions = {
-//     key: fs.readFileSync(
-//       path.join(__dirname, "..", "..", "server/certs/server.key")
-//     ),
-//     cert: fs.readFileSync(
-//       path.join(__dirname, "..", "..", "server/certs/server.cert")
-//     ),
-//   };
+if (process.env.LOCAL_HTTPS_PORT) {
+  var https = require("https");
+  var fs = require("fs");
+  var path = require("path");
+  var sslOptions = {
+    key: fs.readFileSync(
+      path.join(__dirname, "..", "..", "server/certs/server.key")
+    ),
+    cert: fs.readFileSync(
+      path.join(__dirname, "..", "..", "server/certs/server.cert")
+    ),
+  };
 
-//   https
-//     .createServer(sslOptions, app)
-//     .listen(normalizePort(process.env.LOCAL_HTTPS_PORT), function () {
-//       console.log(
-//         "server starting on https://localhost:" + process.env.LOCAL_HTTPS_PORT
-//       );
-//     });
-// };
+  https
+    .createServer(sslOptions, app)
+    .listen(normalizePort(process.env.LOCAL_HTTPS_PORT), function () {
+      console.log(
+        "server starting on https://localhost:" + process.env.LOCAL_HTTPS_PORT
+      );
+    });
+};
 
 /**
  * Normalize a port into a number, string, or false.

@@ -28,7 +28,6 @@ module.exports = function (req, res) {
         data = {
             userId,
             users: Object.keys(users).length,
-            // memoryUsage: process.memoryUsage()
             time: new Date().getTime(),
         };
         // Note: 

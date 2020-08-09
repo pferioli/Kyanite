@@ -18,13 +18,12 @@ module.exports.listAll = function (req, res, next) {
 
 module.exports.addNew = function (req, res, next) {
     mysql.connection.query(
-        "select descripcion from categoria_impositiva where activo = 1",
+        "select id, descripcion from categoria_impositiva where activo = 1",
         function (err, rows) {
             if (err) {
                 console.error(err);
             } else {
                 res.render("clients/add.ejs", {
-                    user: req.user,
                     categories: { rows },
                 });
             }

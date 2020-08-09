@@ -39,12 +39,17 @@ app.use(
     secret: "session_cookie_secret",
     resave: false,
     saveUninitialized: false,
-    duration: 30 * 60 * 1000,
-    activeDuration: 5 * 60 * 1000,
-    cookie: { maxAge: 60000 },
+    trustProxy: true,
+    cookie: {
+      path: '/',
+      httpOnly: true,
+      secure: true,
+      maxAge: (60 * 1000 * 30)
+    },
   })
 );
-
+// duration: 30 * 60 * 1000,
+//   activeDuration: 5 * 60 * 1000,
 app.use(flash());
 
 passport(app);  //set passport strategy
@@ -72,6 +77,8 @@ app.use('/incomes', require('./routes/incomes.route'));
 app.use('/upload', require('./routes/google.upload.route'));
 
 app.use('/email', require('./routes/email.route'));
+
+require('./routes/usuario')(app);
 
 const sse = require('./routes/serverSentEvents.route')(app);
 

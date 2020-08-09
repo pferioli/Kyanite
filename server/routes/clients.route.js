@@ -15,4 +15,7 @@ router.get("/info/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res,
   clients.getInfo(req, res);
 });
 
+router.post('/new', connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  res.redirect("/clients");
+})
 module.exports = router;
