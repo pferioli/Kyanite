@@ -1,7 +1,8 @@
+const bcrypt = require("bcrypt");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const bcrypt = require("bcrypt");
-const mysql = require("../lib/db");
+
+const User = require('../models').user;
 
 // =========================================================================
 // passport session setup ==================================================
@@ -20,11 +21,12 @@ module.exports = function (app) {
 
     // used to deserialize the user
     passport.deserializeUser(function (id, done) {
-        mysql.connection.query("select * from usuario where id = ?", [id], function (
-            err,
-            user
-        ) {
-            done(err, user[0]);
+        User.findByPk(id).then(function (user) {
+            if (user) {
+                done(null, user.get());
+            } else {
+                done(user.errors, null);
+            }
         });
     });
 
@@ -45,44 +47,39 @@ module.exports = function (app) {
                 failureFlash: true,
                 successFlash: "Hey, Welcome back",
             },
-            function (req, email, password, done) {
+            async function (req, email, password, done) {
+
                 // callback with email and password from our form
 
-                mysql.connection.query(
-                    "select * from usuario where email = ?",
-                    [email],
-                    function (err, rows) {
+                const user = await User.findOne({ where: { email: email } }).then(function (user) {
+
+                    if (user === null) {
+                        return done(
+                            null,
+                            false,
+                            req.flash(
+                                "error",
+                                "No se encontró el usuario en la base de datos"
+                            )
+                        ); // req.flash is the way to set flashdata using connect-flash
+                    };
+
+                    bcrypt.compare(password, user.password, function (err, result) {
                         if (err) return done(err);
-                        if (!rows.length) {
+
+                        if (result === false) {
+                            // if the user is found but the password is wrong
                             return done(
                                 null,
                                 false,
-                                req.flash(
-                                    "error",
-                                    "No se encontró el usuario en la base de datos"
-                                )
-                            ); // req.flash is the way to set flashdata using connect-flash
+                                req.flash("error", "La contraseña ingresada es incorrecta")
+                            ); // create the loginMessage and save it to session as flashdata
+                        } else {
+                            return done(null, user); // all is well, return successful user
                         }
-
-                        bcrypt.compare(password, rows[0].clave, function (err, result) {
-                            if (err) return done(err);
-
-                            if (result === false) {
-                                // if the user is found but the password is wrong
-                                return done(
-                                    null,
-                                    false,
-                                    req.flash("error", "La contraseña ingresada es incorrecta")
-                                ); // create the loginMessage and save it to session as flashdata
-                            } else {
-                                return done(null, rows[0]); // all is well, return successful user
-                            }
-                        });
-                    }
-                );
-            }
-        )
-    );
+                    });
+                });
+            }));
 
     module.exports = passport;
-}
+};

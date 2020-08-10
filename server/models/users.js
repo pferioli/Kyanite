@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class usuario extends Model {
+  class user extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,52 +13,44 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   };
-  usuario.init({
+  user.init({
     id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
-      type: Sequelize.INTEGER
+      type: DataTypes.INTEGER
     },
-    nombre: {
-      type: Sequelize.STRING,
+    name: {
+      type: DataTypes.STRING,
       allowNull: false
     },
     email: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false
     },
-    clave: {
-      type: Sequelize.STRING,
+    password: {
+      type: DataTypes.STRING,
       allowNull: false
     },
-    fecha: {
-      type: Sequelize.DATE,
+    role: {
+      type: DataTypes.CHAR,
       allowNull: false
     },
-    rol: {
-      type: Sequelize.CHAR,
+    enabled: {
+      type: DataTypes.BOOLEAN,
       allowNull: false
     },
-    activo: {
-      type: Sequelize.BOOLEAN,
+    mustChange: {
+      type: DataTypes.BOOLEAN,
       allowNull: false
     },
-    cambio: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false
-    },
-    createdAt: {
-      allowNull: false,
-      type: Sequelize.DATE
-    },
-    updatedAt: {
-      allowNull: false,
-      type: Sequelize.DATE
-    }
   }, {
     sequelize,
-    modelName: 'usuario',
+    modelName: 'user',
+    tableName: 'users',
+    timestamps: true,
+    paranoid: true,
+    deletedAt: 'deletedAt'
   });
-  return usuario;
+  return user;
 };

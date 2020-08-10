@@ -6,42 +6,49 @@ const SSE_RESPONSE_HEADER = {
     'X-Accel-Buffering': 'no'
 };
 
-var users = {}; // Connected users (request object of each user)
+var usersStreams = {}
 
-module.exports = function (req, res) {
+const getUserId = (req, from) => {
+    try {
+        // console.log(from, req.body, req.params)
+        if (!req) return null;
+        if (Boolean(req.session) && req.session.passport.user) return req.session.passport.user;
+        if (Boolean(req.body) && req.body.userId) return req.body.userId;
+        if (Boolean(req.params) && req.params.userId) return req.params.userId;
+        return null
+    } catch (e) {
+        console.log('getUserId error', e)
+        return null;
+    }
+}
 
-    let userId = req.session.passport.user; // getUserId(req);
+module.exports.notify = function (req, res, next) {
 
-    // data for sending
-    let data;
+    let userId = getUserId(req);
+
+    if (!userId) {
+        next({ message: 'stream.no-user' })
+        return;
+    }
 
     // Stores this connection
-    users[userId] = req;
+    usersStreams[userId] = { lastInteraction: null };
 
     // Writes response header.
     res.writeHead(200, SSE_RESPONSE_HEADER);
 
-    // Interval loop
-    let intervalId = setInterval(function () {
-        console.log(`*** Interval loop. userId: "${userId}"`);
-        // Creates sending data:
-        data = {
-            userId,
-            users: Object.keys(users).length,
-            time: new Date().getTime(),
-        };
-        // Note: 
-        // For avoidance of client's request timeout, 
-        // you should send a heartbeat data like ':\n\n' (means "comment") at least every 55 sec (30 sec for first time request)
-        // even if you have no sending data:
-        if (!data)
-            res.write(`:\n\n`);
-        else
-            res.write(`data: ${JSON.stringify(data)}\n\n`);
-    }, 5000);
+    // Note: Heatbeat for avoidance of client's request timeout of first time (30 sec)
+    const heartbeat = { type: 'heartbeat' }
+    res.write(`data: ${JSON.stringify(heartbeat)}\n\n`);
+    usersStreams[userId].lastInteraction = Date.now()
 
-    // Note: Heatbeat for avoidance of client's request timeout of first time (30 sec) 
-    res.write(`:\n\n`);
+    // Interval loop
+    const interval = 5000;
+    let intervalId = setInterval(function () {
+        if (!usersStreams[userId]) return;
+        res.write(`data: ${JSON.stringify(heartbeat)}\n\n`);
+        usersStreams[userId].lastInteraction = Date.now()
+    }, interval);
 
     req.on("close", function () {
         let userId = getUserId(req);
@@ -49,11 +56,11 @@ module.exports = function (req, res) {
         // Breaks the interval loop on client disconnected
         clearInterval(intervalId);
         // Remove from connections
-        delete users[userId];
+        delete usersStreams[userId];
     });
 
     req.on("end", function () {
         let userId = getUserId(req);
         console.log(`*** End. userId: "${userId}"`);
     });
-}
+};

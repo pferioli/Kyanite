@@ -33,23 +33,23 @@
             </tr>
           </thead>
           <tbody>
-            <% for(var i=0; i < data.rows.length; i++) { %>
-            <tr data-id="<%= data.rows[i].id %>">
-              <td><%= data.rows[i].codigo %></td>
+            <% for(var i=0; i < data.clients.length; i++) { %>
+            <tr data-id="<%= data.clients[i].id %>">
+              <td><%= data.clients[i].internalCode %></td>
               <td>
-                <a class ="blue-text" href="/clients/info/<%= data.rows[i].id %>"><%= data.rows[i].razon_social %></a>
+                <a class="blue-text" href="/clients/info/<%= data.clients[i].id %>"><%= data.clients[i].name %></a>
               </td>
-              <td><%= data.rows[i].cuit %></td>
-              <td><%= data.rows[i].direccion %></td>
-              <td><%= data.rows[i].telefono %></td>
-              <td><%= data.rows[i].email %></td>
+              <td><%= data.clients[i].cuit %></td>
+              <td><%= data.clients[i].address %></td>
+              <td><%= data.clients[i].phone %></td>
+              <td><%= data.clients[i].email %></td>
               <td>
-                <!--<a href=" /clients/info/<%= data.rows[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
+                <!--<a href=" /clients/info/<%= data.clients[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
                     class="material-icons">info</i></a>-->
-                <a href="/clients/edit/<%= data.rows[i].id %>" class="btn-flat btn-small waves-effect waves-light"><i
+                <a href="/clients/edit/<%= data.clients[i].id %>" class="btn-flat btn-small waves-effect waves-light"><i
                     class="material-icons">edit</i></a>
                 <a class="btn-flat btn-small waves-effect waves-light modal-trigger" data-target="modal_delete"
-                  data-id="<%= data.rows[i].id %>"></button><i class="material-icons">delete</i></a>
+                  data-id="<%= data.clients[i].id %>"></button><i class="material-icons">delete</i></a>
               </td>
             </tr>
             <% } %>
@@ -58,6 +58,13 @@
       </div>
     </div>
   </div>
+
+  <%if(locals.success && success.length > 0){%>
+  <div class="materialert success">
+    <div class="material-icons">info_outline</div><%=success%>
+  </div>
+  <%}%>
+
 </main>
 
 <!-- Modal Structure -->

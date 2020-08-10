@@ -48,8 +48,7 @@ app.use(
     },
   })
 );
-// duration: 30 * 60 * 1000,
-//   activeDuration: 5 * 60 * 1000,
+
 app.use(flash());
 
 passport(app);  //set passport strategy
@@ -57,6 +56,7 @@ passport(app);  //set passport strategy
 app.use(function (req, res, next) {
   res.locals.error = req.flash("error");
   res.locals.success = req.flash("success");
+  res.locals.user = req.user;
   next();
 });
 
@@ -76,11 +76,9 @@ app.use('/incomes', require('./routes/incomes.route'));
 
 app.use('/upload', require('./routes/google.upload.route'));
 
-app.use('/email', require('./routes/email.route'));
+app.use('/sse', require('./routes/serverSentEvents.route'));
 
-require('./routes/usuario')(app);
 
-const sse = require('./routes/serverSentEvents.route')(app);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

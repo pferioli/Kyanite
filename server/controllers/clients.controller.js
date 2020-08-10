@@ -1,49 +1,87 @@
-const mysql = require("../lib/db");
+const Model = require('../models')
+const Client = Model.client;
+const TaxCategory = Model.taxCategory;
 
 module.exports.listAll = function (req, res, next) {
-    mysql.connection.query(
-        "select * from vcliente order by razon_social asc",
-        function (err, rows) {
-            if (err) {
-                console.error(err);
-            } else {
-                res.render("clients/index.ejs", {
-                    user: req.user,
-                    data: { rows },
-                });
-            }
-        }
-    );
-}
-
-module.exports.addNew = function (req, res, next) {
-    mysql.connection.query(
-        "select id, descripcion from categoria_impositiva where activo = 1",
-        function (err, rows) {
-            if (err) {
-                console.error(err);
-            } else {
-                res.render("clients/add.ejs", {
-                    categories: { rows },
-                });
-            }
-        }
-    );
+    Client.findAll().then(function (clients) {
+        res.render("clients/index.ejs", {
+            data: { clients },
+        });
+    });
 };
 
-module.exports.getInfo = function (req, res) {
-    const id = req.params.id;
-    mysql.connection.query("select * from vcliente where id = ?", [id], function (
-        err,
-        rows
-    ) {
-        if (err) {
-            console.error(err);
-        } else {
-            res.render("clients/info.ejs", {
-                user: req.user,
-                information: rows[0],
-            });
-        }
+module.exports.showNewForm = function (req, res, next) {
+    TaxCategory.findAll({ where: { enabled: true } }).then(function (taxCategories) {
+        res.render("clients/add.ejs", {
+            data: { taxCategories },
+        });
     });
-}
+};
+
+module.exports.addNew = async function (req, res, next) {
+
+    const existingClient = await Client.findAll(
+        {
+            where: {
+                $or: [
+                    { cuit: req.body.cuit }, { internalCode: req.body.internalCode }
+                ]
+            }
+        });
+
+    if (existingClient.length > 0) {
+        req.flash(
+            "error",
+            "Ya existe un cliente registrado con el ese número de C.U.I.T. o Código Interno..."
+        )
+        res.redirect("/clients/new"); return;
+    }
+
+    const client = {
+        internalCode: req.body.internalCode,
+        name: req.body.name,
+        cuit: req.body.cuit,
+        taxCategoryId: req.body.taxCategory,
+        address: req.body.address,
+        city: req.body.city,
+        zipCode: req.body.zipCode,
+        phone: req.body.phone,
+        email: req.body.email,
+        comments: req.body.comments,
+        enabled: true,
+        user: req.user.id
+    }
+
+    try {
+        Client.create(client).then(function (result) {
+            req.flash(
+                "success",
+                "El cliente fue agregado exitosamente a la base de datos"
+            )
+            res.redirect("/clients"); return;
+        })
+    } catch (err) {
+        req.flash(
+            "error",
+            "Ocurrio un error y no se pudo agregar al nuevo cliente en la base de datos"
+        )
+        res.redirect("/clients"); return;
+    }
+};
+
+module.exports.getInfo = async function (req, res) {
+    const clientid = req.params.id;
+    const client = await Client.findByPk(clientid, {
+        include: [{
+            model: TaxCategory
+        }]
+    });
+
+    if (client === null) {
+        res.send(`el ID #${clientid} no existe en la base de datos para ningun cliente registrado, <a href="/clients"> volver al listado </a>`);
+        return;
+    }
+    const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
+
+    res.render("clients/info.ejs", { data: { client, taxCategories } });
+};
