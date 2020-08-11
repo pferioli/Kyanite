@@ -3430,10 +3430,10 @@ table span.badge {
 
 .container {
   margin: 0 auto;
-  max-width: 1280px;
+  max-width: 1920;
   width: 90%;
 }
-
+/*
 @media only screen and (min-width: 601px) {
   .container {
     width: 85%;
@@ -3445,7 +3445,7 @@ table span.badge {
     width: 70%;
   }
 }
-
+*/
 .col .row {
   margin-left: -0.75rem;
   margin-right: -0.75rem;

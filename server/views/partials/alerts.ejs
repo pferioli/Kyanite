@@ -1,0 +1,36 @@
+<%if(locals.warning && warning.length > 0){%>
+<div id="materialertWarning1" class="materialert warning close-alert">
+    <div id="materialertWarning2" class="material-icons">info_outline
+        <button id="btnAlertClose" type="button" class="close-alert">×</button>
+    </div><%=warning%>
+</div>
+<script>
+    document.getElementById("btnAlertClose").onclick = function (e) {
+        document.getElementById(e.target.parentNode.parentNode.id).remove();
+    }
+</script>
+<%}%>
+
+<%if(locals.error && error.length > 0){%>
+<div id="materialertError1" class="materialert error">
+    <div id="materialertError2" class="material-icons">info_outline</div><%=error%>
+    <button id="btnAlertClose" type="button" class="close-alert">×</button>
+</div>
+<script>
+    document.getElementById("btnAlertClose").onclick = function (e) {
+        document.getElementById(e.target.parentNode.parentNode.id).remove();
+    }
+</script>
+<%}%>
+
+<%if(locals.success && success.length > 0){%>
+<div id="materialertSuccess1" class="materialert success">
+    <div id="materialertSuccess2" class="material-icons">info_outline</div><%=success%>
+    <button id="btnAlertClose" type="button" class="close-alert">×</button>
+</div>
+<script>
+    document.getElementById("btnAlertClose").onclick = function (e) {
+        document.getElementById(e.target.parentNode.parentNode.id).remove();
+    }
+</script>
+<%}%>

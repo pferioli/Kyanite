@@ -4,7 +4,7 @@ html {
 }
 .materialert{
     position: relative;
-    min-width: 150px;
+    min-width: 300px;
     padding: 15px;
     margin: 0 auto;
     margin-bottom: 20px;
@@ -22,7 +22,7 @@ html {
     -webkit-align-items: center;
     -ms-flex-align: center;
     align-items: center;
-    width: 30%;
+    width: 40%;
 }
 .materialert .material-icons{
     margin-right: 10px;

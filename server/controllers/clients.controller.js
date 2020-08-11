@@ -2,7 +2,7 @@ const Model = require('../models')
 const Client = Model.client;
 const TaxCategory = Model.taxCategory;
 
-module.exports.listAll = function (req, res, next) {
+function listAll(req, res, next) {
     Client.findAll().then(function (clients) {
         res.render("clients/index.ejs", {
             data: { clients },
@@ -10,7 +10,7 @@ module.exports.listAll = function (req, res, next) {
     });
 };
 
-module.exports.showNewForm = function (req, res, next) {
+function showNewForm(req, res, next) {
     TaxCategory.findAll({ where: { enabled: true } }).then(function (taxCategories) {
         res.render("clients/add.ejs", {
             data: { taxCategories },
@@ -18,23 +18,25 @@ module.exports.showNewForm = function (req, res, next) {
     });
 };
 
-module.exports.addNew = async function (req, res, next) {
+async function addNew(req, res, next) {
+    const Op = require('Sequelize').Op
 
     const existingClient = await Client.findAll(
         {
             where: {
-                $or: [
-                    { cuit: req.body.cuit }, { internalCode: req.body.internalCode }
+                [Op.or]: [
+                    { cuit: req.body.cuit },
+                    { internalCode: req.body.internalCode }
                 ]
             }
-        });
+        }
+    );
 
     if (existingClient.length > 0) {
-        req.flash(
-            "error",
-            "Ya existe un cliente registrado con el ese número de C.U.I.T. o Código Interno..."
-        )
-        res.redirect("/clients/new"); return;
+        req.flash("warning", "Ya existe un cliente registrado con el ese número de C.U.I.T. o Código Interno...");
+        req.flash("metadata", req.body);
+        res.redirect('/clients/new');
+        return;
     }
 
     const client = {
@@ -69,7 +71,7 @@ module.exports.addNew = async function (req, res, next) {
     }
 };
 
-module.exports.getInfo = async function (req, res) {
+async function getInfo(req, res) {
     const clientid = req.params.id;
     const client = await Client.findByPk(clientid, {
         include: [{
@@ -85,3 +87,10 @@ module.exports.getInfo = async function (req, res) {
 
     res.render("clients/info.ejs", { data: { client, taxCategories } });
 };
+
+module.exports = {
+    listAll,
+    showNewForm,
+    addNew,
+    getInfo
+}

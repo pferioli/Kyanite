@@ -55,8 +55,10 @@ passport(app);  //set passport strategy
 
 app.use(function (req, res, next) {
   res.locals.error = req.flash("error");
+  res.locals.warning = req.flash("warning");
   res.locals.success = req.flash("success");
   res.locals.user = req.user;
+  res.locals.metadata = req.flash("metadata");
   next();
 });
 

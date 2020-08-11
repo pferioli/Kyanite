@@ -1,70 +1,69 @@
 <%- include ("../partials/header") %>
 
 <main class="site-content">
-  <div class="row">
-    <div id="admin" class="col s12">
-      <div class="card material-table">
-        <div class="table-header">
-          <span class="table-title">Listado de Clientes</span>
-          <div class="actions">
-            <a href="/clients/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
-                class="material-icons">add_box</i></a>
-            <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
-                class="material-icons">search</i></a>
+  <div class="container">
+    <div class="row" style="margin-top: 50px;">
+      <div id=" admin" class="col s12">
+        <div class="card material-table">
+          <div class="table-header">
+            <span class="table-title">Listado de Clientes</span>
+            <div class="actions">
+              <a href="/clients/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
+                  class="material-icons">add_box</i></a>
+              <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
+                  class="material-icons">search</i></a>
+            </div>
           </div>
+          <table id="datatable" class="table striped">
+            <col style="width: 3%;" />
+            <col style="width: 30%;" />
+            <col style="width: 10%;" />
+            <col style="width: 15%;" />
+            <col style="width: 17%;" />
+            <col style="width: 20%;" />
+            <col style="width: 10%;" />
+            <thead>
+              <tr>
+                <th>Codigo</th>
+                <th>Nombre</th>
+                <th>CUIT</th>
+                <th>Direccion</th>
+                <th>Telefono</th>
+                <th>Correo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for(var i=0; i < data.clients.length; i++) { %>
+              <tr data-id="<%= data.clients[i].id %>">
+                <td><%= data.clients[i].internalCode %></td>
+                <td>
+                  <a class="blue-text" href="/clients/info/<%= data.clients[i].id %>"><%= data.clients[i].name %></a>
+                </td>
+                <td><%= data.clients[i].cuit %></td>
+                <td><%= data.clients[i].address %></td>
+                <td><%= data.clients[i].phone %></td>
+                <td><%= data.clients[i].email %></td>
+                <td>
+                  <!--<a href=" /clients/info/<%= data.clients[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
+                      class="material-icons">info</i></a>-->
+                  <a href="/clients/edit/<%= data.clients[i].id %>"
+                    class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                  <a class="btn-flat btn-small waves-effect waves-light modal-trigger" data-target="modal_delete"
+                    data-id="<%= data.clients[i].id %>"></button><i class="material-icons">delete</i></a>
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
         </div>
-        <table id="datatable" class="table striped">
-          <col style="width: 3%;" />
-          <col style="width: 30%;" />
-          <col style="width: 10%;" />
-          <col style="width: 15%;" />
-          <col style="width: 17%;" />
-          <col style="width: 20%;" />
-          <col style="width: 10%;" />
-          <thead>
-            <tr>
-              <th>Codigo</th>
-              <th>Nombre</th>
-              <th>CUIT</th>
-              <th>Direccion</th>
-              <th>Telefono</th>
-              <th>Correo</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% for(var i=0; i < data.clients.length; i++) { %>
-            <tr data-id="<%= data.clients[i].id %>">
-              <td><%= data.clients[i].internalCode %></td>
-              <td>
-                <a class="blue-text" href="/clients/info/<%= data.clients[i].id %>"><%= data.clients[i].name %></a>
-              </td>
-              <td><%= data.clients[i].cuit %></td>
-              <td><%= data.clients[i].address %></td>
-              <td><%= data.clients[i].phone %></td>
-              <td><%= data.clients[i].email %></td>
-              <td>
-                <!--<a href=" /clients/info/<%= data.clients[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
-                    class="material-icons">info</i></a>-->
-                <a href="/clients/edit/<%= data.clients[i].id %>" class="btn-flat btn-small waves-effect waves-light"><i
-                    class="material-icons">edit</i></a>
-                <a class="btn-flat btn-small waves-effect waves-light modal-trigger" data-target="modal_delete"
-                  data-id="<%= data.clients[i].id %>"></button><i class="material-icons">delete</i></a>
-              </td>
-            </tr>
-            <% } %>
-          </tbody>
-        </table>
       </div>
     </div>
-  </div>
+    <center>
+      <%- include ("../partials/alerts") %>
+    </center>
 
-  <%if(locals.success && success.length > 0){%>
-  <div class="materialert success">
-    <div class="material-icons">info_outline</div><%=success%>
   </div>
-  <%}%>
-
 </main>
 
 <!-- Modal Structure -->

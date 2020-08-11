@@ -73,18 +73,11 @@
                     </div>
                 </form>
             </div>
+
+            <%- include ("partials/alerts") %>
+
         </div>
 
-        <%if(locals.error && error.length > 0){%>
-        <div class="materialert warning">
-            <div class="material-icons">info_outline</div><%=error%>
-        </div>
-        <%}%>
-        <%if(locals.success && success.length > 0){%>
-        <div class="materialert success">
-            <div class="material-icons">info_outline</div><%=success%>
-        </div>
-        <%}%>
     </center>
 </main>
 

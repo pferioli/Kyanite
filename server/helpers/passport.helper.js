@@ -58,7 +58,7 @@ module.exports = function (app) {
                             null,
                             false,
                             req.flash(
-                                "error",
+                                "warning",
                                 "No se encontró el usuario en la base de datos"
                             )
                         ); // req.flash is the way to set flashdata using connect-flash
@@ -72,7 +72,7 @@ module.exports = function (app) {
                             return done(
                                 null,
                                 false,
-                                req.flash("error", "La contraseña ingresada es incorrecta")
+                                req.flash("warning", "La contraseña ingresada es incorrecta")
                             ); // create the loginMessage and save it to session as flashdata
                         } else {
                             return done(null, user); // all is well, return successful user
