@@ -3,27 +3,23 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class client extends Model {
+  class supplier extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      client.hasOne(models.taxCategory, { foreignKey: 'id' })
+      supplier.hasOne(models.taxCategory, { foreignKey: 'id' })
     }
   };
 
-  client.init({
+  supplier.init({
     id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER
-    },
-    internalCode: {
-      allowNull: false,
-      type: DataTypes.STRING
     },
     name: {
       allowNull: false,
@@ -36,6 +32,14 @@ module.exports = (sequelize, DataTypes) => {
     taxCategoryId: {
       allowNull: false,
       type: DataTypes.INTEGER
+    },
+    bankId: {
+      allowNull: true,
+      type: DataTypes.INTEGER
+    },
+    bankAccount: {
+      allowNull: true,
+      type: DataTypes.STRING
     },
     address: {
       type: DataTypes.STRING
@@ -52,13 +56,10 @@ module.exports = (sequelize, DataTypes) => {
     email: {
       type: DataTypes.STRING
     },
-    functionalUnitsCount: {
-      type: DataTypes.INTEGER
-    },
-    lotSize: {
+    comments: {
       type: DataTypes.STRING
     },
-    comments: {
+    categoryId: {
       type: DataTypes.STRING
     },
     enabled: {
@@ -71,11 +72,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'client',
-    tableName: 'clients',
+    modelName: 'supplier',
+    tableName: 'suppliers',
     timestamps: true,
     paranoid: true,
     deletedAt: 'deletedAt'
   });
-  return client;
+  return supplier;
 };

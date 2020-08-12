@@ -74,6 +74,8 @@ app.use('/password', require('./routes/resetPassword.route'));
 
 app.use('/clients', require('./routes/clients.route'));
 
+app.use('/suppliers', require('./routes/suppliers.route'));
+
 app.use('/incomes', require('./routes/incomes.route'));
 
 app.use('/upload', require('./routes/google.upload.route'));

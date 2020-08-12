@@ -7,22 +7,17 @@
         <div class="card-content">
           <span class="card-title">Informacion Detallada</span>
           <div class="row" style="margin-top: 20px;">
-            <div class="input-field col s12">
+            <div class="input-field col s9">
               <i class="material-icons prefix">home</i>
-              <input id="razon_social" value="<%=data.client.name%>" type="text" class="validate" />
-              <label for="razon_social">Nombre del Barrio</label>
+              <input id="razon_social" value="<%=data.supplier.name%>" type="text" class="validate" />
+              <label for="razon_social">Nombre del Proveedor</label>
+            </div>
+            <div class="input-field col s3">
+              <input id="cuit" value="<%=data.supplier.cuit%>" type="text" class="validate" />
+              <label for="cuit">C.U.I.T.</label>
             </div>
           </div>
           <div class="row">
-            <div class="input-field col s3">
-              <i class="material-icons prefix">info_outline</i>
-              <input id="codigo" value="<%=data.client.internalCode%>" type="text" class="validate" />
-              <label for="codigo">Codigo Interno</label>
-            </div>
-            <div class="input-field col s3">
-              <input id="cuit" value="<%=data.client.cuit%>" type="text" class="validate" />
-              <label for="cuit">C.U.I.T.</label>
-            </div>
             <div class="input-field col s6">
               <select id="taxCategorySelect" name="taxCategorySelect">
                 <% for(var i=0; i < data.taxCategories.length; i++) { %>
@@ -31,47 +26,53 @@
               </select>
               <label>Categoria Impositiva</label>
             </div>
+            <div class="input-field col s6">
+              <select id="supplierCategorySelect" name="supplierCategorySelect">
+                <% for(var i=0; i < data.taxCategories.length; i++) { %>
+                <option value="<%=data.taxCategories[i].id%>"><%= data.taxCategories[i].name %></option>
+                <% } %>
+              </select>
+              <label>Rubro</label>
+            </div>
           </div>
           <div class="row">
             <div class="input-field col s9">
               <i class="material-icons prefix">mail</i>
-              <input id="correo_electronico" value="<%=data.client.email%>" type="text" class="validate" />
+              <input id="correo_electronico" value="<%=data.supplier.email%>" type="text" class="validate" />
               <label for="correo_electronico">Correo Electronico</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">local_phone</i>
-              <input id="telefono" value="<%=data.client.phone%>" type="text" class="validate" />
+              <input id="telefono" value="<%=data.supplier.phone%>" type="text" class="validate" />
               <label for="telefono">Telefono</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s6">
               <i class="material-icons prefix">location_on</i>
-              <input id="direccion" value="<%=data.client.address%>" type="text" class="validate" />
+              <input id="direccion" value="<%=data.supplier.address%>" type="text" class="validate" />
               <label for="direccion">Direccion</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">location_city</i>
-              <input id="ciudad" value="<%=data.client.city%>" type="text" class="validate" />
+              <input id="ciudad" value="<%=data.supplier.city%>" type="text" class="validate" />
               <label for="ciudad">Ciudad</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">details</i>
-              <input id="codigo_postal" value="<%=data.client.zipCode%>" type="text" class="validate" />
+              <input id="codigo_postal" value="<%=data.supplier.zipCode%>" type="text" class="validate" />
               <label for="codigo_postal">Codigo Postal</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s12">
-              <textarea id="observaciones" class="materialize-textarea" value="<%=data.client.comments%>"></textarea>
+              <textarea id="observaciones" class="materialize-textarea" value="<%=data.supplier.comments%>"></textarea>
               <label for="observaciones">Observaciones</label>
             </div>
           </div>
         </div>
         <div class="card-action right-align">
-          <a href="/bankaccounts/<%=data.client.id%>" class="waves-effect waves-light btn"><i
-              class="material-icons right">cancel</i>Cuentas</a>
-          <a href="/clients" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
+          <a href="/suppliers" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
               class="material-icons right">cancel</i>Volver</a>
         </div>
       </div>
