@@ -11,7 +11,6 @@ const MySQLStore = require("express-mysql-session")(session);
 
 //---------------------------------------------------------------------------//
 
-const mysql = require("./lib/db");
 const winston = require('./helpers/winston.helper');
 const passport = require('./helpers/passport.helper');
 
@@ -32,11 +31,41 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+winston.info(`welcome to kyanite, starting app in ${process.env.NODE_ENV} environment`);
+
+let sequelizeConfig = require('./config/config.json')[process.env.NODE_ENV];
+var Sequelize = require('sequelize');
+var sequelize = new Sequelize(sequelizeConfig);
+sequelize
+  .authenticate()
+  .then(function (err) {
+    if (!!err) {
+      winston.error('Unable to connect to the database:', err)
+    } else {
+      winston.info('Connection has been established successfully.')
+    }
+  });
+
+let mySQLStoreConfig = {
+  user: sequelizeConfig.username,
+  password: sequelizeConfig.password,
+  database: sequelizeConfig.database
+}
+
+if (process.env.NODE_ENV == 'production') {
+  mySQLStoreConfig.socketPath = sequelizeConfig.dialectOptions.socketPath;
+}
+else {
+  mySQLStoreConfig.port = sequelizeConfig.port,
+    mySQLStoreConfig.host = sequelizeConfig.host
+}
+
+winston.info()
 app.use(
   session({
-    store: new MySQLStore(mysql.settings),
-    key: "session_cookie_name",
-    secret: "session_cookie_secret",
+    store: new MySQLStore(mySQLStoreConfig),
+    key: "session_cookie_kyanite",
+    secret: "secret4kyanite",
     resave: false,
     saveUninitialized: false,
     trustProxy: true,
@@ -44,7 +73,7 @@ app.use(
       path: '/',
       httpOnly: true,
       secure: true,
-      maxAge: (60 * 1000 * 30)
+      maxAge: (60 * 60 * 1000)
     },
   })
 );
@@ -68,8 +97,6 @@ app.use('/login', require('./routes/login.route'));
 
 app.use('/logout', require('./routes/logout.route'));
 
-app.use('/logout', require('./routes/logout.route'));
-
 app.use('/password', require('./routes/resetPassword.route'));
 
 app.use('/clients', require('./routes/clients.route'));
@@ -81,8 +108,6 @@ app.use('/incomes', require('./routes/incomes.route'));
 app.use('/upload', require('./routes/google.upload.route'));
 
 app.use('/sse', require('./routes/serverSentEvents.route'));
-
-
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

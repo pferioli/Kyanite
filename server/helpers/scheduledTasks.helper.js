@@ -1,5 +1,4 @@
 const schedule = require('node-schedule');
-const mysql = require("../lib/db");
 const winston = require('../helpers/winston.helper');
 
 // const job_searchPendingNotifications = schedule.scheduleJob('*/10 * * * * *', function (fireDate) {

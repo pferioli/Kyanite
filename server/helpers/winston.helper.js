@@ -20,26 +20,30 @@ var options = {
         colorize: true,
         timestamp: true,
     },
+    google: {
+        level: 'info',
+        timestamp: true,
+    }
 };
 
-// // Create a Winston logger that streams to Stackdriver Logging.
-// const { LoggingWinston } = require("@google-cloud/logging-winston");
-// const loggingWinston = new LoggingWinston();
-
-// const logger = winston.createLogger({
-//   level: "info",
-//   transports: [new winston.transports.Console(), loggingWinston],
-// });
+// Create a Winston logger that streams to Stackdriver Logging.
+const { LoggingWinston } = require("@google-cloud/logging-winston");
+const loggingWinston = new LoggingWinston({
+    projectId: process.env.GOOGLE_CLOUD_PROJECT,
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+});
 
 // instantiate a new Winston Logger with the settings defined above
+
 var logger = winston.createLogger({
     format: winston.format.combine(
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         winston.format.json()
     ),
     transports: [
-        new winston.transports.File(options.file),
-        new winston.transports.Console(options.console)
+        // new winston.transports.File(options.file),
+        // new winston.transports.Console(options.console),
+        new winston.transports.Console(options.google), loggingWinston,
     ],
     exitOnError: false, // do not exit on handled exceptions
 });

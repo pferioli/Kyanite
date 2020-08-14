@@ -13,6 +13,7 @@
     "dev": "nodemon $npm_package_config_entrypoint"
   },
   "dependencies": {
+    "@google-cloud/logging-winston": "^4.0.0",
     "@google-cloud/storage": "^5.1.2",
     "@sendgrid/mail": "^7.2.2",
     "app-root-path": "^3.0.0",

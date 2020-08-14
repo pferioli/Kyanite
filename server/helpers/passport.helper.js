@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const winston = require('./winston.helper');
 
 const User = require('../models').user;
 
@@ -20,6 +21,7 @@ module.exports = function (app) {
     });
 
     // used to deserialize the user
+
     passport.deserializeUser(function (id, done) {
         User.findByPk(id).then(function (user) {
             if (user) {
@@ -65,6 +67,7 @@ module.exports = function (app) {
                     };
 
                     bcrypt.compare(password, user.password, function (err, result) {
+
                         if (err) return done(err);
 
                         if (result === false) {
