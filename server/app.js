@@ -25,26 +25,32 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(morgan('combined', { stream: winston.stream }));
+app.use(morgan('combined', { stream: winston.stream.write }));
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-winston.info(`welcome to kyanite, starting app in ${process.env.NODE_ENV} environment`);
+const pjson = require('../package.json')
+
+winston.info(`welcome to kyanite, starting app in ${process.env.NODE_ENV} environment, version is ${pjson.version}`);
+
+//---------------------------------------------------------------------------//
+//---------------------------------------------------------------------------//
+
+require('@google-cloud/debug-agent').start({
+  projectId: process.env.GOOGLE_CLOUD_PROJECT,
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  serviceContext: {
+    service: pjson.name,
+    version: pjson.version,
+    enableCanary: true,
+  }
+});
+
+//---------------------------------------------------------------------------//
 
 let sequelizeConfig = require('./config/config.json')[process.env.NODE_ENV];
-var Sequelize = require('sequelize');
-var sequelize = new Sequelize(sequelizeConfig);
-sequelize
-  .authenticate()
-  .then(function (err) {
-    if (!!err) {
-      winston.error('Unable to connect to the database:', err)
-    } else {
-      winston.info('Connection has been established successfully.')
-    }
-  });
 
 let mySQLStoreConfig = {
   user: sequelizeConfig.username,
@@ -56,28 +62,26 @@ if (process.env.NODE_ENV == 'production') {
   mySQLStoreConfig.socketPath = sequelizeConfig.dialectOptions.socketPath;
 }
 else {
-  mySQLStoreConfig.port = sequelizeConfig.port,
-    mySQLStoreConfig.host = sequelizeConfig.host
+  mySQLStoreConfig.port = sequelizeConfig.port;
+  mySQLStoreConfig.host = sequelizeConfig.host;
 }
 
-winston.info()
 app.use(
   session({
     store: new MySQLStore(mySQLStoreConfig),
     key: "session_cookie_kyanite",
     secret: "secret4kyanite",
-    resave: false,
+    resave: true,
     saveUninitialized: false,
     trustProxy: true,
     cookie: {
       path: '/',
       httpOnly: true,
-      secure: true,
+      secure: false,
       maxAge: (60 * 60 * 1000)
     },
   })
 );
-
 app.use(flash());
 
 passport(app);  //set passport strategy
@@ -86,8 +90,8 @@ app.use(function (req, res, next) {
   res.locals.error = req.flash("error");
   res.locals.warning = req.flash("warning");
   res.locals.success = req.flash("success");
-  res.locals.user = req.user;
   res.locals.metadata = req.flash("metadata");
+  res.locals.user = req.user;
   next();
 });
 
@@ -105,9 +109,13 @@ app.use('/suppliers', require('./routes/suppliers.route'));
 
 app.use('/incomes', require('./routes/incomes.route'));
 
+app.use('/expenses', require('./routes/expenses.route'));
+
 app.use('/upload', require('./routes/google.upload.route'));
 
-app.use('/sse', require('./routes/serverSentEvents.route'));
+app.use('/notifications', require('./routes/notifications.route'));
+
+//app.use('/sse', require('./routes/serverSentEvents.route'));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

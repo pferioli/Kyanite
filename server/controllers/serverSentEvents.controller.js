@@ -1,9 +1,12 @@
+const winston = require('../helpers/winston.helper');
+
 // response header for sever-sent events
 const SSE_RESPONSE_HEADER = {
     'Connection': 'keep-alive',
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
-    'X-Accel-Buffering': 'no'
+    'X-Accel-Buffering': 'no',
+    'Access-Control-Allow-Origin': '*',
 };
 
 var usersStreams = {}
@@ -39,14 +42,14 @@ module.exports.notify = function (req, res, next) {
 
     // Note: Heatbeat for avoidance of client's request timeout of first time (30 sec)
     const heartbeat = { type: 'heartbeat' }
-    res.write(`data: ${JSON.stringify(heartbeat)}\n\n`);
+    res.write(`data: ${JSON.stringify(heartbeat)}\n\n`); res.flushHeaders();
     usersStreams[userId].lastInteraction = Date.now()
 
     // Interval loop
     const interval = 5000;
     let intervalId = setInterval(function () {
         if (!usersStreams[userId]) return;
-        res.write(`data: ${JSON.stringify(heartbeat)}\n\n`);
+        res.write(`data: ${JSON.stringify(heartbeat)}\n\n`); res.flush();
         usersStreams[userId].lastInteraction = Date.now()
     }, interval);
 
@@ -64,3 +67,44 @@ module.exports.notify = function (req, res, next) {
         console.log(`*** End. userId: "${userId}"`);
     });
 };
+
+//let eventSource;
+  //   if (!window.EventSource) {
+  //     // IE or an old browser
+  //     alert("The browser doesn't support EventSource.");
+  //     return;
+  //   }
+
+  //   eventSource = new EventSource('/sse');  //+ userid);
+
+  //   eventSource.onopen = function (e) {
+  //     log("Event: open");
+  //   };
+
+  //   eventSource.onerror = function (e) {
+  //     log("Event: error");
+  //     if (this.readyState == EventSource.CONNECTING) {
+  //       log(`Reconnecting (readyState=${this.readyState})...`);
+  //     } else {
+  //       log("Error has occured.");
+  //     }
+  //   };
+
+  //   eventSource.addEventListener('retry', function (e) {
+  //     log("Event: retry, data: " + e.data);
+  //   });
+
+  //   eventSource.onmessage = function (e) {
+  //     log("Event: message, data: " + e.data);
+  //   };
+  // }
+
+  // function stop() { // when "Stop" button pressed
+  //   eventSource.close();
+  //   log("eventSource.close()");
+  // }
+
+  // function log(msg) {
+  //   logElem.innerHTML += msg + "<br>";
+  //   document.documentElement.scrollTop = 99999999;
+  // }

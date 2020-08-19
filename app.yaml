@@ -20,7 +20,7 @@ env_variables:
   GOOGLE_APPLICATION_CREDENTIALS: "./server/credentials/kyanite-281502-5a5e83b0efed.json"
   INSTANCE_CONNECTION_NAME: "kyanite-281502:southamerica-east1:kyanite"
   SENDGRID_API_KEY: "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"
-
+  
 beta_settings:
   cloud_sql_instances: kyanite-281502:southamerica-east1:kyanite
   # [END app_yaml]

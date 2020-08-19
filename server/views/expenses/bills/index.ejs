@@ -1,0 +1,100 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <div class="card">
+            <div class="card-content">
+                <div class="row" style="margin-top: 20px;">
+                    <div class="input-field col s10">
+                        <select id="clientSelect">
+                            <option value="1">Cliente 1</option>
+                            <option value="2">Cliente 2</option>
+                        </select>
+                        <label>Cliente</label>
+                    </div>
+                    <div class="input-field col s2">
+                        <select id="billingPeriodSelect">
+                            <option value="1">Periodo 1</option>
+                            <option value="2">Periodo 2</option>
+                        </select>
+                        <label>Periodo de Liquidacion</label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-action right-align">
+                <button type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i
+                        class="material-icons right">save</i>buscar</button>
+            </div>
+        </div>
+    </div>
+    <section></section>
+    <div class="container" style="margin-top: 50px;">
+        <div class="card material-table">
+            <div class="table-header">
+                <span class="table-title">Listado de Facturas</span>
+                <div class="actions">
+                    <a href="/expenses/paymentReceipts/new" id="button-add"
+                        class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                    <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
+                            class="material-icons">search</i></a>
+                </div>
+            </div>
+            <table id="datatable" class="table striped">
+                <col style="width: 30%;" />
+                <col style="width: 13%;" />
+                <col style="width: 10%;" />
+                <col style="width: 15%;" />
+                <col style="width: 22%;" />
+                <col style="width: 10%;" />
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Proveedor</th>
+                        <th>Factura</th>
+                        <th>Importe</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
+</main>
+
+<!-- Modal Structure -->
+<div id="modal_delete" class="modal">
+    <div class="modal-content">
+        <h4>Eliminar Proveedor</h4>
+        <p>Está a punto de anular la factura seleccionada y no podrá deshacer esta operación, seguro que desea
+            continuar ?</p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn red" style="margin-right: 10px;"
+            onclick="confirm_delete();">Eliminar</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn" style="margin-right: 10px;">Cancelar</a>
+    </div>
+</div>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {})
+
+        elems = document.querySelectorAll("select");
+        instances = M.FormSelect.init(elems, {});
+    });
+
+    function confirm_delete() {
+        var elem = document.getElementById("modal_delete");
+    }
+</script>

@@ -32,9 +32,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'supplierCategory',
-        tableName: 'suppliers_categories',
-        timestamps: false,
-        paranoid: false,
+        tableName: 'suppliers_categories'
     });
     return supplierCategory;
 };

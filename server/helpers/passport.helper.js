@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const winston = require('./winston.helper');
 
 const User = require('../models').user;
 
@@ -25,7 +24,7 @@ module.exports = function (app) {
     passport.deserializeUser(function (id, done) {
         User.findByPk(id).then(function (user) {
             if (user) {
-                done(null, user.get());
+                done(null, user);
             } else {
                 done(user.errors, null);
             }
@@ -46,8 +45,7 @@ module.exports = function (app) {
                 usernameField: "email",
                 passwordField: "password",
                 passReqToCallback: true, // allows us to pass back the entire request to the callback
-                failureFlash: true,
-                successFlash: "Hey, Welcome back",
+                failureFlash: true
             },
             async function (req, email, password, done) {
 

@@ -12,9 +12,9 @@
                         data-tooltip="Ingresos">monetization_on</i>
                 </a>
             </li>
-            <li id="li_outcomes">
-                <a href="/outcomes"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="Egresos">receipt</i>
+            <li id="li_expenses">
+                <a href="/expenses/paymentReceipts"><i class="material-icons tooltipped" data-position="bottom"
+                        data-delay="50" data-tooltip="Egresos">receipt</i>
                 </a>
             </li>
             <li id="li_accounts_banks">
@@ -52,22 +52,26 @@
         <%}%>
 
         <ul class="right">
+            <li id="notifications" style="visibility: hidden;">
+                <a href="/notifications/show/<%=locals.user.id%>"><i class="material-icons tiny left red-text"
+            data-position="bottom" data-delay="50" data-tooltip="Alertas Pendientes">notification_important</i></a>
+        </li>
         <li>
             <span style="margin-right: 20px;"><i class="material-icons tiny left">account_circle</i>
-                <% if (locals.user) { %> <%=locals.user.name%> <% } %>
-        </span>
+                <% if (locals.user) { %> <%=locals.user.name%> <% } %> </span>
         </li>
-
-        <!--
         <li>
-            <i class="material-icons tiny left red-text" data-position="bottom" data-delay="50"
-                data-tooltip="Alertas Pendientes">notification_important</i>
-        </li>
-        -->
-        <li>
-            <a href="/logout"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                    data-tooltip="log out">exit_to_app</i></a>
+            <a href="/logout" onclick="notificationsTimerStop();"><i class="material-icons tooltipped"
+                    data-position="bottom" data-delay="50" data-tooltip="log out">exit_to_app</i></a>
         </li>
         </ul>
     </div>
 </nav>
+
+<script>
+    var userid = htmlDecode("<%= locals.user.id %>");
+
+    document.addEventListener("DOMContentLoaded", function () {
+        notificationsTimerStart();
+    });
+</script>
