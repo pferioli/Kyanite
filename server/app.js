@@ -103,6 +103,8 @@ app.use('/logout', require('./routes/logout.route'));
 
 app.use('/password', require('./routes/resetPassword.route'));
 
+app.use('/periods', require('./routes/billingPeriods.route'));
+
 app.use('/clients', require('./routes/clients.route'));
 
 app.use('/suppliers', require('./routes/suppliers.route'));

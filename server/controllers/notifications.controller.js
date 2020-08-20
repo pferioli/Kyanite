@@ -1,4 +1,4 @@
-const Op = require('Sequelize').Op
+const Op = require('sequelize').Op
 const Model = require('../models')
 const Notification = Model.notification;
 
@@ -6,7 +6,7 @@ async function findPendings(req, res) {
 
     const userid = req.params.id;
 
-    const pendingNotifications = await Notification.findAll(
+    const notifications = await Notification.findAll(
         {
             where: {
                 enabled: true,
@@ -17,7 +17,7 @@ async function findPendings(req, res) {
         });
 
     res.send(
-        pendingNotifications
+        notifications
     );
 }
 

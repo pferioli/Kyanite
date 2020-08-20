@@ -1,57 +1,96 @@
 <%- include ("../partials/header") %>
 
 <main class="site-content">
+
+  <%- include ("../partials/clientsSelector") %>
+
+  <% if(locals.data) { %>
   <div class="card material-table">
     <div class=" table-header">
-      <span class="table-title">Listado de Proveedores</span>
+      <span class="table-title">Listado de Períodos de Liquidación</span>
       <div class="actions">
-        <a href="/suppliers/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
+        <a href="/periods/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
             class="material-icons">add_box</i></a>
         <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
             class="material-icons">search</i></a>
-        <a href="/suppliers/new/category" id="button-category" class="modal-trigger waves-effect btn-flat nopadding"><i
-            class="material-icons">playlist_add</i></a>
       </div>
     </div>
     <table id="datatable" class="table striped responsive-table">
-      <col style="width: 30%;" />
-      <col style="width: 13%;" />
+      <col style="width: 5%;" />
+      <!--Estado-->
+      <col style="width: 5%;" />
+      <!--Nombre-->
       <col style="width: 10%;" />
-      <col style="width: 15%;" />
-      <col style="width: 22%;" />
+      <!--Desde-->
       <col style="width: 10%;" />
+      <!--Hasta-->
+      <col style="width: 25%;" />
+      <!--Apertura-->
+      <col style="width: 25%;" />
+      <!--Finalizacion-->
+      <col style="width: 10%;" />
+      <!--Usuario-->
+      <col style="width: 10%;" />
+      <!--Acciones-->
       <thead>
         <tr>
+          <th>Estado</th>
           <th>Nombre</th>
-          <th>CUIT</th>
-          <th>Telefono</th>
-          <th>Email</th>
-          <th>CBU</th>
+          <th>Desde</th>
+          <th>Hasta</th>
+          <th>Abierto</th>
+          <th>Finalizado</th>
+          <th>Usuario</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <% for(var i=0; i < data.suppliers.length; i++) { %>
-        <tr data-id="<%= data.suppliers[i].id %>">
+        <% for(var i=0; i < data.periods.length; i++) { %>
+        <tr data-id="<%= data.periods[i].id %>">
           <td>
-            <a class="blue-text" href="/suppliers/info/<%= data.suppliers[i].id %>"><%= data.suppliers[i].name %></a>
+            <% if(data.periods[i].statusId === 0) { %>
+            <i class="material-icons">calendar_today</i>
+            <% } %>
+            <% if(data.periods[i].statusId === 1) { %>
+            <i class="material-icons green-text">lock_open</i>
+            <% } %>
+            <% if(data.periods[i].statusId === 2) { %>
+            <i class="material-icons deep-orange-text lighten-1">lock</i>
+            <% } %>
+            <% if(data.periods[i].statusId === 3) { %>
+            <i class="material-icons">cancel</i>
+            <% } %>
           </td>
-          <td><%= data.suppliers[i].cuit %></td>
-          <td><%= data.suppliers[i].phone %></td>
-          <td><%= data.suppliers[i].email %></td>
-          <td><%= data.suppliers[i].bankAccount %></td>
+          <td><%= data.periods[i].name %></td>
+          <td><%= data.periods[i].startDate %></td>
+          <td><%= data.periods[i].endDate %></td>
+          <td><%= data.periods[i].openedAt %></td>
+          <td><%= data.periods[i].closedAt %></td>
+          <td><%= data.periods[i].user.name %></td>
           <td>
-            <!--<a href=" /clients/info/<%= data.suppliers[i].ID %>" class="btn-flat btn-small waves-effect waves-light"><i
-                      class="material-icons">info</i></a>-->
-            <a href="/suppliers/edit/<%= data.suppliers[i].id %>" class="btn-flat btn-small waves-effect waves-light"><i
-                class="material-icons">edit</i></a>
+
+            <% if(data.periods[i].statusId === 0) { %>
             <a class="btn-flat btn-small waves-effect waves-light modal-trigger" data-target="modal_delete"
-              data-id="<%= data.suppliers[i].id %>"></button><i class="material-icons">delete</i></a>
+              data-id="<%= data.periods[i].id %>"><i class="material-icons">lock_open</i></a>
+            <% } %>
+
+            <% if(data.periods[i].statusId === 1) { %>
+            <a class="btn-flat btn-small waves-effect waves-light modal-trigger" data-target="modal_delete"
+              data-id="<%= data.periods[i].id %>"><i class="material-icons">lock</i></a>
+            <% } %>
+
+            <% if((data.periods[i].statusId === 0)||(data.periods[i].statusId === 1)) { %>
+            <a class="btn-flat btn-small waves-effect waves-light modal-trigger" data-target="modal_delete"
+              data-id="<%= data.periods[i].id %>"><i class="material-icons">delete</i></a>
+            <% } %>
+
           </td>
         </tr>
         <% } %>
       </tbody>
     </table>
+    <% } %>
+
     <center>
       <%- include ("../partials/alerts") %>
     </center>
@@ -59,30 +98,16 @@
   </div>
 </main>
 
-<!-- Modal Structure -->
-<div id="modal_delete" class="modal">
-  <div class="modal-content">
-    <h4>Eliminar Proveedor</h4>
-    <p>Está a punto de eliminar el proveedor seleccionado y no podrá deshacer esta operación, seguro que desea
-      continuar ?</p>
-  </div>
-  <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn red" style="margin-right: 10px;"
-      onclick="confirm_delete();">Eliminar</a>
-    <a href="#!" class="modal-close waves-effect waves-green btn" style="margin-right: 10px;">Cancelar</a>
-  </div>
-</div>
-
 <script>
 
   document.addEventListener("DOMContentLoaded", function () {
-    var elems = document.querySelectorAll(".modal");
-    var instances = M.Modal.init(elems, {})
+    populateClients("clientsSelect");
   });
 
-  function confirm_delete() {
-    var elem = document.getElementById("modal_delete");
-  }
+  $('#clientsSelect').on('change', function () {
+    var sel = $('#clientsSelect').val()
+    $('#clientId').val(sel);
+  });
 
   (function (window, document, undefined) {
     var factory = function ($, DataTable) {
@@ -98,9 +123,6 @@
       $.extend(true, DataTable.defaults, {
         dom: "<'hiddensearch'f'>" + "tr" + "<'table-footer'lip'>",
         renderer: "material",
-        buttons: [
-          'copy', 'csv', 'excel', 'pdf', 'print'
-        ]
       });
 
       /* Default class modification */
@@ -142,8 +164,6 @@
             } else {
               btnDisplay = "";
               btnClass = "";
-              console.log(button);
-
               switch (button) {
                 case "first":
                   btnDisplay = lang.sFirst;

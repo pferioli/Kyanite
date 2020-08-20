@@ -4,6 +4,11 @@ const connectEnsureLogin = require('connect-ensure-login');
 
 const clientsController = require('../controllers/clients.controller');
 
+router.get("/populate", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  clientsController.populateClients(req, res);
+});
+
+
 router.get("/", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
   clientsController.listAll(req, res);
 });

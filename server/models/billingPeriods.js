@@ -3,17 +3,18 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class billingPeriod extends Model {
+    class BillingPeriod extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
+            BillingPeriod.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
         }
     };
 
-    billingPeriod.init({
+    BillingPeriod.init({
         id: {
             allowNull: false,
             autoIncrement: true,
@@ -56,6 +57,18 @@ module.exports = (sequelize, DataTypes) => {
         userId: {
             allowNull: false,
             type: DataTypes.INTEGER
+        },
+        status: {
+            type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
+            get: function () {
+                switch (this.get('statusId')) {
+                    case 0: return "Creado";
+                    case 1: return "Abierto";
+                    case 2: return "Cerrado";
+                    case 3: return "Anulado";
+                }
+                return "ERROR";
+            },
         }
     }, {
         sequelize,
@@ -65,5 +78,5 @@ module.exports = (sequelize, DataTypes) => {
         paranoid: true,
         deletedAt: 'deletedAt'
     });
-    return billingPeriod;
+    return BillingPeriod;
 };

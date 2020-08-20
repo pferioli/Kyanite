@@ -1,6 +1,7 @@
 const Model = require('../models')
-const Supplier = Model.supplier;
-const TaxCategory = Model.taxCategory;
+const Supplier = Model.Supplier;
+const TaxCategory = Model.TaxCategory;
+const Op = require('Sequelize').Op
 
 function listAll(req, res, next) {
     Supplier.findAll().then(function (suppliers) {
@@ -17,7 +18,6 @@ function showNewForm(req, res, next) {
 };
 
 async function addNew(req, res, next) {
-    const Op = require('Sequelize').Op
 
     const existingClient = await Supplier.findAll(
         {

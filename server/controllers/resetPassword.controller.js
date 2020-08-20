@@ -3,7 +3,7 @@ const sendgrid = require('../helpers/sendgrid.helper');
 const winston = require('../helpers/winston.helper');
 
 const Model = require('../models')
-const User = Model.user;
+const User = Model.User;
 
 module.exports.encodeJWT = function (req, res) {
 
@@ -13,7 +13,7 @@ module.exports.encodeJWT = function (req, res) {
     }
     else {
 
-        users.findOne({ where: { email: req.body.email } }, function (user) {
+        User.findOne({ where: { email: req.body.email } }, function (user) {
 
             if (user === null) {
                 req.flash("error", "No se encontró el usuario en la base de datos");
@@ -50,7 +50,7 @@ module.exports.encodeJWT = function (req, res) {
 
 module.exports.decodeJWT = function (req, res) {
 
-    users.findOne({ where: { email: req.params.id } }, function (user) {
+    Users.findOne({ where: { email: req.params.id } }, function (user) {
 
         if (user === null) {
             req.flash("error", "No se encontró el usuario en la base de datos");

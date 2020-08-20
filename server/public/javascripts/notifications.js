@@ -1,7 +1,7 @@
 var notificationsTimer;
 
 function notificationsTimerStart() {
-    notificationsTimer = setInterval(checkNotifications, 10 * 1000);
+    notificationsTimer = setInterval(checkNotifications, 60 * 1000);
 }
 
 function notificationsTimerStop() {
@@ -26,6 +26,7 @@ function checkNotifications() {
                 document.getElementById("notifications").style.visibility = "hidden";
             } else {
                 document.getElementById("notifications").style.visibility = "initial";
+                M.toast({ html: 'Tiene nuevas notificaciones pendientes', classes: 'rounded' })
             }
 
         })

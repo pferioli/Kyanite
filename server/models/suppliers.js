@@ -3,18 +3,18 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class supplier extends Model {
+  class Supplier extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      supplier.hasOne(models.taxCategory, { foreignKey: 'id' })
+      Supplier.hasOne(models.taxCategory, { foreignKey: 'id' })
     }
   };
 
-  supplier.init({
+  Supplier.init({
     id: {
       allowNull: false,
       autoIncrement: true,
@@ -78,5 +78,5 @@ module.exports = (sequelize, DataTypes) => {
     paranoid: true,
     deletedAt: 'deletedAt'
   });
-  return supplier;
+  return Supplier;
 };

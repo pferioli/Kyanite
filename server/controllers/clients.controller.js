@@ -2,6 +2,12 @@ const Model = require('../models')
 const Client = Model.client;
 const TaxCategory = Model.taxCategory;
 
+function populateClients(req, res) {
+    Client.findAll({ attributes: ['id', 'name'] }).then(function (clients) {
+        res.send(clients);
+    });
+}
+
 function listAll(req, res, next) {
     Client.findAll().then(function (clients) {
         res.render("clients/index.ejs", {
@@ -89,6 +95,7 @@ async function getInfo(req, res) {
 };
 
 module.exports = {
+    populateClients,
     listAll,
     showNewForm,
     addNew,
