@@ -1,4 +1,7 @@
 'use strict';
+
+const moment = require('moment');
+
 const {
     Model
 } = require('sequelize');
@@ -38,10 +41,20 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATEONLY
         },
         openedAt: {
-            type: DataTypes.DATE
+            type: DataTypes.DATE,
+            get() {
+                if (this.getDataValue('openedAt'))
+                    return moment(this.getDataValue('openedAt')).format('DD/MM/YYYY hh:mm:ss');
+                else return this.getDataValue('openedAt')
+            }
         },
         closedAt: {
-            type: DataTypes.DATE
+            type: DataTypes.DATE,
+            get() {
+                if (this.getDataValue('closedAt'))
+                    return moment(this.getDataValue('closedAt')).format('DD/MM/YYYY hh:mm:ss');
+                else return this.getDataValue('closedAt')
+            }
         },
         statusId: {
             allowNull: false,
@@ -52,6 +65,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER
         },
         previousPeriodId: {
+            allowNull: true,
             type: DataTypes.INTEGER
         },
         userId: {

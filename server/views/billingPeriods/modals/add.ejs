@@ -1,0 +1,72 @@
+<% const selectedYear = new Date().getFullYear(); %>
+<% const selectedMonth = new Date().getMonth() + 1; %>
+
+<div id="modalNewPeriod" class="modal">
+    <form action="/periods/new" method="post">
+        <div class="modal-content">
+            <div class="row">
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">home</i>
+                    <input id="cliente" value="<%=data.client.name%>" type="text" disabled />
+                    <label for="cliente">Cliente</label>
+                    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s6">
+                    <select id="monthSelect">
+                        <% const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; %>
+                        <%for (month=1; month <=12 ; month++){ %>
+                        <%  if(new Date().getMonth()===(month-1)){ %>
+                        <option value="<%=month%>" selected><%=monthNames[month-1]%></option>
+                        <%  } else { %>
+                        <option value=<%=month%>><%=monthNames[month-1]%></option>
+                        <% } %>
+                        <% } %>
+                    </select>
+                    <label>Seleccione el mes <span class=" red-text">*</span></label>
+                </div>
+                <div class="input-field col s6">
+                    <select id="yearSelect">
+                        <%for (year=new Date().getFullYear()-5; year<=new Date().getFullYear()+20; year++){ %>
+                        <%if(year === new Date().getFullYear()) { %>
+                        <option value="<%=year%>" selected><%= year %></option>
+
+                        <% } else { %>
+                        <option value="<%= year %>"><%= year %></option>
+                        <% } %>
+                        <% } %>
+                    </select>
+                    <label>Seleccione el Año <span class="red-text">*</span></label>
+                </div>
+            </div>
+            <input type="hidden" name="monthValue" id="monthValue" value="<%=selectedMonth%>" />
+            <input type="hidden" name="yearValue" id="yearValue" value="<%=selectedYear%>" />
+        </div>
+
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red"
+                style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems, {});
+    });
+
+    const monthSelect = document.getElementById("monthSelect");
+    monthSelect.addEventListener('change', (event) => {
+        const monthValue = document.getElementById("monthValue");
+        monthValue.value = event.target.value;
+    });
+
+    const yearSelect = document.getElementById("yearSelect");
+    yearSelect.addEventListener('change', (event) => {
+        const yearValue = document.getElementById("yearValue");
+        yearValue.value = event.target.value;
+    });
+</script>

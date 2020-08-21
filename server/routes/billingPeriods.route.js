@@ -9,14 +9,24 @@ router.get("/", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
 });
 
 router.post("/", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+    const clientId = req.body.clientId;
+    res.redirect("/periods/" + clientId);
+});
+
+router.get("/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
     billingPeriodsController.listAll(req, res);
 });
 
-router.get("/new", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
-    res.render('billingPeriods/add');
+router.post("/new", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+    billingPeriodsController.create(req, res);
 });
 
-router.post("/new", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+router.post("/close", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+    billingPeriodsController.close(req, res);
+});
+
+router.post("/open", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+    billingPeriodsController.open(req, res);
 });
 
 module.exports = router;

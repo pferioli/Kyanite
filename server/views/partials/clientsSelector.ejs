@@ -1,19 +1,25 @@
 <div class="container">
     <div class="row box-white" style="margin-top: 20px; height: fit-content;">
-        <form method="POST" action='/periods'>
-            <div class="input-field col s11">
-                <select id="clientsSelect">
-                    <option value="" disabled selected>Choose your option</option>
-                </select>
-                <label>Seleccione el Cliente <span class="red-text">*</span></label>
-            </div>
-            <div class="input-field col s1 center-align">
-                <button type='submit' action="submit" class="waves-effect waves-light btn-floating btn-large teal"
-                    style="margin-right: 10px;"><i class="material-icons right">send</i>Buscar</button>
-            </div>
-            <input type="hidden" name="clientId" id="clientId" />
-        </form>
+        <div class="input-field col s11">
+            <select id="clientsSelect" onchange="myFunction(this.value)">
+                <option value="" disabled selected>Choose your option</option>
+            </select>
+            <label>Seleccione el Cliente <span class="red-text">*</span></label>
+        </div>
+        <div class="input-field col s1 center-align">
+            <button type='submit' action="submit" class="waves-effect waves-light btn-floating btn-large teal"
+                style="margin-right: 10px;"><i class="material-icons right">send</i>Buscar</button>
+        </div>
+        <input type="hidden" name="clientId" id="clientId" />
     </div>
 </div>
+
+<script>
+    const clientsSelect = document.getElementById("clientsSelect");
+    clientsSelect.addEventListener('change', (event) => {
+        const clientId = document.getElementById("clientId");
+        clientId.value = event.target.value;
+    });
+</script>
 
 <script type="text/javascript" src="/javascripts/populateClients.js"></script>

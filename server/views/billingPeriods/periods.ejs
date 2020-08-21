@@ -1,0 +1,342 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+
+  <div class="card material-table">
+    <div class=" table-header">
+      <span class="table-title">Períodos de Liquidación - <span style="font-weight: bold;"><%=data.client.name%></span>
+        [<%=data.client.internalCode%>]</span>
+      <div class="actions">
+        <a id="button-add" class="modal-trigger waves-effect btn-flat nopadding" data-target="modalNewPeriod"><i
+            class="material-icons">add_box</i></a>
+        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
+            class="material-icons">search</i></a>
+      </div>
+    </div>
+    <table id="datatable" class="table striped responsive-table">
+      <col style="width: 5%;" />
+      <!--Estado-->
+      <col style="width: 10%;" />
+      <!--Nombre-->
+      <col style="width: 10%;" />
+      <!--Desde-->
+      <col style="width: 10%;" />
+      <!--Hasta-->
+      <col style="width: 15%;" />
+      <!--Apertura-->
+      <col style="width: 15%;" />
+      <!--Finalizacion-->
+      <col style="width: 25%;" />
+      <!--Usuario-->
+      <col style="width: 10%;" />
+      <!--Acciones-->
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th>Nombre</th>
+          <th>Desde</th>
+          <th>Hasta</th>
+          <th>Abierto</th>
+          <th>Finalizado</th>
+          <th>Usuario</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(var i=0; i < data.periods.length; i++) { %>
+        <tr data-id="<%= data.periods[i].id %>">
+          <td>
+            <% if(data.periods[i].statusId === 0) { %>
+            <i class="material-icons">calendar_today</i>
+            <% } %>
+            <% if(data.periods[i].statusId === 1) { %>
+            <i class="material-icons green-text">lock_open</i>
+            <% } %>
+            <% if(data.periods[i].statusId === 2) { %>
+            <i class="material-icons deep-orange-text lighten-1">lock</i>
+            <% } %>
+            <% if(data.periods[i].statusId === 3) { %>
+            <i class="material-icons">cancel</i>
+            <% } %>
+          </td>
+          <td><%= data.periods[i].name %></td>
+          <td><%= data.periods[i].startDate %></td>
+          <td><%= data.periods[i].endDate %></td>
+          <td><%= data.periods[i].openedAt %></td>
+          <td><%= data.periods[i].closedAt %></td>
+          <td><%= data.periods[i].user.name %></td>
+          <td>
+            <% if(data.periods[i].statusId === 0) { %>
+            <a id="buttonOpen" class="waves-effect btn-flat nopadding" data-id="<%=data.periods[i].id%>"
+              data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>" onclick="openDialog(this)"><i
+                class="material-icons-outlined">lock_open</i></a>
+            <% } %>
+
+            <% if(data.periods[i].statusId === 1) { %>
+            <a id="buttonClose" class="modal-trigger waves-effect btn-flat nopadding" data-target="modalClosePeriod"><i
+                class="material-icons">lock</i></a>
+            <% } %>
+
+            <% if((data.periods[i].statusId === 0)||(data.periods[i].statusId === 1)) { %>
+            <a id="buttonDelete" class="modal-trigger waves-effect btn-flat nopadding"
+              data-target="modalDeletePeriod"><i class="material-icons">delete</i></a>
+            <% } %>
+          </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <center>
+      <%- include ("../partials/alerts") %>
+    </center>
+
+  </div>
+</main>
+
+<%- include ("./modals/add.ejs") %>
+<%- include ("./modals/open.ejs") %>
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function () {
+
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems,
+      {
+        dismissible: true,
+        onOpenStart: (e) => {
+          console.log("Open Start");
+        },
+        onOpenEnd: (e) => {
+          console.log("Open End");
+        },
+        onCloseStart: (e) => {
+          console.log("Close Start");
+        },
+        onCloseEnd: (e) => {
+          console.log("Close End");
+        }
+      });
+  });
+
+  function openDialog(button) {
+    var _elem = document.getElementById('modalOpenPeriod');
+    var modal = M.Modal.getInstance(_elem);
+    const message = `se va a realizar la apertura de un nuevo periodo ${button.dataset.value} [ID ${button.dataset.id}].`
+    document.getElementById('modalMessage').textContent = message;
+    document.getElementById('modalPeriodId').value = button.dataset.id;
+    document.getElementById('modalClientId').value = button.dataset.value2;
+    modal.open();
+  };
+
+  (function (window, document, undefined) {
+    var factory = function ($, DataTable) {
+      "use strict";
+
+      $(".search-toggle").click(function () {
+        if ($(".hiddensearch").css("display") == "none")
+          $(".hiddensearch").slideDown();
+        else $(".hiddensearch").slideUp();
+      });
+
+      /* Set the defaults for DataTables initialisation */
+      $.extend(true, DataTable.defaults, {
+        dom: "<'hiddensearch'f'>" + "tr" + "<'table-footer'lip'>",
+        renderer: "material",
+      });
+
+      /* Default class modification */
+      $.extend(DataTable.ext.classes, {
+        sWrapper: "dataTables_wrapper",
+        sFilterInput: "form-control input-sm",
+        sLengthSelect: "form-control input-sm"
+      });
+
+      /* Bootstrap paging button renderer */
+      DataTable.ext.renderer.pageButton.material = function (
+        settings,
+        host,
+        idx,
+        buttons,
+        page,
+        pages
+      ) {
+        var api = new DataTable.Api(settings);
+        var classes = settings.oClasses;
+        var lang = settings.oLanguage.oPaginate;
+        var btnDisplay,
+          btnClass,
+          counter = 0;
+
+        var attach = function (container, buttons) {
+          var i, ien, node, button;
+          var clickHandler = function (e) {
+            e.preventDefault();
+            if (!$(e.currentTarget).hasClass("disabled")) {
+              api.page(e.data.action).draw(false);
+            }
+          };
+
+          for (i = 0, ien = buttons.length; i < ien; i++) {
+            button = buttons[i];
+            if ($.isArray(button)) {
+              attach(container, button);
+            } else {
+              btnDisplay = "";
+              btnClass = "";
+              switch (button) {
+                case "first":
+                  btnDisplay = lang.sFirst;
+                  btnClass = button + (page > 0 ? "" : " disabled");
+                  break;
+
+                case "previous":
+                  btnDisplay = '<i class="material-icons">chevron_left</i>';
+                  btnClass = button + (page > 0 ? "" : " disabled");
+                  break;
+
+                case "next":
+                  btnDisplay = '<i class="material-icons">chevron_right</i>';
+                  btnClass = button + (page < pages - 1 ? "" : " disabled");
+                  break;
+
+                case "last":
+                  btnDisplay = lang.sLast;
+                  btnClass = button + (page < pages - 1 ? "" : " disabled");
+                  break;
+              }
+
+              if (btnDisplay) {
+                node = $("<li>", {
+                  class: classes.sPageButton + " " + btnClass,
+                  id:
+                    idx === 0 && typeof button === "string"
+                      ? settings.sTableId + "_" + button
+                      : null
+                })
+                  .append(
+                    $("<a>", {
+                      href: "#",
+                      "aria-controls": settings.sTableId,
+                      "data-dt-idx": counter,
+                      tabindex: settings.iTabIndex
+                    }).html(btnDisplay)
+                  )
+                  .appendTo(container);
+
+                settings.oApi._fnBindAction(
+                  node,
+                  {
+                    action: button
+                  },
+                  clickHandler
+                );
+
+                counter++;
+              }
+            }
+          }
+        };
+
+        // IE9 throws an 'unknown error' if document.activeElement is used
+        // inside an iframe or frame.
+        var activeEl;
+
+        try {
+          // Because this approach is destroying and recreating the paging
+          // elements, focus is lost on the select button which is bad for
+          // accessibility. So we want to restore focus once the draw has
+          // completed
+          activeEl = $(document.activeElement).data("dt-idx");
+        } catch (e) { }
+
+        attach(
+          $(host)
+            .empty()
+            .html('<ul class="material-pagination"/>')
+            .children("ul"),
+          buttons
+        );
+
+        if (activeEl) {
+          $(host)
+            .find("[data-dt-idx=" + activeEl + "]")
+            .focus();
+        }
+      };
+
+      /*
+       * TableTools Bootstrap compatibility
+       * Required TableTools 2.1+
+       */
+      if (DataTable.TableTools) {
+        // Set the classes that TableTools uses to something suitable for Bootstrap
+        $.extend(true, DataTable.TableTools.classes, {
+          container: "DTTT btn-group",
+          buttons: {
+            normal: "btn btn-default",
+            disabled: "disabled"
+          },
+          collection: {
+            container: "DTTT_dropdown dropdown-menu",
+            buttons: {
+              normal: "",
+              disabled: "disabled"
+            }
+          },
+          print: {
+            info: "DTTT_print_info"
+          },
+          select: {
+            row: "active"
+          }
+        });
+
+        // Have the collection use a material compatible drop down
+        $.extend(true, DataTable.TableTools.DEFAULTS.oTags, {
+          collection: {
+            container: "ul",
+            button: "li",
+            liner: "a"
+          }
+        });
+      }
+    }; // /factory
+
+    // Define as an AMD module if possible
+    if (typeof define === "function" && define.amd) {
+      define(["jquery", "datatables"], factory);
+    } else if (typeof exports === "object") {
+      // Node/CommonJS
+      factory(require("jquery"), require("datatables"));
+    } else if (jQuery) {
+      // Otherwise simply initialise as normal, stopping multiple evaluation
+      factory(jQuery, jQuery.fn.dataTable);
+    }
+  })(window, document);
+
+  $(document).ready(function () {
+    $("#datatable").dataTable({
+      oLanguage: {
+        sStripClasses: "",
+        sSearch: "",
+        sSearchPlaceholder: "Escriba aquí su consulta...",
+        sInfo: "_START_ -_END_ of _TOTAL_",
+        sLengthMenu:
+          '<span>Filas por página:</span><select class="browser-default">' +
+          '<option value="10">10</option>' +
+          '<option value="20">20</option>' +
+          '<option value="30">30</option>' +
+          '<option value="40">40</option>' +
+          '<option value="50">50</option>' +
+          '<option value="-1">Todos</option>' +
+          "</select></div>"
+      },
+      bAutoWidth: false
+    });
+  });
+
+</script>
+
+<%- include ("../partials/footer") %>
