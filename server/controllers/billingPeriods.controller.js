@@ -67,22 +67,29 @@ async function create(req, res, next) {
 };
 
 async function open(req, res) {
-    const id = req.body.modalPeriodId;
     const clientId = req.body.modalClientId;
+    const id = req.body.modalPeriodId;
     const period = await BillingPeriod.findByPk(id);
     period.statusId = 1;
     period.openedAt = new Date();
     await period.save();
+
+    //TODO:falta agregar el saldo del periodo anterior a la CC del barrio...
+
     res.redirect("/periods/" + clientId);
 }
 
 async function close(req, res, next) {
-    const id = req.body.id;
+    const clientId = req.body.modalClientId;
+    const id = req.body.modalPeriodId;
     const period = await BillingPeriod.findByPk(id);
     period.statusId = 2;
     period.closedAt = new Date();
     await period.save();
-    const clientId = req.body.modalClientId;
+
+
+    //TODO:falta actualizar el saldo del barrio al cierre del periodo...
+
     res.redirect("/periods/" + clientId);
 }
 

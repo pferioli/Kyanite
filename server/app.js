@@ -117,6 +117,8 @@ app.use('/upload', require('./routes/google.upload.route'));
 
 app.use('/notifications', require('./routes/notifications.route'));
 
+app.use('/accountingImputations', require('./routes/accountingImputations.route'));
+
 //app.use('/sse', require('./routes/serverSentEvents.route'));
 
 // catch 404 and forward to error handler

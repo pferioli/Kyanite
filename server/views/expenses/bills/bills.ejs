@@ -1,0 +1,72 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+    <div class="card material-table">
+        <div class=" table-header">
+            <span class="table-title">Listado de Facturas y Ordenes de Pago</span>
+            <div class="actions">
+                <a href="/expenses/paymentReceipts/new/<%=data.clientId%>" id="button-add"
+                    class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
+                        class="material-icons">search</i></a>
+            </div>
+        </div>
+        <table id="datatable" class="table striped responsive-table">
+            <col style="width: 5%;" />
+            <col style="width: 35%;" />
+            <col style="width: 10%;" />
+            <col style="width: 10%;" />
+            <col style="width: 15%;" />
+            <col style="width: 15%;" />
+            <col style="width: 10%;" />
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Proveedor</th>
+                    <th>Factura</th>
+                    <th>Importe</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+
+    </div>
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
+</main>
+
+<!-- Modal Structure -->
+<div id="modal_delete" class="modal">
+    <div class="modal-content">
+        <h4>Eliminar Proveedor</h4>
+        <p>Está a punto de anular la factura seleccionada y no podrá deshacer esta operación, seguro que desea
+            continuar ?</p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn red" style="margin-right: 10px;"
+            onclick="confirm_delete();">Eliminar</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn" style="margin-right: 10px;">Cancelar</a>
+    </div>
+</div>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {})
+        populateClients("clientsSelect");
+    });
+
+    function confirm_delete() {
+        var elem = document.getElementById("modal_delete");
+    }
+</script>

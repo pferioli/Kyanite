@@ -9,8 +9,8 @@
             class="material-icons">add_box</i></a>
         <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
             class="material-icons">search</i></a>
-        <a href="/suppliers/new/category" id="button-category" class="modal-trigger waves-effect btn-flat nopadding"><i
-            class="material-icons">playlist_add</i></a>
+        <a id="button-category" class="modal-trigger waves-effect btn-flat nopadding"
+          data-target="modalNewSupplierCategory"><i class="material-icons">playlist_add</i></a>
       </div>
     </div>
     <table id="datatable" class="table striped responsive-table">
@@ -45,6 +45,7 @@
                       class="material-icons">info</i></a>-->
             <a href="/suppliers/edit/<%= data.suppliers[i].id %>" class="btn-flat btn-small waves-effect waves-light"><i
                 class="material-icons">edit</i></a>
+
             <a class="btn-flat btn-small waves-effect waves-light modal-trigger" data-target="modal_delete"
               data-id="<%= data.suppliers[i].id %>"></button><i class="material-icons">delete</i></a>
           </td>
@@ -55,23 +56,11 @@
     <center>
       <%- include ("../partials/alerts") %>
     </center>
-
   </div>
 </main>
 
-<!-- Modal Structure -->
-<div id="modal_delete" class="modal">
-  <div class="modal-content">
-    <h4>Eliminar Proveedor</h4>
-    <p>Está a punto de eliminar el proveedor seleccionado y no podrá deshacer esta operación, seguro que desea
-      continuar ?</p>
-  </div>
-  <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn red" style="margin-right: 10px;"
-      onclick="confirm_delete();">Eliminar</a>
-    <a href="#!" class="modal-close waves-effect waves-green btn" style="margin-right: 10px;">Cancelar</a>
-  </div>
-</div>
+<%- include ("./modals/newCategory.ejs") %>
+<%- include ("./modals/delete.ejs") %>
 
 <script>
 
@@ -79,10 +68,6 @@
     var elems = document.querySelectorAll(".modal");
     var instances = M.Modal.init(elems, {})
   });
-
-  function confirm_delete() {
-    var elem = document.getElementById("modal_delete");
-  }
 
   (function (window, document, undefined) {
     var factory = function ($, DataTable) {

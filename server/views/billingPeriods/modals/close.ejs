@@ -1,14 +1,14 @@
-<div id="modalOpenPeriod" class="modal">
-    <form action="/periods/open" method="post">
+<div id="modalClosePeriod" class="modal">
+    <form action="/periods/close" method="post">
         <div class="modal-content">
             <div class="row">
-                <h5>Confirmar la apertura del período</h5>
+                <h5>Confirmar el cierre del período</h5>
             </div>
-            <div id="modalOpenMessage" class="center-left"></div>
+            <div id="modalCloseMessage" class="center-left"></div>
             <p>Esta tarea no puede ser cancelada, esta seguro que desea continuar ?</p>
         </div>
-        <input type="hidden" id="modalOpenPeriodId" name="modalPeriodId" value="" />
-        <input type="hidden" id="modalOpenClientId" name="modalClientId" value="" />
+        <input type="hidden" id="modalClosePeriodId" name="modalPeriodId" value="" />
+        <input type="hidden" id="modalCloseClientId" name="modalClientId" value="" />
         <div class="modal-footer">
             <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
             <a class="modal-close waves-effect waves-red btn red"

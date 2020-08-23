@@ -1,6 +1,9 @@
 const Model = require('../models')
-const Supplier = Model.Supplier;
-const TaxCategory = Model.TaxCategory;
+const Supplier = Model.supplier;
+const TaxCategory = Model.taxCategory;
+const SupplierCategory = Model.supplierCategory;
+const Banks = Model.bank;
+
 const Op = require('Sequelize').Op
 
 function listAll(req, res, next) {
@@ -11,22 +14,18 @@ function listAll(req, res, next) {
     });
 };
 
-function showNewForm(req, res, next) {
-    TaxCategory.findAll({ where: { enabled: true } }).then(function (taxCategories) {
-        res.render("suppliers/add.ejs");
-    });
+async function showNewForm(req, res, next) {
+    const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
+    const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
+    const banks = await Banks.findAll({ where: { enabled: true } });
+    res.render("suppliers/add.ejs", { data: { taxCategories, supplierCategories, banks } });
 };
 
 async function addNew(req, res, next) {
 
     const existingClient = await Supplier.findAll(
         {
-            where: {
-                [Op.or]: [
-                    { cuit: req.body.cuit },
-                    { internalCode: req.body.internalCode }
-                ]
-            }
+            where: { cuit: req.body.cuit }
         }
     );
 
@@ -83,9 +82,15 @@ async function getInfo(req, res) {
     res.render("suppliers/info.ejs", { data: { supplier, taxCategories } });
 };
 
+async function newCategory(req, res) {
+    const supplierCategories = await SupplierCategory.create({ name: req.body.category, enabled: true });
+    res.redirect("/suppliers");
+};
+
 module.exports = {
     listAll,
     showNewForm,
     addNew,
-    getInfo
+    getInfo,
+    newCategory
 }

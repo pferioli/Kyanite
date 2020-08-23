@@ -1,7 +1,6 @@
 <%- include ("../partials/header") %>
 
 <main class="site-content">
-
   <div class="card material-table">
     <div class=" table-header">
       <span class="table-title">Períodos de Liquidación - <span style="font-weight: bold;"><%=data.client.name%></span>
@@ -15,6 +14,8 @@
     </div>
     <table id="datatable" class="table striped responsive-table">
       <col style="width: 5%;" />
+      <!--ID-->
+      <col style="width: 5%;" />
       <!--Estado-->
       <col style="width: 10%;" />
       <!--Nombre-->
@@ -26,12 +27,13 @@
       <!--Apertura-->
       <col style="width: 15%;" />
       <!--Finalizacion-->
-      <col style="width: 25%;" />
+      <col style="width: 20%;" />
       <!--Usuario-->
       <col style="width: 10%;" />
       <!--Acciones-->
       <thead>
         <tr>
+          <th>ID</th>
           <th>Estado</th>
           <th>Nombre</th>
           <th>Desde</th>
@@ -45,6 +47,7 @@
       <tbody>
         <% for(var i=0; i < data.periods.length; i++) { %>
         <tr data-id="<%= data.periods[i].id %>">
+          <td><%= data.periods[i].id %></td>
           <td>
             <% if(data.periods[i].statusId === 0) { %>
             <i class="material-icons">calendar_today</i>
@@ -73,8 +76,9 @@
             <% } %>
 
             <% if(data.periods[i].statusId === 1) { %>
-            <a id="buttonClose" class="modal-trigger waves-effect btn-flat nopadding" data-target="modalClosePeriod"><i
-                class="material-icons">lock</i></a>
+            <a id="buttonClose" class="waves-effect btn-flat nopadding" data-id="<%=data.periods[i].id%>"
+              data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>"
+              onclick="closeDialog(this)"><i class="material-icons-outlined">lock</i></a>
             <% } %>
 
             <% if((data.periods[i].statusId === 0)||(data.periods[i].statusId === 1)) { %>
@@ -96,6 +100,7 @@
 
 <%- include ("./modals/add.ejs") %>
 <%- include ("./modals/open.ejs") %>
+<%- include ("./modals/close.ejs") %>
 
 <script>
 
@@ -106,16 +111,16 @@
       {
         dismissible: true,
         onOpenStart: (e) => {
-          console.log("Open Start");
+          //console.log("Open Start");
         },
         onOpenEnd: (e) => {
-          console.log("Open End");
+          //console.log("Open End");
         },
         onCloseStart: (e) => {
-          console.log("Close Start");
+          //console.log("Close Start");
         },
         onCloseEnd: (e) => {
-          console.log("Close End");
+          //console.log("Close End");
         }
       });
   });
@@ -124,9 +129,19 @@
     var _elem = document.getElementById('modalOpenPeriod');
     var modal = M.Modal.getInstance(_elem);
     const message = `se va a realizar la apertura de un nuevo periodo ${button.dataset.value} [ID ${button.dataset.id}].`
-    document.getElementById('modalMessage').textContent = message;
-    document.getElementById('modalPeriodId').value = button.dataset.id;
-    document.getElementById('modalClientId').value = button.dataset.value2;
+    document.getElementById('modalOpenMessage').textContent = message;
+    document.getElementById('modalOpenPeriodId').value = button.dataset.id;
+    document.getElementById('modalOpenClientId').value = button.dataset.value2;
+    modal.open();
+  };
+
+  function closeDialog(button) {
+    var _elem = document.getElementById('modalClosePeriod');
+    var modal = M.Modal.getInstance(_elem);
+    const message = `se va a realizar el cierre del período ${button.dataset.value} [ID ${button.dataset.id}].`
+    document.getElementById('modalCloseMessage').textContent = message;
+    document.getElementById('modalClosePeriodId').value = button.dataset.id;
+    document.getElementById('modalCloseClientId').value = button.dataset.value2;
     modal.open();
   };
 
