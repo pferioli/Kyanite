@@ -9,64 +9,57 @@
           <div class="row" style="margin-top: 20px;">
             <div class="input-field col s9">
               <i class="material-icons prefix">home</i>
-              <input id="razon_social" value="<%=data.supplier.name%>" type="text" class="validate" />
+              <input id="razon_social" value="<%=data.supplier.name%>" type="text" disabled />
               <label for="razon_social">Nombre del Proveedor</label>
             </div>
             <div class="input-field col s3">
-              <input id="cuit" value="<%=data.supplier.cuit%>" type="text" class="validate" />
+              <input id="cuit" value="<%=data.supplier.cuit%>" type="text" disabled />
               <label for="cuit">C.U.I.T.</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s6">
-              <select id="taxCategorySelect" name="taxCategorySelect">
-                <% for(var i=0; i < data.taxCategories.length; i++) { %>
-                <option value="<%=data.taxCategories[i].id%>"><%= data.taxCategories[i].name %></option>
-                <% } %>
-              </select>
-              <label>Categoria Impositiva</label>
+              <input id="taxCategory" value="<%=data.supplier.taxCategory.name%>" type="text" disabled />
+              <label for="taxCategory">Categoria Impositiva</label>
             </div>
             <div class="input-field col s6">
-              <select id="supplierCategorySelect" name="supplierCategorySelect">
-                <% for(var i=0; i < data.taxCategories.length; i++) { %>
-                <option value="<%=data.taxCategories[i].id%>"><%= data.taxCategories[i].name %></option>
-                <% } %>
-              </select>
-              <label>Rubro</label>
+              <input id="supplierCategory" value="<%=data.supplier.supplierCategory.name%>" type="text" disabled />
+              <label for="supplierCategory">Rubro</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s9">
               <i class="material-icons prefix">mail</i>
-              <input id="correo_electronico" value="<%=data.supplier.email%>" type="text" class="validate" />
+              <input id="correo_electronico" value="<%=data.supplier.email%>" type="text" disabled />
               <label for="correo_electronico">Correo Electronico</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">local_phone</i>
-              <input id="telefono" value="<%=data.supplier.phone%>" type="text" class="validate" />
+              <input id="telefono" value="<%=data.supplier.phone%>" type="text" disabled />
               <label for="telefono">Telefono</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s6">
               <i class="material-icons prefix">location_on</i>
-              <input id="direccion" value="<%=data.supplier.address%>" type="text" class="validate" />
+              <input id="direccion" value="<%=data.supplier.address%>" type="text" disabled />
               <label for="direccion">Direccion</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">location_city</i>
-              <input id="ciudad" value="<%=data.supplier.city%>" type="text" class="validate" />
+              <input id="ciudad" value="<%=data.supplier.city%>" type="text" disabled />
               <label for="ciudad">Ciudad</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">details</i>
-              <input id="codigo_postal" value="<%=data.supplier.zipCode%>" type="text" class="validate" />
+              <input id="codigo_postal" value="<%=data.supplier.zipCode%>" type="text" disabled />
               <label for="codigo_postal">Codigo Postal</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s12">
-              <textarea id="observaciones" class="materialize-textarea" value="<%=data.supplier.comments%>"></textarea>
+              <textarea id="observaciones" class="materialize-textarea" value="<%=data.supplier.comments%>"
+                disabled></textarea>
               <label for="observaciones">Observaciones</label>
             </div>
           </div>

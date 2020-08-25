@@ -35,7 +35,9 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'receiptType',
-        tableName: 'receipt_types'
+        tableName: 'receipt_types',
+        timestamps: false,
+        paranoid: false,
     });
     return ReceiptType;
 };

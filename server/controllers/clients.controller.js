@@ -1,31 +1,31 @@
+const Op = require('Sequelize').Op
 const Model = require('../models')
 const Client = Model.client;
 const TaxCategory = Model.taxCategory;
 
-function populateClients(req, res) {
+const CURRENT_MENU = 'clients'; module.exports.CURRENT_MENU = CURRENT_MENU;
+
+module.exports.populateClients = function (req, res) {
     Client.findAll({ attributes: ['id', 'name'] }).then(function (clients) {
         res.send(clients);
     });
 }
 
-function listAll(req, res, next) {
+module.exports.listAll = function (req, res, next) {
     Client.findAll().then(function (clients) {
-        res.render("clients/index.ejs", {
-            data: { clients },
-        });
+        res.render("clients/index.ejs", { menu: CURRENT_MENU, data: { clients } });
     });
 };
 
-function showNewForm(req, res, next) {
+module.exports.showNewForm = function (req, res, next) {
     TaxCategory.findAll({ where: { enabled: true } }).then(function (taxCategories) {
         res.render("clients/add.ejs", {
-            data: { taxCategories },
+            menu: CURRENT_MENU, data: { taxCategories },
         });
     });
 };
 
-async function addNew(req, res, next) {
-    const Op = require('Sequelize').Op
+module.exports.addNew = async function (req, res, next) {
 
     const existingClient = await Client.findAll(
         {
@@ -77,7 +77,7 @@ async function addNew(req, res, next) {
     }
 };
 
-async function getInfo(req, res) {
+module.exports.getInfo = async function (req, res) {
     const clientid = req.params.id;
     const client = await Client.findByPk(clientid, {
         include: [{
@@ -91,13 +91,5 @@ async function getInfo(req, res) {
     }
     const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
 
-    res.render("clients/info.ejs", { data: { client, taxCategories } });
+    res.render("clients/info.ejs", { menu: CURRENT_MENU, data: { client, taxCategories } });
 };
-
-module.exports = {
-    populateClients,
-    listAll,
-    showNewForm,
-    addNew,
-    getInfo
-}

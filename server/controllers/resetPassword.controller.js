@@ -3,9 +3,9 @@ const sendgrid = require('../helpers/sendgrid.helper');
 const winston = require('../helpers/winston.helper');
 
 const Model = require('../models')
-const User = Model.User;
+const User = Model.user;
 
-module.exports.encodeJWT = function (req, res) {
+module.exports.encodeJWT = async function (req, res) {
 
     if ((req.body.email === undefined) || (req.body.email.length === 0)) {
         req.flash("error", "debe ingresar una direccion de correo electrónica válida")
@@ -13,39 +13,36 @@ module.exports.encodeJWT = function (req, res) {
     }
     else {
 
-        User.findOne({ where: { email: req.body.email } }, function (user) {
+        const user = await User.findOne({ where: { email: req.body.email } });
 
-            if (user === null) {
-                req.flash("error", "No se encontró el usuario en la base de datos");
-            }
+        if (user === null) {
+            req.flash("error", "No se encontró el usuario en la base de datos");
+        }
 
-            var payload = {
-                id: user.id,        // User ID from database
-                email: user.email
-            };
+        var payload = {
+            id: user.id,        // User ID from database
+            email: user.email
+        };
 
-            const secret = user.clave + '-' + user.fecha.getTime();
+        const secret = user.password + '-' + user.createdAt.getTime();
 
-            var token = jwt.encode(payload, secret);
+        var token = jwt.encode(payload, secret);
 
-            winston.info(`token ${token} encoded with secret ${secret}`);
+        winston.info(`token ${token} encoded with secret ${secret}`);
 
-            sendgrid.sendgridResetPassword("pferioli@gmail.com", `http://localhost:3000/password/reset/${payload.id}/${token}`)
-                .then(mail => {
-                    winston.info(`se envio correctamente el mail de reset al usuario ${user.email}`);
-                    req.flash("success", `un correo le ha sido enviado a la direccion ${user.email} para completar el proceso`);
-                    res.redirect('/password/forgot');
+        sendgrid.sendgridResetPassword(user.email, `http://localhost:3000/password/reset/${payload.id}/${token}`)
+            .then(mail => {
+                winston.info(`se envio correctamente el mail de reset al usuario ${user.email}`);
+                req.flash("success", `un correo le ha sido enviado a la direccion ${user.email} para completar el proceso`);
+                res.redirect('/password/forgot');
 
-                })
-                .catch(err => {
-                    winston.info(`se envio correctamente el mail de reset al usuario ${user.email}`);
-                    req.flash("error", `no se pudo enviar el correo a la direccion ${user.email}`);
-                    res.redirect('/password/forgot');
-                })
-
-        });
-
-    }
+            })
+            .catch(err => {
+                winston.info(`se envio correctamente el mail de reset al usuario ${user.email}`);
+                req.flash("error", `no se pudo enviar el correo a la direccion ${user.email}`);
+                res.redirect('/password/forgot');
+            })
+    };
 };
 
 module.exports.decodeJWT = function (req, res) {
@@ -57,7 +54,7 @@ module.exports.decodeJWT = function (req, res) {
         }
 
         try {
-            const secret = user.clave + '-' + user.fecha.getTime();
+            const secret = user.password + '-' + user.createdAt.getTime();
 
             const payload = jwt.decode(req.params.token, secret);
 

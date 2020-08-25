@@ -1,8 +1,8 @@
-function populateClients(fieldID) {
+function populateReceiptTypes(fieldID) {
     selectField = document.getElementById(fieldID);
     selectField.options.length = 0;
-
-    fetch('/clients/populate')
+    selectField.innerHTML = "<option value=\"\" selected disabled>" + "Seleccione el Tipo de Factura" + "</option>"
+    fetch('/expenses/paymentReceipts/types')
         .then(response => {
             if (response.status == 200) {
                 return response.text();
@@ -12,10 +12,10 @@ function populateClients(fieldID) {
         })
         .then(response => {
 
-            clients = JSON.parse(response);
+            let receiptTypes = JSON.parse(response);
 
-            for (i = 0; i < clients.length; i++) {
-                selectField.innerHTML = selectField.innerHTML + "<option value=\"" + clients[i].id + "\">" + clients[i].name + "</option>"
+            for (i = 0; i < receiptTypes.length; i++) {
+                selectField.innerHTML = selectField.innerHTML + "<option value=\"" + receiptTypes[i].id + "\">" + receiptTypes[i].name + "</option>"
             }
             M.FormSelect.init(selectField, {});
         })

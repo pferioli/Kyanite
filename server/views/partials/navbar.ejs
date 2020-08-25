@@ -45,25 +45,22 @@
 
         <!-- BREADCRUMBS -->
 
-        <% if (locals.menu === 'incomes') { %>
-        <a href="#!" class="breadcrumb">Home</a>
-        <a href="#!" class="breadcrumb">Ingresos</a>
-        <a href="#!" class="breadcrumb">Listado de Cobranzas</a>
-        <%}%>
+        <%- include ("breadcrumbs.ejs") %>
 
         <ul class="right">
             <li id="notifications" style="visibility: hidden;">
                 <a href="/notifications/show/<%=locals.user.id%>"><i class="material-icons tiny left amber-text"
-            data-position="bottom" data-delay="50" data-tooltip="Alertas Pendientes">notification_important</i></a>
-        </li>
-        <li>
-            <span style="margin-right: 20px;"><i class="material-icons tiny left">account_circle</i>
-                <% if (locals.user) { %> <%=locals.user.name%> <% } %> </span>
-        </li>
-        <li>
-            <a href="/logout" onclick="notificationsTimerStop();"><i class="material-icons tooltipped"
-                    data-position="bottom" data-delay="50" data-tooltip="log out">exit_to_app</i></a>
-        </li>
+                        data-position="bottom" data-delay="50"
+                        data-tooltip="Alertas Pendientes">notification_important</i></a>
+            </li>
+            <li>
+                <span style="margin-right: 20px;"><i class="material-icons tiny left">account_circle</i>
+                    <% if (locals.user) { %> <%=locals.user.name%> <% } %> </span>
+            </li>
+            <li>
+                <a href="/logout" onclick="notificationsTimerStop();"><i class="material-icons tooltipped"
+                        data-position="bottom" data-delay="50" data-tooltip="log out">exit_to_app</i></a>
+            </li>
         </ul>
     </div>
 </nav>

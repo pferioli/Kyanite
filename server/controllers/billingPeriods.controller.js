@@ -6,7 +6,9 @@ const Client = Model.client;
 const winston = require('../helpers/winston.helper');
 const moment = require('moment');
 
-async function listAll(req, res, next) {
+const CURRENT_MENU = 'periods'; module.exports.CURRENT_MENU = CURRENT_MENU;
+
+module.exports.listAll = async function (req, res, next) {
 
     const clientId = req.params.id;
 
@@ -20,6 +22,7 @@ async function listAll(req, res, next) {
         include: [{ model: User }]
     }).then(function (periods) {
         res.render('billingPeriods/periods', {
+            menu: CURRENT_MENU,
             data: { periods: periods, client: client },
         });
     });
@@ -31,7 +34,7 @@ async function listAll(req, res, next) {
 //     res.render('billingPeriods/add', { data: { client } });
 // };
 
-async function create(req, res, next) {
+module.exports.create = async function (req, res, next) {
     const clientId = req.body.clientId;
     const userId = req.user.id;
     const yearValue = req.body.yearValue;
@@ -66,7 +69,7 @@ async function create(req, res, next) {
 
 };
 
-async function open(req, res) {
+module.exports.open = async function (req, res) {
     const clientId = req.body.modalClientId;
     const id = req.body.modalPeriodId;
     const period = await BillingPeriod.findByPk(id);
@@ -79,7 +82,7 @@ async function open(req, res) {
     res.redirect("/periods/" + clientId);
 }
 
-async function close(req, res, next) {
+module.exports.close = async function (req, res, next) {
     const clientId = req.body.modalClientId;
     const id = req.body.modalPeriodId;
     const period = await BillingPeriod.findByPk(id);
@@ -87,15 +90,15 @@ async function close(req, res, next) {
     period.closedAt = new Date();
     await period.save();
 
-
     //TODO:falta actualizar el saldo del barrio al cierre del periodo...
 
     res.redirect("/periods/" + clientId);
 }
 
-module.exports = {
-    listAll,
-    create,
-    open,
-    close,
+module.exports.getActive = async function (req, res, next) {
+    BillingPeriod.findOne({
+        where: { clientId: req.params.id, statusId: 1 }
+    }).then(function (periods) {
+        res.send(periods)
+    });
 }

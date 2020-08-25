@@ -15,14 +15,15 @@
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">calendar_today</i>
-                            <input id="client" name="client" type="text" value="" disabled />
-                            <label for="name">Período de Liquidación</label>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="input-field col s9">
-                            <select id="supplierSelect">
+                            <select id="supplierSelect" onchange="getSupplierCategory(this.value)">
+                                <option value="" disabled selected>Seleccione un proveedor</option>
                                 <% for(var i=0; i < data.suppliers.length; i++) { %>
                                 <option value="<%=data.suppliers[i].id%>"><%= data.suppliers[i].name %></option>
                                 <% } %>
@@ -30,7 +31,7 @@
                             <label>Nombre del Proveedor</label>
                         </div>
                         <div class="input-field col s3">
-                            <input id="supplierCategory" name="supplierCategory" type="text" disabled />
+                            <input id="supplierCategory" name="supplierCategory" type="text" value="" />
                             <label for="name">Rubro</label>
                         </div>
                     </div>
@@ -46,8 +47,9 @@
                             <label for="name">Número de Factura</label>
                         </div>
                         <div class="input-field col s4">
-                            <input id="ammount" name="ammount" type="text" class="validate" required />
-                            <label for="name">Importe</label>
+                            <input id="ammount" name="ammount" type="number" min="0.00" step="0.01" class="validate"
+                                required />
+                            <label for="ammount">Importe</label>
                         </div>
                     </div>
                     <div class="row">
@@ -59,6 +61,7 @@
                         </div>
                         <div class="input-field col s4">
                             <select id="accountingImputationSelect">
+                                <option value="" selected disabled>Seleccion Primero el grupo de Cuentas</option>
                             </select>
                             <label>Imputacion Contable</label>
                         </div>
@@ -73,15 +76,13 @@
                         </div>
                     </div>
 
-
                     <div class="row">
                         <div class="input-field col s8">
                             <textarea id="comments" name="comments" class="materialize-textarea"> </textarea>
-                            <label for="comments">Observaciones</label>
+                            <label for="comments">Detalle de la Factura</label>
                         </div>
                         <div class="file-field input-field col s4">
-                            <div class="btn noppading">
-                                <span>Imagen</span>
+                            <div class="btn"><i class="material-icons center">cloud_upload</i>
                                 <input type="file">
                             </div>
                             <div class="file-path-wrapper">
@@ -110,7 +111,9 @@
 
 <%- include ("../../partials/footer") %>
 
+<script type="text/javascript" src="/javascripts/suppliers.js"></script>
 <script type="text/javascript" src="/javascripts/accountingImputations.js"></script>
+<script type="text/javascript" src="/javascripts/receiptTypes.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -119,12 +122,59 @@
         elems = document.querySelectorAll('.datepicker');
         instances = M.Datepicker.init(elems, {});
 
-        populateGroups('accountingGroupSelect');
+        populateAccountingGroups('accountingGroupSelect');
+        populateReceiptTypes('receiptTypeSelect');
+
+        document.getElementById('accountingGroupSelect').onchange(function () {
+            console.log('onchange');
+        });
+
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
     });
 
-    document.getElementById('accountingGroupSelect').onchange(function () {
-        console.log('onchange');
-    });
+    function getSupplierCategory(supplierId) {
+
+        let supplierCategory = document.getElementById('supplierCategory');
+
+        fetch('/suppliers/info/raw/' + supplierId)
+            .then(response => {
+                if (response.status == 200) {
+                    return response.text();
+                } else {
+                    throw "Respuesta incorrecta del servidor"
+                }
+            })
+            .then(response => {
+                const supplier = JSON.parse(response);
+                supplierCategory.value = supplier.supplierCategory.name
+                M.updateTextFields();
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    function getActiveBillingPeriod(clientId) {
+
+        let billingPeriod = document.getElementById('billingPeriod');
+
+        fetch('/periods/active/' + clientId)
+            .then(response => {
+                if (response.status == 200) {
+                    return response.text();
+                } else {
+                    throw "Respuesta incorrecta del servidor"
+                }
+            })
+            .then(response => {
+                const period = JSON.parse(response);
+                billingPeriod.value = period.name
+                M.updateTextFields();
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
 
     $(document).ready(function () {
         $('textarea#comments').characterCounter();

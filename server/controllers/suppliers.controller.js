@@ -70,16 +70,18 @@ async function addNew(req, res, next) {
 
 async function getInfo(req, res) {
     const supplierid = req.params.id;
-    const supplier = await Supplier.findByPk(supplierid, {});
+    const supplier = await Supplier.findByPk(supplierid, {
+        include: [
+            { model: SupplierCategory }, { model: TaxCategory }
+        ]
+    });
 
     if (supplier === null) {
         res.send(`el ID #${supplierid} no existe en la base de datos para ningun proveedor registrado, <a href="/suppliers"> volver al listado </a>`);
         return;
     }
 
-    const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
-
-    res.render("suppliers/info.ejs", { data: { supplier, taxCategories } });
+    res.render("suppliers/info.ejs", { data: { supplier } });
 };
 
 async function newCategory(req, res) {
@@ -87,10 +89,36 @@ async function newCategory(req, res) {
     res.redirect("/suppliers");
 };
 
+async function allCategories(req, res) {
+    supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
+    res.send(supplierCategories);
+};
+
+async function findCategoryById(req, res) {
+    const id = req.params.id
+    supplierCategories = await SupplierCategory.findByPk(id, { where: { enabled: true } });
+    res.send(supplierCategories);
+};
+
+async function findSupplierById(req, res) {
+    const id = req.params.id
+    supplier = await Supplier.findByPk(id,
+        {
+            where: { enabled: true },
+            include: [{
+                model: SupplierCategory
+            }]
+        });
+    res.send(supplier);
+};
+
 module.exports = {
     listAll,
     showNewForm,
     addNew,
     getInfo,
-    newCategory
+    newCategory,
+    allCategories,
+    findCategoryById,
+    findSupplierById
 }

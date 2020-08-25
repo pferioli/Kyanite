@@ -1,6 +1,7 @@
-function populateGroups(fieldID) {
+function populateAccountingGroups(fieldID) {
     let selectField = document.getElementById(fieldID);
     selectField.options.length = 0;
+    selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el grupo de cuentas" + "</option>"
 
     fetch('/accountingImputations/groups')
         .then(response => {

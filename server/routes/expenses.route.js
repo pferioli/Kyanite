@@ -25,6 +25,16 @@ router.get('/paymentReceipts/new/:id', connectEnsureLogin.ensureLoggedIn(), func
 router.post('/paymentReceipts/new', connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
 })
 
+router.get("/paymentReceipts/types", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+    paymentReceiptsController.receiptTypes(req, res);
+});
+
+
+router.get("/paymentReceipts/types/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+    paymentReceiptsController.receiptTypesByID(req, res);
+
+});
+
 router.get("/paymentReceipts/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
     paymentReceiptsController.listAll(req, res);
 
