@@ -1,6 +1,6 @@
 node_modules/
 .env
-app.yaml
+*.yaml
 server/certs/
 server/config/
 server/credentials/
