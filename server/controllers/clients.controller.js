@@ -1,7 +1,9 @@
-const Op = require('Sequelize').Op
-const Model = require('../models')
+const Op = require('sequelize').Op
+const Model = require('../models');
 const Client = Model.client;
 const TaxCategory = Model.taxCategory;
+
+const winston = require('../helpers/winston.helper');
 
 const CURRENT_MENU = 'clients'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
@@ -13,7 +15,7 @@ module.exports.populateClients = function (req, res) {
 
 module.exports.listAll = function (req, res, next) {
     Client.findAll().then(function (clients) {
-        res.render("clients/index.ejs", { menu: CURRENT_MENU, data: { clients } });
+        res.render("clients/clients.ejs", { menu: CURRENT_MENU, data: { clients } });
     });
 };
 
@@ -56,8 +58,7 @@ module.exports.addNew = async function (req, res, next) {
         phone: req.body.phone,
         email: req.body.email,
         comments: req.body.comments,
-        enabled: true,
-        user: req.user.id
+        userId: req.user.id
     }
 
     try {
@@ -89,7 +90,30 @@ module.exports.getInfo = async function (req, res) {
         res.send(`el ID #${clientid} no existe en la base de datos para ningun cliente registrado, <a href="/clients"> volver al listado </a>`);
         return;
     }
-    const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
+    res.render("clients/info.ejs", { menu: CURRENT_MENU, data: { client } });
+};
 
-    res.render("clients/info.ejs", { menu: CURRENT_MENU, data: { client, taxCategories } });
+module.exports.delete = async function (req, res, next) {
+    const clientId = req.body.clientId;
+    const client = await Client.findByPk(clientId);
+    if (client) {
+        client.destroy()
+            .then(numAffectedRows => {
+                req.flash(
+                    "success",
+                    "El cliente fue eliminado exitosamente a la base de datos"
+                )
+                winston.info(`client #${clientId} was deleted by user #${req.user.id} `);
+            })
+            .catch(err => {
+                req.flash(
+                    "error",
+                    "Ocurrio un error y no se pudo eliminar el cliente de la base de datos"
+                )
+                winston.error(`an error ocurred when user "${req.user.id} tryed to delete client #${clientId} - ${err}`);
+            })
+            .finally(function () {
+                res.redirect("/clients");
+            })
+    }
 };

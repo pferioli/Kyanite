@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      //Client.hasOne(models.taxCategory, { foreignKey: 'id' })
+      Client.hasOne(models.taxCategory, { foreignKey: 'id', sourceKey: 'taxCategoryId' })
     }
   };
 
@@ -60,10 +60,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     comments: {
       type: DataTypes.STRING
-    },
-    enabled: {
-      allowNull: false,
-      type: DataTypes.BOOLEAN
     },
     userId: {
       allowNull: false,

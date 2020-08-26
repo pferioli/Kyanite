@@ -1,0 +1,141 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+  <div class="card material-table">
+    <div class="table-header">
+      <span class="table-title">Listado de Clientes</span>
+      <div class="actions">
+        <a href="/clients/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
+            class="material-icons">add_box</i></a>
+        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
+            class="material-icons">search</i></a>
+        <a href="#" id="ExportReporttoExcel" class="waves-effect btn-flat nopadding"><i
+            class="material-icons">search</i></a>
+
+
+      </div>
+    </div>
+    <table id="datatable" class="table striped display">
+      <col style="width: 3%;" />
+      <col style="width: 30%;" />
+      <col style="width: 10%;" />
+      <col style="width: 15%;" />
+      <col style="width: 17%;" />
+      <col style="width: 20%;" />
+      <col style="width: 10%;" />
+      <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Nombre</th>
+          <th>CUIT</th>
+          <th>Direccion</th>
+          <th>Telefono</th>
+          <th>Correo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(var i=0; i < data.clients.length; i++) { %>
+        <tr data-id="<%= data.clients[i].id %>">
+          <td><%= data.clients[i].internalCode %></td>
+          <td>
+            <a class="blue-text" href="/clients/info/<%= data.clients[i].id %>"><%= data.clients[i].name %></a>
+          </td>
+          <td><%= data.clients[i].cuit %></td>
+          <td><%= data.clients[i].address %></td>
+          <td><%= data.clients[i].phone %></td>
+          <td><%= data.clients[i].email %></td>
+          <td>
+            <a href="/clients/edit/<%= data.clients[i].id %>" class="btn-flat btn-small waves-effect waves-light"><i
+                class="material-icons">edit</i></a>
+
+            <a id="buttonDelete" class="waves-effect waves-light btn-flat btn-small nopadding"
+              data-id="<%=data.clients[i].id%>" data-value="<%= data.clients[i].name %>" onclick="deleteDialog(this)"><i
+                class="material-icons">delete</i></a>
+          </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <center>
+    <%- include ("../partials/alerts") %>
+  </center>
+</main>
+
+<%- include ("./modals/delete.ejs") %>
+
+<script type="text/javascript" src="/javascripts/datatable.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var elems = document.querySelectorAll(".modal");
+    var instances = M.Modal.init(elems, {})
+  });
+
+  function deleteDialog(button) {
+    var _elem = document.getElementById('modalDeleteClient');
+    var modal = M.Modal.getInstance(_elem);
+    const message = `[ID: ${button.dataset.id}] - ${button.dataset.value}`
+    document.getElementById('modalDeleteMessage').textContent = message;
+    document.getElementById('modalDeleteClientId').value = button.dataset.id;
+    modal.open();
+  };
+
+  $(document).ready(function () {
+    $('#datatable').dataTable({
+      "oLanguage": {
+        "sSearch": "",
+        "sSearchPlaceholder": "Escriba aqui su búsqueda ",
+        "sInfo": "_START_ -_END_ of _TOTAL_",
+        "sLengthMenu": '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+          '<option value="10">10</option>' +
+          '<option value="20">20</option>' +
+          '<option value="30">30</option>' +
+          '<option value="40">40</option>' +
+          '<option value="50">50</option>' +
+          '<option value="-1">Todos</option>' +
+          '</select></div>'
+      },
+      order: [[1, "asc"]],
+      bAutoWidth: false,
+      buttons: [
+        {
+          //text: '<span style="color:#4d4d4d; margin-right:15px">Print<span>',
+          extend: 'print',
+          className: '',
+          title: '',
+          // autoPrint: false,
+          customize: function (win) {
+            $(win.document.body)
+              .css('font-size', '10pt')
+              .prepend(
+                '<h4>Title Test</h4>',
+              );
+
+            $(win.document.body).find('table')
+              .addClass('compact')
+              .css('font-size', 'inherit',);
+          }
+        },
+        {
+          //text: '<span style="color:#4d4d4d; margin-right:15px">Excel<span>',
+          extend: 'excelHtml5',
+        },
+        {
+          //text: '<span style="color:#4d4d4d; margin-right:15px">Csv<span>',
+          extend: 'csvHtml5',
+        },
+        {
+          //text: '<span style="color:#4d4d4d; margin-right:15px">Copy<span>',
+          extend: 'copyHtml5',
+
+        },
+      ]
+    });
+  });
+</script>
+
+
+<%- include ("../partials/footer") %>

@@ -88,8 +88,8 @@
           <div class="row">
             <div class="input-field col s12">
               <textarea id="comments" name="comments" class="materialize-textarea"
-                <% if(locals.metadata && locals.metadata.length>0) { %> value="<%=metadata[0].comments%>" <% } %>>
-              </textarea>
+                <% if(locals.metadata && locals.metadata.length>0) { %> value="<%=metadata[0].comments%>"
+                <% } %>></textarea>
               <label for="comments">Observaciones</label>
             </div>
           </div>
@@ -115,14 +115,14 @@
   document.addEventListener("DOMContentLoaded", function () {
     var elems = document.querySelectorAll("select");
     var instances = M.FormSelect.init(elems, {});
+
+    M.CharacterCounter.init(document.getElementById("comments"));
+    M.CharacterCounter.init(document.getElementById("name"));
+
+    var taxCategorySelect = document.getElementById("taxCategorySelect").onchange = function (evt) {
+      document.getElementById("taxCategory").value = evt.target.value;
+    };
+
   });
 
-  $(document).ready(function () {
-    $('input#razon_social, textarea#observaciones').characterCounter();
-
-    $('#taxCategorySelect').on('change', function () {
-      var sel = $('#taxCategorySelect').val()
-      $('#taxCategory').val(sel);
-    });
-  });
 </script>

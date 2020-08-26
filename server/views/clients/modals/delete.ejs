@@ -1,12 +1,12 @@
-<div id="modalDeleteSupplier" class="modal">
-    <form action="/suppliers/delete" method="post">
+<div id="modalDeleteClient" class="modal">
+    <form action="/clients/delete" method="post">
         <div class="modal-content">
             <div class="row">
-                <h5>Eliminar Proveedor ?</h5>
+                <h5>Eliminar Cliente ?</h5>
             </div>
             <div id="modalDeleteMessage" class="center-left"></div>
             <p>Esta tarea no puede ser cancelada, esta seguro que desea continuar ?</p>
-            <input type="hidden" name="supplierId" id="modalDeleteSupplierId" value="" />
+            <input type="hidden" name="clientId" id="modalDeleteClientId" value="" />
         </div>
         <div class="modal-footer">
             <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>

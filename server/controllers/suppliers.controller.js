@@ -1,74 +1,80 @@
+const Op = require('sequelize').Op
+
 const Model = require('../models')
 const Supplier = Model.supplier;
 const TaxCategory = Model.taxCategory;
 const SupplierCategory = Model.supplierCategory;
 const Banks = Model.bank;
 
-const Op = require('Sequelize').Op
+const winston = require('../helpers/winston.helper');
 
-function listAll(req, res, next) {
+const CURRENT_MENU = 'suppliers'; module.exports.CURRENT_MENU = CURRENT_MENU;
+
+module.exports.listAll = function (req, res, next) {
     Supplier.findAll().then(function (suppliers) {
-        res.render("suppliers/index.ejs", {
-            data: { suppliers: suppliers },
+        res.render("suppliers/suppliers.ejs", {
+            data: { menu: CURRENT_MENU, suppliers: suppliers },
         });
     });
 };
 
-async function showNewForm(req, res, next) {
+module.exports.showNewForm = async function (req, res, next) {
     const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
     const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
     const banks = await Banks.findAll({ where: { enabled: true } });
-    res.render("suppliers/add.ejs", { data: { taxCategories, supplierCategories, banks } });
+    res.render("suppliers/add.ejs", { menu: CURRENT_MENU, data: { taxCategories, supplierCategories, banks } });
 };
 
-async function addNew(req, res, next) {
+module.exports.addNew = async function (req, res, next) {
 
-    const existingClient = await Supplier.findAll(
-        {
-            where: { cuit: req.body.cuit }
-        }
-    );
+    const existingSupplier = await Supplier.findAll({ where: { cuit: req.body.cuit } });
 
-    if (existingClient.length > 0) {
+    if (existingSupplier.length > 0) {
         req.flash("warning", "Ya existe un proveedor registrado con el ese número de C.U.I.T.");
         req.flash("metadata", req.body);
         res.redirect('/suppliers/new');
         return;
     }
 
-    const client = {
-        internalCode: req.body.internalCode,
+    const supplier = {
         name: req.body.name,
         cuit: req.body.cuit,
-        taxCategoryId: req.body.taxCategory,
+        taxCategoryId: req.body.taxCategoryId,
+        bankId: (req.body.bankId === '') ? null : req.body.bankId,
+        bankAccount: (req.body.bankAccount === '') ? null : req.body.bankAccount,
         address: req.body.address,
         city: req.body.city,
         zipCode: req.body.zipCode,
         phone: req.body.phone,
         email: req.body.email,
         comments: req.body.comments,
-        enabled: true,
-        user: req.user.id
+        categoryId: req.body.categoryId,
+        userId: req.user.id
     }
 
-    try {
-        Supplier.create(client).then(function (result) {
+    Supplier.create(supplier)
+        .then(function (result) {
             req.flash(
                 "success",
                 "El proveedor fue agregado exitosamente a la base de datos"
-            )
-            res.redirect("/suppliers"); return;
+            );
+            winston.info(`supplier #${result.id} was succesfully added by user #${req.user.id} `);
+
         })
-    } catch (err) {
-        req.flash(
-            "error",
-            "Ocurrio un error y no se pudo agregar al nuevo proveedor en la base de datos"
-        )
-        res.redirect("/suppliers"); return;
-    }
+        .catch(err => {
+            req.flash(
+                "error",
+                "Ocurrio un error y no se pudo agregar al nuevo proveedor en la base de datos"
+            );
+            winston.error(`an error ocurred when user #${req.user.id} tryed to add a new supplier - ${err}`);
+
+        })
+        .finally(() => {
+            res.redirect("/suppliers");
+        })
 };
 
-async function getInfo(req, res) {
+module.exports.getInfo = async function (req, res) {
     const supplierid = req.params.id;
     const supplier = await Supplier.findByPk(supplierid, {
         include: [
@@ -81,26 +87,51 @@ async function getInfo(req, res) {
         return;
     }
 
-    res.render("suppliers/info.ejs", { data: { supplier } });
+    res.render("suppliers/info.ejs", { menu: CURRENT_MENU, data: { supplier } });
 };
 
-async function newCategory(req, res) {
-    const supplierCategories = await SupplierCategory.create({ name: req.body.category, enabled: true });
-    res.redirect("/suppliers");
+module.exports.delete = async function (req, res, next) {
+    const supplierId = req.body.supplierId;
+    const supplier = await Supplier.findByPk(supplierId);
+    if (supplier) {
+        supplier.destroy()
+            .then(numAffectedRows => {
+                req.flash(
+                    "success",
+                    "El proveedor fue eliminado exitosamente a la base de datos"
+                )
+                winston.info(`supplier #${supplierId} was deleted by user #${req.user.id} `);
+            })
+            .catch(err => {
+                req.flash(
+                    "error",
+                    "Ocurrio un error y no se pudo eliminar el proveedor de la base de datos"
+                )
+                winston.error(`an error ocurred when user #${req.user.id} tryed to delete supplier #${supplierId} - ${err}`);
+            })
+            .finally(function () {
+                res.redirect("/suppliers");
+            })
+    }
 };
 
-async function allCategories(req, res) {
+module.exports.newCategory = async function (req, res) {
+    const supplierCategory = await SupplierCategory.create({ name: req.body.category, enabled: true });
+    res.send(supplierCategory);
+};
+
+module.exports.allCategories = async function (req, res) {
     supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
     res.send(supplierCategories);
 };
 
-async function findCategoryById(req, res) {
+module.exports.findCategoryById = async function (req, res) {
     const id = req.params.id
     supplierCategories = await SupplierCategory.findByPk(id, { where: { enabled: true } });
     res.send(supplierCategories);
 };
 
-async function findSupplierById(req, res) {
+module.exports.findSupplierById = async function (req, res) {
     const id = req.params.id
     supplier = await Supplier.findByPk(id,
         {
@@ -111,14 +142,3 @@ async function findSupplierById(req, res) {
         });
     res.send(supplier);
 };
-
-module.exports = {
-    listAll,
-    showNewForm,
-    addNew,
-    getInfo,
-    newCategory,
-    allCategories,
-    findCategoryById,
-    findSupplierById
-}

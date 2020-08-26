@@ -18,18 +18,15 @@
     crossorigin="anonymous" />
 
   <link type="text/css" rel="stylesheet" href="/stylesheets/styles.css" media="screen,projection" />
-
   <link type="text/css" rel="stylesheet" href="/stylesheets/table.css" media="screen,projection" />
-
   <link type="text/css" rel="stylesheet" href="/stylesheets/materialert.css" media="screen,projection" />
 
   <link rel="icon" href="/public/images/favicon.ico" />
 
-  <!--link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
-  
+  <!--link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/dataTables.foundation.min.css" />-->
   <link rel="stylesheet" type="text/css"
-    href="https://cdn.datatables.net/buttons/1.6.2/css/buttons.dataTables.min.css" />
-  -->
+    href="https://cdn.datatables.net/buttons/1.6.3/css/buttons.foundation.min.css" />
+
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!--Let browser know website is optimized for mobile-->
@@ -40,24 +37,27 @@
   <header>
 
     <script type="text/javascript" src="/javascripts/htmlDecode.js"></script>
+    <script type="text/javascript" src="/javascripts/header.js"></script>
     <script type="text/javascript" src="/javascripts/notifications.js"></script>
 
     <%- include ("navbar") %>
     <%- include ("sidenav") %>
 
     <!--Import jQuery before materialize.js-->
-    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+      integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.js"
       integrity="sha512-m2PhLxj2N91eYrIGU2cmIu2d0SkaE4A14bCjVb9zykvp6WtsdriFCiXQ/8Hdj0kssUB/Nz0dMBcoLsJkSCto0Q=="
       crossorigin="anonymous"></script>
 
-    <!--Import materialize.js from my website directory materialization-->
-    <!--script type="text/javascript" src="/javascripts/materialize.js"></script> -->
-
-    <script type="text/javascript" src="/javascripts/header.js"></script>
-
-    <script type="text/javascript" charset="utf8"
-      src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <!--Datatables-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.3/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.3/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.print.min.js"></script>
 
   </header>

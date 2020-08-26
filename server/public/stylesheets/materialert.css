@@ -26,6 +26,7 @@ html {
 }
 .materialert .material-icons{
     margin-right: 10px;
+    margin-top: 5px;
 }
 .materialert .close-alert{
     -webkit-appearance: none;

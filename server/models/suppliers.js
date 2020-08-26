@@ -35,11 +35,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
     },
     bankId: {
-      allowNull: true,
-      type: DataTypes.INTEGER
+      defaultValue: null,
+      type: DataTypes.INTEGER,
     },
     bankAccount: {
-      allowNull: true,
+      defaultValue: null,
       type: DataTypes.STRING
     },
     address: {
@@ -63,11 +63,7 @@ module.exports = (sequelize, DataTypes) => {
     categoryId: {
       type: DataTypes.STRING
     },
-    enabled: {
-      allowNull: false,
-      type: DataTypes.BOOLEAN
-    },
-    user: {
+    userId: {
       allowNull: false,
       type: DataTypes.INTEGER
     }

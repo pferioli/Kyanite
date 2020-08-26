@@ -25,4 +25,8 @@ router.post('/new', connectEnsureLogin.ensureLoggedIn(), function (req, res, nex
   clientsController.addNew(req, res);
 })
 
+router.post('/delete', connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  clientsController.delete(req, res);
+})
+
 module.exports = router;
