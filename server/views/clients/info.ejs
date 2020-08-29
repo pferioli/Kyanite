@@ -6,27 +6,38 @@
       <div class="card-content">
         <span class="card-title">Informacion Detallada</span>
         <div class="row" style="margin-top: 20px;">
-          <div class="input-field col s12">
+          <div class="input-field col s10">
             <i class="material-icons prefix">home</i>
-            <input id="razon_social" value="<%=data.client.name%>" type="text" class="validate" />
+            <input id="razon_social" value="<%=data.client.name%>" type="text" />
             <label for="razon_social">Nombre del Barrio</label>
           </div>
+          <div class="input-field col s2">
+            <input id="codigo" value="<%=data.client.internalCode%>" type="text" />
+            <label for="codigo">Codigo Interno</label>
+          </div>
         </div>
+
         <div class="row">
           <div class="input-field col s3">
             <i class="material-icons prefix">info_outline</i>
-            <input id="codigo" value="<%=data.client.internalCode%>" type="text" class="validate" />
-            <label for="codigo">Codigo Interno</label>
-          </div>
-          <div class="input-field col s3">
-            <input id="cuit" value="<%=data.client.cuit%>" type="text" class="validate" />
+            <input id="cuit" value="<%=data.client.cuit%>" type="text" />
             <label for="cuit">C.U.I.T.</label>
           </div>
-          <div class="input-field col s6">
-            <input id="taxCategory" value="<%=data.client.taxCategory.name%>" type="text" class="validate" />
+          <div class="input-field col s5">
+            <input id="taxCategory" value="<%=data.client.taxCategory.name%>" type="text" />
             <label for="taxCategory">Categoria Impositiva</label>
           </div>
+          <div class="input-field col s2">
+            <input id="functionalUnitsCount" name="functionalUnitsCount" type="text"
+              value="<%=data.client.functionalUnitsCount%>" />
+            <label for="functionalUnitsCount">Cantidad de UFs</label>
+          </div>
+          <div class="input-field col s2">
+            <input id="lotSize" name="lotSize" type="text" value="<%=data.client.lotSize%>" />
+            <label for="lotSize">Tamaño del Lote [m<span><sup>2</sup></span>]</label>
+          </div>
         </div>
+
         <div class="row">
           <div class="input-field col s9">
             <i class="material-icons prefix">mail</i>
@@ -39,6 +50,7 @@
             <label for="telefono">Telefono</label>
           </div>
         </div>
+
         <div class="row">
           <div class="input-field col s6">
             <i class="material-icons prefix">location_on</i>
@@ -56,6 +68,7 @@
             <label for="codigo_postal">Codigo Postal</label>
           </div>
         </div>
+
         <div class="row">
           <div class="input-field col s12">
             <textarea id="comments" class="materialize-textarea"><%=data.client.comments%></textarea>
@@ -63,9 +76,12 @@
           </div>
         </div>
       </div>
+
       <div class="card-action right-align">
         <a href="/bankaccounts/<%=data.client.id%>" class="waves-effect waves-light btn"><i
             class="material-icons right">account_balance</i>Cuentas</a>
+        <a href="/clients/edit/<%=data.client.id%>" class="waves-effect waves-light btn" style="margin-left: 20px;"><i
+            class="material-icons right">edit</i>Modificar</a>
         <a href="/clients" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
             class="material-icons right">cancel</i>Volver</a>
       </div>

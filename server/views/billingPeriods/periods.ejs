@@ -70,19 +70,19 @@
           <td><%= data.periods[i].user.name %></td>
           <td>
             <% if(data.periods[i].statusId === 0) { %>
-            <a id="buttonOpen" class="waves-effect btn-flat nopadding" data-id="<%=data.periods[i].id%>"
+            <a id="buttonOpen" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>"
               data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>" onclick="openDialog(this)"><i
                 class="material-icons-outlined">lock_open</i></a>
             <% } %>
 
             <% if(data.periods[i].statusId === 1) { %>
-            <a id="buttonClose" class="waves-effect btn-flat nopadding" data-id="<%=data.periods[i].id%>"
+            <a id="buttonClose" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>"
               data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>"
               onclick="closeDialog(this)"><i class="material-icons-outlined">lock</i></a>
             <% } %>
 
             <% if((data.periods[i].statusId === 0)||(data.periods[i].statusId === 1)) { %>
-            <a id="buttonDelete" class="modal-trigger waves-effect btn-flat nopadding"
+            <a id="buttonDelete" class="modal-trigger btn-flat btn-small waves-effect waves-light"
               data-target="modalDeletePeriod"><i class="material-icons">delete</i></a>
             <% } %>
           </td>

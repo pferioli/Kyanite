@@ -8,17 +8,12 @@ router.get("/populate", connectEnsureLogin.ensureLoggedIn(), function (req, res,
   clientsController.populateClients(req, res);
 });
 
-
 router.get("/", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
   clientsController.listAll(req, res);
 });
 
 router.get("/new", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
   clientsController.showNewForm(req, res);
-});
-
-router.get("/info/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
-  clientsController.getInfo(req, res);
 });
 
 router.post('/new', connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
@@ -28,5 +23,19 @@ router.post('/new', connectEnsureLogin.ensureLoggedIn(), function (req, res, nex
 router.post('/delete', connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
   clientsController.delete(req, res);
 })
+
+router.get("/info/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  clientsController.info(req, res);
+});
+
+router.post("/edit/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  clientsController.edit(req, res);
+});
+
+router.get("/edit/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  clientsController.showEditForm(req, res);
+});
+
+
 
 module.exports = router;

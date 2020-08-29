@@ -4,7 +4,6 @@
 
         "use strict";
 
-
         $('.search-toggle').click(function () {
             if ($('.hiddensearch').css('display') == 'none')
                 $('.hiddensearch').slideDown();
@@ -19,6 +18,7 @@
                 "<'table-footer'Blip'>",
             renderer: 'material'
         });
+
         /* Default class modification */
         $.extend(DataTable.ext.classes, {
             sWrapper: "dataTables_wrapper",
@@ -26,7 +26,7 @@
             sLengthSelect: "form-control input-sm"
         });
 
-        /* Bootstrap paging button renderer */
+        //     /* Bootstrap paging button renderer */
         DataTable.ext.renderer.pageButton.material = function (settings, host, idx, buttons, page, pages) {
             var api = new DataTable.Api(settings);
             var classes = settings.oClasses;

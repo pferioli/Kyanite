@@ -37,7 +37,11 @@ router.get("/info/raw/:id", connectEnsureLogin.ensureLoggedIn(), function (req, 
 });
 
 router.get("/info/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
-  suppliersController.getInfo(req, res);
+  suppliersController.info(req, res);
+});
+
+router.get("/edit/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  suppliersController.edit(req, res);
 });
 
 module.exports = router;

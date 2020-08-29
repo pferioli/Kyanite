@@ -1,36 +1,41 @@
 <%- include ("../partials/header") %>
 
 <main class="site-content">
-  <div class="card material-table">
-    <div class="table-header">
-      <span class="table-title">Listado de Clientes</span>
+
+  <!-- <div class="material-table card">
+    <div class=" table-header">
+      <span class="table-title">Listado de Proveedores</span>
       <div class="actions">
         <a href="/clients/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
             class="material-icons">add_box</i></a>
         <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
             class="material-icons">search</i></a>
-        <a href="#" id="ExportReporttoExcel" class="waves-effect btn-flat nopadding"><i
-            class="material-icons">search</i></a>
-
-
       </div>
     </div>
-    <table id="datatable" class="table striped display">
-      <col style="width: 3%;" />
-      <col style="width: 30%;" />
-      <col style="width: 10%;" />
-      <col style="width: 15%;" />
-      <col style="width: 17%;" />
-      <col style="width: 20%;" />
-      <col style="width: 10%;" />
+  </div> -->
+
+  <div class="table-container">
+
+    <table id="datatable" class="display striped nowrap">
+      <!-- <col style=" width: 5%;" />
+          <col style="width: 40%;" />
+          <col style="width: 10%;" />
+          <col style="width: 20%;" />
+          <col style="width: 15%;" />
+          <col style="width: 10%;" /> -->
       <thead>
         <tr>
           <th>Codigo</th>
           <th>Nombre</th>
           <th>CUIT</th>
-          <th>Direccion</th>
+          <th>Categoria Impositiva</th>
           <th>Telefono</th>
-          <th>Correo</th>
+          <th>Direccion</th>
+          <th>Ciudad</th>
+          <th>Codigo Postal</th>
+          <th>Correo Electronico</th>
+          <th>Cant UF</th>
+          <th>Lote</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -42,21 +47,30 @@
             <a class="blue-text" href="/clients/info/<%= data.clients[i].id %>"><%= data.clients[i].name %></a>
           </td>
           <td><%= data.clients[i].cuit %></td>
-          <td><%= data.clients[i].address %></td>
-          <td><%= data.clients[i].phone %></td>
-          <td><%= data.clients[i].email %></td>
-          <td>
-            <a href="/clients/edit/<%= data.clients[i].id %>" class="btn-flat btn-small waves-effect waves-light"><i
-                class="material-icons">edit</i></a>
+          <td><%= data.clients[i].taxCategory.name %></td>
 
-            <a id="buttonDelete" class="waves-effect waves-light btn-flat btn-small nopadding"
-              data-id="<%=data.clients[i].id%>" data-value="<%= data.clients[i].name %>" onclick="deleteDialog(this)"><i
+          <td><%= data.clients[i].phone %></td>
+          <td><%= data.clients[i].address %></td>
+          <td><%= data.clients[i].city %></td>
+          <td><%= data.clients[i].zipCode %></td>
+          <td><%= data.clients[i].email %></td>
+
+          <td><%= data.clients[i].functionalUnitsCount %></td>
+          <td><%= data.clients[i].lotSize %></td>
+
+          <td>
+            <a href="/clients/edit/<%= data.clients[i].id %>" class="btn-flat btn-small waves-effect waves-light">
+              <i class="material-icons">edit</i></a>
+
+            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.clients[i].id%>"
+              data-value="<%= data.clients[i].name %>" onclick="deleteDialog(this)"><i
                 class="material-icons">delete</i></a>
           </td>
         </tr>
         <% } %>
       </tbody>
     </table>
+
   </div>
 
   <center>
@@ -66,7 +80,7 @@
 
 <%- include ("./modals/delete.ejs") %>
 
-<script type="text/javascript" src="/javascripts/datatable.js"></script>
+<!--script type="text/javascript" src="/javascripts/datatable.js"></script>-->
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -84,23 +98,24 @@
   };
 
   $(document).ready(function () {
-    $('#datatable').dataTable({
+
+    var table = $('#datatable').dataTable({
       "oLanguage": {
         "sSearch": "",
         "sSearchPlaceholder": "Escriba aqui su búsqueda ",
         "sInfo": "_START_ -_END_ of _TOTAL_",
         "sLengthMenu": '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
-          '<option value="10">10</option>' +
-          '<option value="20">20</option>' +
           '<option value="30">30</option>' +
-          '<option value="40">40</option>' +
           '<option value="50">50</option>' +
+          '<option value="100">100</option>' +
           '<option value="-1">Todos</option>' +
           '</select></div>'
       },
-      order: [[1, "asc"]],
-      bAutoWidth: false,
-      buttons: [
+      "pageLength": 50,
+      "order": [[0, "asc"]],
+      "autowidth": true,
+      "scrollX": true,
+      "buttons": [
         {
           //text: '<span style="color:#4d4d4d; margin-right:15px">Print<span>',
           extend: 'print',
@@ -122,6 +137,7 @@
         {
           //text: '<span style="color:#4d4d4d; margin-right:15px">Excel<span>',
           extend: 'excelHtml5',
+          //exportOptions: { columns: ':visible(:not(.not-export-col))' }
         },
         {
           //text: '<span style="color:#4d4d4d; margin-right:15px">Csv<span>',
@@ -135,7 +151,8 @@
       ]
     });
   });
-</script>
+  table.columns.adjust().draw();
 
+</script>
 
 <%- include ("../partials/footer") %>

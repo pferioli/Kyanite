@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
     },
     lotSize: {
-      type: DataTypes.STRING
+      type: DataTypes.INTEGER
     },
     comments: {
       type: DataTypes.STRING
