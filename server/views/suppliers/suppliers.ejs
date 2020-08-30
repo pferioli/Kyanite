@@ -1,10 +1,25 @@
 <%- include ("../partials/header") %>
 
 <main class="site-content">
-  <div class="card material-table">
-    <div class=" table-header">
+  <div class="table-container">
+    <div class="table-header">
       <span class="table-title">Listado de Proveedores</span>
+      <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+        <div class="spinner-layer spinner-green-only">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div>
+          <div class="gap-patch">
+            <div class="circle"></div>
+          </div>
+          <div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+      </div>
       <div class="actions">
+        <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i
+            class="material-icons">refresh</i></button>
         <a href="/suppliers/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
             class="material-icons">add_box</i></a>
         <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
@@ -13,45 +28,64 @@
           data-target="modalNewSupplierCategory"><i class="material-icons">playlist_add</i></a>
       </div>
     </div>
-    <table id="datatable" class="table striped">
-      <col style="width: 30%;" />
-      <col style="width: 13%;" />
-      <col style="width: 10%;" />
-      <col style="width: 15%;" />
-      <col style="width: 22%;" />
-      <col style="width: 10%;" />
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>CUIT</th>
-          <th>Telefono</th>
-          <th>Email</th>
-          <th>CBU</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% for(var i=0; i < data.suppliers.length; i++) { %>
-        <tr data-id="<%= data.suppliers[i].id %>">
-          <td>
-            <a class="blue-text" href="/suppliers/info/<%= data.suppliers[i].id %>"><%= data.suppliers[i].name %></a>
-          </td>
-          <td><%= data.suppliers[i].cuit %></td>
-          <td><%= data.suppliers[i].phone %></td>
-          <td><%= data.suppliers[i].email %></td>
-          <td><%= data.suppliers[i].bankAccount %></td>
-          <td>
-            <a href="/suppliers/edit/<%= data.suppliers[i].id %>" class="btn-flat btn-small waves-effect waves-light"><i
-                class="material-icons">edit</i></a>
+    <!-- <div class="progress" id="progress" style="margin-top: 30px;">
+      <div class="indeterminate"></div>
+    </div> -->
+    <div id="hide-dt" style="display:none">
+      <table id="datatable" class="table display">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Rubro</th>
+            <th>CUIT</th>
+            <th>Categoria Impositiva</th>
+            <th>Telefono</th>
+            <th>Direccion</th>
+            <th>Ciudad</th>
+            <th>Codigo Postal</th>
+            <th>Correo Electronico</th>
+            <th>CBU</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(var i=0; i < data.suppliers.length; i++) { %>
+          <tr data-id="<%= data.suppliers[i].id %>">
+            <td>
+              <a class="blue-text" href="/suppliers/info/<%= data.suppliers[i].id %>"><%= data.suppliers[i].name %></a>
+            </td>
 
-            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.suppliers[i].id%>"
-              data-value="<%= data.suppliers[i].name %>" onclick="deleteDialog(this)"><i
-                class="material-icons">delete</i></a>
-          </td>
-        </tr>
-        <% } %>
-      </tbody>
-    </table>
+            <% if(data.suppliers[i].supplierCategory) { %>
+            <td><%= data.suppliers[i].supplierCategory.name %></td>
+            <% } else { %>
+            <td></td>
+            <% } %>
+
+            <td><%= data.suppliers[i].cuit %></td>
+            <td><%= data.suppliers[i].taxCategory.name %></td>
+            <td><%= data.suppliers[i].phone %></td>
+            <td><%= data.suppliers[i].address %></td>
+            <td><%= data.suppliers[i].city %></td>
+            <td><%= data.suppliers[i].zipCode %></td>
+            <td><%= data.suppliers[i].email %></td>
+            <td><%= data.suppliers[i].bankAccount %></td>
+
+            <td>
+              <a href="/suppliers/payments/<%= data.suppliers[i].id %>"
+                class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">payments</i></a>
+
+              <a href="/suppliers/edit/<%= data.suppliers[i].id %>"
+                class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+
+              <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light"
+                data-id="<%=data.suppliers[i].id%>" data-value="<%= data.suppliers[i].name %>"
+                onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
   <center>
     <%- include ("../partials/alerts") %>
@@ -60,8 +94,6 @@
 
 <%- include ("./modals/newCategory.ejs") %>
 <%- include ("./modals/delete.ejs") %>
-
-<script type="text/javascript" src="/javascripts/datatable.js"></script>
 
 <script>
 
@@ -80,25 +112,53 @@
   };
 
   $(document).ready(function () {
-    $('#datatable').dataTable({
-      "oLanguage": {
-        "sSearch": "",
-        "sSearchPlaceholder": "Escriba aqui su búsqueda ",
-        "sInfo": "_START_ -_END_ of _TOTAL_",
-        "sLengthMenu": '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
-          '<option value="10">10</option>' +
-          '<option value="20">20</option>' +
-          '<option value="30">30</option>' +
-          '<option value="40">40</option>' +
-          '<option value="50">50</option>' +
+
+    $('.search-toggle').click(function () {
+      if ($('.hiddensearch').css('display') == 'none')
+        $('.hiddensearch').slideDown();
+      else
+        $('.hiddensearch').slideUp();
+    });
+
+    var table = $('#datatable').dataTable({
+      dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+      oLanguage: {
+        sSearch: '',
+        sSearchPlaceholder: 'Escriba aqui su búsqueda',
+        sInfo: '_START_ -_END_ de _TOTAL_',
+        sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+          '<option value="200">200</option>' +
+          '<option value="500">500</option>' +
+          '<option value="1000">1000</option>' +
           '<option value="-1">Todos</option>' +
           '</select></div>'
       },
-      order: [[0, "asc"]],
-      bAutoWidth: false,
+      columnDefs: [
+        {
+          targets: -1,
+          searchable: false,
+          sortable: false
+        },
+        {
+          className: "center-align",
+          targets: 0
+        }
+      ],
+      colReorder: true,
+      fixedColumns: true,
+      pageLength: 200,
+      order: [[0, 'asc']],
+      autowidth: true,
+      scrollY: '500px',
+      scrollX: true,
+      scrollCollapse: true,
+      paging: true,
       buttons: [
         {
-          //text: '<span style="color:#4d4d4d; margin-right:15px">Print<span>',
+          extend: 'colvis',
+          text: 'Columnas',
+        },
+        {
           extend: 'print',
           className: '',
           title: '',
@@ -109,29 +169,45 @@
               .prepend(
                 '<h4>Title Test</h4>',
               );
-
             $(win.document.body).find('table')
               .addClass('compact')
               .css('font-size', 'inherit',);
           }
         },
         {
-          //text: '<span style="color:#4d4d4d; margin-right:15px">Excel<span>',
           extend: 'excelHtml5',
-          //exportOptions: { columns: ':visible(:not(.not-export-col))' }
+          exportOptions: {
+            columns: ':visible(th:not(:last-child))',
+            search: 'applied',
+            order: 'applied'
+          },
+          customize: function (xlsx) {
+            var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+            source.setAttribute('name', 'Proveedores');
+          }
         },
+        { extend: 'csvHtml5' },
+        { extend: 'copyHtml5' },
         {
-          //text: '<span style="color:#4d4d4d; margin-right:15px">Csv<span>',
-          extend: 'csvHtml5',
-        },
-        {
-          //text: '<span style="color:#4d4d4d; margin-right:15px">Copy<span>',
-          extend: 'copyHtml5',
-
-        },
-      ]
+          text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+          extend: 'pdfHtml5',
+          filename: 'proveedores',
+          orientation: 'landscape',     //portrait
+          pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+          exportOptions: {
+            columns: ':visible',
+            search: 'applied',
+            order: 'applied'
+          }
+        }
+      ],
+      fnInitComplete: function () {
+        $('#hide-dt').show();
+        $('#progress').hide();
+      },
     });
   });
+
 </script>
 
 <%- include ("../partials/footer") %>

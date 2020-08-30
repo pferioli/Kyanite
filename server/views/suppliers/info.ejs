@@ -58,13 +58,14 @@
           </div>
           <div class="row">
             <div class="input-field col s12">
-              <textarea id="observaciones" class="materialize-textarea" value="<%=data.supplier.comments%>"
-                disabled></textarea>
+              <textarea id="observaciones" class="materialize-textarea" disabled><%=data.supplier.comments%></textarea>
               <label for="observaciones">Observaciones</label>
             </div>
           </div>
         </div>
         <div class="card-action right-align">
+          <a href="/suppliers/edit/<%=data.supplier.id%>" class="waves-effect waves-light btn"
+            style="margin-left: 20px;"><i class="material-icons right">edit</i>Modificar</a>
           <a href="/suppliers" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
               class="material-icons right">cancel</i>Volver</a>
         </div>

@@ -132,12 +132,3 @@ main {
 }
 
 .modal { max-height: 100%; overflow: visible}
-
-.table-container {
-  border-radius: 10px;
-  background-color: white;
-  border:1px solid #bdbdbd;
-  margin: 20px;
-  padding: 20px;
-  width: 98%;
-}

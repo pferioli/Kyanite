@@ -1,10 +1,23 @@
 <%- include ("../partials/header") %>
 
 <main class="site-content">
-  <div class="card material-table">
+  <div class="table-container">
     <div class=" table-header">
       <span class="table-title">Períodos de Liquidación - <span style="font-weight: bold;"><%=data.client.name%></span>
         [<%=data.client.internalCode%>]</span>
+      <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+        <div class="spinner-layer spinner-green-only">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div>
+          <div class="gap-patch">
+            <div class="circle"></div>
+          </div>
+          <div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+      </div>
       <div class="actions">
         <a id="button-add" class="modal-trigger waves-effect btn-flat nopadding" data-target="modalNewPeriod"><i
             class="material-icons">add_box</i></a>
@@ -12,97 +25,81 @@
             class="material-icons">search</i></a>
       </div>
     </div>
-    <table id="datatable" class="table striped responsive-table">
-      <col style="width: 5%;" />
-      <!--ID-->
-      <col style="width: 5%;" />
-      <!--Estado-->
-      <col style="width: 10%;" />
-      <!--Nombre-->
-      <col style="width: 10%;" />
-      <!--Desde-->
-      <col style="width: 10%;" />
-      <!--Hasta-->
-      <col style="width: 15%;" />
-      <!--Apertura-->
-      <col style="width: 15%;" />
-      <!--Finalizacion-->
-      <col style="width: 20%;" />
-      <!--Usuario-->
-      <col style="width: 10%;" />
-      <!--Acciones-->
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Estado</th>
-          <th>Nombre</th>
-          <th>Desde</th>
-          <th>Hasta</th>
-          <th>Abierto</th>
-          <th>Finalizado</th>
-          <th>Usuario</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% for(var i=0; i < data.periods.length; i++) { %>
-        <tr data-id="<%= data.periods[i].id %>">
-          <td><%= data.periods[i].id %></td>
-          <td>
-            <% if(data.periods[i].statusId === 0) { %>
-            <i class="material-icons">calendar_today</i>
-            <% } %>
-            <% if(data.periods[i].statusId === 1) { %>
-            <i class="material-icons green-text">lock_open</i>
-            <% } %>
-            <% if(data.periods[i].statusId === 2) { %>
-            <i class="material-icons deep-orange-text lighten-1">lock</i>
-            <% } %>
-            <% if(data.periods[i].statusId === 3) { %>
-            <i class="material-icons">cancel</i>
-            <% } %>
-          </td>
-          <td><%= data.periods[i].name %></td>
-          <td><%= data.periods[i].startDate %></td>
-          <td><%= data.periods[i].endDate %></td>
-          <td><%= data.periods[i].openedAt %></td>
-          <td><%= data.periods[i].closedAt %></td>
-          <td><%= data.periods[i].user.name %></td>
-          <td>
-            <% if(data.periods[i].statusId === 0) { %>
-            <a id="buttonOpen" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>"
-              data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>" onclick="openDialog(this)"><i
-                class="material-icons-outlined">lock_open</i></a>
-            <% } %>
+    <!-- <div class="progress" id="progress" style="margin-top: 30px;">
+      <div class="indeterminate"></div>
+    </div> -->
+    <div id="hide-dt" style="display:none">
+      <table id="datatable" class="table display">
+        <thead>
+          <tr>
+            <th>Estado</th>
+            <th>Nombre</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+            <th>Abierto</th>
+            <th>Finalizado</th>
+            <th>Usuario</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(var i=0; i < data.periods.length; i++) { %>
+          <tr data-id="<%= data.periods[i].id %>">
+            <!-- <td><#%= data.periods[i].id %></td> -->
+            <td>
+              <% if(data.periods[i].statusId === 0) { %>
+              <i class="material-icons">calendar_today</i>
+              <% } %>
+              <% if(data.periods[i].statusId === 1) { %>
+              <i class="material-icons green-text">lock_open</i>
+              <% } %>
+              <% if(data.periods[i].statusId === 2) { %>
+              <i class="material-icons deep-orange-text lighten-1">lock</i>
+              <% } %>
+              <% if(data.periods[i].statusId === 3) { %>
+              <i class="material-icons">cancel</i>
+              <% } %>
+            </td>
+            <td><%= data.periods[i].name %></td>
+            <td><%= data.periods[i].startDate %></td>
+            <td><%= data.periods[i].endDate %></td>
+            <td><%= data.periods[i].openedAt %></td>
+            <td><%= data.periods[i].closedAt %></td>
+            <td><%= data.periods[i].user.name %></td>
+            <td>
+              <% if(data.periods[i].statusId === 0) { %>
+              <a id="buttonOpen" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>"
+                data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>"
+                onclick="openDialog(this)"><i class="material-icons-outlined">lock_open</i></a>
+              <% } %>
 
-            <% if(data.periods[i].statusId === 1) { %>
-            <a id="buttonClose" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>"
-              data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>"
-              onclick="closeDialog(this)"><i class="material-icons-outlined">lock</i></a>
-            <% } %>
+              <% if(data.periods[i].statusId === 1) { %>
+              <a id="buttonClose" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>"
+                data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>"
+                onclick="closeDialog(this)"><i class="material-icons-outlined">lock</i></a>
+              <% } %>
 
-            <% if((data.periods[i].statusId === 0)||(data.periods[i].statusId === 1)) { %>
-            <a id="buttonDelete" class="modal-trigger btn-flat btn-small waves-effect waves-light"
-              data-target="modalDeletePeriod"><i class="material-icons">delete</i></a>
-            <% } %>
-          </td>
-        </tr>
-        <% } %>
-      </tbody>
-    </table>
-
-    <center>
-      <%- include ("../partials/alerts") %>
-    </center>
-
+              <% if((data.periods[i].statusId === 0)||(data.periods[i].statusId === 1)) { %>
+              <a id="buttonDelete" class="modal-trigger btn-flat btn-small waves-effect waves-light"
+                data-target="modalDeletePeriod"><i class="material-icons">delete</i></a>
+              <% } %>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
+  <center>
+    <%- include ("../partials/alerts") %>
+  </center>
 </main>
 
 <%- include ("./modals/add.ejs") %>
 <%- include ("./modals/open.ejs") %>
 <%- include ("./modals/close.ejs") %>
 
-<script type="text/javascript" src="/javascripts/datatable.js"></script>
+<%- include("../partials/footer") %>
 
 <script>
 
@@ -147,30 +144,54 @@
     modal.open();
   };
 
-  $('#ExportReporttoExcel').on('click', function () {
-    $('.buttons-excel').click()
-  });
+  // $('#ExportReporttoExcel').on('click', function () {
+  //   $('.buttons-excel').click()
+  // });
 
   $(document).ready(function () {
-    $('#datatable').dataTable({
-      "oLanguage": {
-        "sSearch": "",
-        "sSearchPlaceholder": "Escriba aqui su búsqueda ",
-        "sInfo": "_START_ -_END_ of _TOTAL_",
-        "sLengthMenu": '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+
+    $('.search-toggle').click(function () {
+      if ($('.hiddensearch').css('display') == 'none')
+        $('.hiddensearch').slideDown();
+      else
+        $('.hiddensearch').slideUp();
+    });
+
+    var table = $('#datatable').dataTable({
+      dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+      oLanguage: {
+        sSearch: '',
+        sSearchPlaceholder: 'Escriba aqui su búsqueda',
+        sInfo: '_START_ -_END_ de _TOTAL_',
+        sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
           '<option value="10">10</option>' +
-          '<option value="20">20</option>' +
-          '<option value="30">30</option>' +
-          '<option value="40">40</option>' +
           '<option value="50">50</option>' +
+          '<option value="100">100</option>' +
           '<option value="-1">Todos</option>' +
           '</select></div>'
       },
-      order: [[0, "desc"]],
-      bAutoWidth: false,
+      columnDefs: [
+        {
+          targets: -1,
+          searchable: false,
+          sortable: false
+        },
+        {
+          className: "center-align",
+          targets: 0
+        }
+      ],
+      colReorder: true,
+      pageLength: 10,
+      order: [[2, 'desc']],
+      autowidth: true,
+      paging: true,
       buttons: [
         {
-          //text: '<span style="color:#4d4d4d; margin-right:15px">Print<span>',
+          extend: 'colvis',
+          text: 'Columnas',
+        },
+        {
           extend: 'print',
           className: '',
           title: '',
@@ -181,29 +202,43 @@
               .prepend(
                 '<h4>Title Test</h4>',
               );
-
             $(win.document.body).find('table')
               .addClass('compact')
               .css('font-size', 'inherit',);
           }
         },
         {
-          //text: '<span style="color:#4d4d4d; margin-right:15px">Excel<span>',
           extend: 'excelHtml5',
+          exportOptions: {
+            columns: ':visible(th:not(:last-child))',
+            search: 'applied',
+            order: 'applied'
+          },
+          customize: function (xlsx) {
+            var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+            source.setAttribute('name', 'periodosLiquidacion');
+          }
         },
+        { extend: 'csvHtml5' },
+        { extend: 'copyHtml5' },
         {
-          //text: '<span style="color:#4d4d4d; margin-right:15px">Csv<span>',
-          extend: 'csvHtml5',
-        },
-        {
-          //text: '<span style="color:#4d4d4d; margin-right:15px">Copy<span>',
-          extend: 'copyHtml5',
-
-        },
-      ]
+          text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+          extend: 'pdfHtml5',
+          filename: 'periodosLiquidacion',
+          orientation: 'landscape',     //portrait
+          pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+          exportOptions: {
+            columns: ':visible',
+            search: 'applied',
+            order: 'applied'
+          }
+        }
+      ],
+      fnInitComplete: function () {
+        $('#hide-dt').show();
+        $('#progress').hide();
+      },
     });
   });
 
 </script>
-
-<% - include("../partials/footer") %>

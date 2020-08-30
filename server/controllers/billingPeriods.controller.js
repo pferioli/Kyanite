@@ -28,12 +28,6 @@ module.exports.listAll = async function (req, res, next) {
     });
 };
 
-// async function requestData(req, res, next) {
-//     const clientId = req.params.id;
-//     const client = await Client.findByPk(clientId);
-//     res.render('billingPeriods/add', { data: { client } });
-// };
-
 module.exports.create = async function (req, res, next) {
     const clientId = req.body.clientId;
     const userId = req.user.id;

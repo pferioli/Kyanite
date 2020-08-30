@@ -40,8 +40,12 @@ router.get("/info/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res,
   suppliersController.info(req, res);
 });
 
-router.get("/edit/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+router.post("/edit/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
   suppliersController.edit(req, res);
+});
+
+router.get("/edit/:id", connectEnsureLogin.ensureLoggedIn(), function (req, res, next) {
+  suppliersController.showEditForm(req, res);
 });
 
 module.exports = router;

@@ -11,7 +11,9 @@ const winston = require('../helpers/winston.helper');
 const CURRENT_MENU = 'suppliers'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = function (req, res, next) {
-    Supplier.findAll().then(function (suppliers) {
+    Supplier.findAll({
+        include: [{ model: TaxCategory }, { model: SupplierCategory }]
+    }).then(function (suppliers) {
         res.render("suppliers/suppliers.ejs", {
             menu: CURRENT_MENU, data: { suppliers: suppliers },
         });
@@ -27,51 +29,62 @@ module.exports.showNewForm = async function (req, res, next) {
 
 module.exports.addNew = async function (req, res, next) {
 
-    const existingSupplier = await Supplier.findAll({ where: { cuit: req.body.cuit } });
+    try {
+        const existingSupplier = await Supplier.findAll({ where: { cuit: req.body.cuit } });
 
-    if (existingSupplier.length > 0) {
-        req.flash("warning", "Ya existe un proveedor registrado con el ese número de C.U.I.T.");
-        req.flash("metadata", req.body);
-        res.redirect('/suppliers/new');
-        return;
+        if (existingSupplier.length > 0) {
+            req.flash("warning", "Ya existe un proveedor registrado con el ese número de C.U.I.T.");
+            req.flash("metadata", req.body);
+            res.redirect('/suppliers/new');
+            return;
+        }
+        const supplier = {
+            name: req.body.name,
+            cuit: req.body.cuit,
+            taxCategoryId: req.body.taxCategoryId,
+            bankId: (req.body.bankId === '') ? null : req.body.bankId,
+            bankAccount: (req.body.bankAccount === '') ? null : req.body.bankAccount,
+            address: req.body.address,
+            city: req.body.city,
+            zipCode: req.body.zipCode,
+            phone: req.body.phone,
+            email: req.body.email,
+            comments: req.body.comments,
+            categoryId: req.body.categoryId,
+            userId: req.user.id
+        }
+
+        Supplier.create(supplier)
+            .then(function (result) {
+                req.flash(
+                    "success",
+                    "El proveedor fue agregado exitosamente a la base de datos"
+                );
+                winston.info(`supplier #${result.id} was succesfully added by user #${req.user.id} `);
+
+            })
+            .catch(err => {
+                req.flash(
+                    "error",
+                    "Ocurrio un error y no se pudo agregar al nuevo proveedor en la base de datos"
+                );
+                winston.error(`an error ocurred when user #${req.user.id} tryed to add a new supplier - ${err}`);
+
+            })
+            .finally(() => {
+                res.redirect("/suppliers");
+            })
+
+    } catch (error) {
+        req.flash(
+            "error",
+            "Ocurrio un error y no se pudo modificar el cliente en la base de datos"
+        );
+
+        winston.error(`An error ocurred while creating new client ${JSON.stringify(req.body)} - ${err}`);
+
+        res.redirect("/clients");
     }
-
-    const supplier = {
-        name: req.body.name,
-        cuit: req.body.cuit,
-        taxCategoryId: req.body.taxCategoryId,
-        bankId: (req.body.bankId === '') ? null : req.body.bankId,
-        bankAccount: (req.body.bankAccount === '') ? null : req.body.bankAccount,
-        address: req.body.address,
-        city: req.body.city,
-        zipCode: req.body.zipCode,
-        phone: req.body.phone,
-        email: req.body.email,
-        comments: req.body.comments,
-        categoryId: req.body.categoryId,
-        userId: req.user.id
-    }
-
-    Supplier.create(supplier)
-        .then(function (result) {
-            req.flash(
-                "success",
-                "El proveedor fue agregado exitosamente a la base de datos"
-            );
-            winston.info(`supplier #${result.id} was succesfully added by user #${req.user.id} `);
-
-        })
-        .catch(err => {
-            req.flash(
-                "error",
-                "Ocurrio un error y no se pudo agregar al nuevo proveedor en la base de datos"
-            );
-            winston.error(`an error ocurred when user #${req.user.id} tryed to add a new supplier - ${err}`);
-
-        })
-        .finally(() => {
-            res.redirect("/suppliers");
-        })
 };
 
 module.exports.info = async function (req, res) {
@@ -115,6 +128,27 @@ module.exports.delete = async function (req, res, next) {
     }
 };
 
+module.exports.showEditForm = async function (req, res, next) {
+
+    const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
+
+    const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
+
+    const banks = await Banks.findAll({ where: { enabled: true } });
+
+    const supplierid = req.params.id;
+
+    const supplier = await Supplier.findByPk(supplierid, {
+        include: [
+            { model: SupplierCategory }, { model: TaxCategory }
+        ]
+    });
+
+    res.render("suppliers/edit.ejs", {
+        menu: CURRENT_MENU, data: { supplier, supplierCategories, taxCategories, banks },
+    });
+
+};
 module.exports.newCategory = async function (req, res) {
     const supplierCategory = await SupplierCategory.create({ name: req.body.category, enabled: true });
     res.send(supplierCategory);
