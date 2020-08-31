@@ -7,9 +7,9 @@ div.table-container {
     margin: 20px auto;
 }
 
-div.table-container table {
-    table-layout: fixed;
-    /* width: 100% !important; */
+div.table-container table {    
+    table-layout: auto; /*fixed;*/
+    width: 100% !important;
 }
 
 div.table-container .hiddensearch {

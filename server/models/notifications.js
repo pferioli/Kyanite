@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    severity: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     user: {
       type: DataTypes.INTEGER,
       allowNull: false

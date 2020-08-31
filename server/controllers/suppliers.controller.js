@@ -12,7 +12,7 @@ const CURRENT_MENU = 'suppliers'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = function (req, res, next) {
     Supplier.findAll({
-        include: [{ model: TaxCategory }, { model: SupplierCategory }]
+        include: [{ model: TaxCategory }, { model: SupplierCategory }, { model: Banks }]
     }).then(function (suppliers) {
         res.render("suppliers/suppliers.ejs", {
             menu: CURRENT_MENU, data: { suppliers: suppliers },

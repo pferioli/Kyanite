@@ -1,3 +1,6 @@
+<script>
+    var pendingNotifications = {};
+</script>
 <nav>
     <div class="nav-wrapper grey darken-4">
         <a href="#" data-target="slide-out" class="sidenav-trigger show-on-large"><i class="material-icons">menu</i></a>
@@ -47,6 +50,8 @@
 
         <%- include ("breadcrumbs.ejs") %>
 
+        <!-- Notifications and User area -->
+
         <ul class="right">
             <li id="notifications" style="visibility: hidden;">
                 <a href="/notifications/show/<%=locals.user.id%>"><i class="material-icons tiny left amber-text"
@@ -69,6 +74,10 @@
     var userid = htmlDecode("<%= locals.user.id %>");
 
     document.addEventListener("DOMContentLoaded", function () {
+
+        checkNotifications();
+
         notificationsTimerStart();
     });
+
 </script>

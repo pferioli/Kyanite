@@ -33,6 +33,7 @@
     </div> -->
     <div id="hide-dt" style="display:none">
       <table id="datatable" class="table display">
+        <!--style="table-layout: fixed;"-->
         <thead>
           <tr>
             <th>Nombre</th>
@@ -44,7 +45,8 @@
             <th>Ciudad</th>
             <th>Codigo Postal</th>
             <th>Correo Electronico</th>
-            <th>CBU</th>
+            <th>Banco</th>
+            <th>Cuenta o CBU</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -68,6 +70,13 @@
             <td><%= data.suppliers[i].city %></td>
             <td><%= data.suppliers[i].zipCode %></td>
             <td><%= data.suppliers[i].email %></td>
+
+            <% if(data.suppliers[i].bank) { %>
+            <td><%= data.suppliers[i].bank.name %></td>
+            <% } else { %>
+            <td></td>
+            <% } %>
+
             <td><%= data.suppliers[i].bankAccount %></td>
 
             <td>
@@ -94,6 +103,8 @@
 
 <%- include ("./modals/newCategory.ejs") %>
 <%- include ("./modals/delete.ejs") %>
+
+<%- include ("../partials/footer") %>
 
 <script>
 
@@ -142,10 +153,19 @@
         {
           className: "center-align",
           targets: 0
-        }
+        },
+        // {
+        //   render: function (data, type, row, meta) {
+        //     if (data)
+        //       return data.bank + ' ' + data.bankAccount;
+        //     else return data;
+        //   }, targets: -2
+        // }
       ],
       colReorder: true,
-      fixedColumns: true,
+      fixedColumns: {
+        leftColumns: 2
+      },
       pageLength: 200,
       order: [[0, 'asc']],
       autowidth: true,
@@ -209,5 +229,3 @@
   });
 
 </script>
-
-<%- include ("../partials/footer") %>
