@@ -43,6 +43,7 @@
     "sequelize": "^6.3.4",
     "serve-favicon": "^2.5.0",
     "util": "^0.12.3",
+    "uuid": "^8.3.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {}

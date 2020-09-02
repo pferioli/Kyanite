@@ -113,7 +113,7 @@ app.use('/periods', require('./routes/billingPeriods.route'));
 
 app.use('/incomes', require('./routes/incomes.route'));
 
-app.use('/expenses', require('./routes/expenses.route'));
+app.use('/expenses/paymentReceipts', require('./routes/paymentReceipts.route'));
 
 app.use('/upload', require('./routes/google.upload.route'));
 

@@ -4,7 +4,7 @@ const Model = require('../models')
 const Supplier = Model.supplier;
 const TaxCategory = Model.taxCategory;
 const SupplierCategory = Model.supplierCategory;
-const Banks = Model.bank;
+const Bank = Model.bank;
 
 const winston = require('../helpers/winston.helper');
 
@@ -12,7 +12,7 @@ const CURRENT_MENU = 'suppliers'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = function (req, res, next) {
     Supplier.findAll({
-        include: [{ model: TaxCategory }, { model: SupplierCategory }, { model: Banks }]
+        include: [{ model: TaxCategory }, { model: SupplierCategory }, { model: Bank }]
     }).then(function (suppliers) {
         res.render("suppliers/suppliers.ejs", {
             menu: CURRENT_MENU, data: { suppliers: suppliers },
@@ -21,9 +21,9 @@ module.exports.listAll = function (req, res, next) {
 };
 
 module.exports.showNewForm = async function (req, res, next) {
-    const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
+    const taxCategories = await TaxCategory.findAll();
     const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
-    const banks = await Banks.findAll({ where: { enabled: true } });
+    const banks = await Bank.findAll({ where: { enabled: true } });
     res.render("suppliers/add.ejs", { menu: CURRENT_MENU, data: { taxCategories, supplierCategories, banks } });
 };
 
@@ -91,7 +91,7 @@ module.exports.info = async function (req, res) {
     const supplierid = req.params.id;
     const supplier = await Supplier.findByPk(supplierid, {
         include: [
-            { model: SupplierCategory }, { model: TaxCategory }
+            { model: SupplierCategory }, { model: TaxCategory }, { model: Bank }
         ]
     });
 
@@ -134,7 +134,7 @@ module.exports.showEditForm = async function (req, res, next) {
 
     const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
 
-    const banks = await Banks.findAll({ where: { enabled: true } });
+    const banks = await Bank.findAll({ where: { enabled: true } });
 
     const supplierid = req.params.id;
 

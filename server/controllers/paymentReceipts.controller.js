@@ -2,18 +2,114 @@ const Op = require('sequelize').Op
 const Model = require('../models')
 const Client = Model.client;
 const Supplier = Model.supplier;
+const SupplierCategory = Model.supplierCategory;
 const ReceiptType = Model.receiptType;
+const PaymentReceipt = Model.paymentReceipt;
+const PaymentReceiptImage = Model.paymentReceiptImage;
+
+const gcs = require('../helpers/google.upload.helper');
+
+const winston = require('../helpers/winston.helper');
+
+const { v4: uuidv4 } = require('uuid');
+
+const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_MENU;
+
+module.exports = { gcs };
 
 module.exports.listAll = async function (req, res) {
     const clientId = req.body.clientId || req.params.id;
-    res.render('expenses/bills/bills', { data: { clientId: req.body.clientId } });
+    res.render('expenses/bills/bills', { menu: CURRENT_MENU, data: { clientId: clientId } });
 };
 
 module.exports.showNewForm = async function (req, res) {
     const clientId = req.params.id;
     const client = await Client.findByPk(clientId);
-    const suppliers = await Supplier.findAll({ where: { enabled: true } });
-    res.render('expenses/bills/add', { data: { client, suppliers } });
+    const suppliers = await Supplier.findAll(
+        {
+            /*include: [{ model: SupplierCategory }],*/
+            order: [['name', 'asc']]
+        });
+    res.render('expenses/bills/add', { menu: CURRENT_MENU, data: { client, suppliers } });
+};
+
+module.exports.addNew = async function (req, res, next) {
+
+    const clientId = req.params.id;
+
+    try {
+        const paymentReceipt = PaymentReceipt.build(
+            {
+                clientId: clientId,
+                receiptNumber: req.body.receiptNumber,
+                receiptTypeId: req.body.receiptTypeId,
+                emissionDate: req.body.emissionDate,
+                description: req.body.description,
+                accountingImputationId: req.body.accountingImputationId,
+                ammount: req.body.ammount,
+                supplierId: req.body.supplierId,
+                periodId: req.body.billingPeriodId,
+                userId: req.user.id,
+                statusId: 1,
+            });
+
+        const result = await paymentReceipt.save();
+
+        if (result) {
+            req.flash(
+                "success",
+                "La factura o comprobante se creo exitosamente en la base de datos"
+            );
+            winston.info(`User #${req.user.id} created succesfully payment receipt #${paymentReceipt.id} ${JSON.stringify(result)}`);
+        };
+
+        //------------ UPLOAD PAYMENT RECEIPT TO GSC ------------//
+
+        try {
+
+            if (req.file) {
+
+                const receiptImageName = uuidv4();
+
+                const gcsFileName = `receipts/${receiptImageName}`; //${Date.now()}-${req.file.originalname}
+
+                winston.info(`uploading file ${req.file.originalname} to GSC as ${gcsFileName}`);
+
+                const gscreturn = await gcs.sendUploadToGCS(req, gcsFileName)
+
+                const paymentReceiptImage = PaymentReceiptImage.build(
+                    {
+                        paymentReceiptId: result.id,
+                        name: req.file.cloudStorageObject,
+                        originalName: req.file.originalname,
+                        authenticatedUrl: req.file.gcsUrl,
+                        fileSize: req.file.size,
+                        userId: req.user.id
+                    });
+
+                const uploadResult = await paymentReceiptImage.save();
+
+                if (uploadResult) {
+                    winston.info(`uploading file ${gcsFileName} to GSC is completed, receiptId: ${result.id} - receiptImageId: ${uploadResult.id}`);
+                }
+            };
+
+        } catch (error) {
+            winston.error(`An error ocurred while user #${req.user.id} tryed to upload payment receipt file ${req.file.originalname} to GCS - ${error}`);
+        }
+
+    } catch (error) {
+
+        req.flash(
+            "error",
+            "Ocurrio un error y no se pudo crear el registro en la base de datos"
+        );
+
+        winston.error(`An error ocurred while user #${req.user.id} tryed to create a new payment receipt ${JSON.stringify(req.body)} - ${error}`);
+    }
+
+    res.redirect('/expenses/paymentReceipts/' + clientId);
+
 };
 
 module.exports.receiptTypes = async function (req, res) {

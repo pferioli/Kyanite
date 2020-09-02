@@ -7,59 +7,76 @@
         <div class="card-content">
           <span class="card-title">Informacion Detallada</span>
           <div class="row" style="margin-top: 20px;">
-            <div class="input-field col s9">
-              <i class="material-icons prefix">home</i>
-              <input id="razon_social" value="<%=data.supplier.name%>" type="text" />
-              <label for="razon_social">Nombre del Proveedor</label>
-            </div>
-            <div class="input-field col s3">
-              <input id="cuit" value="<%=data.supplier.cuit%>" type="text" />
-              <label for="cuit">C.U.I.T.</label>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">perm_identity</i>
+              <input id="name" name="name" type="text" value="<%=data.supplier.name%>" />
+              <label for="name">Nombre del proveedor</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s6">
-              <input id="taxCategory" value="<%=data.supplier.taxCategory.name%>" type="text" />
-              <label for="taxCategory">Categoria Impositiva</label>
+              <i class="material-icons prefix">perm_identity</i>
+              <input id="name" name="name" type="text" value="<%=data.supplier.taxCategory.name%>" />
+              <label for="name">Categoria Impositiva</label>
             </div>
             <div class="input-field col s6">
-              <input id="supplierCategory" value="<%=data.supplier.supplierCategory.name%>" type="text" />
-              <label for="supplierCategory">Rubro</label>
+              <i class="material-icons prefix">perm_identity</i>
+              <input id="name" name="name" type="text" value="<%=data.supplier.supplierCategory.name%>" />
+              <label for="name">Rubro</label>
             </div>
           </div>
+
+          <div class="row">
+            <div class="input-field col s4">
+              <i class="material-icons-outlined prefix">info</i>
+              <input id="cuit" name="cuit" type="text" value="<%=data.supplier.taxCategory.cuit%>" />
+              <label for="cuit">C.U.I.T. o C.U.I.L.</label>
+            </div>
+            <div class="input-field col s4">
+              <i class="material-icons prefix">account_balance</i> <input id="bankAccount" name="bankAccount"
+                type="text" value="<%=data.supplier.bankAccount%>" />
+              <label for="bankAccount">Número de Cuenta o CBU</label>
+            </div>
+            <div class="input-field col s4">
+              <input id="bank" name="bank" type="text" value="<%=data.supplier.bank.name%>" />
+              <label for="bank">Banco</label>
+            </div>
+          </div>
+
           <div class="row">
             <div class="input-field col s9">
               <i class="material-icons prefix">mail</i>
-              <input id="correo_electronico" value="<%=data.supplier.email%>" type="text" />
-              <label for="correo_electronico">Correo Electronico</label>
+              <input id="email" name="email" type="email" value="<%=data.supplier.email%>" />
+              <label for="email">Correo Electronico</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">local_phone</i>
-              <input id="telefono" value="<%=data.supplier.phone%>" type="text" />
-              <label for="telefono">Telefono</label>
+              <input id="phone" name="phone" type="tel" value="<%=data.supplier.phone%>" />
+              <label for="phone">Telefono</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s6">
               <i class="material-icons prefix">location_on</i>
-              <input id="direccion" value="<%=data.supplier.address%>" type="text" />
-              <label for="direccion">Direccion</label>
+              <input id="address" name="address" type="text" value="<%=data.supplier.address%>" />
+              <label for="address">Direccion</label>
             </div>
             <div class="input-field col s3">
               <i class="material-icons prefix">location_city</i>
-              <input id="ciudad" value="<%=data.supplier.city%>" type="text" />
-              <label for="ciudad">Ciudad</label>
+              <input id="city" name="city" type="text" value="<%=data.supplier.city%>" />
+              <label for="city">Ciudad</label>
             </div>
             <div class="input-field col s3">
-              <i class="material-icons prefix">details</i>
-              <input id="codigo_postal" value="<%=data.supplier.zipCode%>" type="text" />
-              <label for="codigo_postal">Codigo Postal</label>
+              <i class="material-icons-outlined prefix">markunread_mailbox</i>
+              <input id="zipCode" name="zipCode" type="text" value="<%=data.supplier.zipCode%>" />
+              <label for="zipCode">Codigo Postal</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s12">
-              <textarea id="observaciones" class="materialize-textarea" disabled><%=data.supplier.comments%></textarea>
-              <label for="observaciones">Observaciones</label>
+              <textarea id="comments" name="comments"
+                class="materialize-textarea"><%=data.supplier.comments%></textarea>
+              <label for="comments">Observaciones</label>
             </div>
           </div>
         </div>
@@ -78,7 +95,6 @@
   document.addEventListener("DOMContentLoaded", function () {
     var elems = document.querySelectorAll("select");
     var instances = M.FormSelect.init(elems, {});
-    var select = document.getElementById("taxCategorySelect").value = 5;
     M.FormSelect.init(elems, {});
   });
 </script>

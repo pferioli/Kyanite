@@ -2,7 +2,8 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12 m6" method="post" action='/clients/new'>
+        <form class="col s12" method="post" action='/expenses/paymentReceipts/new/<%=data.client.id%>'
+            enctype="multipart/form-data">
             <div class="card">
                 <div class="card-content">
                     <span class="card-title">Ingrese una nueva factura o comprobante</span>
@@ -17,78 +18,81 @@
                             <i class="material-icons prefix">calendar_today</i>
                             <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
                             <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId"
+                                value=<%=data.client.id%> />
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="input-field col s9">
-                            <select id="supplierSelect" onchange="getSupplierCategory(this.value)">
+                            <select id="supplierSelect">
                                 <option value="" disabled selected>Seleccione un proveedor</option>
                                 <% for(var i=0; i < data.suppliers.length; i++) { %>
                                 <option value="<%=data.suppliers[i].id%>"><%= data.suppliers[i].name %></option>
                                 <% } %>
                             </select>
                             <label>Nombre del Proveedor</label>
+                            <input type="hidden" name="supplierId" id="supplierId" />
                         </div>
                         <div class="input-field col s3">
-                            <input id="supplierCategory" name="supplierCategory" type="text" value="" />
+                            <input id="supplierCategory" name="supplierCategory" type="text" />
                             <label for="name">Rubro</label>
                         </div>
                     </div>
                     <div class="row">
                         <div class="input-field col s4">
-                            <select id="receiptTypeSelect">
-
-                            </select>
+                            <select id="receiptTypeSelect"></select>
                             <label>Tipo de Factura</label>
+                            <input type="hidden" name="receiptTypeId" id="receiptTypeId" />
                         </div>
-                        <div class="input-field col s4">
+                        <div class="input-field col s3">
                             <input id="receiptNumber" name="receiptNumber" type="text" class="validate" required />
                             <label for="name">Número de Factura</label>
                         </div>
-                        <div class="input-field col s4">
+                        <div class="input-field col s3">
                             <input id="ammount" name="ammount" type="number" min="0.00" step="0.01" class="validate"
                                 required />
                             <label for="ammount">Importe</label>
                         </div>
+                        <div class="input-field col s2">
+                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
+                            <label for="dtpEmitted">Emitida</label>
+                            <input type="hidden" name="emissionDate" id="emissionDate" />
+
+                        </div>
                     </div>
                     <div class="row">
                         <div class="input-field col s4">
-                            <select id="accountingGroupSelect"
-                                onchange="populateImputations('accountingImputationSelect', this.value);">
+                            <select id="accountingGroupSelect">
                             </select>
                             <label>Grupo de Cuentas</label>
+                            <input type="hidden" name="accountingGroupId" id="accountingGroupId" />
                         </div>
                         <div class="input-field col s4">
                             <select id="accountingImputationSelect">
                                 <option value="" selected disabled>Seleccion Primero el grupo de Cuentas</option>
                             </select>
                             <label>Imputacion Contable</label>
+                            <input type="hidden" name="accountingImputationId" id="accountingImputationId" />
                         </div>
-                        <div class="input-field col s2">
-                            <input type="text" class="datepicker" id="dtpEmitted">
-                            <label for="dtpEmitted">Emitida</label>
-                        </div>
-                        <div class="input-field col s2">
-                            <input type="text" class="datepicker" id="dtpReceived">
-                            <label for="dtpReceived">Recibida</label>
-
+                        <div class="file-field input-field col s4">
+                            <div class="btn"><i class="material-icons center">cloud_upload</i>
+                                <input type="file" name="attachment" id="attachment">
+                            </div>
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text">
+                                <label>Imagen de la factura</label>
+                            </div>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="input-field col s8">
-                            <textarea id="comments" name="comments" class="materialize-textarea"> </textarea>
-                            <label for="comments">Detalle de la Factura</label>
+                        <div class="input-field col s12">
+                            <textarea id="description" name="description" class="materialize-textarea"
+                                required></textarea>
+                            <label for="description">Detalle del servicio o de la factura</label>
                         </div>
-                        <div class="file-field input-field col s4">
-                            <div class="btn"><i class="material-icons center">cloud_upload</i>
-                                <input type="file">
-                            </div>
-                            <div class="file-path-wrapper">
-                                <input class="file-path validate" type="text">
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
@@ -103,34 +107,66 @@
             </div>
         </form>
     </div>
-    <div>
-        <center>
-            <%- include ("../../partials/alerts") %>
-        </center>
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
 </main>
 
 <%- include ("../../partials/footer") %>
 
-<script type="text/javascript" src="/javascripts/suppliers.js"></script>
+<!--script type="text/javascript" src="/javascripts/suppliers.js"></script> -->
 <script type="text/javascript" src="/javascripts/accountingImputations.js"></script>
 <script type="text/javascript" src="/javascripts/receiptTypes.js"></script>
 
 <script>
+
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
+
         elems = document.querySelectorAll('.datepicker');
-        instances = M.Datepicker.init(elems, {});
+        instances = M.Datepicker.init(elems, {
+            format: 'dd/mm/yyyy',
+            autoClose: true,
+            onOpen: function (e) {
+                var that = this;
+                that.hasEvent = false;
+                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                this.doneBtn.addEventListener('click', Done.bind(that))
+            },
+            onClose: function (e) {
+                var that = this;
+                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                this.doneBtn.removeEventListener('click', Done.bind(that))
+            },
+            onSelect: function (selectedDate) {
+                if (this.el.id === 'dtpEmissionDate') {
+                    document.getElementById('emissionDate').value = this.date.toISOString();
+                }
+            }
+        });
 
         populateAccountingGroups('accountingGroupSelect');
         populateReceiptTypes('receiptTypeSelect');
 
-        document.getElementById('accountingGroupSelect').onchange(function () {
-            console.log('onchange');
-        });
-
         getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
     });
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
+            }
+        }
+    }
 
     function getSupplierCategory(supplierId) {
 
@@ -157,6 +193,10 @@
     function getActiveBillingPeriod(clientId) {
 
         let billingPeriod = document.getElementById('billingPeriod');
+        let billingPeriodId = document.getElementById('billingPeriodId');
+
+        billingPeriodId.value = '';
+        billingPeriod.value = '';
 
         fetch('/periods/active/' + clientId)
             .then(response => {
@@ -168,6 +208,7 @@
             })
             .then(response => {
                 const period = JSON.parse(response);
+                billingPeriodId.value = period.id;
                 billingPeriod.value = period.name
                 M.updateTextFields();
             })
@@ -177,11 +218,23 @@
     }
 
     $(document).ready(function () {
-        $('textarea#comments').characterCounter();
+        $('textarea#description').characterCounter();
 
-        // $('#taxCategorySelect').on('change', function () {
-        //     var sel = $('#taxCategorySelect').val()
-        //     $('#taxCategory').val(sel);
-        // });
-    });
+        let supplierSelect = document.getElementById("supplierSelect").onchange = function (evt) {
+            document.getElementById("supplierId").value = evt.target.value;
+            getSupplierCategory(evt.target.value);
+        };
+        let receiptTypeSelect = document.getElementById("receiptTypeSelect").onchange = function (evt) {
+            document.getElementById("receiptTypeId").value = evt.target.value;
+        };
+
+        let accountingGroupSelect = document.getElementById("accountingGroupSelect").onchange = function (evt) {
+            document.getElementById("accountingGroupId").value = evt.target.value;
+            populateImputations('accountingImputationSelect', evt.target.value);
+        };
+
+        let accountingImputationSelect = document.getElementById("accountingImputationSelect").onchange = function (evt) {
+            document.getElementById("accountingImputationId").value = evt.target.value;
+        };
+    });  
 </script>
