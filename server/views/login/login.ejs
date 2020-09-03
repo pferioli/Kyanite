@@ -1,38 +1,4 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/html">
-
-<head>
-    <title>AAII Administraciones Integrales</title>
-
-    <!--Import Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-
-    <!--Import materialize.css from my website directory stylesheets/-->
-    <link type="text/css" rel="stylesheet" href="/css/materialize.css" media="screen,projection" />
-
-    <link type="text/css" rel="stylesheet" href="/stylesheets/materialert.css" media="screen,projection" />
-
-    <link rel="icon" href="/public/images/favicon.ico" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!--Let browser know website is optimized for mobile-->
-</head>
-
-<body class="site grey lighten-3">
-
-    <header>
-
-        <!--Import jQuery before materialize.js-->
-        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-
-        <!--Import materialize.js from my website directory materialization-->
-        <script type="text/javascript" src="/javascripts/materialize.js"></script>
-
-    </header>
-
-</body>
-
-</html>
+<%- include ("header") %>
 
 <main class="site-content">
 
@@ -74,11 +40,11 @@
                 </form>
             </div>
 
-            <%- include ("partials/alerts") %>
+            <%- include ("../partials/alerts") %>
 
         </div>
 
     </center>
 </main>
 
-<%- include ("partials/footer") %>
+<%- include ("../partials/footer") %>

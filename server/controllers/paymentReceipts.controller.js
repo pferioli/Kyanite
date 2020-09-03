@@ -37,35 +37,29 @@ module.exports.addNew = async function (req, res, next) {
 
     const clientId = req.params.id;
 
-    try {
-        const paymentReceipt = PaymentReceipt.build(
-            {
-                clientId: clientId,
-                receiptNumber: req.body.receiptNumber,
-                receiptTypeId: req.body.receiptTypeId,
-                emissionDate: req.body.emissionDate,
-                description: req.body.description,
-                accountingImputationId: req.body.accountingImputationId,
-                ammount: req.body.ammount,
-                supplierId: req.body.supplierId,
-                periodId: req.body.billingPeriodId,
-                userId: req.user.id,
-                statusId: 1,
-            });
+    PaymentReceipt.save(
+        {
+            clientId: clientId,
+            receiptNumber: req.body.receiptNumber,
+            receiptTypeId: req.body.receiptTypeId,
+            emissionDate: req.body.emissionDate,
+            description: req.body.description,
+            accountingImputationId: req.body.accountingImputationId,
+            ammount: req.body.ammount,
+            supplierId: req.body.supplierId,
+            periodId: req.body.billingPeriodId,
+            userId: req.user.id,
+            statusId: 1,
+        }
+    )
+        .then(paymentReceipt => {
 
-        const result = await paymentReceipt.save();
+            req.flash("success", "La factura o comprobante se creo exitosamente en la base de datos");
 
-        if (result) {
-            req.flash(
-                "success",
-                "La factura o comprobante se creo exitosamente en la base de datos"
-            );
             winston.info(`User #${req.user.id} created succesfully payment receipt #${paymentReceipt.id} ${JSON.stringify(result)}`);
-        };
+        })
 
-        //------------ UPLOAD PAYMENT RECEIPT TO GSC ------------//
-
-        try {
+        .then(paymentReceipt => {           //------------ UPLOAD PAYMENT RECEIPT TO GSC ------------//
 
             if (req.file) {
 
@@ -75,41 +69,38 @@ module.exports.addNew = async function (req, res, next) {
 
                 winston.info(`uploading file ${req.file.originalname} to GSC as ${gcsFileName}`);
 
-                const gscreturn = await gcs.sendUploadToGCS(req, gcsFileName)
+                gcs.sendUploadToGCS(req, gcsFileName)
+                    .then(result => {
 
-                const paymentReceiptImage = PaymentReceiptImage.build(
-                    {
-                        paymentReceiptId: result.id,
-                        name: req.file.cloudStorageObject,
-                        originalName: req.file.originalname,
-                        authenticatedUrl: req.file.gcsUrl,
-                        fileSize: req.file.size,
-                        userId: req.user.id
-                    });
+                        const paymentReceiptImage = PaymentReceiptImage.build(
+                            {
+                                paymentReceiptId: paymentReceipt.id,
+                                name: req.file.cloudStorageObject,
+                                originalName: req.file.originalname,
+                                authenticatedUrl: req.file.gcsUrl,
+                                fileSize: req.file.size,
+                                userId: req.user.id
+                            });
 
-                const uploadResult = await paymentReceiptImage.save();
+                        paymentReceiptImage.save().then(() => {
+                            winston.info(`uploading file ${gcsFileName} to GSC is completed, receiptId: ${result.id} - receiptImageId: ${uploadResult.id}`);
 
-                if (uploadResult) {
-                    winston.info(`uploading file ${gcsFileName} to GSC is completed, receiptId: ${result.id} - receiptImageId: ${uploadResult.id}`);
-                }
+                        })
+                    })
+                    .catch(error => { winston.error(`An error ocurred while user #${req.user.id} tryed to upload payment receipt file ${req.file.originalname} to GCS - ${error}`); })
+
             };
+        })
+        .catch(error => {
+            req.flash(
+                "error",
+                "Ocurrio un error y no se pudo crear el registro en la base de datos"
+            );
 
-        } catch (error) {
-            winston.error(`An error ocurred while user #${req.user.id} tryed to upload payment receipt file ${req.file.originalname} to GCS - ${error}`);
-        }
+            winston.error(`An error ocurred while user #${req.user.id} tryed to create a new payment receipt ${JSON.stringify(req.body)} - ${error}`);
+        })
 
-    } catch (error) {
-
-        req.flash(
-            "error",
-            "Ocurrio un error y no se pudo crear el registro en la base de datos"
-        );
-
-        winston.error(`An error ocurred while user #${req.user.id} tryed to create a new payment receipt ${JSON.stringify(req.body)} - ${error}`);
-    }
-
-    res.redirect('/expenses/paymentReceipts/' + clientId);
-
+        .finally(() => { res.redirect('/expenses/paymentReceipts/' + clientId); });
 };
 
 module.exports.receiptTypes = async function (req, res) {

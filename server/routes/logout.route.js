@@ -3,7 +3,7 @@ const router = express.Router();
 
 router.get("/", function (req, res) {
     req.logout();
-    res.render("logout.ejs");
+    res.render("login/logout.ejs");
 });
 
 module.exports = router;

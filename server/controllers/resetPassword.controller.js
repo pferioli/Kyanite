@@ -1,5 +1,7 @@
 const jwt = require('jwt-simple');
-const sendgrid = require('../helpers/sendgrid.helper');
+
+const mailgun = require('../helpers/mailgun.helper');
+
 const winston = require('../helpers/winston.helper');
 
 const Model = require('../models')
@@ -29,8 +31,9 @@ module.exports.encodeJWT = async function (req, res) {
         var token = jwt.encode(payload, secret);
 
         winston.info(`token ${token} encoded with secret ${secret}`);
+        //sendgrid.sendgridResetPassword
 
-        sendgrid.sendgridResetPassword(user.email, `http://localhost:3000/password/reset/${payload.id}/${token}`)
+        mailgun.sendEmailPasswordReset(user.name, user.email, `http://localhost:3000/password/reset/${payload.id}/${token}`)
             .then(mail => {
                 winston.info(`se envio correctamente el mail de reset al usuario ${user.email}`);
                 req.flash("success", `un correo le ha sido enviado a la direccion ${user.email} para completar el proceso`);
@@ -45,34 +48,34 @@ module.exports.encodeJWT = async function (req, res) {
     };
 };
 
-module.exports.decodeJWT = function (req, res) {
+module.exports.decodeJWT = async function (req, res) {
 
-    Users.findOne({ where: { email: req.params.id } }, function (user) {
+    const user = await User.findByPk(req.params.id);
 
-        if (user === null) {
-            req.flash("error", "No se encontró el usuario en la base de datos");
-        }
-
-        try {
-            const secret = user.password + '-' + user.createdAt.getTime();
-
-            const payload = jwt.decode(req.params.token, secret);
-
-            // TODO: Gracefully handle decoding issues.
-            // Create form to reset password.
-            res.send('<form action="/password/reset" method="POST">' +
-                '<input type="hidden" name="id" value="' + payload.id + '" />' +
-                '<input type="hidden" name="token" value="' + req.params.token + '" />' +
-                '<input type="password" name="password" value="" placeholder="Enter your new password..." />' +
-                '<input type="submit" value="Reset Password" />' +
-                '</form>');
-
-        } catch (err) {
-            winston.error(`jwt decode failed with error ${err}`);
-            res.status(403).send(`jwt decode failed with error ${err}`);
-        }
+    if (user === null) {
+        req.flash("error", "No se encontró el usuario en la base de datos");
     }
-    )
+
+    try {
+        const secret = user.password + '-' + user.createdAt.getTime();
+
+        const payload = jwt.decode(req.params.token, secret);
+
+        // TODO: Gracefully handle decoding issues.
+        // Create form to reset password.
+        // res.send('<form action="/password/reset" method="POST">' +
+        //     '<input type="hidden" name="id" value="' + payload.id + '" />' +
+        //     '<input type="hidden" name="token" value="' + req.params.token + '" />' +
+        //     '<input type="password" name="password" value="" placeholder="Enter your new password..." />' +
+        //     '<input type="submit" value="Reset Password" />' +
+        //     '</form>');
+
+        res.render('login/password/change', { id: payload.id, token: req.params.token });
+
+    } catch (err) {
+        winston.error(`jwt decode failed with error ${err}`);
+        res.status(403).send(`jwt decode failed with error ${err}`);
+    }
 };
 
 module.exports.change = function (req, res) {

@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const winston = require('../helpers/winston.helper');
 
 router.get("/", connectEnsureLogin.ensureLoggedOut(), function (req, res) {
-    res.render("login");
+    res.render("login/login.ejs");
 });
 
 router.post("/", passport.authenticate("local-login", {
@@ -16,8 +16,7 @@ router.post("/", passport.authenticate("local-login", {
     failureRedirect: "/login",
     failureFlash: true,
 }), function (req, res, info) {
-    winston.info("render /login post");
-    res.render("login");
+    res.render("login/login.ehs");
 });
 
 router.post("/bcrypt", function (req, res) {

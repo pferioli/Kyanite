@@ -121,6 +121,8 @@ app.use('/notifications', require('./routes/notifications.route'));
 
 app.use('/accountingImputations', require('./routes/accountingImputations.route'));
 
+const mailgun = require('./helpers/mailgun.helper');
+
 
 //app.use('/sse', require('./routes/serverSentEvents.route'));
 
