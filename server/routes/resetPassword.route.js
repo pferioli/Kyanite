@@ -15,7 +15,7 @@ router.get('/reset/:id/:token', function (req, res) {
     passwordManagerController.decodeJWT(req, res);
 });
 
-router.post("/reset", function (req, res) {
+router.post("/reset/:id/:token", function (req, res) {
     passwordManagerController.change(req, res);
 });
 

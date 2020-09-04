@@ -120,13 +120,12 @@ function runPassword(strPassword, strFieldID) {
     var nScore = checkPassword(strPassword);
 
     // Get controls
-    var ctlBar = document.getElementById(strFieldID + "_bar");
-    var ctlText = document.getElementById(strFieldID + "_text");
-    if (!ctlBar || !ctlText)
+    var ctlText = document.getElementById(strFieldID);
+    if (!ctlText)        //if (!ctlBar || !ctlText)
         return;
 
     // Set new width
-    ctlBar.style.width = (nScore * 1.25 > 100) ? 100 : nScore * 1.25 + "%";
+    //ctlBar.style.width = (nScore * 1.25 > 100) ? 100 : nScore * 1.25 + "%";
 
     // Color and text
     // -- Very Secure
@@ -145,38 +144,46 @@ function runPassword(strPassword, strFieldID) {
     else 
     */
     if (nScore >= 80) {
-        var strText = "Very Strong";
-        var strColor = "#008000";
+        var strText = "Muy Segura";
+        var strColor = "#388e3c";
+        var strScore = "veryStrong";
     }
     // -- Strong
     else if (nScore >= 60) {
-        var strText = "Strong";
+        var strText = "Segura";
         var strColor = "#006000";
+        var strScore = "strong";
     }
     // -- Average
     else if (nScore >= 40) {
-        var strText = "Average";
+        var strText = "Normal";
         var strColor = "#e3cb00";
+        var strScore = "average";
     }
     // -- Weak
     else if (nScore >= 20) {
-        var strText = "Weak";
+        var strText = "Débil";
         var strColor = "#Fe3d1a";
+        var strScore = "weak";
     }
     // -- Very Weak
     else {
-        var strText = "Very Weak";
+        var strText = "Muy Débil";
         var strColor = "#e71a1a";
+        var strScore = "veryWeak";
     }
 
     if (strPassword.length == 0) {
-        ctlBar.style.backgroundColor = "";
+        ctlText.style.color = "";
         ctlText.innerHTML = "";
+        strScore = "noPassword";
     }
     else {
-        ctlBar.style.backgroundColor = strColor;
+        ctlText.style.color = strColor;
         ctlText.innerHTML = strText;
     }
+
+    return strScore;
 }
 
 // Checks a string for a list of characters

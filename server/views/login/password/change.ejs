@@ -11,30 +11,30 @@
             <div class="z-depth-1 white row"
                 style="display: inline-block; padding: 32px 48px 0px 48px; border: 1px solid #EEE;">
 
-                <form class="col s12" method="post" action='/password/forgot'>
+                <form class="col s12" method="post" id="newPasswordForm" name="newPasswordForm"
+                    actions="/password/reset/<%=userId%>" onsubmit="return validate()">
                     <div class='row'>
                         <div class='col s12'>
                             <img src="/images/aaii.png" style="width: 150px;" alt="" class="responsive-img">
                         </div>
                     </div>
+                    <div class='row'>
+                        <div class='input-field'>
+                            <input type='password' name='password' id='password' class='validate' required />
+                            <label for='password'>Nueva contraseña</label>
+                            <p id="passwordStrength" style="color:#e0e0e0; font-size:smaller"></p>
+                        </div>
+                    </div>
+                    <div class='row'>
+                        <div class='input-field'>
+                            <input type='password' id='passwordConfirm' class="validate" required />
+                            <label for='passwordConfirm'>Confirmar contraseña</label>
+                            <span class="helper-text" data-error="la contraseña no coincide"></span>
 
-                    <div class='row'>
-                        <div class='input-field col s12'>
-                            <input class='validate' type='password' name='new_password' id='new_password' required />
-                            <label for='new_password'>Nueva contraseña</label>
-                        </div>
-                        <div class='input-field col s12'>
-                            <input class='validate' type='password' name='confirm_password' id='confirm_password'
-                                required />
-                            <label for='confirm_password'>Confirmar contraseña</label>
                         </div>
                     </div>
                     <div class='row'>
-                        <h7>fuerza de la contraseña</h7>
-                    </div>
-                    <div class='row'>
-                        <button type='submit' name='btn_send_link' class='col s12 btn btn-medium waves-effect'>Cambiar
-                            Clave</button>
+                        <button type='submit' class='col s12 btn btn-medium waves-effect'>Cambiar Contraseña</button>
                     </div>
                 </form>
             </div>
@@ -50,3 +50,64 @@
 </main>
 
 <%- include ("../../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/passwordStrength.js"></script>
+
+<script>
+    var userId = htmlDecode("<%=userId%>");
+    var nScore = "";
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.getElementById('password').onkeypress = function (e) {
+            nScore = runPassword(this.value, 'passwordStrength');
+        }
+    });
+
+    $("#password").on("focusout", function (e) {
+        if ($(this).val() != $("#passwordConfirm").val()) {
+            $("#passwordConfirm").removeClass("valid").addClass("invalid");
+        } else {
+            $("#passwordConfirm").removeClass("invalid").addClass("valid");
+        }
+    });
+
+    $("#passwordConfirm").on("keyup", function (e) {
+        if ($("#password").val() != $(this).val()) {
+            $(this).removeClass("valid").addClass("invalid");
+        } else {
+            $(this).removeClass("invalid").addClass("valid");
+        }
+    });
+
+    function validate() {
+        let password = document.getElementById('password');
+        let passwordConfirm = document.getElementById('passwordConfirm');
+
+        document.getElementById('passwordStrength').innerHTML = "";
+
+        if (password.value != passwordConfirm.value) {
+            password.value = '';
+            password.classList.remove("valid");
+            password.focus();
+            passwordConfirm.value = '';
+            passwordConfirm.classList.remove("valid");
+            M.updateTextFields();
+            M.toast({ html: 'Las contraseña ingresadas no coinciden, verifique que ambas sean iguales para continuar', classes: 'rounded' })
+            return false;
+        }
+
+        if (nScore != 'veryStrong' && nScore != 'strong') {
+            password.value = '';
+            password.classList.remove("valid");
+            password.focus();
+            passwordConfirm.value = '';
+            passwordConfirm.classList.remove("valid");
+            M.updateTextFields();
+            M.toast({ html: 'La contraseña ingresada no cumple con el standard de seguridad, por favor ingrese una nueva clave', classes: 'rounded' });
+            return false;
+        }
+
+        return true;
+    }
+</script>
