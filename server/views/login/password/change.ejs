@@ -19,14 +19,14 @@
                         </div>
                     </div>
                     <div class='row'>
-                        <div class='input-field'>
+                        <div class='input-field col s12'>
                             <input type='password' name='password' id='password' class='validate' required />
                             <label for='password'>Nueva contraseña</label>
                             <p id="passwordStrength" style="color:#e0e0e0; font-size:smaller"></p>
                         </div>
                     </div>
                     <div class='row'>
-                        <div class='input-field'>
+                        <div class='input-field col s12'>
                             <input type='password' id='passwordConfirm' class="validate" required />
                             <label for='passwordConfirm'>Confirmar contraseña</label>
                             <span class="helper-text" data-error="la contraseña no coincide"></span>
@@ -39,7 +39,7 @@
                 </form>
             </div>
             <div class="row">
-                <a href="/login">volver al formulario de ingreso</a>
+                <a href="/auth/login">volver al formulario de ingreso</a>
             </div>
 
             <%- include ("../../partials/alerts") %>

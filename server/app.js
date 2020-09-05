@@ -95,13 +95,17 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.use('/', require('./routes/home.route'));
+app.use('/auth', require('./routes/auth.route'));
 
-app.use('/login', require('./routes/login.route'));
+//--- from here, all routes require an authenticated user...
 
-app.use('/logout', require('./routes/logout.route'));
+const connectEnsureLogin = require('connect-ensure-login');
 
-app.use('/password', require('./routes/resetPassword.route'));
+app.use(connectEnsureLogin.ensureLoggedIn('/auth/login'));
+
+app.get("/", function (req, res, next) {
+  res.render("home.ejs", { menu: 'home' });
+});
 
 app.use('/clients', require('./routes/clients.route'));
 
@@ -115,16 +119,9 @@ app.use('/incomes', require('./routes/incomes.route'));
 
 app.use('/expenses/paymentReceipts', require('./routes/paymentReceipts.route'));
 
-app.use('/upload', require('./routes/google.upload.route'));
-
 app.use('/notifications', require('./routes/notifications.route'));
 
 app.use('/accountingImputations', require('./routes/accountingImputations.route'));
-
-const mailgun = require('./helpers/mailgun.helper');
-
-
-//app.use('/sse', require('./routes/serverSentEvents.route'));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

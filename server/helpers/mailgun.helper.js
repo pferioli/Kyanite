@@ -1,14 +1,12 @@
 const mailgun = require("mailgun-js");
 
-const mailfrom = 'pablo_ferioli@hotmail.com';
-
 const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: process.env.MAILGUN_DOMAIN });
 
 module.exports.sendEmailPasswordReset = async function (name, mailto, url) {
 
     return await mg.messages().send({
         to: mailto,
-        from: mailfrom,
+        from: process.env.MAILFROM,
         subject: 'Solicitud de cambio de contraseña',
         text: url,
         template: "password_reset",
@@ -25,9 +23,9 @@ module.exports.sendEmailPasswordChange = async function (name, mailto, url) {
 
     return await mg.messages().send({
         to: mailto,
-        from: mailfrom,
+        from: process.env.MAILFROM,
         subject: 'Notificacion de cambio de contraseña',
-        template: "password_change",
+        template: "password_changed",
         'h:X-Mailgun-Variables': `{"name":"${name}", "url":"${url}"}`
     });
 }
