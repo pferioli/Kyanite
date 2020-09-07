@@ -1,7 +1,7 @@
 node_modules/
 .env
 *.yaml
-server/certs/
-server/config/
-server/credentials/
+certs/
+config/
+credentials/
 logs/
