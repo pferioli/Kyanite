@@ -132,7 +132,8 @@ module.exports.verify = function (req, res) {
     if (isOTPTokenValid) {
         res.redirect('/');
     } else {
-        res.redirect('/auth/logout')
+        req.flash("error", "El token ingresado es inválido, por favor intente nuevamente");
+        res.redirect('/login/verify')
     }
     //}
 };

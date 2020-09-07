@@ -1,0 +1,19 @@
+{
+  "development": {
+    "username": "root",
+    "password": "root",
+    "database": "kyanite",
+    "host": "localhost",
+    "port": 3306,
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": "root",
+    "database": "kyanite",
+    "dialectOptions": {
+      "socketPath": "/cloudsql/kyanite-281502:southamerica-east1:kyanite"
+    },
+    "dialect": "mysql"
+  }
+}

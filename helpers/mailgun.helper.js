@@ -10,11 +10,11 @@ module.exports.sendEmailPasswordReset = async function (name, mailto, url) {
         subject: 'Solicitud de cambio de contraseña',
         text: url,
         template: "password_reset",
-        inline: ['D:\\Projects\\kyanite\\server\\public\\images\\aaii.png',
-            'D:\\Projects\\kyanite\\server\\public\\images\\facebook.png',
-            'D:\\Projects\\kyanite\\server\\public\\images\\instagram.png',
-            'D:\\Projects\\kyanite\\server\\public\\images\\twitter.png',
-            'D:\\Projects\\kyanite\\server\\public\\images\\email.png'],
+        inline: ['D:\\Projects\\kyanite\\public\\images\\aaii.png',
+            'D:\\Projects\\kyanite\\public\\images\\facebook.png',
+            'D:\\Projects\\kyanite\\public\\images\\instagram.png',
+            'D:\\Projects\\kyanite\\public\\images\\twitter.png',
+            'D:\\Projects\\kyanite\\\public\\images\\email.png'],
         'h:X-Mailgun-Variables': `{"name":"${name}", "url":"${url}"}`
     });
 }

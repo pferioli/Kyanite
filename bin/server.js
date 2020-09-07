@@ -38,10 +38,10 @@ if (process.env.LOCAL_HTTPS_PORT) {
   var path = require("path");
   var sslOptions = {
     key: fs.readFileSync(
-      path.join(__dirname, "..", "..", "server/certs/server.key")
+      path.join(__dirname, "..", "certs/server.key")
     ),
     cert: fs.readFileSync(
-      path.join(__dirname, "..", "..", "server/certs/server.cert")
+      path.join(__dirname, "..", "certs/server.cert")
     ),
   };
 

@@ -5,30 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Chrome",
-            "request": "launch",
-            "type": "pwa-chrome",
-            "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}",
-            "runtimeArgs": [
-                "--remote-debugging-port=9222"
-            ]
-        },
-        {
-            "name": "Attach Chrome",
-            "type": "chrome",
-            "request": "attach",
-            "port": 9222
-        },
-        {
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\server\\bin\\server.js",
-            "outputCapture": "std"
+            "program": "${workspaceFolder}\\bin\\server.js"
         }
     ]
 }

@@ -1,0 +1,43 @@
+const express = require("express");
+const router = express.Router();
+
+const homeOwnersController = require('../controllers/homeOwners.controller');
+
+router.get("/", function (req, res, next) {
+    res.render('homeOwners/index', { menu: homeOwnersController.CURRENT_MENU });
+});
+
+router.post("/", function (req, res, next) {
+    const clientId = req.body.clientId;
+    res.redirect("/homeOwners/client/" + clientId);
+});
+
+router.get("/client/:clientId/new", function (req, res, next) {
+    homeOwnersController.showNewForm(req, res);
+});
+
+router.post("/client/:clientId/new", function (req, res, next) {
+    homeOwnersController.addNew(req, res);
+});
+
+router.get("/client/:clientId/upload", function (req, res, next) {
+    homeOwnersController.showUploadForm(req, res);
+});
+
+router.post("/client/:clientId/upload", [homeOwnersController.gcs.multer.single('attachment')], function (req, res, next) {
+    homeOwnersController.upload(req, res);
+});
+
+router.get("/client/:clientId", function (req, res, next) {
+    homeOwnersController.listAll(req, res);
+});
+
+// router.get("/client/:clientId/info", function (req, res, next) {
+//     console.log("info")
+// });
+
+router.get("/client/:clientId/edit/:id", function (req, res, next) {
+    homeOwnersController.edit(req, res);
+});
+
+module.exports = router;

@@ -1,0 +1,64 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12 m6" method="post" action='/homeOwners/client/<%=data.client.id%>/upload'
+            enctype="multipart/form-data">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Alta masiva de propietarios y propiedades</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s10">
+                            <i class="material-icons prefix">home</i>
+                            <input id="razon_social" value="<%=data.client.name%>" type="text" />
+                            <label for="razon_social">Nombre del Barrio</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <input id="codigo" value="<%=data.client.internalCode%>" type="text" />
+                            <label for="codigo">Codigo Interno</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="file-field input-field col s12">
+                            <div class="btn"><i class="material-icons center">cloud_upload</i>
+                                <input type="file" name="attachment" id="attachment">
+                            </div>
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text">
+                                <label>Listado de Propietatios</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action right-align">
+                    <button type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i
+                            class="material-icons right">save</i>Guardar</button>
+                    <a href="/homeOwners/client/<%=data.client.id%>" class="waves-effect waves-light btn red"><i
+                            class="material-icons right">cancel</i>Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div>
+        <center>
+            <%- include ("../partials/alerts") %>
+        </center>
+</main>
+
+<%- include ("../partials/footer") %>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        M.CharacterCounter.init(document.getElementById("comments"));
+        M.CharacterCounter.init(document.getElementById("name"));
+
+        var taxCategorySelect = document.getElementById("taxCategorySelect").onchange = function (evt) {
+            document.getElementById("taxCategory").value = evt.target.value;
+        };
+
+    });
+
+</script>

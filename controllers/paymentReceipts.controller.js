@@ -19,7 +19,12 @@ module.exports = { gcs };
 
 module.exports.listAll = async function (req, res) {
     const clientId = req.body.clientId || req.params.id;
-    res.render('expenses/bills/bills', { menu: CURRENT_MENU, data: { clientId: clientId } });
+    const paymentReceipts = await PaymentReceipt.findAll({
+        where: { clientId: clientId },
+        include: [{ model: Supplier }],
+    });
+
+    res.render('expenses/bills/bills', { menu: CURRENT_MENU, data: { clientId: clientId, paymentReceipts: paymentReceipts } });
 };
 
 module.exports.showNewForm = async function (req, res) {
