@@ -32,11 +32,19 @@ router.get("/client/:clientId", function (req, res, next) {
     homeOwnersController.listAll(req, res);
 });
 
-// router.get("/client/:clientId/info", function (req, res, next) {
-//     console.log("info")
-// });
+router.get("/edit/:id", function (req, res, next) {
+    homeOwnersController.showEditForm(req, res);
+});
 
-router.get("/client/:clientId/edit/:id", function (req, res, next) {
+router.get("/history/:id", function (req, res, next) {
+    homeOwnersController.history(req, res);
+});
+
+router.post("/delete", function (req, res, next) {
+    homeOwnersController.delete(req, res);
+});
+
+router.post("/edit", function (req, res, next) {
     homeOwnersController.edit(req, res);
 });
 

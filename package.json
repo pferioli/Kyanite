@@ -6,15 +6,13 @@
     "entrypoint": "./bin/server.js"
   },
   "scripts": {
-    "start": "node $npm_package_config_entrypoint",
+    "start": "node ./bin/server.js",
     "debug": "node --inspect=0.0.0.0:9229 $npm_package_config_entrypoint",
     "debug:brk": "node --inspect-brk=0.0.0.0:9229 $npm_package_config_entrypoint",
     "debug:legacy": "node --debug=0.0.0.0:5858 $npm_package_config_entrypoint",
     "dev": "nodemon $npm_package_config_entrypoint"
   },
   "dependencies": {
-    "@cubejs-backend/mysql-driver": "^0.20.0",
-    "@cubejs-backend/server-core": "^0.20.3",
     "@google-cloud/debug-agent": "^5.1.2",
     "@google-cloud/logging-winston": "^4.0.0",
     "@google-cloud/storage": "^5.1.2",

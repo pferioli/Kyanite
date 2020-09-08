@@ -1,6 +1,7 @@
 function populateClients(fieldID) {
     selectField = document.getElementById(fieldID);
     selectField.options.length = 0;
+    selectField.innerHTML = "<option value=\"\" disabled selected> Seleccione el Cliente </option>"
 
     fetch('/clients/populate')
         .then(response => {

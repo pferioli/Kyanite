@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    role: {
+    securityLevel: {
       type: DataTypes.CHAR,
       allowNull: false
     },

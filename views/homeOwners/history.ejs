@@ -1,11 +1,14 @@
 <%- include ("../partials/header") %>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
 <main class="site-content">
     <div class="table-container">
         <div class="table-header">
-            <span class="table-title">Listado de Propietarios y Propiedades - <span
+            <span class="table-title">Historial de titularidades - <span
                     style="font-weight: bold;"><%=data.client.name%></span>
-                [<%=data.client.internalCode%>]</span>
+                [<%=data.client.internalCode%>] - Propiedad: <span
+                    style="font-weight: bold;"><%=data.property%></span></span>
             <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
                     <div class="circle-clipper left">
@@ -22,89 +25,49 @@
             <div class="actions">
                 <button id="button-reload" onClick="window.location.reload();"
                     class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/homeOwners/client/<%=data.client.id%>/new" id="button-add"
-                    class="waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="/homeOwners/client/<%=data.client.id%>/upload" id="button-upload"
-                    class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
                         class="material-icons">search</i></a>
             </div>
         </div>
-        <!-- <div class="progress" id="progress" style="margin-top: 30px;">
-        <div class="indeterminate"></div>
-        </div> -->
         <div id="hide-dt" style="display:none">
             <table id="datatable" class="table display">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Propietario</th>
                         <th>Propiedad</th>
+                        <th>Creado</th>
+                        <th>Eliminado</th>
                         <th>CUIL</th>
                         <th>Correo</th>
                         <th>Telefono</th>
                         <th>Comentarios</th>
-                        <th>Coeficiente PH</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% for(var i=0; i < data.homeOwners.length; i++) { %>
                     <tr data-id="<%= data.homeOwners[i].id %>">
+                        <td><%= data.homeOwners[i].id %></td>
                         <td><%= data.homeOwners[i].name %></td>
                         <td><%= data.homeOwners[i].property %></td>
+                        <td><%= data.homeOwners[i].createdAt %></td>
+                        <td><%= data.homeOwners[i].deletedAt %></td>
                         <td><%= data.homeOwners[i].cuil %></td>
                         <td><%= data.homeOwners[i].email %></td>
                         <td><%= data.homeOwners[i].phone %></td>
                         <td><%= data.homeOwners[i].comments %></td>
-                        <td><%= data.homeOwners[i].coefficient %></td>
-                        <td>
-                            <a href="/homeOwners/edit/<%=data.homeOwners[i].id%>?mode=update"
-                                class="btn-flat btn-small waves-effect waves-light">
-                                <i class="material-icons">edit</i></a>
-
-                            <a href="/homeOwners/edit/<%=data.homeOwners[i].id%>?mode=transfer"
-                                class="btn-flat btn-small waves-effect waves-light">
-                                <i class="material-icons">home</i></a>
-
-                            <a href="/homeOwners/history/<%=data.homeOwners[i].id%>"
-                                class="btn-flat btn-small waves-effect waves-light">
-                                <i class="material-icons">history</i></a>
-
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light"
-                                data-id="<%=data.homeOwners[i].id%>" data-value="<%= data.homeOwners[i].name %>"
-                                data-value2="<%=data.client.id%>" onclick="deleteDialog(this)">
-                                <i class="material-icons">delete</i></a>
-
-
-                        </td>
                     </tr>
                     <% } %>
                 </tbody>
             </table>
         </div>
     </div>
-    <center>
-        <%- include ("../partials/alerts") %>
-    </center>
+
 </main>
 
-<%- include ("./modals/delete.ejs") %>
-
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var elems = document.querySelectorAll(".modal");
-        var instances = M.Modal.init(elems, {})
-    });
 
-    function deleteDialog(button) {
-        var _elem = document.getElementById('modalDelete');
-        var modal = M.Modal.getInstance(_elem);
-        const message = `[ID: ${button.dataset.id}] - ${button.dataset.value}`
-        document.getElementById('modalDeleteMessage').textContent = message;
-        document.getElementById('modalDeleteOwnerId').value = button.dataset.id;
-        document.getElementById('modalDeleteClientId').value = button.dataset.value2;
-        modal.open();
-    };
+    const tableMessage = htmlDecode('Historial de titularidades - <%=data.client.name%> [<%=data.client.internalCode %>] - Propiedad: <%=data.property%>');
 
     $(document).ready(function () {
 
@@ -130,19 +93,28 @@
             },
             columnDefs: [
                 {
-                    targets: -1,
-                    searchable: false,
-                    sortable: false
-                },
-                {
                     className: "center-align",
                     targets: 0
                 },
+                {
+                    render: function (data) {
+                        if (data)
+                            return moment(data).format('DD/MM/YYYY HH:mm:ss');
+                        else return "";
+                    }, targets: [3, 4]
+                },
             ],
             colReorder: true,
+            fixedHeader: true,
+            fixedColumns: {
+                leftColumns: 2
+            },
             pageLength: 200,
-            order: [[0, 'asc']],
+            order: [[0, 'desc']],
             autowidth: true,
+            scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
             paging: true,
             buttons: [
                 {
@@ -167,6 +139,7 @@
                 },
                 {
                     extend: 'excelHtml5',
+                    messageTop: tableMessage,
                     exportOptions: {
                         columns: ':visible(th:not(:last-child))',
                         search: 'applied',
@@ -174,7 +147,7 @@
                     },
                     customize: function (xlsx) {
                         var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
-                        source.setAttribute('name', 'Proveedores');
+                        source.setAttribute('name', 'Historial');
                     }
                 },
                 { extend: 'csvHtml5' },
@@ -182,7 +155,7 @@
                 {
                     text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
                     extend: 'pdfHtml5',
-                    filename: 'proveedores',
+                    filename: 'clients',
                     orientation: 'landscape',     //portrait
                     pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
                     exportOptions: {
@@ -197,7 +170,6 @@
                 $('#progress').hide();
             },
         });
-        table.columns.adjust().draw();
     });
 
 </script>

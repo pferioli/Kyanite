@@ -48,8 +48,11 @@ module.exports = (sequelize, DataTypes) => {
         coefficient: {
             type: DataTypes.DECIMAL(10, 4)
         },
-        userId: {
+        createdBy: {
             allowNull: false,
+            type: DataTypes.INTEGER
+        },
+        updatedBy: {
             type: DataTypes.INTEGER
         }
     }, {

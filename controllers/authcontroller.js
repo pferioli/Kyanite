@@ -133,7 +133,7 @@ module.exports.verify = function (req, res) {
         res.redirect('/');
     } else {
         req.flash("error", "El token ingresado es inválido, por favor intente nuevamente");
-        res.redirect('/login/verify')
+        res.redirect('/auth/login/verify')
     }
     //}
 };

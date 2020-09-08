@@ -80,7 +80,7 @@ app.use(
       path: '/',
       httpOnly: true,
       secure: false,
-      maxAge: (60 * 60 * 1000)
+      maxAge: (480 * 60 * 1000)
     },
   })
 );
@@ -151,21 +151,21 @@ const scheduledTasks = require('./helpers/scheduledTasks.helper');
 // CUBE.JS
 //---------------------------------------------------------------------------//
 
-const CubejsServerCore = require('@cubejs-backend/server-core');
+// const CubejsServerCore = require('@cubejs-backend/server-core');
 
-const dbType = 'mysql';
+// const dbType = 'mysql';
 
-const options = {
-  dbType,
-  devServer: false,
-  logger: (msg, params) => {
-    console.log(`${msg}: ${JSON.stringify(params)}`);
-  },
-  schemaPath: 'schema'
-};
+// const options = {
+//   dbType,
+//   devServer: false,
+//   logger: (msg, params) => {
+//     console.log(`${msg}: ${JSON.stringify(params)}`);
+//   },
+//   schemaPath: 'schema'
+// };
 
-const core = CubejsServerCore.create(options);
+// const core = CubejsServerCore.create(options);
 
-core.initApp(app);
+// core.initApp(app);
 
 module.exports = app;
