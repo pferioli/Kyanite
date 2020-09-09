@@ -4,8 +4,6 @@ const router = express.Router();
 const passport = require('../helpers/passport.helper');
 const connectEnsureLogin = require('connect-ensure-login');
 
-const User = require('../models').user;
-
 const authController = require('../controllers/authcontroller');
 
 //---------------------------------------------------------------------------//
@@ -63,6 +61,10 @@ router.post("/password/reset/:id/:token", function (req, res) {
 // TWO-FACTOR AUTHENTICATION //
 //---------------------------------------------------------------------------//
 
+router.get('/setup2fa', connectEnsureLogin.ensureLoggedIn('/auth/login'), function (req, res) {
+    authController.setup2fa(req, res);
+});
+
 router.get('/login/verify', connectEnsureLogin.ensureLoggedIn('/auth/login'), function (req, res) {
     res.render("login/totp/verify.ejs")
 });
@@ -72,9 +74,5 @@ router.post('/login/verify', passport.authenticate('local-topt', { failureRedire
         req.session.secondFactor = 'totp';
         res.redirect('/');
     });
-
-router.get('/setup2fa', connectEnsureLogin.ensureLoggedIn('/auth/login'), function (req, res) {
-    authController.setup2fa(req, res);
-});
 
 module.exports = router;
