@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const TotpStrategy = require('passport-totp').Strategy;
 
 const User = require('../models').user;
 
@@ -51,7 +52,7 @@ module.exports = function (app) {
 
                 // callback with email and password from our form
 
-                const user = await User.findOne({ where: { email: email } }).then(function (user) {
+                const user = await User.findOne({ where: { email: email, enabled: true } }).then(function (user) {
 
                     if (user === null) {
                         return done(
@@ -81,6 +82,14 @@ module.exports = function (app) {
                     });
                 });
             }));
+
+    passport.use('local-topt', new TotpStrategy({ codeField: 'otpToken', window: 30 },
+        function (user, done) {
+            if (!user.secret)
+                return done('missing secret');
+            return done(null, user.secret, 30);
+        }
+    ));
 
     module.exports = passport;
 };

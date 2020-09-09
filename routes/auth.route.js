@@ -12,7 +12,7 @@ const authController = require('../controllers/authcontroller');
 // LOGIN & LOGOUT //
 //---------------------------------------------------------------------------//
 
-router.get("/login", connectEnsureLogin.ensureLoggedOut('/logout'), function (req, res) {
+router.get("/login", connectEnsureLogin.ensureLoggedOut('/auth/logout'), function (req, res) {
     res.render("login/login.ejs");
 });
 
@@ -22,19 +22,15 @@ router.post("/login", passport.authenticate("local-login", {
     failureRedirect: "/auth/login",
     failureFlash: true,
 }), function (req, res) {
-
-    // if (req.user.mustChange === true) {
-    //     res.redirect('/password/forgot');
-    // }
-
-    if (req.user.enabled2FA === true) {
+    if (req.user.secret) {
         res.redirect('/auth/login/verify'); return;
     }
-
-    res.redirect('/index');
+    req.session.secondFactor = "disabled"
+    res.redirect('/');
 });
 
 router.get("/logout", function (req, res) {
+    req.session.secondFactor = undefined;   //to reset 2FA
     req.logout();
     res.render("login/logout.ejs");
 });
@@ -67,16 +63,18 @@ router.post("/password/reset/:id/:token", function (req, res) {
 // TWO-FACTOR AUTHENTICATION //
 //---------------------------------------------------------------------------//
 
-router.get('/setup2fa', connectEnsureLogin.ensureLoggedIn('/auth/login'), function (req, res) {
-    authController.setup2fa(req, res)
-});
-
 router.get('/login/verify', connectEnsureLogin.ensureLoggedIn('/auth/login'), function (req, res) {
-    res.render("login/password/verify.ejs")
+    res.render("login/totp/verify.ejs")
 });
 
-router.post('/login/verify', connectEnsureLogin.ensureLoggedIn('/auth/login'), function (req, res) {
-    authController.verify(req, res);
+router.post('/login/verify', passport.authenticate('local-topt', { failureRedirect: '/login/verify', failureFlash: true }),
+    function (req, res) {
+        req.session.secondFactor = 'totp';
+        res.redirect('/');
+    });
+
+router.get('/setup2fa', connectEnsureLogin.ensureLoggedIn('/auth/login'), function (req, res) {
+    authController.setup2fa(req, res);
 });
 
 module.exports = router;

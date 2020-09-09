@@ -40,11 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false
     },
-    enabled2FA: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false
-    },
-    secret2FA: {
+    secret: {
       type: DataTypes.STRING,
       allowNull: true
     },

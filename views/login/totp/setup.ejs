@@ -1,0 +1,53 @@
+<%- include ("../header") %>
+
+<main class="site-content">
+
+    <center>
+        <div class="container">
+
+            <div class="section"></div>
+            <div class="section"></div>
+
+            <div class="z-depth-1 white row"
+                style="display: inline-block; padding: 32px 48px 0px 48px; border: 1px solid #EEE;">
+
+                <div class='row'>
+                    <div class='col s12'>
+                        <img src="/images/aaii.png" style="width: 150px;" alt="" class="responsive-img">
+                    </div>
+                </div>
+
+                <p>Para activar la autenticación de dos pasos por favor escanear<br>
+                    el codigo de barras usando la aplicacion Google Authenticator
+                </p>
+                <img src="<%- qrImage %>" style="width: 200px; height: 200px;" />
+                <p>- o ingrese el siguiente codigo usando la opcion manual -</p>
+                <b><%= key %></b>
+
+                <div class="section"></div>
+            </div>
+
+            <div class="row" style="margin-top: 20px;">
+                <div class="col s12">
+                    <a
+                        href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=es_AR">
+                        <img src="/images/googleplay.png" style="margin-right: 10px;" />
+                    </a>
+                    <a href=" https://apps.apple.com/us/app/google-authenticator/id388497605">
+                        <img src="/images/applestore.png" style="margin-left: 10px;" />
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <a href="/">Volver al menu principal</a>
+            </div>
+
+        </div>
+
+    </center>
+</main>
+
+
+
+<%- include ("../../partials/footer") %>

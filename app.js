@@ -109,6 +109,15 @@ const connectEnsureLogin = require('connect-ensure-login');
 
 app.use(connectEnsureLogin.ensureLoggedIn('/auth/login'));
 
+function ensureSecondFactor(req, res, next) {
+  if (req.session.secondFactor === 'totp' || req.session.secondFactor === 'disabled') { return next(); }
+  res.redirect('/auth/login/verify');
+}
+
+app.use(ensureSecondFactor);
+
+// secured routes...
+
 app.get("/", function (req, res, next) {
   res.render("dashboard.ejs", { menu: 'home' });
 });

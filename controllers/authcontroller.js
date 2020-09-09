@@ -1,6 +1,7 @@
 const jwt = require('jwt-simple');
 const bcrypt = require('bcrypt');
-const auth2FA = require('../helpers/auth2FA.helper');
+const base32 = require('thirty-two');
+
 const mailgun = require('../helpers/mailgun.helper');
 const winston = require('../helpers/winston.helper');
 
@@ -110,30 +111,42 @@ module.exports.decodeJWT = async function (req, res) {
 
 module.exports.setup2fa = async function (req, res) {
 
-    let secret = auth2FA.generateSecret();
+    var key = randomKey(10);
 
-    let user = await User.findByPk(req.user.id);
-    user.enabled2FA = true;
-    user.secret2FA = secret;
-    user.save();
-
-    const imageUrl = await auth2FA.generateQRCode(user.email, secret);
-
-    res.status(200).send('<img src="' + imageUrl + '">');
-};
-
-module.exports.verify = function (req, res) {
-
-    const otpToken = req.body.otpToken;
-    const accessToken = req.headers["Authorization"];
-
-    //if (accessToken.isValid) {
-    const isOTPTokenValid = auth2FA.verify(otpToken, req.user.secret2FA);
-    if (isOTPTokenValid) {
-        res.redirect('/');
-    } else {
-        req.flash("error", "El token ingresado es inválido, por favor intente nuevamente");
-        res.redirect('/auth/login/verify')
+    if (req.user.secret) {
+        key = req.user.secret;
     }
-    //}
+
+    var encodedKey = base32.encode(key);
+
+    // generate QR code for scanning into Google Authenticator
+    // reference: https://code.google.com/p/google-authenticator/wiki/KeyUriFormat
+    var otpUrl = 'otpauth://totp/' + req.user.email
+        + '?secret=' + encodedKey + '&period=30' + `&issuer=${encodeURIComponent('AAII Kyanite')}`;
+
+    var qrImage = 'https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=' + encodeURIComponent(otpUrl);
+
+    if (!req.user.secret) {
+        let user = await User.findByPk(req.user.id);
+        user.secret = key;
+        await user.save();
+    }
+
+    res.render('login/totp/setup.ejs', { user: req.user, key: encodedKey, qrImage: qrImage });
 };
+
+function randomKey(len) {
+    var buf = []
+        , chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+        , charlen = chars.length;
+
+    for (var i = 0; i < len; ++i) {
+        buf.push(chars[getRandomInt(0, charlen - 1)]);
+    }
+
+    return buf.join('');
+};
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
