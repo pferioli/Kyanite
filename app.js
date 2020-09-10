@@ -16,6 +16,8 @@ const passport = require('./helpers/passport.helper');
 
 const dotenv = require("dotenv").config();
 
+const connectEnsureLogin = require('connect-ensure-login');
+
 //---------------------------------------------------------------------------//
 
 var app = express();
@@ -98,14 +100,29 @@ app.use(function (req, res, next) {
 });
 
 //---------------------------------------------------------------------------//
+// CUBE.JS
+//---------------------------------------------------------------------------//
+
+// const CubejsServerCore = require('@cubejs-backend/server-core');
+
+// const options = {
+//   dbType: 'mysql',
+//   devServer: true,
+//   schemaPath: 'schema'
+// };
+
+// const core = CubejsServerCore.create(options);
+
+// core.initApp(app);
+
+
+//---------------------------------------------------------------------------//
 // ROUTES
 //---------------------------------------------------------------------------//
 
 app.use('/auth', require('./routes/auth.route'));
 
 //--- from here, all routes require an authenticated user...
-
-const connectEnsureLogin = require('connect-ensure-login');
 
 app.use(connectEnsureLogin.ensureLoggedIn('/auth/login'));
 
@@ -116,11 +133,11 @@ function ensureSecondFactor(req, res, next) {
 
 app.use(ensureSecondFactor);
 
-// secured routes...
-
-app.get("/", function (req, res, next) {
+app.get("/", connectEnsureLogin.ensureLoggedIn('/auth/login'), ensureSecondFactor, function (req, res, next) {
   res.render("dashboard.ejs", { menu: 'home' });
 });
+
+// secured routes...
 
 app.use('/clients', require('./routes/clients.route'));
 
@@ -154,27 +171,7 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
+
 const scheduledTasks = require('./helpers/scheduledTasks.helper');
-
-//---------------------------------------------------------------------------//
-// CUBE.JS
-//---------------------------------------------------------------------------//
-
-// const CubejsServerCore = require('@cubejs-backend/server-core');
-
-// const dbType = 'mysql';
-
-// const options = {
-//   dbType,
-//   devServer: false,
-//   logger: (msg, params) => {
-//     console.log(`${msg}: ${JSON.stringify(params)}`);
-//   },
-//   schemaPath: 'schema'
-// };
-
-// const core = CubejsServerCore.create(options);
-
-// core.initApp(app);
 
 module.exports = app;

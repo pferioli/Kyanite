@@ -2,7 +2,7 @@ const Model = require('../models')
 const Client = Model.client;
 const HomeOwner = Model.homeOwner;
 
-const gcs = require('../helpers/google.upload.helper');
+const gcs = require('../helpers/googleUpload.helper');
 
 const winston = require('../helpers/winston.helper');
 

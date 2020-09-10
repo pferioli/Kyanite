@@ -7,7 +7,7 @@ const ReceiptType = Model.receiptType;
 const PaymentReceipt = Model.paymentReceipt;
 const PaymentReceiptImage = Model.paymentReceiptImage;
 
-const gcs = require('../helpers/google.upload.helper');
+const gcs = require('../helpers/googleUpload.helper');
 
 const winston = require('../helpers/winston.helper');
 
@@ -42,7 +42,7 @@ module.exports.addNew = async function (req, res, next) {
 
     const clientId = req.params.id;
 
-    PaymentReceipt.save(
+    PaymentReceipt.create(
         {
             clientId: clientId,
             receiptNumber: req.body.receiptNumber,
@@ -61,7 +61,7 @@ module.exports.addNew = async function (req, res, next) {
 
             req.flash("success", "La factura o comprobante se creo exitosamente en la base de datos");
 
-            winston.info(`User #${req.user.id} created succesfully payment receipt #${paymentReceipt.id} ${JSON.stringify(result)}`);
+            winston.info(`User #${req.user.id} created succesfully payment receipt #${paymentReceipt.id} ${JSON.stringify(paymentReceipt)}`);
         })
 
         .then(paymentReceipt => {           //------------ UPLOAD PAYMENT RECEIPT TO GSC ------------//
@@ -75,7 +75,7 @@ module.exports.addNew = async function (req, res, next) {
                 winston.info(`uploading file ${req.file.originalname} to GSC as ${gcsFileName}`);
 
                 gcs.sendUploadToGCS(req, gcsFileName)
-                    .then(result => {
+                    .then(uploadResult => {
 
                         const paymentReceiptImage = PaymentReceiptImage.build(
                             {

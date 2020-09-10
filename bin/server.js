@@ -6,6 +6,7 @@ const dotenv = require("dotenv").config();
 
 var app = require("../app");
 var http = require("http");
+var debug = require('debug')('kyanite:server');
 
 /**
  * Get port from environment and store in Express.
