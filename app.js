@@ -115,7 +115,6 @@ app.use(function (req, res, next) {
 
 // core.initApp(app);
 
-
 //---------------------------------------------------------------------------//
 // ROUTES
 //---------------------------------------------------------------------------//
@@ -134,7 +133,7 @@ function ensureSecondFactor(req, res, next) {
 app.use(ensureSecondFactor);
 
 app.get("/", connectEnsureLogin.ensureLoggedIn('/auth/login'), ensureSecondFactor, function (req, res, next) {
-  res.render("dashboard.ejs", { menu: 'home' });
+  res.render("home.ejs", { menu: 'home' });
 });
 
 // secured routes...

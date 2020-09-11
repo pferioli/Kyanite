@@ -3,7 +3,7 @@
 <main class="site-content">
 
     <form method="POST" action='/expenses/paymentReceipts'>
-        <%- include ("../../partials/clientsSelector") %>
+        <%- include ("../../partials/clientsPeriodSelector") %>
     </form>
 
     <center>
@@ -12,10 +12,10 @@
 
 </main>
 
-<script>
+<!-- <script>
     document.addEventListener("DOMContentLoaded", function () {
         populateClients("clientsSelect");
     });
-</script>
+</script> -->
 
 <%- include ("../../partials/footer") %>

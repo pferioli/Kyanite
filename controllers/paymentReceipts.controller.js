@@ -19,8 +19,12 @@ module.exports = { gcs };
 
 module.exports.listAll = async function (req, res) {
     const clientId = req.body.clientId || req.params.id;
+    const periods = req.body.periodId.split(',');
     const paymentReceipts = await PaymentReceipt.findAll({
-        where: { clientId: clientId },
+        where: {
+            clientId: clientId,
+            periodId: { [Op.in]: periods }
+        },
         include: [{ model: Supplier }],
     });
 

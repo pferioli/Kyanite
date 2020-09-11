@@ -16,6 +16,10 @@ router.get("/active/:id", function (req, res, next) {
     billingPeriodsController.getActive(req, res);
 });
 
+router.get("/byCustomer/:id", function (req, res, next) {
+    billingPeriodsController.getAllByClientID(req, res);
+});
+
 router.get("/:id", function (req, res, next) {
     billingPeriodsController.listAll(req, res);
 });

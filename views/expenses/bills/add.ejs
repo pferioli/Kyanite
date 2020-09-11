@@ -97,10 +97,10 @@
                 </div>
 
                 <div class="card-action right-align">
-                    <button type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;"><i
-                            class="material-icons right">queue</i>Siguiente</button>
-                    <button type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i
-                            class="material-icons right">save</i>Guardar</button>
+                    <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue"
+                        style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green"
+                        style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
                     <a href="/expenses/paymentReceipts/<%=data.client.id%>" class="waves-effect waves-light btn red"><i
                             class="material-icons right">cancel</i>Cancelar</a>
                 </div>
@@ -113,10 +113,12 @@
 </main>
 
 <%- include ("../../partials/footer") %>
+<%- include ("../../partials/modals/billingPeriod.ejs") %>
 
-<!--script type="text/javascript" src="/javascripts/suppliers.js"></script> -->
+<script type="text/javascript" src="/javascripts/suppliers.js"></script>
 <script type="text/javascript" src="/javascripts/accountingImputations.js"></script>
 <script type="text/javascript" src="/javascripts/receiptTypes.js"></script>
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
 
 <script>
 
@@ -146,6 +148,9 @@
             }
         });
 
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});
+
         populateAccountingGroups('accountingGroupSelect');
         populateReceiptTypes('receiptTypeSelect');
 
@@ -166,55 +171,6 @@
                 if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
             }
         }
-    }
-
-    function getSupplierCategory(supplierId) {
-
-        let supplierCategory = document.getElementById('supplierCategory');
-
-        fetch('/suppliers/info/raw/' + supplierId)
-            .then(response => {
-                if (response.status == 200) {
-                    return response.text();
-                } else {
-                    throw "Respuesta incorrecta del servidor"
-                }
-            })
-            .then(response => {
-                const supplier = JSON.parse(response);
-                supplierCategory.value = supplier.supplierCategory.name
-                M.updateTextFields();
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    }
-
-    function getActiveBillingPeriod(clientId) {
-
-        let billingPeriod = document.getElementById('billingPeriod');
-        let billingPeriodId = document.getElementById('billingPeriodId');
-
-        billingPeriodId.value = '';
-        billingPeriod.value = '';
-
-        fetch('/periods/active/' + clientId)
-            .then(response => {
-                if (response.status == 200) {
-                    return response.text();
-                } else {
-                    throw "Respuesta incorrecta del servidor"
-                }
-            })
-            .then(response => {
-                const period = JSON.parse(response);
-                billingPeriodId.value = period.id;
-                billingPeriod.value = period.name
-                M.updateTextFields();
-            })
-            .catch(err => {
-                console.log(err);
-            });
     }
 
     $(document).ready(function () {

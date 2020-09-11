@@ -59,6 +59,13 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
+        status: {
+            type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
+            get: function () {
+                const status = ["DESHABILITADO", "PENDIENTE", "EN_PROCESO", "PROCESADO", "ANULADO", "PAUSADO"];
+                return status[this.get('statusId')];
+            }
+        },
         periodId: {
             allowNull: false,
             type: DataTypes.INTEGER

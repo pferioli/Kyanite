@@ -1,0 +1,17 @@
+<% const periodClientID = data.client.id %>
+
+<div id="modalBillingPeriod" class="modal">
+    <div class="modal-content black-text">
+        <div class="row">
+            <h5>No hay ningún periodo de liquidación habilitado</h5>
+        </div>
+        <p>Para poder agregar una nueva factura, se debe establecer un período de liquidación activo primero.</p>
+    </div>
+    <div class="modal-footer">
+        <a id="periods" href="/periods/<%=periodClientID%>"
+            class="modal-close waves-effect waves-green btn tile">Periodos</a>
+
+        <a class="modal-close waves-effect waves-red btn red"
+            style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+    </div>
+</div>

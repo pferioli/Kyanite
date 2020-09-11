@@ -1,6 +1,6 @@
-function getSupplierCategory(supplierId, elementId) {
+function getSupplierCategory(supplierId) {
 
-    let supplierCategory = document.getElementById(elementId);
+    let supplierCategory = document.getElementById('supplierCategory');
 
     fetch('/suppliers/info/raw/' + supplierId)
         .then(response => {
@@ -13,6 +13,7 @@ function getSupplierCategory(supplierId, elementId) {
         .then(response => {
             const supplier = JSON.parse(response);
             supplierCategory.value = supplier.supplierCategory.name
+            M.updateTextFields();
         })
         .catch(err => {
             console.log(err);

@@ -96,3 +96,11 @@ module.exports.getActive = async function (req, res, next) {
         res.send(periods)
     });
 }
+
+module.exports.getAllByClientID = async function (req, res, next) {
+    BillingPeriod.findAll({
+        where: { clientId: req.params.id }, order: [['name', 'DESC']],
+    }).then(function (periods) {
+        res.send(periods)
+    });
+}
