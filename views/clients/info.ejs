@@ -80,13 +80,16 @@
       <div class="card-action right-align">
         <a href="/bankaccounts/<%=data.client.id%>" class="waves-effect waves-light btn"><i
             class="material-icons right">account_balance</i>Cuentas</a>
+
         <a href="/clients/edit/<%=data.client.id%>" class="waves-effect waves-light btn" style="margin-left: 20px;"><i
             class="material-icons right">edit</i>Modificar</a>
-        <a href="/clients" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
-            class="material-icons right">cancel</i>Volver</a>
-      </div>
-    </div>
 
+        <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel"
+          class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
+            class="material-icons right">cancel</i>Volver</button>
+      </div>
+
+    </div>
   </div>
 </main>
 

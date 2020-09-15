@@ -4,5 +4,10 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"editor.formatOnPaste": true,
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true,
+		"html.format.wrapLineLength": 0
+	}
 }

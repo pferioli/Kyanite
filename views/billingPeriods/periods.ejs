@@ -1,6 +1,11 @@
 <%- include ("../partials/header") %>
 
 <main class="site-content">
+
+  <center>
+    <%- include ("../partials/alerts") %>
+  </center>
+
   <div class="table-container">
     <div class=" table-header">
       <span class="table-title">Períodos de Liquidación - <span style="font-weight: bold;"><%=data.client.name%></span>
@@ -79,7 +84,7 @@
                 onclick="closeDialog(this)"><i class="material-icons-outlined">lock</i></a>
               <% } %>
 
-              <% if((data.periods[i].statusId === 0)||(data.periods[i].statusId === 1)) { %>
+              <% if(data.periods[i].statusId === 0) { %>
               <a id="buttonDelete" class="modal-trigger btn-flat btn-small waves-effect waves-light"
                 data-target="modalDeletePeriod"><i class="material-icons">delete</i></a>
               <% } %>
@@ -90,9 +95,7 @@
       </table>
     </div>
   </div>
-  <center>
-    <%- include ("../partials/alerts") %>
-  </center>
+
 </main>
 
 <%- include ("./modals/add.ejs") %>

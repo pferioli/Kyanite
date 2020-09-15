@@ -13,6 +13,9 @@ module.exports = (sequelize, DataTypes) => {
             PaymentReceipt.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
             PaymentReceipt.hasOne(models.supplier, { foreignKey: 'id', sourceKey: 'supplierId' })
             PaymentReceipt.hasOne(models.receiptType, { foreignKey: 'id', sourceKey: 'receiptTypeId' })
+            PaymentReceipt.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
+            PaymentReceipt.hasOne(models.accountingImputation, { foreignKey: 'id', sourceKey: 'accountingImputationId' })
+            PaymentReceipt.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
         }
     };
 
@@ -62,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
             get: function () {
-                const status = ["DESHABILITADO", "PENDIENTE", "EN_PROCESO", "PROCESADO", "ANULADO", "PAUSADO"];
+                const status = ["Deshabilitado", "Pendiente", "En Proceso", "Procesado", "Anulado", "Pausado"];
                 return status[this.get('statusId')];
             }
         },

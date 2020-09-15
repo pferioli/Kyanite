@@ -11,7 +11,10 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\bin\\server.js"
-        }
+            "program": "${workspaceFolder}\\bin\\server.js",
+            "sourceMaps": true,
+            "smartStep": true,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
     ]
 }

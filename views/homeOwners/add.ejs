@@ -76,8 +76,9 @@
                             class="material-icons right">queue</i>Siguiente</button>
                     <button type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i
                             class="material-icons right">save</i>Guardar</button>
-                    <a href="/homeOwners/client/<%=data.client.id%>" class="waves-effect waves-light btn red"><i
-                            class="material-icons right">cancel</i>Cancelar</a>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel"
+                        class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
+                            class="material-icons right">cancel</i>Cancelar</button>
                 </div>
             </div>
         </form>

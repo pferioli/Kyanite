@@ -6,6 +6,10 @@ const SupplierCategory = Model.supplierCategory;
 const ReceiptType = Model.receiptType;
 const PaymentReceipt = Model.paymentReceipt;
 const PaymentReceiptImage = Model.paymentReceiptImage;
+const BillingPeriod = Model.billingPeriod;
+const AccountingImputation = Model.accountingImputation;
+const AccountingGroup = Model.accountingGroup;
+const User = Model.user;
 
 const gcs = require('../helpers/googleUpload.helper');
 
@@ -18,17 +22,52 @@ const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_ME
 module.exports = { gcs };
 
 module.exports.listAll = async function (req, res) {
+
     const clientId = req.body.clientId || req.params.id;
-    const periods = req.body.periodId.split(',');
-    const paymentReceipts = await PaymentReceipt.findAll({
+
+    let periods = [];
+
+    if (typeof req.body.periodId != 'undefined') {
+        periods = req.body.periodId.split(',');
+    } else {
+
+        const activePeriod = await BillingPeriod.findOne({
+            where: { clientId: clientId, statusId: 1 },
+            attributes: ['id']
+        });
+
+        if (activePeriod) { periods.push(activePeriod.id) }
+    }
+
+    const autoRefresh = (req.query.refresh === undefined || req.query.refresh.toLowerCase() === 'false' ? false : true);
+    const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
+
+    const status = (showAll === true) ? [0, 1, 2, 3, 4, 5] : [1, 2];
+
+    let options = {
         where: {
             clientId: clientId,
-            periodId: { [Op.in]: periods }
+            periodId: {
+                [Op.in]: periods
+            },
+            statusId: { [Op.in]: status }
         },
-        include: [{ model: Supplier }],
-    });
+        include: [{ model: Supplier }, { model: ReceiptType }, { model: BillingPeriod }, { model: User },
+        {
+            model: AccountingImputation, include: [{ model: AccountingGroup }]
+        }],
+    };
 
-    res.render('expenses/bills/bills', { menu: CURRENT_MENU, data: { clientId: clientId, paymentReceipts: paymentReceipts } });
+    const client = await Client.findByPk(clientId);
+
+    const paymentReceipts = await PaymentReceipt.findAll(options);
+
+    res.render('expenses/bills/bills',
+        {
+            menu: CURRENT_MENU,
+            data: { client: client, paymentReceipts: paymentReceipts, periods: periods },
+            params: { showAll: showAll, autoRefresh: autoRefresh }
+        });
 };
 
 module.exports.showNewForm = async function (req, res) {

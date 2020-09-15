@@ -18,3 +18,8 @@
 <% if (locals.menu === 'homeOwners') { %>
 <a href="#!" class="breadcrumb">Propietarios</a>
 <%}%>
+
+<% if (locals.menu === 'paymentReceipts') { %>
+<a href="/expenses" class="breadcrumb">Egresos</a>
+<a href="/expenses/paymentReceipts" class="breadcrumb">Comprobantes</a>
+<%}%>

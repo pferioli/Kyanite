@@ -1,16 +1,16 @@
-<style>
-    .toolbar {
-        float: left;
-    }
-</style>
-
 <%- include ("../../partials/header") %>
 
 <main class="site-content">
 
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
     <div class="table-container">
         <div class="table-header">
-            <span class="table-title">Listado de Facturas y Comprobantes</span>
+
+            <span class="table-title">Comprobantes - <span style="font-weight: bold;"><%=data.client.name%></span>
+                [<%=data.client.internalCode%>]</span>
             <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
                     <div class="circle-clipper left">
@@ -25,71 +25,158 @@
                 </div>
             </div>
             <div class="actions">
+                <div class="switch">
+                    <label> Mostrar todos los estados <input id="swStatus" type="checkbox" onchange="reloadPage();"
+                            <% if(params.showAll===true){%> checked <%}%>>
+                        <span class="lever"></span></label>
+                </div>
+                <div class="switch">
+                    <label> Refrescar automáticamente <input id="swRefresh" type="checkbox" onchange="autoRefresh(this);"
+                            <% if(params.autoRefresh===true){%> checked <%}%>>
+                        <span class="lever"></span></label>
+                </div>
+
                 <button id="button-reload" onClick="window.location.reload();"
                     class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/expenses/paymentReceipts/new/<%=data.clientId%>" id="button-add"
-                    class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
-                        class="material-icons">search</i></a>
+
+                <a href="/expenses/paymentReceipts/new/<%=data.client.id%>" id="button-add"
+                            class="modal-trigger waves-effect btn-flat nopadding"><i
+                            class="material-icons">add_box</i></a>
+
+                        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
+                                class="material-icons">search</i></a>
+                </div>
+            </div>
+            <div id="hide-dt" style="display:none">
+                <table id="datatable" class="table display">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Proveedor</th>
+                            <th>Factura</th>
+                            <th>Importe</th>
+                            <th>Detalles</th>
+                            <th>Fecha</th>
+                            <th>Grupo de Cuentas</th>
+                            <th>Imputacion Contable</th>
+                            <th>Periodo</th>
+                            <th>Estado</th>
+                            <th>Usuario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < data.paymentReceipts.length; i++) { %>
+                        <tr data-id="<%= data.paymentReceipts[i].id %>">
+                            <td><%= data.paymentReceipts[i].id %></td>
+                            <td><a class="blue-text"
+                                    href="/suppliers/info/<%= data.paymentReceipts[i].supplier.id %>"><%= data.paymentReceipts[i].supplier.name %>
+                                </a>
+                            </td>
+                            <td>(<%=data.paymentReceipts[i].receiptType.receiptType%>)
+                                <%=data.paymentReceipts[i].receiptNumber%>
+                            </td>
+                            <td>$<%= data.paymentReceipts[i].ammount %></td>
+                            <td><%= data.paymentReceipts[i].description %></td>
+                            <td><%= data.paymentReceipts[i].emissionDate %></td>
+                            <td><%= data.paymentReceipts[i].accountingImputation.accountingGroup.name %></td>
+                            <td><%= data.paymentReceipts[i].accountingImputation.name %></td>
+
+                            <td>
+                                <% if(data.paymentReceipts[i].billingPeriod.statusId === 0) { %>
+                                <i class="material-icons">calendar_today</i>
+                                <% } %>
+                                <% if(data.paymentReceipts[i].billingPeriod.statusId=== 1) { %>
+                                <i class="material-icons">lock_open</i>
+                                <% } %>
+                                <% if(data.paymentReceipts[i].billingPeriod.statusId === 2) { %>
+                                <i class="material-icons">lock</i>
+                                <% } %>
+                                <% if(data.paymentReceipts[i].billingPeriod.statusId === 3) { %>
+                                <i class="material-icons">cancel</i>
+                                <% } %>
+
+                                <a href="/periods/<%=data.client.id%>"><span
+                                        style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].billingPeriod.name %></span></a>
+                            </td>
+
+                            <td>
+                                <!--DESHABILITADO-->
+                                <% if(data.paymentReceipts[i].statusId === 0) { %>
+                                <i class="material-icons">disabled_by_default</i>
+                                <% } %>
+
+                                <!--PENDIENTE-->
+                                <% if(data.paymentReceipts[i].statusId === 1) { %>
+                                <i class="material-icons">assignment</i>
+                                <% } %>
+
+                                <!--EN_PROCESO-->
+                                <% if(data.paymentReceipts[i].statusId === 2) { %>
+                                <i class="material-icons">assignment_ind</i>
+                                <% } %>
+
+                                <!--PROCESADO-->
+                                <% if(data.paymentReceipts[i].statusId === 3) { %>
+                                <i class="material-icons">assignment_turned_in</i>
+                                <% } %>
+
+                                <!--ANULADO-->
+                                <% if(data.paymentReceipts[i].statusId === 4) { %>
+                                <i class="material-icons">assignment_returned</i>
+                                <% } %>
+
+                                <!--PAUSADO-->
+                                <% if(data.paymentReceipts[i].statusId === 5) { %>
+                                <i class="material-icons">pending</i>
+                                <% } %>
+                                <span
+                                    style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].status %></span>
+                            </td>
+
+                            <!-- <td><%#= data.paymentReceipts[i].status %></td> -->
+
+                            <td><%= data.paymentReceipts[i].user.name %></td>
+
+                            <td>
+                                <% if(data.paymentReceipts[i].statusId === 1) { %>
+                                <a href="/expenses/paymentReceipts/<%=data.clientId%>/edit/<%= data.paymentReceipts[i].id%>"
+                                    class="btn-flat btn-small waves-effect waves-light">
+                                    <i class="material-icons">edit</i></a>
+                                <% } %>
+
+                                <% if(data.paymentReceipts[i].statusId === 1) { %>
+                                <a id="buttonCreatePO" class="btn-flat btn-small waves-effect waves-light"
+                                    data-id="<%=data.paymentReceipts[i].id%>"
+                                    data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i
+                                        class="material-icons">receipt</i></a>
+                                <% } %>
+
+                                <a id="buttonDownload" class="btn-flat btn-small waves-effect waves-light"
+                                    data-id="<%=data.paymentReceipts[i].id%>"
+                                    data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i
+                                        class="material-icons">cloud_download</i></a>
+
+                                <% if(data.paymentReceipts[i].statusId === 1) { %>
+                                <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light"
+                                    data-id="<%=data.paymentReceipts[i].id%>"
+                                    data-value="<%= data.paymentReceipts[i].receiptNumber %>"
+                                    onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div id="hide-dt" style="display:none">
-            <table id="datatable" class="table display">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Proveedor</th>
-                        <th>Factura</th>
-                        <th>Importe</th>
-                        <th>Fecha</th>
-                        <th>Periodo</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for(var i=0; i < data.paymentReceipts.length; i++) { %>
-                    <tr data-id="<%= data.paymentReceipts[i].id %>">
-                        <td><%= data.paymentReceipts[i].id %></td>
-                        <td><%= data.paymentReceipts[i].supplier.name %></td>
-                        <td><%= data.paymentReceipts[i].receiptNumber %></td>
-                        <td><%= data.paymentReceipts[i].ammount %></td>
-                        <td><%= data.paymentReceipts[i].emissionDate %></td>
-                        <td><%= data.paymentReceipts[i].periodId %></td>
-                        <td><%= data.paymentReceipts[i].status %></td>
-                        <td>
-                            <a href="/expenses/paymentReceipts/<%=data.clientId%>/edit/<%= data.paymentReceipts[i].id%>"
-                                class="btn-flat btn-small waves-effect waves-light">
-                                <i class="material-icons">edit</i></a>
 
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light"
-                                data-id="<%=data.paymentReceipts[i].id%>"
-                                data-value="<%= data.paymentReceipts[i].receiptNumber %>"
-                                onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
-                        </td>
-                    </tr>
-                    <% } %>
-                </tbody>
-
-                <tfoot>
-                    <tr>
-                        <th>ID</th>
-                        <th>Proveedor</th>
-                        <th>Factura</th>
-                        <th>Importe</th>
-                        <th>Fecha</th>
-                        <th>Periodo</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </tfoot>
-            </table>
+        <div class="container">
+            <div class="row center-align" style="font-size:small" id="lastUpdate"></div>
         </div>
-    </div>
 
-    <center>
-        <%- include ("../../partials/alerts") %>
-    </center>
+        <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+        <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
 
 </main>
 
@@ -97,10 +184,38 @@
 
 <script>
 
+    var handler = 0;
+
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll(".modal");
         var instances = M.Modal.init(elems, {})
+
+        document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
+
+        if (htmlDecode("<%= params.autoRefresh %>") === 'true') {
+            handler = enableAutoRefresh();
+        }
+
     });
+
+    function autoRefresh(e) {
+        if (e.checked === true) {
+            handler = enableAutoRefresh();
+        } else {
+            disableAutoRefresh(handler);
+        }
+    }
+
+    function enableAutoRefresh() {
+        return setTimeout(function () { reloadPage(); }, (2 * 60 * 1000))
+    }
+
+    function disableAutoRefresh(handler) {
+        if (handler) {
+            clearTimeout(handler);
+            timer = 0;
+        }
+    }
 
     function deleteDialog(button) {
         var _elem = document.getElementById('modalDeleteClient');
@@ -111,7 +226,22 @@
         modal.open();
     };
 
-    $("div.toolbar").html('<b>Custom tool bar! Text/images etc.</b>');
+    function reloadPage() {
+        const swRefresh = document.getElementById('swRefresh').checked;
+        const swStatus = document.getElementById('swStatus').checked;
+        const clientId = document.getElementById('clientId').value;
+        const periodId = document.getElementById('periodId').value;
+
+        const redirectUrl = '/expenses/paymentReceipts?refresh=' + swRefresh + '&' + 'showAll=' + swStatus;
+
+        var form = $('<form action="' + redirectUrl + '" method="post">' +
+            '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
+            '<input type="hidden" name="periodId" value="' + periodId + '"></input>' +
+            '</form>');
+
+        $('body').append(form);
+        $(form).submit();
+    }
 
     $(document).ready(function () {
 
@@ -123,7 +253,7 @@
         });
 
         var table = $('#datatable').dataTable({
-            dom: "<<'toolbar'><'hiddensearch'f'>tr<'table-footer'Blip'>",
+            dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
             oLanguage: {
                 sSearch: '',
                 sSearchPlaceholder: 'Escriba aqui su búsqueda',
@@ -139,15 +269,32 @@
                 {
                     targets: -1,
                     searchable: false,
-                    sortable: false
+                    sortable: false,
+                    className: "left-align",
                 },
                 {
                     className: "center-align",
                     targets: 0
                 },
+                {
+                    targets: 3,
+                    type: 'currency',
+                },
+                {
+                    targets: 4,
+                    visible: true,
+                    searchable: false,
+                    render: $.fn.dataTable.render.ellipsis(32, true)
+                    // render: function (data, type, full, meta) {
+                    //     return type === 'display' ? '<div title="' + full.description + '">' + data : data;
+                    // }
+                }
             ],
+
             colReorder: true,
-            fixedColumns: true,
+            fixedColumns: {
+                leftColumns: 3
+            },
             pageLength: 200,
             order: [[0, 'asc']],
             autowidth: true,
@@ -206,25 +353,6 @@
             fnInitComplete: function () {
                 $('#hide-dt').show();
                 $('#progress').hide();
-
-                this.api().columns().every(function () {
-                    var column = this;
-                    var select = $('<select><option value=""></option></select>')
-                        .appendTo($(column.footer()).empty())
-                        .on('change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-
-                            column
-                                .search(val ? '^' + val + '$' : '', true, false)
-                                .draw();
-                        });
-
-                    column.data().unique().sort().each(function (d, j) {
-                        select.append('<option value="' + d + '">' + d + '</option>')
-                    });
-                });
             },
             // "footerCallback": function (row, data, start, end, display) {
             //     var api = this.api();

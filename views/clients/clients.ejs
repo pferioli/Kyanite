@@ -1,6 +1,11 @@
 <%- include ("../partials/header") %>
 
 <main class="site-content">
+
+  <center>
+    <%- include ("../partials/alerts") %>
+  </center>
+
   <div class="table-container">
     <div class="table-header">
       <span class="table-title">Listado de Clientes</span>
@@ -78,9 +83,7 @@
       </table>
     </div>
   </div>
-  <center>
-    <%- include ("../partials/alerts") %>
-  </center>
+
 </main>
 
 <%- include ("./modals/delete.ejs") %>

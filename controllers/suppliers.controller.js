@@ -76,14 +76,9 @@ module.exports.addNew = async function (req, res, next) {
             })
 
     } catch (error) {
-        req.flash(
-            "error",
-            "Ocurrio un error y no se pudo modificar el cliente en la base de datos"
-        );
-
         winston.error(`An error ocurred while creating new client ${JSON.stringify(req.body)} - ${err}`);
-
-        res.redirect("/clients");
+        req.flash("error", "Ocurrio un error y no se pudo modificar el cliente en la base de datos");
+        res.redirect("/suppliers");
     }
 };
 
@@ -96,8 +91,11 @@ module.exports.info = async function (req, res) {
     });
 
     if (supplier === null) {
-        res.send(`el ID #${supplierid} no existe en la base de datos para ningun proveedor registrado, <a href="/suppliers"> volver al listado </a>`);
-        return;
+        req.flash(
+            "error",
+            "Ocurrio un error y no se pudo eliminar el proveedor de la base de datos"
+        );
+        return
     }
 
     res.render("suppliers/info.ejs", { menu: CURRENT_MENU, data: { supplier } });
@@ -149,6 +147,59 @@ module.exports.showEditForm = async function (req, res, next) {
     });
 
 };
+
+module.exports.edit = async function (req, res, next) {
+
+    const supplierId = req.params.id;
+
+    try {
+
+        let supplier = await Supplier.findByPk(supplierId);
+
+        if (!supplier) { res.redirect("/suppliers"); return; }
+
+        supplier.name = req.body.name;
+        supplier.cuit = req.body.cuit;
+        supplier.taxCategoryId = req.body.taxCategoryId;
+        supplier.bankId = (req.body.bankId === '') ? null : req.body.bankId;
+        supplier.bankAccount = (req.body.bankAccount === '') ? null : req.body.bankAccount;
+        supplier.address = req.body.address;
+        supplier.city = req.body.city;
+        supplier.zipCode = req.body.zipCode;
+        supplier.phone = req.body.phone;
+        supplier.email = req.body.email;
+        supplier.comments = req.body.comments;
+        supplier.categoryId = req.body.categoryId;
+        supplier.userId = req.user.id;
+
+        supplier.save()
+            .then(result => {
+                req.flash(
+                    "success",
+                    "El proveedor fue actualizado exitosamente a la base de datos"
+                )
+                winston.info(`supplier #${supplierId} was updated by user #${req.user.id} `);
+            })
+            .catch(err => {
+                req.flash(
+                    "error",
+                    "Ocurrio un error y no se pudo actualizar el proveedor de la base de datos"
+                )
+                winston.error(`an error ocurred when user #${req.user.id} tryed to update supplier #${supplierId} - ${err}`);
+            })
+            .finally(() => {
+                res.redirect("/suppliers");
+            });
+
+    } catch (error) {
+        winston.error(`An error ocurred while creating new client ${JSON.stringify(req.body)} - ${err}`);
+        req.flash("error", "Ocurrio un error y no se pudo modificar el cliente en la base de datos");
+        res.redirect("/suppliers");
+    }
+}
+
+//------------------ AJAX CALLS ------------------//
+
 module.exports.newCategory = async function (req, res) {
     const supplierCategory = await SupplierCategory.create({ name: req.body.category, enabled: true });
     res.send(supplierCategory);

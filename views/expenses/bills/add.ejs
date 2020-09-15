@@ -18,8 +18,7 @@
                             <i class="material-icons prefix">calendar_today</i>
                             <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
                             <label for="billingPeriod">Período de Liquidación</label>
-                            <input type="hidden" name="billingPeriodId" id="billingPeriodId"
-                                value=<%=data.client.id%> />
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
                         </div>
                     </div>
 
@@ -101,8 +100,9 @@
                         style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
                     <button id="add_button" type='submit' class="waves-effect waves-light btn green"
                         style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
-                    <a href="/expenses/paymentReceipts/<%=data.client.id%>" class="waves-effect waves-light btn red"><i
-                            class="material-icons right">cancel</i>Cancelar</a>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel"
+                        class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
+                            class="material-icons right">cancel</i>Volver</button>
                 </div>
             </div>
         </form>

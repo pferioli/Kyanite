@@ -1,8 +1,8 @@
 <%if(locals.warning && warning.length > 0){%>
 <div id="materialertWarning" class="materialert warning close-alert">
-    <div class="material-icons">info_outline
-        <button id="btnAlertClose" type="button" class="close-alert">×</button>
-    </div><%=warning%>
+    <div class="material-icons">info_outline</div>
+    <button id="btnAlertClose" type="button" class="close-alert">×</button>
+    <%=warning%>
 </div>
 <script>
     document.getElementById("btnAlertClose").onclick = function (e) {
