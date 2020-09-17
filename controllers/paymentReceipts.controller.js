@@ -23,7 +23,7 @@ module.exports = { gcs };
 
 module.exports.listAll = async function (req, res) {
 
-    const clientId = req.body.clientId || req.params.id;
+    const clientId = req.body.clientId || req.params.clientId;
 
     let periods = [];
 
@@ -71,7 +71,7 @@ module.exports.listAll = async function (req, res) {
 };
 
 module.exports.showNewForm = async function (req, res) {
-    const clientId = req.params.id;
+    const clientId = req.params.clientId;
     const client = await Client.findByPk(clientId);
     const suppliers = await Supplier.findAll(
         {
@@ -83,7 +83,7 @@ module.exports.showNewForm = async function (req, res) {
 
 module.exports.addNew = async function (req, res, next) {
 
-    const clientId = req.params.id;
+    const clientId = req.params.clientId;
 
     PaymentReceipt.create(
         {

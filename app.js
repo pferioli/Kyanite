@@ -146,6 +146,8 @@ app.use('/homeOwners', require('./routes/homeOwners.route'));
 
 app.use('/periods', require('./routes/billingPeriods.route'));
 
+app.use('/accounts', require('./routes/accounts.route'));
+
 app.use('/incomes', require('./routes/incomes.route'));
 
 app.use('/expenses/paymentReceipts', require('./routes/paymentReceipts.route'));

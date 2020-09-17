@@ -1,48 +1,73 @@
 <script>
     var pendingNotifications = {};
 </script>
+
+<ul id="Expenses" class="dropdown-content black">
+    <li><a class="white-text" href="/expenses/paymentReceipts"><i class="material-icons">assignment</i>Comprobantes</a></li>
+    <li><a class="white-text" href="/expenses/paymentOrders"><i class="material-icons">assignment_turned_in</i>Ordenes de Pago</a></li>
+    <li class="divider"></li>
+    <li><a class="white-text" href="#!"><i class="material-icons">analytics</i>Reportes</a></li>
+</ul>
+
+<ul id="Incomes" class="dropdown-content black">
+    <li><a class="white-text" href="#!"><i class="material-icons">payment</i>Cobranzas</a></li>
+    <li><a class="white-text" href="#!"><i class="material-icons">pageview</i>Depositos no identificados</a></li>
+    <li><a class="white-text" href="#!"><i class="material-icons">description</i>Emisión de Recibos</a></li>
+    <li class="divider"></li>
+    <li><a class="white-text" href="#!"><i class="material-icons">payments</i>Notas de Crédito</a></li>
+    <li><a class="white-text" href="#!"><i class="material-icons">trending_up</i>Plazos Fijos</a></li>
+    <li class="divider"></li>
+    <li><a class="white-text" href="#!"><i class="material-icons">analytics</i>Reportes</a></li>
+</ul>
+
+<ul id="BanksAndAccounts" class="dropdown-content black">
+    <li><a class="white-text" href="#!"><i class="material-icons">request_quote</i>Cuenta Corriente</a></li>
+    <li class="divider"></li>
+    <li><a class="white-text" href="#!"><i class="material-icons">swap_horizontal_circle</i>Transferencias</a></li>
+    <li><a class="white-text" href="#!"><i class="material-icons">local_atm</i>Cheques</a></li>
+    <li class="divider"></li>
+    <li><a class="white-text" href="/accounts"><i class="material-icons">fact_check</i>Cuentas</a></li>
+</ul>
+
 <nav>
     <div class="nav-wrapper grey darken-4">
         <a href="#" data-target="slide-out" class="sidenav-trigger show-on-large"><i class="material-icons">menu</i></a>
 
         <ul class="left" id="ul_header_buttons">
             <li id="li_home">
-                <a href="/"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="Inicio">home</i></a>
+                <a href="/"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Inicio">home</i></a>
             </li>
             <li id="li_incomes">
-                <a href="/incomes"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="Ingresos">monetization_on</i>
-                </a>
+                <a id="dropdownIncomes" class="dropdown-trigger" data-target="Incomes">
+                    <i class="material-icons">monetization_on<i class="material-icons right" style="margin-left: 0px; margin-right: -10px;">arrow_drop_down</i></i></a>
             </li>
+
             <li id="li_expenses">
-                <a href="/expenses/paymentReceipts"><i class="material-icons tooltipped" data-position="bottom"
-                        data-delay="50" data-tooltip="Egresos">receipt</i>
-                </a>
+                <a id="dropdownExpenses" class="dropdown-trigger" data-target="Expenses"><i class="material-icons">receipt<i class="material-icons right" style="margin-left: 0px; margin-right: -10px;">arrow_drop_down</i></i></a>
             </li>
+
             <li id="li_accounts_banks">
-                <a href="/accountsandbanks"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="Cajas y Bancos">account_balance</i></a>
+                <a id="dropdownBanksAndAccounts" class="dropdown-trigger" data-target="BanksAndAccounts"><i class="material-icons">account_balance<i class="material-icons right" style="margin-left: 0px; margin-right: -10px;">arrow_drop_down</i></i></a>
             </li>
+
+            <!-- <li id="li_incomes"><a href="/incomes"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Ingresos">monetization_on</i></a></li> -->
+            <!-- <li id="li_expenses"><a href="/expenses/paymentReceipts"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Egresos">receipt</i></a></li>-->
+            <!-- <li id="li_accounts_banks"><a href="/accounts"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Cajas y Bancos">account_balance</i></a></li> -->
+
             <li id="li_periods">
-                <a href="/periods"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="Periodos">event</i></a>
+                <a href="/periods"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Periodos">event</i></a>
             </li>
             <li id="li_clients">
-                <a href="/clients"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="Clientes">business</i></a>
+                <a href="/clients"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Clientes">business</i></a>
             </li>
             <li id="li_homeowners">
-                <a href="/homeOwners"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="Propietarios">people</i></a>
+                <a href="/homeOwners"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Propietarios">people</i></a>
             </li>
             <li id="li_suppliers">
-                <a href="/suppliers"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="Proveedores">store</i></a>
+                <a href="/suppliers"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Proveedores">store</i></a>
             </li>
             <li>
-                <a href="/settings"><i class="material-icons tooltipped" data-position="bottom" data-delay="50"
-                        data-tooltip="settings">more_vert</i></a>
+                <a href="/settings"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="settings">more_vert</i></a>
             </li>
         </ul>
 
@@ -54,23 +79,21 @@
 
         <ul class="right">
             <li id="notifications" style="visibility: hidden;">
-                <a href="/notifications/show/<%=locals.user.id%>"><i class="material-icons tiny left amber-text"
-                        data-position="bottom" data-delay="50"
-                        data-tooltip="Alertas Pendientes">notification_important</i></a>
+                <a href="/notifications/show/<%=locals.user.id%>"><i class="material-icons tiny left amber-text" data-position="bottom" data-delay="50" data-tooltip="Alertas Pendientes">notification_important</i></a>
             </li>
             <li>
                 <span style="margin-right: 20px;"><i class="material-icons tiny left">account_circle</i>
                     <% if (locals.user) { %> <%=locals.user.name%> <% } %> </span>
             </li>
             <li>
-                <a href="/auth/logout" onclick="notificationsTimerStop();"><i class="material-icons tooltipped"
-                        data-position="bottom" data-delay="50" data-tooltip="log out">exit_to_app</i></a>
+                <a href="/auth/logout" onclick="notificationsTimerStop();"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="log out">exit_to_app</i></a>
             </li>
         </ul>
     </div>
 </nav>
 
 <script>
+
     var userid = htmlDecode("<%= locals.user.id %>");
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -78,6 +101,12 @@
         //checkNotifications();
 
         notificationsTimerStart();
+    });
+
+    $(document).ready(function () {
+        $('#dropdownIncomes,#dropdownExpenses,#dropdownBanksAndAccounts').dropdown({
+            coverTrigger: false, constrainWidth: false, hover: true
+        });
     });
 
 </script>

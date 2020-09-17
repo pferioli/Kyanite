@@ -2,7 +2,11 @@
 const {
     Model
 } = require('sequelize');
+
+const status = ["Deshabilitado", "Pendiente", "En Proceso", "Procesado", "Anulado", "Pausado"];
+
 module.exports = (sequelize, DataTypes) => {
+
     class PaymentReceipt extends Model {
         /**
          * Helper method for defining associations.
@@ -65,7 +69,6 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
             get: function () {
-                const status = ["Deshabilitado", "Pendiente", "En Proceso", "Procesado", "Anulado", "Pausado"];
                 return status[this.get('statusId')];
             }
         },

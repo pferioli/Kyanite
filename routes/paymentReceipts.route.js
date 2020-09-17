@@ -11,14 +11,14 @@ router.post("/", function (req, res, next) {
     paymentReceiptsController.listAll(req, res);
 });
 
-router.get("/info/:id", function (req, res, next) {
+router.get("/info/:clientId", function (req, res, next) {
 });
 
-router.get('/new/:id', function (req, res, next) {
+router.get('/new/:clientId', function (req, res, next) {
     paymentReceiptsController.showNewForm(req, res);
 })
 
-router.post('/new/:id', [paymentReceiptsController.gcs.multer.single('attachment')],
+router.post('/new/:clientId', [paymentReceiptsController.gcs.multer.single('attachment')],
     function (req, res, next) {
         paymentReceiptsController.addNew(req, res, next);
     },
@@ -33,7 +33,7 @@ router.get("/types/:id", function (req, res, next) {
 
 });
 
-router.get("/:id", function (req, res, next) {
+router.get("/:clientId", function (req, res, next) {
     paymentReceiptsController.listAll(req, res);
 });
 

@@ -13,7 +13,7 @@ const eBillingPeriodStatus = new Enum({ 'created': 0, 'opened': 1, 'closed': 2, 
 
 module.exports.listAll = async function (req, res, next) {
 
-    const clientId = req.params.id;
+    const clientId = req.params.clientId;
 
     const client = await Client.findByPk(clientId);
 
@@ -150,9 +150,11 @@ module.exports.close = async function (req, res, next) {
         });
 }
 
+//------------------ AJAX CALLS ------------------//
+
 module.exports.getActive = async function (req, res, next) {
     BillingPeriod.findOne({
-        where: { clientId: req.params.id, statusId: eBillingPeriodStatus.get('opened') }
+        where: { clientId: req.params.clientId, statusId: eBillingPeriodStatus.get('opened').value }
     }).then(function (periods) {
         res.send(periods)
     });
@@ -160,7 +162,7 @@ module.exports.getActive = async function (req, res, next) {
 
 module.exports.getAllByClientID = async function (req, res, next) {
     BillingPeriod.findAll({
-        where: { clientId: req.params.id }, order: [['name', 'DESC']],
+        where: { clientId: req.params.clientId }, order: [['name', 'DESC']],
     }).then(function (periods) {
         res.send(periods)
     });

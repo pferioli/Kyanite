@@ -12,15 +12,15 @@ router.post("/", function (req, res, next) {
     res.redirect("/periods/" + clientId);
 });
 
-router.get("/active/:id", function (req, res, next) {
+router.get("/active/:clientId", function (req, res, next) {
     billingPeriodsController.getActive(req, res);
 });
 
-router.get("/byCustomer/:id", function (req, res, next) {
+router.get("/byCustomer/:clientId", function (req, res, next) {
     billingPeriodsController.getAllByClientID(req, res);
 });
 
-router.get("/:id", function (req, res, next) {
+router.get("/:clientId", function (req, res, next) {
     billingPeriodsController.listAll(req, res);
 });
 
