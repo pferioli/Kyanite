@@ -33,7 +33,7 @@
                                 <% } %>
                             </select>
                             <label>Banco</label>
-                            <input type="hidden" name="bankId" id="bank" />
+                            <input type="hidden" name="bankId" id="bankId" />
                         </div>
                     </div>
 
@@ -41,18 +41,18 @@
                         <div class="input-field col s3">
                             <i class="material-icons prefix">account_balance</i>
                             <input id="cbu" name="cbu" type="text" class="validate" minlength="22" maxlength="22" patern="^[0-9]{22}" required disabled onfocusout="validateCBU(this)" />
-                            <label for="cbu">C.B.U.</label><span class="helper-text" data-error="formato inválido" data-success="correcto">ingrese los 22 digitos sin espacios</span>
-                        </div>
-                        <div class="input-field col s3">
-                            <input id="accountNumber" name="accountNumber" type="text" disabled />
-                            <label for="accountNumber">Cuenta</label>
+                            <label for="cbu">C.B.U.</label><span class="helper-text" data-error="CBU inválida" data-success="formato válido">ingrese los 22 digitos sin espacios</span>
                         </div>
                         <div class="input-field col s3">
                             <input id="accountAlias" name="accountAlias" type="text" minlength="6" maxlength="20" disabled />
                             <label for="accountAlias">Alias</label>
                         </div>
                         <div class="input-field col s3">
-                            <input id="bankBranch" name="bankBranch" type="text" class="validate" disabled />
+                            <input id="accountNumber" name="accountNumber" type="text" disabled />
+                            <label for="accountNumber">Cuenta</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="bankBranch" name="bankBranch" type="text" disabled />
                             <label for="bankBranch">Sucursal</label>
                         </div>
                     </div>
@@ -61,13 +61,13 @@
                     </div>
                     <div class="row">
                         <div class="input-field col s12">
-                            <textarea id="comments" name="comments" class="materialize-textarea" required></textarea>
+                            <textarea id="comments" name="comments" class="materialize-textarea"></textarea>
                             <label for="comments">Comentarios</label>
                         </div>
                     </div>
 
                     <div class="card-action right-align">
-                        <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Guardar</button>
+                        <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
                         <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i class="material-icons right">cancel</i>Volver</button>
                     </div>
                 </div>
@@ -93,26 +93,28 @@
 
             const accountType = event.target.options[event.target.selectedIndex].text;
 
+            document.getElementById("accountTypeId").value = event.target.value;
+
             let bankSelect = document.getElementById("bankSelect");
 
             let accountNumber = document.getElementById("accountNumber");
             let accountAlias = document.getElementById("accountAlias");
             let bankBranch = document.getElementById("bankBranch");
             let cbu = document.getElementById("cbu");
+            let bankId = document.getElementById("bankId");
 
             if ((accountType.includes('[CC$]')) || (accountType.includes('[CA$]')) || (accountType.includes('[CCU$]')) || (accountType.includes('[CAU$]'))) {
-                // accountNumber.disabled = false;
-                // accountAlias.disabled = false;
-                // bankBranch.disabled = false;
-                // cbu.disabled = false;
-                bankSelect.disabled = false;
+                bankSelect.disabled = false; bankId.disabled = false; document.getElementById("add_button").disabled = true;
             } else {
                 accountNumber.value = ""; accountNumber.classList.remove("valid"); accountNumber.disabled = true;
-                accountAlias.value = ""; accountAlias.classList.remove("valid"); accountAlias.disabled = true;
-                bankBranch.value = ""; bankBranch.classList.remove("valid"); bankBranch.disabled = true;
-                cbu.value = ""; cbu.classList.remove("valid"); cbu.disabled = true;
+                accountAlias.value = ""; accountAlias.disabled = true;
+                bankBranch.value = ""; bankBranch.disabled = true;
+                cbu.value = ""; cbu.classList.remove("valid"); cbu.classList.remove("invalid"); cbu.disabled = true;
+                bankId.value = ""; bankId.disabled = true;
                 bankSelect.selectedIndex = "0";
                 bankSelect.disabled = true;
+
+                document.getElementById("add_button").disabled = false;
             };
             M.FormSelect.init(bankSelect, {});
             M.updateTextFields();
@@ -129,23 +131,40 @@
             let accountNumber = document.getElementById("accountNumber");
             let accountAlias = document.getElementById("accountAlias");
             let bankBranch = document.getElementById("bankBranch");
+            let bankId = document.getElementById("bankId");
 
             cbu.value = ""; cbu.disabled = false;
             accountNumber.value = ""; accountNumber.disabled = false;
             accountAlias.value = ""; accountAlias.disabled = false;
             bankBranch.value = ""; bankBranch.disabled = false;
+            bankId.value = event.target.value;
 
             M.updateTextFields(); cbu.focus();
         });
     });
 
     function validateCBU(e) {
-        if (e.value === '') return;
+        if (e.value === '') {
+            document.getElementById("add_button").disabled = true;
+            return;
+        };
+
         const isCBU = validarCBU(e.value);
+
         if (isCBU === false) {
+            document.getElementById("add_button").disabled = true;
+            cbu.classList.remove("valid"); cbu.classList.add("invalid");
             alert('la CBU ingresada es incorrecta');
         } else {
-            if (`[${e.value}]` != bankCode) { alert('la CBU ingresada no pertenece al banco seleccionado, debe comenzar con ' + bankCode); };
+            if (`[${e.value.substr(0, 3)}]` != bankCode) {
+                cbu.classList.remove("valid"); cbu.classList.add("invalid");
+                alert('la CBU ingresada no pertenece al banco seleccionado, debe comenzar con ' + bankCode);
+            };
+
+            accountNumber.value = e.value.substr(8, 13)
+            bankBranch.value = e.value.substr(3, 4)
+            M.updateTextFields();
+            document.getElementById("add_button").disabled = false;
         }
     };
 

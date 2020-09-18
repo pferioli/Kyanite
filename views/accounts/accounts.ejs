@@ -25,53 +25,71 @@
                 </div>
             </div>
             <div class="actions">
+                <div class="switch">
+                    <label> Mostrar cuentas eliminadas
+                        <input id="swShowDeleted" type="checkbox" onchange="showDeletedAccounts();" <% if(params.showAll===true){%> checked <%}%>>
+                        <span class="lever"></span>
+                    </label>
+                </div>
+                                
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
 
                 <a href="/accounts/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
 
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                </div>
+            </div>
+            <div id="hide-dt" style="display:none">
+                <table id="datatable" class="table display">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cuenta</th>
+                            <th>Descripcion</th>
+                            <th>Banco</th>
+                            <th>Sucursal</th>
+                            <th>Cuenta</th>
+                            <th>Alias</th>
+                            <th>CBU</th>
+                            <th>Comentarios</th>
+                            <% if(params.showAll===true){%>
+                            <th>Eliminado</th>
+                            <%}%>
+                            <th>Usuario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < data.accounts.length; i++) { %>
+                        <tr data-id="<%= data.accounts[i].id %>">
+                            <td><%= data.accounts[i].id %></td>
+                            <td><%= data.accounts[i].accountType.account %></td>
+                            <td><%= data.accounts[i].accountType.description %></td>
+                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bank.name %> <%}%></td>
+                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankBranch %> <%}%></td>
+                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].accountNumber %> <%}%></td>
+                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankAlias %> <%}%></td>
+                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].cbu %> <%}%></td>
+                            <td><%= data.accounts[i].comments %></td>
+                            <% if(params.showAll===true){%>
+                            <td><%=data.accounts[i].deletedAt%></td>
+                            <%}%>
+                            <td><%= data.accounts[i].user.name %></td>
+                            <td>
+                                <% if((data.accounts[i].accountType.account==="CC$")||(data.accounts[i].accountType.account==="CA$")|| (data.accounts[i].accountType.account==="CCU$")||(data.accounts[i].accountType.account==="CAU$")) { %>
+                                <a href="/accounts/edit/<%=data.accounts[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                                <% } %>
+
+                                <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.accounts[i].id%>" data-clientId="<%=data.client.id%>" data-account="<%=data.accounts[i].accountType.account%> (<%=data.accounts[i].accountType.description %>)" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            </td>
+                        </tr>
+                        <% } %>
+                        </tbody>
+                </table>
             </div>
         </div>
-        <div id="hide-dt" style="display:none">
-            <table id="datatable" class="table display">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cuenta</th>
-                        <th>Descripcion</th>
-                        <th>Banco</th>
-                        <th>Sucursal</th>
-                        <th>Cuenta</th>
-                        <th>Alias</th>
-                        <th>CBU</th>
-                        <th>Comentarios</th>
-                        <th>Usuario</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for(var i=0; i < data.accounts.length; i++) { %>
-                    <tr data-id="<%= data.accounts[i].id %>">
-                        <td><%= data.accounts[i].id %></td>
-                        <td><%= data.accounts[i].accountType.account %></td>
-                        <td><%= data.accounts[i].accountType.description %></td>
-                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bank.name %> <%}%></td>
-                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankBranch %> <%}%></td>
-                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].accountNumber %> <%}%></td>
-                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankAlias %> <%}%></td>
-                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].cbu %> <%}%></td>
-                        <td><%= data.accounts[i].comments %></td>
-                        <td><%= data.accounts[i].user.name %></td>
-                        <td>
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.accounts[i].id%>" data-account="<%= data.accounts[i].id %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
-                        </td>
-                    </tr>
-                    <% } %>
-                </tbody>
-            </table>
-        </div>
-    </div>
 
+        <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
 </main>
 
 <%- include ("./modals/delete.ejs") %>
@@ -80,7 +98,7 @@
 
 <script>
 
-    var handler = 0;
+    const showDeleted = htmlDecode("<%=params.showAll%>");
 
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll(".modal");
@@ -92,9 +110,24 @@
         var modal = M.Modal.getInstance(_elem);
         const message = `[ID: ${button.dataset.id}] - ${button.dataset.account}`
         document.getElementById('modalDeleteMessage').textContent = message;
-        document.getElementById('modalDeleteClientId').value = button.dataset.id;
+        document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
+        document.getElementById('modalDeleteAccountId').value = button.dataset.id;
         modal.open();
     };
+
+    function showDeletedAccounts(e) {
+        const swShowDeleted = document.getElementById('swShowDeleted').checked;
+        const clientId = document.getElementById('clientId').value;
+
+        const redirectUrl = '/accounts?showAll=' + swShowDeleted;
+
+        var form = $('<form action="' + redirectUrl + '" method="post">' +
+            '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
+            '</form>');
+
+        $('body').append(form);
+        $(form).submit();
+    }
 
     $(document).ready(function () {
 
@@ -139,7 +172,7 @@
             colReorder: true,
             fixedColumns: { leftColumns: 2 },
             pageLength: 10,
-            order: [[0, 'asc']],
+            order: [[1, 'asc']],
             autowidth: true,
             scrollY: '500px',
             scrollX: true,

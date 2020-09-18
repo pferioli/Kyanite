@@ -8,16 +8,19 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
-    const clientId = req.body.clientId;
-    res.redirect("/accounts/" + clientId);
+    accountsController.listAll(req, res);
 });
 
 router.get("/new/:clientId", function (req, res, next) {
     accountsController.showNewForm(req, res);
 });
 
-router.post("/new", function (req, res, next) {
-    accountsController.new(req, res);
+router.post("/new/:clientId", function (req, res, next) {
+    accountsController.addNew(req, res);
+});
+
+router.get("/edit/:id", function (req, res, next) {
+    accountsController.showEditForm(req, res);
 });
 
 router.post('/delete', function (req, res, next) {
