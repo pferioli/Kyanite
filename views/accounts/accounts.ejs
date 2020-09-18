@@ -53,7 +53,7 @@
                             <th>CBU</th>
                             <th>Comentarios</th>
                             <% if(params.showAll===true){%>
-                            <th>Eliminado</th>
+                            <th>Eliminada</th>
                             <%}%>
                             <th>Usuario</th>
                             <th>Acciones</th>
@@ -72,19 +72,22 @@
                             <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].cbu %> <%}%></td>
                             <td><%= data.accounts[i].comments %></td>
                             <% if(params.showAll===true){%>
-                            <td><%=data.accounts[i].deletedAt%></td>
+                            <td><%=data.accounts[i].isDeleted%></td>
                             <%}%>
                             <td><%= data.accounts[i].user.name %></td>
                             <td>
+                                <% if(!data.accounts[i].isDeleted){ %>
+
                                 <% if((data.accounts[i].accountType.account==="CC$")||(data.accounts[i].accountType.account==="CA$")|| (data.accounts[i].accountType.account==="CCU$")||(data.accounts[i].accountType.account==="CAU$")) { %>
                                 <a href="/accounts/edit/<%=data.accounts[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
                                 <% } %>
 
                                 <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.accounts[i].id%>" data-clientId="<%=data.client.id%>" data-account="<%=data.accounts[i].accountType.account%> (<%=data.accounts[i].accountType.description %>)" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                <%}%>
                             </td>
                         </tr>
                         <% } %>
-                        </tbody>
+                                </tbody>
                 </table>
             </div>
         </div>
@@ -167,7 +170,14 @@
                     visible: true,
                     searchable: false,
                     render: $.fn.dataTable.render.ellipsis(32, true)
-                }
+                },
+                // {
+                //     targets: "Eliminada",
+                //     visible: true,
+                //     searchable: false,
+                //     render: $.fn.dataTable.render.moment('Do MMM YYYY')
+                // },
+
             ],
             colReorder: true,
             fixedColumns: { leftColumns: 2 },

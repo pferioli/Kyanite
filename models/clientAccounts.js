@@ -1,4 +1,7 @@
 'use strict';
+
+const moment = require('moment');
+
 const {
     Model
 } = require('sequelize');
@@ -53,6 +56,14 @@ module.exports = (sequelize, DataTypes) => {
         userId: {
             allowNull: false,
             type: DataTypes.INTEGER
+        },
+        isDeleted: {
+            type: new DataTypes.VIRTUAL(DataTypes.DATE, ['deletedAt']),
+            get() {
+                if (this.getDataValue('deletedAt'))
+                    return moment(this.getDataValue('deletedAt')).format('DD/MM/YYYY hh:mm:ss');
+                else return null;
+            }
         }
     }, {
         sequelize,

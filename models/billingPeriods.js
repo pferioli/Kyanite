@@ -1,7 +1,8 @@
 'use strict';
 
 const moment = require('moment');
-//const Enum = require('enum')
+
+const status = ["Creado", "Abierto", "Cerrado", "Anulado"];
 
 const {
     Model
@@ -76,13 +77,7 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
             get: function () {
-                switch (this.get('statusId')) {
-                    case 0: return "Creado";
-                    case 1: return "Abierto";
-                    case 2: return "Cerrado";
-                    case 3: return "Anulado";
-                }
-                return "ERROR";
+                return (status[this.get('statusId')])
             },
         }
     }, {
