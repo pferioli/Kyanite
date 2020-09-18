@@ -23,6 +23,10 @@ router.get("/edit/:id", function (req, res, next) {
     accountsController.showEditForm(req, res);
 });
 
+router.post("/edit", function (req, res, next) {
+    accountsController.edit(req, res);
+});
+
 router.post('/delete', function (req, res, next) {
     accountsController.delete(req, res);
 })

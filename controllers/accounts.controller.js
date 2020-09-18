@@ -91,48 +91,86 @@ module.exports.addNew = async function (req, res, next) {
 };
 
 module.exports.delete = async function (req, res, next) {
+
     const clientId = req.body.clientId;
     const accountId = req.body.accountId;
 
-    ClientAccount.findByPk(accountId)
-        .then(clientAccount => {
+    try {
+        const clientAccount = await ClientAccount.findByPk(accountId);
 
-            clientAccount.destroy()
-                .then(() => {
-                    winston.info(`User #${req.user.id} deleted succesfully the selected client account ${JSON.stringify(clientAccount)} - ${accountId}`)
-                    req.flash(
-                        "success",
-                        "La cuenta de cliente fue eliminada exitosamente a la base de datos"
-                    )
-                })
-                .catch(err => {
-                    req.flash(
-                        "error",
-                        "Ocurrio un error y no se encontro la cuenta seleccionada en la base de datos"
-                    );
-                    winston.error(`An error ocurred while deleting client account ${JSON.stringify(req.body)} - ${err}`);
-                })
-                .finally(() => {
-                    res.redirect("/accounts/" + clientId);
-                });
+        if (clientAccount) {
 
-        })
-        .catch(err => {
-            req.flash(
-                "error",
-                "Ocurrio un error y no se encontro la cuenta seleccionada en la base de datos"
-            );
-            winston.error(`An error ocurred while deleting client account ${JSON.stringify(req.body)} - ${err}`);
-        })
+            clientAccount.userId = req.user.id;
+            await clientAccount.save();
+
+            const deleteResult = await clientAccount.destroy();
+
+            if (deleteResult) {
+                winston.info(`User #${req.user.id} deleted succesfully the selected client account ${JSON.stringify(clientAccount)} - ${accountId}`);
+                req.flash("success", "La cuenta de cliente fue eliminada exitosamente a la base de datos");
+            } else {
+                winston.error(`An error ocurred while deleting client account ${JSON.stringify(req.body)} - ${err}`);
+                req.flash("error", "Ocurrio un error y no se pudo eliminar la cuenta seleccionada en la base de datos");
+            }
+
+        } else {
+            req.flash("error", "Ocurrio un error y no se encontro la cuenta seleccionada en la base de datos");
+            winston.error(`Client account not found for deleting ${JSON.stringify(req.body)} - ${err}`);
+        }
+
+    } finally {
+        res.redirect("/accounts/" + clientId);
+    };
 };
 
 module.exports.showEditForm = async function (req, res, next) {
 
     const accountId = req.params.id;
 
+    const clientAccount = await ClientAccount.findByPk(accountId);
+
+    const client = await Client.findByPk(clientAccount.clientId);
+
+    const accountTypes = await AccountType.findAll({ where: { enabled: true } });
+
+    const banks = await Bank.findAll({ where: { enabled: true } });
+
+    res.render("accounts/edit.ejs", { menu: CURRENT_MENU, data: { client, clientAccount, accountTypes, banks } });
+};
+
+module.exports.edit = async function (req, res, next) {
+
+    const accountId = req.body.accountId;
+
+    const clientId = req.body.clientId;
+
     let clientAccount = await ClientAccount.findByPk(accountId)
 
-    const clientId = clientAccount.clientId;
+    if (clientAccount) {
 
-    res.redirect("/accounts/" + clientId);
+        clientAccount.clientId = clientId;
+        clientAccount.accountTypeId = req.body.accountTypeId;
+        clientAccount.bankId = req.body.bankId;
+        clientAccount.bankBranch = req.body.bankBranch;
+        clientAccount.accountNumber = req.body.accountNumber;
+        clientAccount.accountAlias = req.body.accountAlias;
+        clientAccount.cbu = req.body.cbu;
+        clientAccount.comments = req.body.comments;
+        clientAccount.userId = req.user.id;
+
+        clientAccount.save()
+            .then(() => {
+                winston.info(`User #${req.user.id} updated succesfully the selected client account ${JSON.stringify(clientAccount)} - ${accountId}`);
+                req.flash("success", "La cuenta de cliente fue actualizada exitosamente en la base de datos");
+            })
+            .catch(err => {
+                winston.error(`An error ocurred while updating client account ${JSON.stringify(req.body)} - ${err}`);
+                req.flash("error", "Ocurrio un error y no se pudo modificar la cuenta seleccionada en la base de datos");
+            })
+            .finally(() => { res.redirect("/accounts/" + clientId); })
+    } else {
+        req.flash("error", "Ocurrio un error y no se encontro la cuenta seleccionada en la base de datos");
+        winston.error(`Client account not found for updating ${JSON.stringify(req.body)} - ${err}`);
+        res.redirect("/accounts/" + clientId);
+    }
 };

@@ -1,0 +1,156 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" method="post" action='/accounts/edit'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Modificar cuenta de cliente</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">home</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <select id="accountTypeSelect">
+                                <option value="" disabled selected>Seleccione el tipo de cuenta</option>
+                                <% for(var i=0; i < data.accountTypes.length; i++) { %>
+                                <% if((data.accountTypes[i].account==="CC$")||(data.accountTypes[i].account==="CA$")|| (data.accountTypes[i].account==="CCU$")||(data.accountTypes[i].account==="CAU$")) { %>
+                                <% if(data.clientAccount.accountTypeId === data.accountTypes[i].id){%>
+                                <option value="<%=data.accountTypes[i].id%>" selected>[<%=data.accountTypes[i].account%>] <%=data.accountTypes[i].description%></option>
+                                <% } else {%>
+                                <option value="<%=data.accountTypes[i].id%>">[<%=data.accountTypes[i].account%>] <%=data.accountTypes[i].description%></option>
+                                <% } %>
+                                <% } %>
+                                <% } %>
+                            </select>
+                            <label>Tipo de Cuenta</label>
+                            <input type="hidden" name="accountTypeId" id="accountTypeId" value="<%=data.clientAccount.accountTypeId%>" />
+                        </div>
+                        <div class="input-field col s6">
+                            <select id="bankSelect">
+                                <option value="0" disabled selected>Seleccione un banco</option>
+                                <% for(var i=0; i < data.banks.length; i++) { %>
+                                <% if(data.clientAccount.bankId === data.banks[i].id){%>
+                                <option value="<%=data.banks[i].id%>" selected><%= data.banks[i].name%> [<%=data.banks[i].code%>]</option>
+                                <% } else {%>
+                                <option value="<%=data.banks[i].id%>"><%= data.banks[i].name%> [<%=data.banks[i].code%>]</option>
+                                <% } %>
+                                <% } %>
+                            </select>
+                            <label>Banco</label>
+                            <input type="hidden" name="bankId" id="bankId" value="<%=data.clientAccount.bankId%>" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">account_balance</i>
+                            <input id="cbu" name="cbu" type="text" class="validate" minlength="22" maxlength="22" patern="^[0-9]{22}" required onfocusout="validateCBU(this)" value="<%=data.clientAccount.cbu%>" />
+                            <label for="cbu">C.B.U.</label><span class="helper-text" data-error="CBU inválida" data-success="formato válido">ingrese los 22 digitos sin espacios</span>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="accountAlias" name="accountAlias" type="text" minlength="6" maxlength="20" value="<%=data.clientAccount.accountAlias%>" />
+                            <label for="accountAlias">Alias</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="accountNumber" name="accountNumber" type="text" value="<%=data.clientAccount.accountNumber%>" />
+                            <label for="accountNumber">Cuenta</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <input id="bankBranch" name="bankBranch" type="text" value="<%=data.clientAccount.bankBranch%>" />
+                            <label for="bankBranch">Sucursal</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <textarea id="comments" name="comments" class="materialize-textarea"><%=data.clientAccount.comments%></textarea>
+                            <label for="comments">Comentarios</label>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="accountId" id="accountId" value="<%=data.clientAccount.id%>" />
+                    <input type="hidden" name="clientId" id="clientId" value="<%=data.clientAccount.clientId%>" />
+
+                    <div class="card-action right-align">
+                        <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Guardar</button>
+                        <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i class="material-icons right">cancel</i>Volver</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<%- include ("../partials/footer") %>
+
+<script>
+
+    var bankCode = "";
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+        M.CharacterCounter.init(document.getElementById("comments"));
+
+        const accountTypeSelect = document.getElementById("accountTypeSelect");
+        accountTypeSelect.addEventListener('change', (event) => {
+            document.getElementById("accountTypeId").value = event.target.value;
+        });
+
+        const bankSelect = document.getElementById("bankSelect");
+        bankSelect.addEventListener('change', (event) => {
+
+            const bank = event.target.options[event.target.selectedIndex].text;
+
+            bankCode = bank.substr(bank.indexOf("["));
+
+            let cbu = document.getElementById("cbu");
+            let accountNumber = document.getElementById("accountNumber");
+            let accountAlias = document.getElementById("accountAlias");
+            let bankBranch = document.getElementById("bankBranch");
+            let bankId = document.getElementById("bankId");
+
+            cbu.value = ""; cbu.disabled = false;
+            accountNumber.value = ""; accountNumber.disabled = false;
+            accountAlias.value = ""; accountAlias.disabled = false;
+            bankBranch.value = ""; bankBranch.disabled = false;
+            bankId.value = event.target.value;
+
+            M.updateTextFields(); cbu.focus();
+        });
+    });
+
+    function validateCBU(e) {
+        if (e.value === '') {
+            document.getElementById("add_button").disabled = true;
+            return;
+        };
+
+        const isCBU = validarCBU(e.value);
+
+        if (isCBU === false) {
+            document.getElementById("add_button").disabled = true;
+            cbu.classList.remove("valid"); cbu.classList.add("invalid");
+            alert('la CBU ingresada es incorrecta');
+        } else {
+            if (`[${e.value.substr(0, 3)}]` != bankCode) {
+                cbu.classList.remove("valid"); cbu.classList.add("invalid");
+                alert('la CBU ingresada no pertenece al banco seleccionado, debe comenzar con ' + bankCode);
+            };
+
+            accountNumber.value = e.value.substr(8, 13)
+            bankBranch.value = e.value.substr(3, 4)
+            M.updateTextFields();
+            document.getElementById("add_button").disabled = false;
+        }
+    };
+
+</script>
+
+<script type="text/javascript" src="/javascripts/validateCBU.js"></script>
