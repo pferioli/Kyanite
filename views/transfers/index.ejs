@@ -1,0 +1,21 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+
+    <form method="POST" action='/transfers'>
+        <%- include ("../partials/clientsPeriodSelector") %>
+    </form>
+
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
+
+</main>
+
+<!-- <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        populateClients("clientsSelect");
+    });
+</script> -->
+
+<%- include ("../partials/footer") %>

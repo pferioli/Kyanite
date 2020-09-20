@@ -1,33 +1,56 @@
+const Op = require('sequelize').Op
 const Model = require('../models')
 const User = Model.user;
 const Client = Model.client;
+const BillingPeriod = Model.billingPeriod;
+const AccountTransfer = Model.accountTransfer;
 const ClientAccount = Model.clientAccount;
 const AccountType = Model.accountType;
-const Bank = Model.bank;
 
 const winston = require('../helpers/winston.helper');
 
-const CURRENT_MENU = 'accounts'; module.exports.CURRENT_MENU = CURRENT_MENU;
+const CURRENT_MENU = 'accountTransfers'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = async function (req, res, next) {
 
     const clientId = req.params.clientId || req.body.clientId;
 
-    const client = await Client.findByPk(clientId);
+    let periods = [];
+
+    if (typeof req.body.periodId != 'undefined') {
+        periods = req.body.periodId.split(',');
+    } else {
+
+        const activePeriod = await BillingPeriod.findOne({
+            where: { clientId: clientId, statusId: 1 },
+            attributes: ['id']
+        });
+
+        if (activePeriod) { periods.push(activePeriod.id) }
+    }
 
     const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
 
+    const client = await Client.findByPk(clientId);
+
     let options = {
-        where: { clientId: clientId },
-        include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }],
+        where: {
+            clientId: clientId,
+            periodId: {
+                [Op.in]: periods
+            },
+        },
+        include: [{ model: Client }, { model: BillingPeriod }, { model: User },
+        { model: ClientAccount, include: [{ model: AccountType }], as: 'sourceAccount' },
+        { model: ClientAccount, include: [{ model: AccountType }], as: 'destinationAccount' }],
         paranoid: !showAll
     };
 
-    ClientAccount.findAll(options).then(function (accounts) {
-        res.render('accounts/accounts', {
+    AccountTransfer.findAll(options).then(function (accountTransfers) {
+        res.render('transfers/transfers', {
             menu: CURRENT_MENU,
             params: { showAll: showAll },
-            data: { accounts: accounts, client: client },
+            data: { accountTransfers: accountTransfers, client: client },
         });
     });
 };
@@ -35,9 +58,9 @@ module.exports.listAll = async function (req, res, next) {
 module.exports.showNewForm = async function (req, res, next) {
     const clientId = req.params.clientId;
     const client = await Client.findByPk(clientId);
-    const accountTypes = await AccountType.findAll({ where: { enabled: true } });
-    const banks = await Bank.findAll({ where: { enabled: true } });
-    res.render("accounts/add.ejs", { menu: CURRENT_MENU, data: { client, accountTypes, banks } });
+    const clientAccounts = await ClientAccount.findAll({ include: [{ model: AccountType }] });
+
+    res.render("transfers/add.ejs", { menu: CURRENT_MENU, data: { client, clientAccounts } });
 };
 
 module.exports.addNew = async function (req, res, next) {
@@ -46,46 +69,46 @@ module.exports.addNew = async function (req, res, next) {
 
     try {
 
-        const clientAccount = {
+        const accountTransfer = {
             clientId: clientId,
-            accountTypeId: req.body.accountTypeId,
-            bankId: req.body.bankId,
-            bankBranch: req.body.bankBranch,
-            accountNumber: req.body.accountNumber,
-            accountAlias: req.body.accountAlias,
-            cbu: req.body.cbu,
+            periodId: req.body.billingPeriodId,
+            sourceAccountId: req.body.sourceAccountId,
+            destinationAccountId: req.body.destinationAccountId,
+            ammount: req.body.ammount,
+            transferDate: req.body.transferDate,
             comments: req.body.comments,
+            statusId: 1,
             userId: req.user.id
         }
 
-        ClientAccount.create(clientAccount).
+        AccountTransfer.create(accountTransfer).
             then(function (result) {
-                winston.info(`User #${req.user.id} created succesfully a new client account ${JSON.stringify(clientAccount)} - ${result.id}`)
+                winston.info(`User #${req.user.id} created succesfully a new account transfer ${JSON.stringify(accountTransfer)} - ${result.id}`)
                 req.flash(
                     "success",
-                    "Una nueva cuenta de cliente fue agregada exitosamente a la base de datos"
+                    "La transferencia fue agregada exitosamente a la base de datos"
                 )
             })
             .catch(function (err) {
-                winston.error(`An error ocurred while user #${req.user.id} tryed to create a new client account ${JSON.stringify(clientAccount)} - ${err}`)
+                winston.error(`An error ocurred while user #${req.user.id} tryed to create a new account transfer ${JSON.stringify(accountTransfer)} - ${err}`)
                 req.flash(
                     "error",
-                    "Ocurrio un error y no se pudo agregar la nueva cuente de cliente en la base de datos"
+                    "Ocurrio un error y no se pudo agregar la transferencia en la base de datos"
                 )
             })
             .finally(() => {
-                res.redirect("/accounts/" + clientId);
+                res.redirect("/transfers/" + clientId);
             })
 
     } catch (error) {
         req.flash(
             "error",
-            "Ocurrio un error y no se pudo crear la nueva cuenta de cliente en la base de datos"
+            "Ocurrio un error y no se pudo crear la transferencia en la base de datos"
         );
 
-        winston.error(`An error ocurred while creating new client account ${JSON.stringify(req.body)} - ${err}`);
+        winston.error(`An error ocurred while creating new account transfer ${JSON.stringify(req.body)} - ${err}`);
 
-        res.redirect("/accounts/" + clientId);
+        res.redirect("/transfers/" + clientId);
     }
 
 };
@@ -173,25 +196,3 @@ module.exports.edit = async function (req, res, next) {
         res.redirect("/accounts/" + clientId);
     }
 };
-
-module.exports.getCustomerAccounts = async function (req, res, next) {
-
-    const clientId = req.params.clientId || req.body.clientId;
-
-    ClientAccount.findAll({
-        where: { clientId: clientId },
-        include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }]
-    }).then(function (accounts) {
-        res.send(accounts)
-    });
-}
-
-module.exports.getCustomerAccountInfoById = async function (req, res, next) {
-
-    const accountId = req.params.id || req.body.id;
-
-    ClientAccount.findByPk(accountId, { include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }] })
-        .then(account => {
-            res.send(account)
-        });
-}

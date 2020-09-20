@@ -23,6 +23,14 @@ router.get("/edit/:id", function (req, res, next) {
     accountsController.showEditForm(req, res);
 });
 
+router.get('/getByCustomerID/:clientId', function (req, res, next) {
+    accountsController.getCustomerAccounts(req, res);
+});
+
+router.get('/getByAccountID/:id', function (req, res, next) {
+    accountsController.getCustomerAccountInfoById(req, res);
+});
+
 router.post("/edit", function (req, res, next) {
     accountsController.edit(req, res);
 });
@@ -34,5 +42,6 @@ router.post('/delete', function (req, res, next) {
 router.get("/:clientId", function (req, res, next) {
     accountsController.listAll(req, res);
 });
+
 
 module.exports = router;
