@@ -195,3 +195,36 @@ module.exports.getCustomerAccountInfoById = async function (req, res, next) {
             res.send(account)
         });
 }
+
+module.exports.newAccountType = async function (req, res, next) {
+
+    const clientId = req.params.clientId || req.body.clientId;
+
+    let account = req.body.account.toUpperCase();
+    let description = req.body.description;
+
+    AccountType.findOne({ where: { account: account } })
+        .then(accountType => {
+            if (accountType) {
+                req.flash("warning", "Ya existe en la base de datos una cuenta con el mismo alias"); res.redirect('/accounts/' + clientId);
+            } else {
+                AccountType.create({ account: account, description: description, enabled: true, userId: req.user.id })
+                    .then(result => {
+                        req.flash("success", "El nuevo tipo de cuenta se agrego existosamente en la base de datos");
+                        winston.info(`User #${req.user.id} added a new account type to database ${JSON.stringify(req.body)}`);
+                    })
+                    .catch(err => {
+                        req.flash("error", "Ocurrio un error y no se pudo agregar el nuevo tipo de cuenta la base de datos");
+                        winston.error(`New account type could not be added to database ${JSON.stringify(req.body)} - ${err}`);
+                    })
+                    .finally(() => { res.redirect('/accounts/' + clientId); });
+            }
+
+        })
+        .catch(err => {
+            req.flash("error", "Ocurrio un error y no se pudo agregar el nuevo tipo de cuenta la base de datos");
+            winston.error(`New account type could not be added to database ${JSON.stringify(req.body)} - ${err}`);
+            res.redirect('/accounts/' + clientId);
+        })
+
+}

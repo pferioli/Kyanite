@@ -11,6 +11,10 @@ router.post("/", function (req, res, next) {
     accountsController.listAll(req, res);
 });
 
+router.post("/types/new", function (req, res, next) {
+    accountsController.newAccountType(req, res);
+});
+
 router.get("/new/:clientId", function (req, res, next) {
     accountsController.showNewForm(req, res);
 });

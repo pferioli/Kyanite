@@ -23,6 +23,10 @@ router.get("/edit/:id", function (req, res, next) {
     accountTransfersController.showEditForm(req, res);
 });
 
+router.get("/info/:id", function (req, res, next) {
+    accountTransfersController.info(req, res);
+});
+
 router.post("/edit", function (req, res, next) {
     accountTransfersController.edit(req, res);
 });

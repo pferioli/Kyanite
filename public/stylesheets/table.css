@@ -64,6 +64,9 @@ div.table-container .table-header i {
 div.table-container .table-title {
     font-size: 20px;
     color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 div.table-container .table-footer {

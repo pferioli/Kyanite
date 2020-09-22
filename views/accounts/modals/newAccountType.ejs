@@ -1,0 +1,29 @@
+<div id="modalNewAccountType" class="modal">
+    <form action="/accounts/types/new" method="post">
+        <div class="modal-content">
+            <div class="row">
+                <h5>Agregar un nuevo tipo de cuenta</h5>
+            </div>
+        </div>
+        <div class="row" style="padding-right: 20px; padding-left: 20px;">
+            <div class="input-field col s12">
+                <i class="material-icons prefix">source</i>
+                <input id="account" name="account" value="" type="text" required class="validate" maxlength="5" minlength="2" placeholder="puede ser del tipo AB, AB1, AB12 o AB12$" title="el alias admite dos letras seguidas de hasta 2 números" pattern="[a-zA-Z]{2}[0-9]{0,2}[\$]{0,1}$">
+                <label for="account">Alias</label><span class="helper-text" data-error="formato inválido">el alias se compone de dos letras seguidas de hasta dos números opcionales, incluya el signo $ al final para indentificarla como cuenta bancaria]</span>
+            </div>
+            <div class="input-field col s12">
+                <i class="material-icons prefix">comment</i>
+                <input id="description" name="description" value="" type="text" maxlength="128" required class="validate" />
+                <label for="account">Descripcion</label>
+            </div>
+            <input type="hidden" name="clientId" id="modalClientId" value="" />
+        </div>
+        <div class="row center-align">
+            <p style="font-size: smaller;">el nuevo tipo de cuenta estará disponible para todos los clientes</h5>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>

@@ -9,8 +9,8 @@
     <div class="table-container">
         <div class="table-header">
 
-            <span class="table-title">Listado de Cuentas - <span style="font-weight: bold;"><%=data.client.name%></span>
-                [<%=data.client.internalCode%>]</span>
+            <span class="table-title">Listado de Cuentas - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span>
+            </span>
             <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
                     <div class="circle-clipper left">
@@ -27,76 +27,78 @@
             <div class="actions">
                 <div class="switch">
                     <label> Mostrar cuentas eliminadas
-                        <input id="swShowDeleted" type="checkbox" onchange="showDeletedAccounts();" <% if(params.showAll===true){%> checked <%}%>>
+                        <input id="swShowDeleted" type="checkbox" onchange="showDeletedAccounts();" <% if(params.showAll===true){ %> checked <% } %>>
                         <span class="lever"></span>
                     </label>
                 </div>
-                                
+
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-
                 <a href="/accounts/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-
-                        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
-                </div>
-            </div>
-
-            <div id="hide-dt" style="display:none">
-                <table id="datatable" class="table display">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Cuenta</th>
-                            <th>Descripcion</th>
-                            <th>Banco</th>
-                            <th>Sucursal</th>
-                            <th>Cuenta</th>
-                            <th>Alias</th>
-                            <th>CBU</th>
-                            <th>Comentarios</th>
-                            <% if(params.showAll===true){%>
-                            <th>Eliminada</th>
-                            <%}%>
-                            <th>Usuario</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% for(var i=0; i < data.accounts.length; i++) { %>
-                        <tr data-id="<%= data.accounts[i].id %>">
-                            <td><%= data.accounts[i].id %></td>
-                            <td><%= data.accounts[i].accountType.account %></td>
-                            <td><%= data.accounts[i].accountType.description %></td>
-                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bank.name %> <%}%></td>
-                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankBranch %> <%}%></td>
-                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].accountNumber %> <%}%></td>
-                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankAlias %> <%}%></td>
-                            <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].cbu %> <%}%></td>
-                            <td><%= data.accounts[i].comments %></td>
-                            <% if(params.showAll===true){%>
-                            <td><%=data.accounts[i].isDeleted%></td>
-                            <%}%>
-                            <td><%= data.accounts[i].user.name %></td>
-                            <td>
-                                <% if(!data.accounts[i].isDeleted){ %>
-
-                                <% if((data.accounts[i].accountType.account==="CC$")||(data.accounts[i].accountType.account==="CA$")|| (data.accounts[i].accountType.account==="CCU$")||(data.accounts[i].accountType.account==="CAU$")) { %>
-                                <a href="/accounts/edit/<%=data.accounts[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
-                                <% } %>
-
-                                <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.accounts[i].id%>" data-clientId="<%=data.client.id%>" data-account="<%=data.accounts[i].accountType.account%> (<%=data.accounts[i].accountType.description %>)" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
-                                <%}%>
-                            </td>
-                        </tr>
-                        <% } %>
-                                </tbody>
-                </table>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <a id="button-accountType" class="waves-effect btn-flat nopadding" data-id="<%=data.client.id%>" onclick="addNewAccountTypeDialog(this)"><i class="material-icons">playlist_add</i></a>
             </div>
         </div>
 
-        <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+        <div id="hide-dt" style="display:none">
+            <table id="datatable" class="table display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cuenta</th>
+                        <th>Descripcion</th>
+                        <th>Banco</th>
+                        <th>Sucursal</th>
+                        <th>Cuenta</th>
+                        <th>Alias</th>
+                        <th>CBU</th>
+                        <th>Comentarios</th>
+                        <% if(params.showAll===true){ %>
+                        <th>Eliminada</th>
+                        <% } %>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < data.accounts.length; i++) { %>
+                    <tr data-id="<%= data.accounts[i].id %>">
+                        <td><%= data.accounts[i].id %></td>
+                        <td><%= data.accounts[i].accountType.account %></td>
+                        <td><%= data.accounts[i].accountType.description %></td>
+                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bank.name %> <% } %></td>
+                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankBranch %> <% } %></td>
+                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].accountNumber %> <% } %></td>
+                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankAlias %> <% } %></td>
+                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].cbu %> <% } %></td>
+                        <td><%= data.accounts[i].comments %></td>
+                        <% if(params.showAll===true){ %>
+                        <td><%=data.accounts[i].isDeleted%></td>
+                        <% } %>
+                        <td><%= data.accounts[i].user.name %></td>
+                        <td>
+                            <% if(!data.accounts[i].isDeleted){ %>
+
+                            <%# if((data.accounts[i].accountType.account==="CC$")||(data.accounts[i].accountType.account==="CA$")|| (data.accounts[i].accountType.account==="CCU$")||(data.accounts[i].accountType.account==="CAU$")) { %>
+
+                            <% if(data.accounts[i].accountType.account.includes("$")){ %>
+                            <a href="/accounts/edit/<%=data.accounts[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                            <% } %>
+
+                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.accounts[i].id%>" data-clientId="<%=data.client.id%>" data-account="<%=data.accounts[i].accountType.account%> (<%=data.accounts[i].accountType.description %>)" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
 </main>
 
 <%- include ("./modals/delete.ejs") %>
+<%- include ("./modals/newAccountType.ejs") %>
 
 <%- include ("../partials/footer") %>
 
@@ -108,6 +110,13 @@
         var elems = document.querySelectorAll(".modal");
         var instances = M.Modal.init(elems, {})
     });
+
+    function addNewAccountTypeDialog(button) {
+        var _elem = document.getElementById('modalNewAccountType');
+        var modal = M.Modal.getInstance(_elem);
+        document.getElementById('modalClientId').value = button.dataset.id;
+        modal.open();
+    };
 
     function deleteDialog(button) {
         var _elem = document.getElementById('modalDelete');

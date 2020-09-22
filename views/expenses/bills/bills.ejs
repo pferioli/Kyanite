@@ -9,8 +9,7 @@
     <div class="table-container">
         <div class="table-header">
 
-            <span class="table-title">Comprobantes - <span style="font-weight: bold;"><%=data.client.name%></span>
-                [<%=data.client.internalCode%>]</span>
+            <span class="table-title">Comprobantes - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
             <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
                     <div class="circle-clipper left">
@@ -26,25 +25,20 @@
             </div>
             <div class="actions">
                 <div class="switch">
-                    <label> Mostrar todos los estados <input id="swStatus" type="checkbox" onchange="reloadPage();"
-                            <% if(params.showAll===true){%> checked <%}%>>
+                    <label> Mostrar todos los estados <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
                         <span class="lever"></span></label>
                 </div>
                 <div class="switch">
-                    <label> Refrescar automáticamente <input id="swRefresh" type="checkbox" onchange="autoRefresh(this);"
-                            <% if(params.autoRefresh===true){%> checked <%}%>>
+                    <label> Refrescar automáticamente <input id="swRefresh" type="checkbox" onchange="autoRefresh(this);" <% if(params.autoRefresh===true){%> checked <%}%>>
                         <span class="lever"></span></label>
                 </div>
 
                 <button id="button-reload" onClick="window.location.reload();"
                     class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
 
-                <a href="/expenses/paymentReceipts/new/<%=data.client.id%>" id="button-add"
-                            class="modal-trigger waves-effect btn-flat nopadding"><i
-                            class="material-icons">add_box</i></a>
+                <a href="/expenses/paymentReceipts/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
 
-                        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
-                                class="material-icons">search</i></a>
+                        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
                 </div>
             </div>
             <div id="hide-dt" style="display:none">
@@ -69,8 +63,7 @@
                         <% for(var i=0; i < data.paymentReceipts.length; i++) { %>
                         <tr data-id="<%= data.paymentReceipts[i].id %>">
                             <td><%= data.paymentReceipts[i].id %></td>
-                            <td><a class="blue-text"
-                                    href="/suppliers/info/<%= data.paymentReceipts[i].supplier.id %>"><%= data.paymentReceipts[i].supplier.name %>
+                            <td><a class="blue-text" href="/suppliers/info/<%= data.paymentReceipts[i].supplier.id %>"><%= data.paymentReceipts[i].supplier.name %>
                                 </a>
                             </td>
                             <td>(<%=data.paymentReceipts[i].receiptType.receiptType%>)
@@ -96,8 +89,7 @@
                                 <i class="material-icons">cancel</i>
                                 <% } %>
 
-                                <a href="/periods/<%=data.client.id%>"><span
-                                        style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].billingPeriod.name %></span></a>
+                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].billingPeriod.name %></span></a>
                             </td>
 
                             <td>
@@ -130,8 +122,7 @@
                                 <% if(data.paymentReceipts[i].statusId === 5) { %>
                                 <i class="material-icons">pending</i>
                                 <% } %>
-                                <span
-                                    style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].status %></span>
+                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].status %></span>
                             </td>
 
                             <!-- <td><%#= data.paymentReceipts[i].status %></td> -->
@@ -140,28 +131,18 @@
 
                             <td>
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                <a href="/expenses/paymentReceipts/<%=data.clientId%>/edit/<%= data.paymentReceipts[i].id%>"
-                                    class="btn-flat btn-small waves-effect waves-light">
+                                <a href="/expenses/paymentReceipts/<%=data.clientId%>/edit/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
                                     <i class="material-icons">edit</i></a>
                                 <% } %>
 
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                <a id="buttonCreatePO" class="btn-flat btn-small waves-effect waves-light"
-                                    data-id="<%=data.paymentReceipts[i].id%>"
-                                    data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i
-                                        class="material-icons">receipt</i></a>
+                                <a id="buttonCreatePO" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">receipt</i></a>
                                 <% } %>
 
-                                <a id="buttonDownload" class="btn-flat btn-small waves-effect waves-light"
-                                    data-id="<%=data.paymentReceipts[i].id%>"
-                                    data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i
-                                        class="material-icons">cloud_download</i></a>
+                                <a id="buttonDownload" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">cloud_download</i></a>
 
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light"
-                                    data-id="<%=data.paymentReceipts[i].id%>"
-                                    data-value="<%= data.paymentReceipts[i].receiptNumber %>"
-                                    onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                                 <% } %>
                             </td>
                         </tr>

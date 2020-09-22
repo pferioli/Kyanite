@@ -3,7 +3,7 @@ const {
     Model
 } = require('sequelize');
 
-const status = ["Deshabilitada", "Pendiente", "En Proceso", "Procesada", "Anulada"];
+const AccountTransferStatus = require('../utils/statusMessages.util').AccountTransfer;
 
 module.exports = (sequelize, DataTypes) => {
     class AccountTransfer extends Model {
@@ -63,7 +63,7 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
             get: function () {
-                return status[this.get('statusId')];
+                return AccountTransferStatus.Status[this.get('statusId')];
             }
         },
         userId: {

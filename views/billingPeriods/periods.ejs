@@ -8,8 +8,7 @@
 
   <div class="table-container">
     <div class=" table-header">
-      <span class="table-title">Períodos de Liquidación - <span style="font-weight: bold;"><%=data.client.name%></span>
-        [<%=data.client.internalCode%>]</span>
+      <span class="table-title">Períodos de Liquidación - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
       <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
         <div class="spinner-layer spinner-green-only">
           <div class="circle-clipper left">
@@ -24,10 +23,8 @@
         </div>
       </div>
       <div class="actions">
-        <a id="button-add" class="modal-trigger waves-effect btn-flat nopadding" data-target="modalNewPeriod"><i
-            class="material-icons">add_box</i></a>
-        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
-            class="material-icons">search</i></a>
+        <a id="button-add" class="modal-trigger waves-effect btn-flat nopadding" data-target="modalNewPeriod"><i class="material-icons">add_box</i></a>
+        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
       </div>
     </div>
     <!-- <div class="progress" id="progress" style="margin-top: 30px;">
@@ -73,20 +70,15 @@
             <td><%= data.periods[i].user.name %></td>
             <td>
               <% if(data.periods[i].statusId === 0) { %>
-              <a id="buttonOpen" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>"
-                data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>"
-                onclick="openDialog(this)"><i class="material-icons-outlined">lock_open</i></a>
+              <a id="buttonOpen" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>" data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>" onclick="openDialog(this)"><i class="material-icons-outlined">lock_open</i></a>
               <% } %>
 
               <% if(data.periods[i].statusId === 1) { %>
-              <a id="buttonClose" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>"
-                data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>"
-                onclick="closeDialog(this)"><i class="material-icons-outlined">lock</i></a>
+              <a id="buttonClose" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>" data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>" onclick="closeDialog(this)"><i class="material-icons-outlined">lock</i></a>
               <% } %>
 
               <% if(data.periods[i].statusId === 0) { %>
-              <a id="buttonDelete" class="modal-trigger btn-flat btn-small waves-effect waves-light"
-                data-target="modalDeletePeriod"><i class="material-icons">delete</i></a>
+              <a id="buttonDelete" class="modal-trigger btn-flat btn-small waves-effect waves-light" data-target="modalDeletePeriod"><i class="material-icons">delete</i></a>
               <% } %>
             </td>
           </tr>

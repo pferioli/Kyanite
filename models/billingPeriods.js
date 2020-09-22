@@ -2,7 +2,7 @@
 
 const moment = require('moment');
 
-const status = ["Creado", "Abierto", "Cerrado", "Anulado"];
+const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
 const {
     Model
@@ -77,7 +77,7 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
             get: function () {
-                return (status[this.get('statusId')])
+                return (BillingPeriodStatus.Status[this.get('statusId')])
             },
         }
     }, {

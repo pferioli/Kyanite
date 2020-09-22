@@ -3,13 +3,12 @@ const BillingPeriod = Model.billingPeriod;
 const User = Model.user;
 const Client = Model.client;
 
-const Enum = require('enum');
 const moment = require('moment');
 const winston = require('../helpers/winston.helper');
 
-const CURRENT_MENU = 'periods'; module.exports.CURRENT_MENU = CURRENT_MENU;
+const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
-const eBillingPeriodStatus = new Enum({ 'created': 0, 'opened': 1, 'closed': 2, 'disabled': 3 })
+const CURRENT_MENU = 'periods'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = async function (req, res, next) {
 
@@ -49,7 +48,7 @@ module.exports.create = async function (req, res, next) {
             startDate: startDate,
             endDate: endDate,
             userId: userId,
-            statusId: eBillingPeriodStatus.get('created').value,
+            statusId: BillingPeriodStatus.eStatus.get('created').value,
             lastPeriodId: 0
         }
     )
@@ -73,7 +72,7 @@ module.exports.open = async function (req, res) {
     const id = req.body.modalPeriodId;
 
     let period = await BillingPeriod.findOne({
-        where: { clientId: clientId, statusId: eBillingPeriodStatus.get('opened').value }
+        where: { clientId: clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
     })
 
     if (period) {
@@ -88,13 +87,13 @@ module.exports.open = async function (req, res) {
         res.redirect("/periods/" + clientId); return;
     }
 
-    if (period.statusId != eBillingPeriodStatus.get('created').value) {
+    if (period.statusId != BillingPeriodStatus.eStatus.get('created').value) {
         req.flash("warning", "Solo se pueden abrir períodos de liquidación que cuyo estado sea \<creado\>");
         res.redirect('/periods/' + clientId);
         return;
     }
 
-    period.statusId = eBillingPeriodStatus.get('opened').value;
+    period.statusId = BillingPeriodStatus.eStatus.get('opened').value;
     period.openedAt = new Date();
 
     period.save()
@@ -125,13 +124,13 @@ module.exports.close = async function (req, res, next) {
         res.redirect("/periods/" + clientId); return;
     }
 
-    if (period.statusId != eBillingPeriodStatus.get('opened').value) {
+    if (period.statusId != BillingPeriodStatus.eStatus.get('opened').value) {
         req.flash("warning", "Solo se pueden cerrar períodos de liquidación que esten abiertos");
         res.redirect('/periods/' + clientId);
         return;
     }
 
-    period.statusId = eBillingPeriodStatus.get('closed').value;
+    period.statusId = BillingPeriodStatus.eStatus.get('closed').value;
     period.closedAt = new Date();
 
     period.save()
@@ -154,7 +153,7 @@ module.exports.close = async function (req, res, next) {
 
 module.exports.getActive = async function (req, res, next) {
     BillingPeriod.findOne({
-        where: { clientId: req.params.clientId, statusId: eBillingPeriodStatus.get('opened').value }
+        where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
     }).then(function (periods) {
         res.send(periods)
     });

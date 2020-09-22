@@ -15,16 +15,16 @@
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">calendar_today</i>
-                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
                             <label for="billingPeriod">Período de Liquidación</label>
-                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="input-field col s6">
                             <i class="material-icons prefix">account_balance</i>
-                            <select id="sourceAccountSelect" required>
+                            <select id="sourceAccountSelect" required disabled>
                                 <option value="" disabled selected>Seleccione la cuenta de Origen</option>
                                 <% for(var i=0; i < data.clientAccounts.length; i++) { %>
                                 <option value=" <%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
@@ -34,7 +34,7 @@
                             <input type="hidden" name="sourceAccountId" id="sourceAccountId" />
                         </div>
                         <div class="input-field col s6">
-                            <select id="destinationAccountSelect" required>
+                            <select id="destinationAccountSelect" required disabled>
                                 <option value="" disabled selected>Seleccione la cuenta de Origen Primero</option>
                             </select>
                             <label>Cuenta de Destino</label>
@@ -95,6 +95,16 @@
 <script>
 
     document.addEventListener("DOMContentLoaded", function () {
+
+        const clientId = document.getElementById('clientId').value
+
+        const billingPeriodId = document.getElementById('billingPeriodId').value;
+
+        if (billingPeriodId) {
+            document.getElementById('sourceAccountSelect').disabled = false;
+            document.getElementById('destinationAccountSelect').disabled = false;
+        }
+
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
 
@@ -123,19 +133,25 @@
         elems = document.querySelectorAll('.modal');
         instances = M.Modal.init(elems, {});
 
-        const clientId = document.getElementById('clientId').value
-
-        getActiveBillingPeriod(clientId);
+        //getActiveBillingPeriod(clientId);
 
         document.getElementById('sourceAccountSelect').onchange = async function () {
-            document.getElementById('sourceAccountId').value = this.value;
             getSelectedAccountDetails(this.value, 'sourceAccountInfo');
             getClientAccounts(clientId, 'destinationAccountSelect', this.value);
+
+            document.getElementById('sourceAccountId').value = this.value;
+            document.getElementById('destinationAccountInfo').value = "";
+            M.updateTextFields();
+
+            document.getElementById('add_button').disabled = true;
+            document.getElementById('add_next_button').disabled = true;
         }
 
         document.getElementById('destinationAccountSelect').onchange = async function () {
-            document.getElementById('destinationAccountId').value = this.value;
             getSelectedAccountDetails(this.value, 'destinationAccountInfo');
+            document.getElementById('destinationAccountId').value = this.value;
+            document.getElementById('add_button').disabled = false;
+            document.getElementById('add_next_button').disabled = false;
         };
     });
 
