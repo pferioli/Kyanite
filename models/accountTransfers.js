@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
             AccountTransfer.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
             AccountTransfer.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
-            AccountTransfer.hasOne(models.clientAccount, { as: 'sourceAccount', foreignKey: 'id', sourceKey: 'sourceAccountId' })
-            AccountTransfer.hasOne(models.clientAccount, { as: 'destinationAccount', foreignKey: 'id', sourceKey: 'destinationAccountId' })
+            AccountTransfer.hasOne(models.account, { as: 'sourceAccount', foreignKey: 'id', sourceKey: 'sourceAccountId' })
+            AccountTransfer.hasOne(models.account, { as: 'destinationAccount', foreignKey: 'id', sourceKey: 'destinationAccountId' })
             AccountTransfer.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
         }
     };

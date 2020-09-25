@@ -6,7 +6,7 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class ClientAccount extends Model {
+    class Account extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
@@ -14,13 +14,13 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            ClientAccount.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
-            ClientAccount.hasOne(models.accountType, { foreignKey: 'id', sourceKey: 'accountTypeId' })
-            ClientAccount.hasOne(models.bank, { foreignKey: 'id', sourceKey: 'bankId' })
-            ClientAccount.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            Account.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
+            Account.hasOne(models.accountType, { foreignKey: 'id', sourceKey: 'accountTypeId' })
+            Account.hasOne(models.bank, { foreignKey: 'id', sourceKey: 'bankId' })
+            Account.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
         }
     };
-    ClientAccount.init({
+    Account.init({
         id: {
             allowNull: false,
             autoIncrement: true,
@@ -67,11 +67,11 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         sequelize,
-        modelName: 'clientAccount',
-        tableName: 'client_accounts',
+        modelName: 'account',
+        tableName: 'accounts',
         timestamps: true,
         paranoid: true,
 
     });
-    return ClientAccount;
+    return Account;
 };

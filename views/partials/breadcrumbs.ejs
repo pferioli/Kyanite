@@ -27,6 +27,10 @@
 <a href="/transfers" class="breadcrumb">Transferencias</a>
 <%}%>
 
+<% if (locals.menu === 'checks') { %>
+<a href="/checks" class="breadcrumb">Cheques</a>
+<%}%>
+
 <% if (locals.menu === 'paymentReceipts') { %>
 <a href="/expenses" class="breadcrumb">Egresos</a>
 <a href="/expenses/paymentReceipts" class="breadcrumb">Comprobantes</a>

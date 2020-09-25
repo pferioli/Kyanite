@@ -38,3 +38,17 @@ module.exports.PaymentReceipt = class {
         return new Enum({ 'disabled': 0, 'pending': 1, 'inprogress': 2, 'processed': 3, 'deleted': 4 })
     }
 }
+
+
+module.exports.Check = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["En Cartera", "Depositado", "Acreditado", "Entregado", "Anulado", "Rechazado"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'wallet': 0, 'deposited': 1, 'accredited': 2, 'delivered': 3, 'cancelled': 4, 'rejected': 5 })
+    }
+}

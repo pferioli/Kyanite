@@ -1,7 +1,7 @@
 const Model = require('../models')
 const User = Model.user;
 const Client = Model.client;
-const ClientAccount = Model.clientAccount;
+const Account = Model.account;
 const AccountType = Model.accountType;
 const Bank = Model.bank;
 
@@ -23,7 +23,7 @@ module.exports.listAll = async function (req, res, next) {
         paranoid: !showAll
     };
 
-    ClientAccount.findAll(options).then(function (accounts) {
+    Account.findAll(options).then(function (accounts) {
         res.render('accounts/accounts', {
             menu: CURRENT_MENU,
             params: { showAll: showAll },
@@ -58,7 +58,7 @@ module.exports.addNew = async function (req, res, next) {
             userId: req.user.id
         }
 
-        ClientAccount.create(clientAccount).
+        Account.create(clientAccount).
             then(function (result) {
                 winston.info(`User #${req.user.id} created succesfully a new client account ${JSON.stringify(clientAccount)} - ${result.id}`)
                 req.flash(
@@ -96,7 +96,7 @@ module.exports.delete = async function (req, res, next) {
     const accountId = req.body.accountId;
 
     try {
-        const clientAccount = await ClientAccount.findByPk(accountId);
+        const clientAccount = await Account.findByPk(accountId);
 
         if (clientAccount) {
 
@@ -127,7 +127,7 @@ module.exports.showEditForm = async function (req, res, next) {
 
     const accountId = req.params.id;
 
-    const clientAccount = await ClientAccount.findByPk(accountId);
+    const clientAccount = await Account.findByPk(accountId);
 
     const client = await Client.findByPk(clientAccount.clientId);
 
@@ -143,7 +143,7 @@ module.exports.edit = async function (req, res, next) {
     const accountId = req.body.accountId;
     const clientId = req.body.clientId;
 
-    let clientAccount = await ClientAccount.findByPk(accountId)
+    let clientAccount = await Account.findByPk(accountId)
 
     if (clientAccount) {
 
@@ -178,7 +178,7 @@ module.exports.getCustomerAccounts = async function (req, res, next) {
 
     const clientId = req.params.clientId || req.body.clientId;
 
-    ClientAccount.findAll({
+    Account.findAll({
         where: { clientId: clientId },
         include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }]
     }).then(function (accounts) {
@@ -190,7 +190,7 @@ module.exports.getCustomerAccountInfoById = async function (req, res, next) {
 
     const accountId = req.params.id || req.body.id;
 
-    ClientAccount.findByPk(accountId, { include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }] })
+    Account.findByPk(accountId, { include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }] })
         .then(account => {
             res.send(account)
         });

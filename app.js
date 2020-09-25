@@ -150,6 +150,8 @@ app.use('/accounts', require('./routes/accounts.route'));
 
 app.use('/transfers', require('./routes/accountTransfers.route'));
 
+app.use('/checks', require('./routes/checks.route'));
+
 app.use('/incomes', require('./routes/incomes.route'));
 
 app.use('/expenses/paymentReceipts', require('./routes/paymentReceipts.route'));
