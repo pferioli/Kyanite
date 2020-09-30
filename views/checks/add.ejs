@@ -1,0 +1,139 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" method="post" action='/checks/new/<%=data.client.id%>'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Crear una nuevo cheque</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">home</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <i class="material-icons-outlined prefix">account_balance</i>
+                            <select id="bankSelect" required>
+                                <option value="0" disabled selected>Seleccione un banco</option>
+                                <% for(var i=0; i < data.banks.length; i++) { %>
+                                <option value="<%=data.banks[i].id%>"><%= data.banks[i].name%> [<%=data.banks[i].code%>]</option>
+                                <% } %>
+                            </select>
+                            <label>Banco</label>
+                            <input type="hidden" name="bankId" id="bankId" />
+                        </div>
+                        <div class="input-field col s4">
+                            <i class="material-icons-outlined prefix">info</i>
+                            <input id="checkNumber" name="checkNumber" type="text" value="" required />
+                            <label for="checkNumber">Número de Cheque</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <i class="material-icons-outlined prefix">monetization_on</i>
+                            <input id="ammount" name="ammount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <label for="ammount">Importe</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
+                            <label for="dtpEmissionDate">Fecha Emisión</label>
+                            <input type="hidden" name="emissionDate" id="emissionDate" />
+                        </div>
+                        <div class="input-field col s2">
+                            <input type="text" class="datepicker" id="dtpPaymentDate" name="dtpPaymentDate" required>
+                            <label for="dtpPaymentDate">Fecha Pago</label>
+                            <input type="hidden" name="paymentDate" id="paymentDate" />
+                        </div>
+
+                        <div class="input-field col s8">
+                            <i class="material-icons-outlined prefix">comments</i>
+                            <textarea id="comments" name="comments" class="materialize-textarea"></textarea>
+                            <label for="comments">Comentarios</label>
+                        </div>
+                    </div>
+
+                    <div class="card-action right-align">
+                        <button id="add_button" type='submit' class="waves-effect waves-light btn green"><i class="material-icons right">save</i>Guardar</button>
+                        <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px;"><i class="material-icons right">cancel</i>Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<%- include ("../partials/footer") %>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+        M.CharacterCounter.init(document.getElementById("comments"));
+
+        document.getElementById("bankSelect").addEventListener('change', (event) => {
+            document.getElementById("bankId").value = event.target.value;
+        });
+
+        M.Datepicker.init(document.querySelectorAll('.datepicker'), {
+            format: 'dd/mm/yyyy',
+            autoClose: true,
+            onOpen: function (e) {
+                var that = this;
+                that.hasEvent = false;
+                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                this.doneBtn.addEventListener('click', Done.bind(that))
+            },
+            onClose: function (e) {
+                var that = this;
+                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                this.doneBtn.removeEventListener('click', Done.bind(that))
+            },
+            onSelect: function (selectedDate) {
+                if (this.date) {
+                    if (this.el.id === 'dtpEmissionDate') {
+                        document.getElementById('emissionDate').value = this.date.toISOString();
+                    };
+                    if (this.el.id === 'dtpPaymentDate') {
+                        document.getElementById('paymentDate').value = this.date.toISOString();
+                    };
+                }
+            }
+        });
+    });
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpEmissionDate') {
+                    document.getElementById('emissionDate').value = this.date.toISOString();
+                };
+                if (this.el.id === 'dtpPaymentDate') {
+                    document.getElementById('paymentDate').value = this.date.toISOString();
+                };
+            }
+        }
+    }
+</script>

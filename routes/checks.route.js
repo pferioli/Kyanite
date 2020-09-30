@@ -12,11 +12,11 @@ router.post("/", function (req, res, next) {
     res.redirect("/checks/client/" + clientId);
 });
 
-router.get("/new", function (req, res, next) {
+router.get("/new/:clientId", function (req, res, next) {
     checksController.showNewForm(req, res);
 });
 
-router.post('/new', function (req, res, next) {
+router.post('/new/:clientId', function (req, res, next) {
     checksController.addNew(req, res);
 })
 
