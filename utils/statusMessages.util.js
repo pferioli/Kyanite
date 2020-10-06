@@ -39,16 +39,15 @@ module.exports.PaymentReceipt = class {
     }
 }
 
-
 module.exports.Check = class {
 
     constructor() { }
 
     static get Status() {
-        return ["En Cartera", "Depositado", "Acreditado", "Entregado", "Anulado", "Rechazado"];
+        return ["En Cartera", "Depositado", "Acreditado", "Entregado", "Rechazado", "Anulado"];
     }
 
     static get eStatus() {
-        return new Enum({ 'wallet': 0, 'deposited': 1, 'accredited': 2, 'delivered': 3, 'cancelled': 4, 'rejected': 5 })
+        return new Enum({ 'wallet': 0, 'deposited': 1, 'accredited': 2, 'delivered': 3, 'rejected': 4, 'cancelled': 5 })
     }
 }

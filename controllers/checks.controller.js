@@ -6,6 +6,7 @@ const AccountType = Model.accountType;
 const Bank = Model.bank;
 const Check = Model.check;
 const BillingPeriod = Model.billingPeriod;
+const CheckSplitted = Model.checkSplitted;
 
 const winston = require('../helpers/winston.helper');
 
@@ -24,27 +25,35 @@ module.exports.listAll = async function (req, res, next) {
 
     let options = {
         where: { clientId: clientId },
-        include: [{ model: User }, { model: Account }, { model: Bank }, { model: BillingPeriod }]
+        include: [{ model: User }, { model: Account, include: [{ model: AccountType }] },
+        { model: Bank }, { model: BillingPeriod },
+        {
+            model: CheckSplitted,
+            where: { splitType: 'I' }
+        },
+            // {
+            //     model: CheckSplitted,
+            //     where: { splitType: 'O' }
+            // }
+        ]
     };
 
     Check.findAll(options).then(function (checks) {
         res.render('checks/checks', {
             menu: CURRENT_MENU,
             data: { checks: checks, client: client },
-        });
+        }); s
     });
 };
 
 module.exports.showNewForm = async function (req, res, next) {
     const clientId = req.params.clientId;
-
     const client = await Client.findByPk(clientId);
+    const banks = await Bank.findAll({ where: { enabled: true } });
 
     const period = await BillingPeriod.findOne({
         where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
     });
-
-    const banks = await Bank.findAll({ where: { enabled: true } });
 
     res.render("checks/add.ejs", { menu: CURRENT_MENU, data: { client, banks, period } });
 };
@@ -97,7 +106,6 @@ module.exports.addNew = async function (req, res, next) {
             res.redirect("/checks/client/" + clientId);
             return;
         };
-
 
         Check.create(check).
             then(function (result) {

@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
             Check.hasOne(models.account, { foreignKey: 'id', sourceKey: 'accountId' })
             Check.hasOne(models.bank, { foreignKey: 'id', sourceKey: 'bankId' })
             Check.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            Check.hasMany(models.checkSplitted, { foreignKey: 'checkId', sourceKey: 'id' })
         }
     };
     Check.init({
