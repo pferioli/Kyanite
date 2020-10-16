@@ -29,7 +29,7 @@ module.exports.listAll = async function (req, res, next) {
         { model: Bank }, { model: BillingPeriod },
         {
             model: CheckSplitted,
-            where: { splitType: 'I' }
+            // where: { splitType: 'I' }
         },
             // {
             //     model: CheckSplitted,
@@ -42,7 +42,7 @@ module.exports.listAll = async function (req, res, next) {
         res.render('checks/checks', {
             menu: CURRENT_MENU,
             data: { checks: checks, client: client },
-        }); s
+        });
     });
 };
 
