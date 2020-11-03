@@ -23,10 +23,11 @@ module.exports.listAll = async function (req, res, next) {
 
     const checkId = req.params.checkId || req.body.checkId;
 
+    const check = await Check.findByPk(checkId, { include: { model: Client } });
+
     let options = {
         where: { checkId: checkId },
         include: [
-            { model: Check },
             { model: User },
         ],
         order: [
@@ -34,24 +35,19 @@ module.exports.listAll = async function (req, res, next) {
         ]
     };
 
-    const checks = await CheckSplitted.findAll(options);
-
-    const client = await Client.findByPk(checks[0].check.clientId);
+    const splittedChecks = await CheckSplitted.findAll(options);
 
     res.render('splittedChecks/splittedChecks', {
-        menu: CURRENT_MENU,
-        data: { checks: checks, client: client },
+        menu: CURRENT_MENU, data: { check: check, checks: splittedChecks },
     });
 };
 
 module.exports.showNewForm = async function (req, res, next) {
     const checkId = req.params.checkId;
 
+    const check = await Check.findByPk(checkId, { include: [{ model: Client }, { model: Bank }] });
 
-    const client = await Client.findByPk(checkId);
-    const banks = await Bank.findAll({ where: { enabled: true } });
-
-    res.render("checks/add.ejs", { menu: CURRENT_MENU, data: { client, banks, period } });
+    res.render("splittedChecks/add.ejs", { menu: CURRENT_MENU, data: { check } });
 };
 
 module.exports.addNew = async function (req, res, next) {
