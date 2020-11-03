@@ -1,0 +1,287 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
+
+    <div class="table-container">
+        <div class="table-header">
+            <span class="table-title">Cheques Parciales - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+            <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/checks/split/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
+        </div>
+
+        <div id="hide-dt" style="display:none">
+            <table id="datatable" class="table display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Banco</th>
+                        <th>Numero</th>
+                        <th>Importe</th>
+                        <th>Fecha de Emisión</th>
+                        <th>Fecha de Cobro</th>
+                        <th>Fecha de Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Comentarios</th>
+                        <th>Parciales</th>
+                        <th>Cuenta</th>
+                        <th>Periodo</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < data.checks.length; i++) { %>
+                    <tr data-id="<%= data.checks[i].id %>">
+                        <td><%= data.checks[i].id %></td>
+
+                        <td><%= data.checks[i].bank.name %></td>
+                        <td><a href="/checks/info/<%=data.checks[i].id%>" class="blue-text"><%=data.checks[i].number%></a></td>
+                        <td>$<%= data.checks[i].ammount %></td>
+
+                        <td><%= data.checks[i].emissionDate %></td>
+                        <td><%= data.checks[i].paymentDate %></td>
+                        <td><%= data.checks[i].dueDate %></td>
+
+                        <td>
+                            <!--EN CARTERA-->
+                            <% if(data.checks[i].statusId === 0) { %>
+                            <i class="material-icons">account_balance_wallet</i>
+                            <% } %>
+
+                            <!--DEPOSITADO-->
+                            <% if(data.checks[i].statusId === 1) { %>
+                            <i class="material-icons">done</i>
+                            <% } %>
+
+                            <!--ACREDITADO-->
+                            <% if(data.checks[i].statusId === 2) { %>
+                            <i class="material-icons">done_all</i>
+                            <% } %>
+
+                            <!--ENTREGADO-->
+                            <% if(data.checks[i].statusId === 3) { %>
+                            <i class="material-icons">check_circle_outline</i>
+                            <% } %>
+
+                            <!--RECHAZADO-->
+                            <% if(data.checks[i].statusId === 4) { %>
+                            <i class="material-icons">highlight_off</i>
+                            <% } %>
+
+                            <!--ANULADO-->
+                            <% if(data.checks[i].statusId === 5) { %>
+                            <i class="material-icons">delete_outline</i>
+                            <% } %>
+
+                            <span style="padding-left: 10px; vertical-align: 8px;"><%= data.checks[i].status %></span>
+                        </td>
+
+                        <td><%= data.checks[i].comments %></td>
+
+                        <td><a href="/checks/splitted/<%=data.checks[i].id%>" class="blue-text"><%= data.checks[i].checkSplitteds.length %></a></td>
+
+                        <td><a href="/accounts/<%=data.checks[i].id%>" class="blue-text"><%= data.checks[i].account.accountType.account %></a> [ID:<%= data.checks[i].account.id %>]</td>
+
+                        <td>
+                            <% if(data.checks[i].billingPeriod.statusId === 0) { %>
+                            <i class="material-icons">calendar_today</i>
+                            <% } %>
+                            <% if(data.checks[i].billingPeriod.statusId=== 1) { %>
+                            <i class="material-icons">lock_open</i>
+                            <% } %>
+                            <% if(data.checks[i].billingPeriod.statusId === 2) { %>
+                            <i class="material-icons">lock</i>
+                            <% } %>
+                            <% if(data.checks[i].billingPeriod.statusId === 3) { %>
+                            <i class="material-icons">cancel</i>
+                            <% } %>
+
+                            <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.checks[i].billingPeriod.name %></span></a>
+                        </td>
+
+                        <td><%= data.checks[i].user.name %></td>
+
+                        <td>
+                            <a href="/checks/split/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">content_cut</i></a>
+                            <a href="/checks/edit/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.checks[i].ammount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+    <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
+
+</main>
+
+<%#- include ("./modals/delete.ejs") %>
+
+<%- include ("../partials/footer") %>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {})
+    });
+
+    // function deleteDialog(button) {
+    //     var _elem = document.getElementById('modalDelete');
+    //     var modal = M.Modal.getInstance(_elem);
+    //     const message = `[ID: ${button.dataset.id}] - ${button.dataset.value} desde ${button.dataset.source} hacia ${button.dataset.destination} `
+    //     document.getElementById('modalDeleteMessage').textContent = message;
+    //     document.getElementById('modalDeleteTransferId').value = button.dataset.id;
+    //     document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
+    //     modal.open();
+    // };
+
+    // function showDeleted() {
+    //     const swShowDeleted = document.getElementById('swShowDeleted').checked;
+
+    //     const clientId = document.getElementById('clientId').value;
+    //     const periodId = document.getElementById('periodId').value;
+
+    //     const redirectUrl = '/transfers?showAll=' + swShowDeleted;
+
+    //     var form = $('<form action="' + redirectUrl + '" method="post">' +
+    //         '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
+    //         '<input type="hidden" name="periodId" value="' + periodId + '"></input>' +
+    //         '</form>');
+
+    //     $('body').append(form);
+    //     $(form).submit();
+    // }
+
+    $(document).ready(function () {
+
+        $('.search-toggle').click(function () {
+            if ($('.hiddensearch').css('display') == 'none')
+                $('.hiddensearch').slideDown();
+            else
+                $('.hiddensearch').slideUp();
+        });
+
+        var table = $('#datatable').dataTable({
+            dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+            oLanguage: {
+                sSearch: '',
+                sSearchPlaceholder: 'Escriba aqui su búsqueda',
+                sInfo: '_START_ -_END_ de _TOTAL_',
+                sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+                    '<option value="200">200</option>' +
+                    '<option value="500">500</option>' +
+                    '<option value="1000">1000</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select></div>'
+            },
+            columnDefs: [
+                {
+                    targets: -1,
+                    searchable: false,
+                    sortable: false,
+                    className: "left-align",
+                },
+                {
+                    className: "center-align",
+                    targets: [0, 1, 2]
+                },
+                {
+                    targets: 3,
+                    type: 'currency',
+                },
+                {
+                    targets: 4,
+                    visible: true,
+                    searchable: false,
+                    render: $.fn.dataTable.render.ellipsis(32, true)
+                },
+            ],
+            colReorder: true,
+            fixedColumns: { leftColumns: 2 },
+            pageLength: 200,
+            order: [[0, 'asc']],
+            autowidth: true,
+            scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
+            paging: true,
+            buttons: [
+                {
+                    extend: 'colvis',
+                    text: 'Columnas',
+                },
+                {
+                    extend: 'print',
+                    className: '',
+                    title: '',
+                    // autoPrint: false,
+                    customize: function (win) {
+                        $(win.document.body)
+                            .css('font-size', '10pt')
+                            .prepend(
+                                '<h4>Title Test</h4>',
+                            );
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit',);
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: ':visible(th:not(:last-child))',
+                        search: 'applied',
+                        order: 'applied'
+                    },
+                    customize: function (xlsx) {
+                        var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+                        source.setAttribute('name', 'Clientes');
+                    }
+                },
+                { extend: 'csvHtml5' },
+                { extend: 'copyHtml5' },
+                {
+                    text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+                    extend: 'pdfHtml5',
+                    filename: 'clients',
+                    orientation: 'landscape',     //portrait
+                    pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+                    exportOptions: {
+                        columns: ':visible',
+                        search: 'applied',
+                        order: 'applied'
+                    }
+                }
+            ],
+            fnInitComplete: function () {
+                $('#hide-dt').show();
+                $('#progress').hide();
+            },
+        });
+    });
+</script>

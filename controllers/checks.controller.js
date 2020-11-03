@@ -1,3 +1,5 @@
+const Sequelize = require('sequelize');
+const Op = require('sequelize').Op;
 const Model = require('../models')
 const User = Model.user;
 const Client = Model.client;
@@ -25,24 +27,31 @@ module.exports.listAll = async function (req, res, next) {
 
     let options = {
         where: { clientId: clientId },
-        include: [{ model: User }, { model: Account, include: [{ model: AccountType }] },
-        { model: Bank }, { model: BillingPeriod },
-        {
-            model: CheckSplitted,
-            where: { splitType: 'I' }
-        },
-            // {
-            //     model: CheckSplitted,
-            //     where: { splitType: 'O' }
-            // }
-        ]
+        include: [
+            { model: User }, { model: Account, include: [{ model: AccountType }] },
+            { model: Bank }, { model: BillingPeriod },
+            {
+                model: CheckSplitted,
+                required: false,
+                // where: {
+                //     [Op.or]: [
+                //         { splitType: 'I' },
+                //         { splitType: 'O' }
+                //     ],
+                // },
+                attributes: ['id']
+            },
+        ],
+        // attributes: {
+        //     include: [[Sequelize.fn("COUNT", Sequelize.col("checkSplitteds.id")), "CheckSplittedCount"]]
+        // },
     };
 
     Check.findAll(options).then(function (checks) {
         res.render('checks/checks', {
             menu: CURRENT_MENU,
             data: { checks: checks, client: client },
-        }); s
+        });
     });
 };
 
@@ -63,6 +72,17 @@ module.exports.addNew = async function (req, res, next) {
     const clientId = req.params.clientId;
 
     try {
+
+        const emissionDate = moment(req.body.emissionDate);
+        const paymentDate = moment(req.body.paymentDate);
+
+        const dateDiff = emissionDate - paymentDate;
+
+        if (dateDiff > 0) {
+            req.flash("warning", "la fecha de emision es posterior a la fecha de pago");
+            res.redirect("/checks/client/" + clientId);
+            return;
+        };
 
         const account = await Account.findOne({
             include: [{ model: AccountType }],
@@ -109,7 +129,7 @@ module.exports.addNew = async function (req, res, next) {
 
         Check.create(check).
             then(function (result) {
-                winston.info(`User #${req.user.id} created succesfully a new check into account #${accountId} ${JSON.stringify(check)} - ${result.id}`)
+                winston.info(`User #${req.user.id} created succesfully a new check into account #${result.accountId} ${JSON.stringify(check)} - ${result.id}`)
                 req.flash(
                     "success",
                     "Un nuevo cheque fue agregado exitosamente a la base de datos"
