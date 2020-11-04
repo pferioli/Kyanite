@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
+        periodId: {
+            allowNull: false,
+            type: DataTypes.INTEGER
+        },
         splitType: {
             allowNull: false,
             type: DataTypes.CHAR

@@ -17,9 +17,17 @@ router.get("/split/new/:checkId", function (req, res, next) {
     splittedChecksController.showNewForm(req, res);
 });
 
+router.get("/split/remainingBalance/:checkId", function (req, res, next) {
+    splittedChecksController.getRemainingBalance(req, res);
+});
+
 router.get("/split/:checkId", function (req, res, next) {
     splittedChecksController.listAll(req, res);
 });
+
+router.post('/split/new/:clientId', function (req, res, next) {
+    splittedChecksController.addNew(req, res);
+})
 
 router.get("/new/:clientId", function (req, res, next) {
     checksController.showNewForm(req, res);

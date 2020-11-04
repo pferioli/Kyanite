@@ -7,11 +7,17 @@
                 <div class="card-content">
                     <span class="card-title">Crear una nueva subdivisión de cheque</span>
                     <div class="row" style="margin-top: 20px;">
-                        <div class="input-field col s12">
+                        <div class="input-field col s9">
                             <i class="material-icons prefix">home</i>
                             <input id="client" name="client" type="text" value="<%=data.check.client.name%> [<%=data.check.client.internalCode%>]" disabled />
                             <label for="name">Nombre del Barrio</label>
                             <input type="hidden" name="clientId" id="clientId" value="<%=data.check.client.id%>" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.check.billingPeriod.name%>" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.check.billingPeriod.id%>" />
                         </div>
                     </div>
 
@@ -26,6 +32,9 @@
                             <input id="checkNumber" name="checkNumber" type="text" value="<%= data.check.number %>" readonly />
                             <label for="checkNumber">Número de Cheque</label>
                         </div>
+
+                        <input type="hidden" name="checkId" id="checkId" value="<%=data.check.id%>" />
+
                     </div>
 
                     <div class="row">
@@ -34,25 +43,25 @@
                             <select id="typeSelect" required>
                                 <option value="0" disabled selected>Seleccione el tipo</option>
                                 <option value="I">Cobranza</option>
-                                <option value="O">Pago</option>
+                                <option value="O">Orden de Pago</option>
                             </select>
                             <label>Tipo</label>
                             <input type="hidden" name="splitType" id="splitType" />
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons-outlined prefix">monetization_on</i>
-                            <input id="totalAmmount" name="totalAmmount" type="text" value="<%= data.check.ammount %>" readonly />
+                            <input id="totalAmmount" name="totalAmmount" type="text" value="$<%= data.check.ammount %>" readonly />
                             <label for="totalAmmount">Importe Total</label>
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons-outlined prefix">monetization_on</i>
-                            <input id="remainingAmmount" name="remainingAmmount" type="text" value="1000.0" readonly />
+                            <input id="remainingAmmount" name="remainingAmmount" type="text" value="$ 0.00" readonly />
                             <label for="remainingAmmount">Importe Remanente</label>
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons-outlined prefix">monetization_on</i>
-                            <input id="ammount" name="ammount" type="number" min="0.00" step="0.01" class="validate" required />
-                            <label for="ammount">Importe Parcial</label>
+                            <input id="partialAmmount" name="partialAmmount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <label for="partialAmmount">Importe Parcial</label>
                         </div>
                     </div>
 
@@ -77,62 +86,52 @@
 
 <%- include ("../partials/footer") %>
 
+<script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
+
 <script>
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", async function () {
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
         M.CharacterCounter.init(document.getElementById("comments"));
 
-        document.getElementById("bankSelect").addEventListener('change', (event) => {
-            document.getElementById("bankId").value = event.target.value;
-        });
+        const remainingAmmount = document.getElementById("remainingAmmount");
+        const partialAmmount = document.getElementById("partialAmmount");
 
-        M.Datepicker.init(document.querySelectorAll('.datepicker'), {
-            format: 'dd/mm/yyyy',
-            autoClose: true,
-            onOpen: function (e) {
-                var that = this;
-                that.hasEvent = false;
-                this.cancelBtn.addEventListener('click', Cancel.bind(that))
-                this.doneBtn.addEventListener('click', Done.bind(that))
-            },
-            onClose: function (e) {
-                var that = this;
-                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
-                this.doneBtn.removeEventListener('click', Done.bind(that))
-            },
-            onSelect: function (selectedDate) {
-                if (this.date) {
-                    if (this.el.id === 'dtpEmissionDate') {
-                        document.getElementById('emissionDate').value = this.date.toISOString();
-                    };
-                    if (this.el.id === 'dtpPaymentDate') {
-                        document.getElementById('paymentDate').value = this.date.toISOString();
-                    };
-                }
-            }
+        document.getElementById("typeSelect").addEventListener('change', async (event) => {
+            document.getElementById("splitType").value = event.target.value;
+            let aux = await getCheckRemainingBalance("<%= data.check.id %>", event.target.value);
+
+            var formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+
+                // These options are needed to round to whole numbers if that's what you want.
+                //minimumFractionDigits: 0,
+                //maximumFractionDigits: 0,
+            });
+
+            remainingAmmount.value = formatter.format(aux.remainingBalance).replace(",", "");
+
+            // var formatter = new Intl.NumberFormat('es-AR', {
+            //     style: 'currency',
+            //     currency: 'ARS',
+
+            //     // These options are needed to round to whole numbers if that's what you want.
+            //     //minimumFractionDigits: 0,
+            //     //maximumFractionDigits: 0,
+            // });
+
+            // remainingAmmount.value = Intl.NumberFormat('en-US', { style: 'decimal' }).format(aux.remainingBalance, {
+            //     minimumFractionDigits: 0,
+            //     maximumFractionDigits: 2
+            // })
+
+            partialAmmount.max = aux.remainingBalance;
+            partialAmmount.value = aux.remainingBalance;
+            M.updateTextFields();
+
         });
     });
 
-    function Cancel() {
-        if (!this.hasEvent) {
-            this.hasEvent = true;
-            console.log('Clicked on cancel btn:', this.cancelBtn);
-        }
-    }
-    function Done() {
-        if (!this.hasEvent) {
-            this.hasEvent = true;
-            console.log('Clicked on done btn:', this.doneBtn);
-            if (this.date) {
-                if (this.el.id === 'dtpEmissionDate') {
-                    document.getElementById('emissionDate').value = this.date.toISOString();
-                };
-                if (this.el.id === 'dtpPaymentDate') {
-                    document.getElementById('paymentDate').value = this.date.toISOString();
-                };
-            }
-        }
-    }
 </script>
