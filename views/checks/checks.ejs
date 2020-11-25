@@ -123,8 +123,15 @@
 
                         <td>
                             <a href="/checks/split/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">content_cut</i></a>
+
+                            <!--EN CARTERA, DEPOSITADO, ACREDITADO, ENTREGADO-->
+                            <% if((data.checks[i].statusId === 0)||(data.checks[i].statusId === 1)||(data.checks[i].statusId === 2)||(data.checks[i].statusId === 3)) { %>
                             <a href="/checks/edit/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.checks[i].ammount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            <% } %>
+
+                            <% if((data.checks[i].statusId === 0)||(data.checks[i].statusId === 1)||(data.checks[i].statusId === 2)||(data.checks[i].statusId === 3)||(data.checks[i].statusId === 4)) { %>
+                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-check="<%=data.checks[i].bank.name%> <%=data.checks[i].number%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.checks[i].ammount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            <% } %>
                         </td>
                     </tr>
                     <% } %>
@@ -139,7 +146,7 @@
 
 </main>
 
-<%#- include ("./modals/delete.ejs") %>
+<%- include ("./modals/delete.ejs") %>
 
 <%- include ("../partials/footer") %>
 
@@ -150,32 +157,15 @@
         var instances = M.Modal.init(elems, {})
     });
 
-    // function deleteDialog(button) {
-    //     var _elem = document.getElementById('modalDelete');
-    //     var modal = M.Modal.getInstance(_elem);
-    //     const message = `[ID: ${button.dataset.id}] - ${button.dataset.value} desde ${button.dataset.source} hacia ${button.dataset.destination} `
-    //     document.getElementById('modalDeleteMessage').textContent = message;
-    //     document.getElementById('modalDeleteTransferId').value = button.dataset.id;
-    //     document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
-    //     modal.open();
-    // };
-
-    // function showDeleted() {
-    //     const swShowDeleted = document.getElementById('swShowDeleted').checked;
-
-    //     const clientId = document.getElementById('clientId').value;
-    //     const periodId = document.getElementById('periodId').value;
-
-    //     const redirectUrl = '/transfers?showAll=' + swShowDeleted;
-
-    //     var form = $('<form action="' + redirectUrl + '" method="post">' +
-    //         '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
-    //         '<input type="hidden" name="periodId" value="' + periodId + '"></input>' +
-    //         '</form>');
-
-    //     $('body').append(form);
-    //     $(form).submit();
-    // }
+    function deleteDialog(button) {
+        var _elem = document.getElementById('modalDelete');
+        var modal = M.Modal.getInstance(_elem);
+        const message = `[ID: ${button.dataset.id}] - ${button.dataset.check} con valor ${button.dataset.value}`
+        document.getElementById('modalDeleteMessage').textContent = message;
+        document.getElementById('modalDeleteCheckId').value = button.dataset.id;
+        document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
+        modal.open();
+    };
 
     $(document).ready(function () {
 

@@ -1,14 +1,15 @@
-<%- include ("../partials/header") %>
+<%- include ("../../partials/header") %>
 
 <main class="site-content">
 
     <center>
-        <%- include ("../partials/alerts") %>
+        <%- include ("../../partials/alerts") %>
     </center>
 
     <div class="table-container">
         <div class="table-header">
-            <span class="table-title">Cheques Parciales - [<%=data.check.client.internalCode%>] <span style="font-weight: bold;"><%=data.check.client.name%></span></span>
+
+            <span class="table-title">Cobranzas - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
             <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
                     <div class="circle-clipper left">
@@ -23,116 +24,116 @@
                 </div>
             </div>
             <div class="actions">
+                <div class="switch">
+                    <label> Mostrar todos los estados <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
+                        <span class="lever"></span></label>
+                </div>
+                <div class="switch">
+                    <label> Refrescar automáticamente <input id="swRefresh" type="checkbox" onchange="autoRefresh(this);" <% if(params.autoRefresh===true){%> checked <%}%>>
+                        <span class="lever"></span></label>
+                </div>
+
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/checks/split/new/<%=data.check.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <a href="/incomes/collections/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                </div>
+            </div>
+            <div id="hide-dt" style="display:none">
+                <table id="datatable" class="table display">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Proveedor</th>
+                            <th>Factura</th>
+                            <th>Importe</th>
+                            <th>Detalles</th>
+                            <th>Fecha</th>
+                            <th>Grupo de Cuentas</th>
+                            <th>Imputacion Contable</th>
+                            <th>Periodo</th>
+                            <th>Estado</th>
+                            <th>Usuario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div id="hide-dt" style="display:none">
-            <table id="datatable" class="table display">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Banco</th>
-                        <th>Cheque</th>
-                        <th>Importe Total</th>
-                        <th>Importe Parcial</th>
-                        <th>Tipo</th>
-                        <th>Estado</th>
-                        <th>Comentarios</th>
-                        <th>Usuario</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for(var i=0; i < data.checks.length; i++) { %>
-                    <tr data-id="<%= data.checks[i].id %>">
-                        <td><%= data.checks[i].id %></td>
-                        <td><%= data.check.bank.name %></td>
-                        <td><%= data.check.number %></td>
-                        <td>$<%= data.check.ammount%></td>
-                        <td>$<%= data.checks[i].ammount %></td>
-
-                        <% if(data.checks[i].splitType === 'I') { %>
-                        <td>Cobranza</td>
-                        <% } else { %>
-                        <td>Orden de Pago</td>
-                        <% } %>
-
-                        <td>
-                            <!--PENDIENTE-->
-                            <% if(data.checks[i].statusId === 0) { %>
-                            <i class="material-icons">account_balance_wallet</i>
-                            <% } %>
-
-                            <!--ASIGNADO-->
-                            <% if(data.checks[i].statusId === 1) { %>
-                            <i class="material-icons">done</i>
-                            <% } %>
-
-                            <!--ANULADO-->
-                            <% if(data.checks[i].statusId === 3) { %>
-                            <i class="material-icons">delete_outline</i>
-                            <% } %>
-
-                            <span style="padding-left: 10px; vertical-align: 8px;"><%= data.checks[i].status %></span>
-                        </td>
-
-                        <td><%= data.checks[i].comments %></td>
-                        <td><%= data.checks[i].user.name %></td>
-                        <td>
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.check.client.id%>" data-value="$<%= data.checks[i].ammount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
-                        </td>
-                    </tr>
-                    <% } %>
-                </tbody>
-            </table>
+        <div class="container">
+            <div class="row center-align" style="font-size:small" id="lastUpdate"></div>
         </div>
 
-    </div>
-
-    <input type="hidden" name="clientId" id="clientId" value=<%=data.check.client.id%> />
+        <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+        <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
 
 </main>
 
-<%#- include ("./modals/delete.ejs") %>
-
-<%- include ("../partials/footer") %>
+<%- include ("../../partials/footer") %>
 
 <script>
+
+    var handler = 0;
 
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll(".modal");
         var instances = M.Modal.init(elems, {})
+
+        document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
+
+        if (htmlDecode("<%= params.autoRefresh %>") === 'true') {
+            handler = enableAutoRefresh();
+        }
+
     });
 
-    // function deleteDialog(button) {
-    //     var _elem = document.getElementById('modalDelete');
-    //     var modal = M.Modal.getInstance(_elem);
-    //     const message = `[ID: ${button.dataset.id}] - ${button.dataset.value} desde ${button.dataset.source} hacia ${button.dataset.destination} `
-    //     document.getElementById('modalDeleteMessage').textContent = message;
-    //     document.getElementById('modalDeleteTransferId').value = button.dataset.id;
-    //     document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
-    //     modal.open();
-    // };
+    function autoRefresh(e) {
+        if (e.checked === true) {
+            handler = enableAutoRefresh();
+        } else {
+            disableAutoRefresh(handler);
+        }
+    }
 
-    // function showDeleted() {
-    //     const swShowDeleted = document.getElementById('swShowDeleted').checked;
+    function enableAutoRefresh() {
+        return setTimeout(function () { reloadPage(); }, (2 * 60 * 1000))
+    }
 
-    //     const clientId = document.getElementById('clientId').value;
-    //     const periodId = document.getElementById('periodId').value;
+    function disableAutoRefresh(handler) {
+        if (handler) {
+            clearTimeout(handler);
+            timer = 0;
+        }
+    }
 
-    //     const redirectUrl = '/transfers?showAll=' + swShowDeleted;
+    function deleteDialog(button) {
+        var _elem = document.getElementById('modalDeleteClient');
+        var modal = M.Modal.getInstance(_elem);
+        const message = `[ID: ${button.dataset.id}] - ${button.dataset.value}`
+        document.getElementById('modalDeleteMessage').textContent = message;
+        document.getElementById('modalDeleteClientId').value = button.dataset.id;
+        modal.open();
+    };
 
-    //     var form = $('<form action="' + redirectUrl + '" method="post">' +
-    //         '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
-    //         '<input type="hidden" name="periodId" value="' + periodId + '"></input>' +
-    //         '</form>');
+    function reloadPage() {
+        const swRefresh = document.getElementById('swRefresh').checked;
+        const swStatus = document.getElementById('swStatus').checked;
+        const clientId = document.getElementById('clientId').value;
+        const periodId = document.getElementById('periodId').value;
 
-    //     $('body').append(form);
-    //     $(form).submit();
-    // }
+        const redirectUrl = '/expenses/paymentReceipts?refresh=' + swRefresh + '&' + 'showAll=' + swStatus;
+
+        var form = $('<form action="' + redirectUrl + '" method="post">' +
+            '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
+            '<input type="hidden" name="periodId" value="' + periodId + '"></input>' +
+            '</form>');
+
+        $('body').append(form);
+        $(form).submit();
+    }
 
     $(document).ready(function () {
 
@@ -165,10 +166,10 @@
                 },
                 {
                     className: "center-align",
-                    targets: [0, 1, 2, 3]
+                    targets: 0
                 },
                 {
-                    targets: 2,
+                    targets: 3,
                     type: 'currency',
                 },
                 {
@@ -176,10 +177,16 @@
                     visible: true,
                     searchable: false,
                     render: $.fn.dataTable.render.ellipsis(32, true)
-                },
+                    // render: function (data, type, full, meta) {
+                    //     return type === 'display' ? '<div title="' + full.description + '">' + data : data;
+                    // }
+                }
             ],
+
             colReorder: true,
-            fixedColumns: { leftColumns: 2 },
+            fixedColumns: {
+                leftColumns: 3
+            },
             pageLength: 200,
             order: [[0, 'asc']],
             autowidth: true,
@@ -239,6 +246,10 @@
                 $('#hide-dt').show();
                 $('#progress').hide();
             },
+            // "footerCallback": function (row, data, start, end, display) {
+            //     var api = this.api();
+            //     $(api.column(4).footer()).html('prueba');
+            // }
         });
     });
 </script>

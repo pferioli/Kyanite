@@ -70,7 +70,8 @@
               <a href="/clients/edit/<%= data.clients[i].id %>" class="btn-flat btn-small waves-effect waves-light">
                 <i class="material-icons">edit</i></a>
 
-              <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.clients[i].id%>" data-value="<%= data.clients[i].name %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+              <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.clients[i].id%>" 
+                data-value="<%= data.clients[i].name %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
             </td>
           </tr>
           <% } %>

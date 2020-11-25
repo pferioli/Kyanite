@@ -4,7 +4,7 @@ const User = Model.user;
 const Client = Model.client;
 const BillingPeriod = Model.billingPeriod;
 const AccountTransfer = Model.accountTransfer;
-const ClientAccount = Model.clientAccount;
+const Account = Model.account;
 const AccountType = Model.accountType;
 
 const AccountTransferStatus = require('../utils/statusMessages.util').AccountTransfer;
@@ -44,8 +44,9 @@ module.exports.listAll = async function (req, res, next) {
             },
         },
         include: [{ model: Client }, { model: BillingPeriod }, { model: User },
-        { model: ClientAccount, include: [{ model: AccountType }], as: 'sourceAccount' },
-        { model: ClientAccount, include: [{ model: AccountType }], as: 'destinationAccount' }],
+        { model: Account, required: false, include: [{ model: AccountType }], as: 'sourceAccount' },
+        { model: Account, required: false, include: [{ model: AccountType }], as: 'destinationAccount' }
+        ],
         paranoid: !showAll
     };
 
@@ -63,14 +64,14 @@ module.exports.showNewForm = async function (req, res, next) {
 
     const client = await Client.findByPk(clientId);
 
-    const clientAccounts = await ClientAccount.findAll(
+    const Accounts = await Account.findAll(
         { where: { clientId: clientId }, include: [{ model: AccountType }] });
 
     const period = await BillingPeriod.findOne({
         where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
     });
 
-    res.render("transfers/add.ejs", { menu: CURRENT_MENU, data: { client, clientAccounts, period } });
+    res.render("transfers/add.ejs", { menu: CURRENT_MENU, data: { client, clientAccounts: Accounts, period } });
 };
 
 module.exports.addNew = async function (req, res, next) {
@@ -172,17 +173,42 @@ module.exports.delete = async function (req, res, next) {
 
 module.exports.showEditForm = async function (req, res, next) {
 
-    const accountId = req.params.id;
+    const clientId = req.params.clientId;
+    const transferId = req.params.transferId;
 
-    //const clientAccount = await ClientAccount.findByPk(accountId);
+    try {
 
-    // const client = await Client.findByPk(clientAccount.clientId);
+        const transfer = await AccountTransfer.findByPk(transferId,
+            {
+                include: [{ model: Client }, { model: BillingPeriod },
+                { model: Account, include: [{ model: AccountType }], as: 'sourceAccount' },
+                { model: Account, include: [{ model: AccountType }], as: 'destinationAccount' }],
+                paranoid: false
+            });
 
-    // const accountTypes = await AccountType.findAll({ where: { enabled: true } });
+        if (transfer === null) {
+            req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
+            winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
+            res.redirect("/transfers/" + clientId);
+        }
 
-    // const banks = await Bank.findAll({ where: { enabled: true } });
+        if ((transfer.statusId != AccountTransferStatus.eStatus.get('pending').value) &&
+            (transfer.statusId != AccountTransferStatus.eStatus.get('inprogress').value)) {
+            req.flash("warning", "El estado actual de la transferencia no permite que sea modificada");
+            res.redirect("/transfers/" + clientId);
+            return;
+        }
 
-    // res.render("accounts/edit.ejs", { menu: CURRENT_MENU, data: { client, clientAccount, accountTypes, banks } });
+        res.render('transfers/edit', {
+            menu: CURRENT_MENU,
+            data: { accountTransfer: transfer },
+        });
+
+    } catch (err) {
+        req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
+        winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
+        res.redirect("/transfers/" + clientId);
+    }
 };
 
 module.exports.edit = async function (req, res, next) {
@@ -223,13 +249,14 @@ module.exports.edit = async function (req, res, next) {
 
 module.exports.info = async function (req, res, next) {
 
-    const transferId = req.params.id;
+    const clientId = req.params.clientId;
+    const transferId = req.params.transferId;
 
     AccountTransfer.findByPk(transferId,
         {
             include: [{ model: Client }, { model: BillingPeriod },
-            { model: ClientAccount, include: [{ model: AccountType }], as: 'sourceAccount' },
-            { model: ClientAccount, include: [{ model: AccountType }], as: 'destinationAccount' }],
+            { model: Account, include: [{ model: AccountType }], as: 'sourceAccount' },
+            { model: Account, include: [{ model: AccountType }], as: 'destinationAccount' }],
             paranoid: false
         })
         .then(transfer => {

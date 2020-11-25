@@ -14,16 +14,21 @@ const winston = require('../helpers/winston.helper');
 
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 const CheckStatus = require('../utils/statusMessages.util').Check;
+const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 
 const moment = require('moment');
-
 const CURRENT_MENU = 'splittedChecks'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = async function (req, res, next) {
 
     const checkId = req.params.checkId || req.body.checkId;
 
-    const check = await Check.findByPk(checkId, { include: [{ model: Client }] });
+    const check = await Check.findByPk(checkId, {
+        include: [
+            { model: Client },
+            { model: Bank, attributes: [['name', 'name']] }
+        ]
+    });
 
     let options = {
         where: { checkId: checkId },
@@ -49,27 +54,89 @@ module.exports.showNewForm = async function (req, res, next) {
 };
 
 module.exports.addNew = async function (req, res, next) {
-    res.redirect('/checks')
+
+    const checkId = req.params.checkId;
+
+    const clientId = req.body.clientId;
+
+    const splitType = req.body.splitType;
+
+    try {
+
+        const remainingBalance = await calcRemainingBalance(checkId, splitType);
+
+        if (remainingBalance < req.body.partialAmmount) {
+            req.flash("warning", `el importe ingresado es mayor que el saldo remanente del cheque[$${remainingBalance.toFixed(2)}]`);
+            res.redirect("/checks/split/" + checkId);
+            return;
+        };
+
+        const check = {
+            checkId: checkId,
+            periodId: req.body.billingPeriodId,
+            splitType: req.body.splitType,
+            ammount: req.body.partialAmmount,
+            comments: req.body.comments,
+            statusId: SplitCheckStatus.eStatus.get('pending').value,
+            userId: req.user.id
+        }
+
+        CheckSplitted.create(check).
+            then(function (result) {
+                winston.info(`User #${req.user.id} created succesfully a new split check for check id #${result.checkId} ${JSON.stringify(check)} - ${result.id}`)
+                req.flash(
+                    "success",
+                    "Un nuevo cheque fue agregado exitosamente a la base de datos"
+                )
+            })
+            .catch(function (err) {
+                winston.error(`An error ocurred while user #${req.user.id} tryed to create a new check ${JSON.stringify(check)} - ${err}`)
+                req.flash(
+                    "error",
+                    "Ocurrio un error y no se pudo agregar el cheque en la base de datos"
+                )
+            })
+            .finally(() => {
+                res.redirect("/checks/split/" + checkId);
+            })
+
+    } catch (err) {
+        req.flash(
+            "error",
+            "Ocurrio un error y no se pudo agregar la subdivisión del cheque a la base de datos"
+        );
+
+        winston.error(`An error ocurred while creating new splitted check ${JSON.stringify(req.body)} - ${err}`);
+
+        res.redirect("/checks/split/" + checkId);
+    }
 };
 
 //------------------ AJAX CALLS ------------------//
 
 module.exports.getRemainingBalance = async function (req, res, next) {
 
-    const checkId = req.params.checkId;
+    const checkId = req.params.checkId; const splitType = req.query.splitType;
+
+    const remainingBalance = await calcRemainingBalance(checkId, splitType);
+
+    res.send(JSON.parse(`{ "remainingBalance" : "${remainingBalance}" }`));
+}
+
+async function calcRemainingBalance(checkId, splitType) {
 
     const check = await Check.findByPk(checkId);
 
     const splittedChecks = await CheckSplitted.findAll({
-        where: { checkId: req.params.checkId, splitType: req.query.splitType }
+        where: { checkId: checkId, splitType: splitType }
     });
 
     let totalAmmount = check.ammount, used = 0;
 
     for (i = 0; i < splittedChecks.length; i++) {
-        used += splittedChecks[i].ammount;
+        used += parseFloat(splittedChecks[i].ammount);
     }
     const remainingBalance = totalAmmount - used;
 
-    res.send(JSON.parse(`{ "remainingBalance" : "${remainingBalance}" }`));
-}
+    return remainingBalance;
+};

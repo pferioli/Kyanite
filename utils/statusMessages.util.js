@@ -51,3 +51,16 @@ module.exports.Check = class {
         return new Enum({ 'wallet': 0, 'deposited': 1, 'accredited': 2, 'delivered': 3, 'rejected': 4, 'cancelled': 5 })
     }
 }
+
+module.exports.SplitCheck = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["Pendiente", "Asignado", "Anulado"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'pending': 0, 'assigned': 1, 'cancelled': 2 })
+    }
+}

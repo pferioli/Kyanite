@@ -3,6 +3,8 @@ const {
     Model
 } = require('sequelize');
 
+const CheckStatus = require('../utils/statusMessages.util').SplitCheck;
+
 module.exports = (sequelize, DataTypes) => {
     class CheckSplitted extends Model {
         /**
@@ -42,6 +44,16 @@ module.exports = (sequelize, DataTypes) => {
         comments: {
             allowNull: false,
             type: DataTypes.STRING
+        },
+        statusId: {
+            allowNull: false,
+            type: DataTypes.INTEGER
+        },
+        status: {
+            type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
+            get: function () {
+                return CheckStatus.Status[this.get('statusId')];
+            }
         },
         userId: {
             allowNull: false,

@@ -19,11 +19,11 @@ router.post("/new/:clientId", function (req, res, next) {
     accountTransfersController.addNew(req, res);
 });
 
-router.get("/edit/:id", function (req, res, next) {
+router.get("/edit/:clientId/:transferId", function (req, res, next) {
     accountTransfersController.showEditForm(req, res);
 });
 
-router.get("/info/:id", function (req, res, next) {
+router.get("/info/:clientId/:transferId", function (req, res, next) {
     accountTransfersController.info(req, res);
 });
 

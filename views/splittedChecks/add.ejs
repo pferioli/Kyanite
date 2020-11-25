@@ -131,6 +131,9 @@
             partialAmmount.value = aux.remainingBalance;
             M.updateTextFields();
 
+            if (remainingAmmount.value === "$0.00") {
+                alert("No es posible agregar una nueva división al cheque, ya no queda saldo remanente para la opción seleccionada")
+            }
         });
     });
 

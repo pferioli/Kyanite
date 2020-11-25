@@ -25,7 +25,7 @@ router.get("/split/:checkId", function (req, res, next) {
     splittedChecksController.listAll(req, res);
 });
 
-router.post('/split/new/:clientId', function (req, res, next) {
+router.post('/split/new/:checkId', function (req, res, next) {
     splittedChecksController.addNew(req, res);
 })
 
@@ -35,7 +35,11 @@ router.get("/new/:clientId", function (req, res, next) {
 
 router.post('/new/:clientId', function (req, res, next) {
     checksController.addNew(req, res);
-})
+});
+
+router.post('/delete', function (req, res, next) {
+    checksController.delete(req, res);
+});
 
 router.get("/client/:clientId", function (req, res, next) {
     checksController.listAll(req, res);

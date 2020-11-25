@@ -57,6 +57,21 @@ module.exports.listAll = async function (req, res, next) {
 
 module.exports.showNewForm = async function (req, res, next) {
     const clientId = req.params.clientId;
+
+    const account = await Account.findOne({
+        include: [{ model: AccountType }],
+        where: {
+            clientId: clientId,
+            '$accountType.account$': 'VAL'
+        },
+    });
+
+    if (!account) {
+        req.flash("warning", "No hay definida ninguna cuenta de Valores [VAL] para el cliente");
+        res.redirect("/checks/client/" + clientId);
+        return;
+    }
+
     const client = await Client.findByPk(clientId);
     const banks = await Bank.findAll({ where: { enabled: true } });
 
@@ -157,4 +172,37 @@ module.exports.addNew = async function (req, res, next) {
         res.redirect("/checks/client/" + clientId);
     }
 
+};
+
+module.exports.delete = async function (req, res, next) {
+
+    const checkId = req.body.checkId;
+    const clientId = req.body.clientId;
+
+    Check.findByPk(checkId).then(function (check) {
+
+        if (check) {
+            check.destroy()
+                .then(numAffectedRows => {
+                    
+                    //TODO: aca deberia hacer el cascade de los splitted checks si los hay...
+                    
+                    req.flash(
+                        "success",
+                        "El cheque fue eliminado exitosamente a la base de datos"
+                    )
+                    winston.info(`check #${checkId} was deleted by user #${req.user.id} `);
+                })
+                .catch(err => {
+                    req.flash(
+                        "error",
+                        "Ocurrio un error y no se pudo eliminar el cheque de la base de datos"
+                    )
+                    winston.error(`an error ocurred when user "${req.user.id} tryed to delete check #${checkId} - ${err}`);
+                })
+                .finally(function () {
+                    res.redirect("/checks/client/" + clientId);
+                })
+        }
+    });
 };
