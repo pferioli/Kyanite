@@ -20,4 +20,7 @@ router.get("/collections/client/:clientId", function (req, res, next) {
     collectionsController.listAll(req, res);
 });
 
+router.get("/collections/new/:clientId", function (req, res, next) {
+    collectionsController.showNewForm(req, res);
+})
 module.exports = router

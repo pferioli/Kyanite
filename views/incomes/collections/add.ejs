@@ -1,0 +1,263 @@
+<style>
+    table {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" method="post" action='/expenses/paymentReceipts/new/<%=data.client.id%>' enctype="multipart/form-data">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Nueva Cobranza</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">home</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">home</i>
+                            <select id="supplierSelect">
+                                <option value="" disabled selected>Seleccione una propiedad</option>
+
+                            </select>
+                            <label>Nombre del Propietario / Propiedad</label>
+                            <input type="hidden" name="homeOwnerId" id="homeOwnerId" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
+                            <label for="dtpEmitted">Fecha de Cobro</label>
+                            <input type="hidden" name="emissionDate" id="emissionDate" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons-outlined prefix">comments</i>
+                            <textarea id="description" name="description" class="materialize-textarea" required></textarea>
+                            <label for="description">Comentarios</label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Conceptos</span>
+
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="col s12">
+                            <table id="tableConcepts" class="table centered_table" style="width: 80% !important;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50%;">Concepto</th>
+                                        <th style="width: 30%;">Importe</th>
+                                        <th style="width: 10%;">Remover</th>
+                                        <th style="width: 10%; display:none;">ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s3 offset-s9">
+                            <p id="totalConcepts">Importe Total: $0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-action right-align">
+                    <button id="add_concept_button" class="modal-trigger waves-effect waves-light btn" data-target="modalAddConcept">
+                        <i class="material-icons right">queue</i>Agregar Concepto</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Valores</span>
+
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="col s12">
+                            <table id="tableValues" class="table centered_table" style="width: 80% !important;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50%;">Valor</th>
+                                        <th style="width: 40%;">Importe</th>
+                                        <th style="width: 10%;">Remover</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s3 offset-s9">
+                            <p id="totalValues">Importe Total: $0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-action right-align">
+                    <button id="add_value_button" class="modal-trigger waves-effect waves-light btn" data-target="modalAddConcept">
+                        <i class="material-icons right">queue</i>Agregar Valor</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-action right-align">
+
+                    <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+</main>
+
+<%- include ("../../partials/footer") %>
+<%- include ("./modals/addConcept.ejs") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+
+<script>
+
+    var totalConcepts = 0; var totalValues = 0;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        elems = document.querySelectorAll('.datepicker');
+        instances = M.Datepicker.init(elems, {
+            format: 'dd/mm/yyyy',
+            autoClose: true,
+            onOpen: function (e) {
+                var that = this;
+                that.hasEvent = false;
+                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                this.doneBtn.addEventListener('click', Done.bind(that))
+            },
+            onClose: function (e) {
+                var that = this;
+                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                this.doneBtn.removeEventListener('click', Done.bind(that))
+            },
+            onSelect: function (selectedDate) {
+                if (this.el.id === 'dtpEmissionDate') {
+                    document.getElementById('emissionDate').value = this.date.toISOString();
+                }
+            }
+        });
+
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems,
+            {
+                dismissible: true,
+                onOpenStart: (e) => {
+                    //console.log("Open Start");                   
+                    if (e.id === "modalAddConcept") {
+                        const conceptsSelect = document.getElementById('conceptsSelect')
+                        conceptsSelect.selectedIndex = 0;
+                        M.FormSelect.init(conceptsSelect, {});
+                        document.getElementById('conceptId').value = "";
+                        document.getElementById('conceptDesc').value = "";
+                        document.getElementById('conceptAmmount').value = "0.00";
+                    }
+                },
+                onOpenEnd: (e) => {
+                    //console.log("Open End");                  
+                },
+                onCloseStart: (e) => {
+                    //console.log("Close Start");
+                },
+                onCloseEnd: (e) => {
+                    //console.log("Close End";
+                }
+            });
+
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+    });
+
+    document.getElementById('conceptsAcceptBtn').onclick = function (e) {
+        if (document.getElementById('conceptId').value === '') { alert("No selecciono ningun tipo de concepto"); return; };
+        conceptComment = document.getElementById('conceptDesc').value;
+        conceptAmmount = document.getElementById('conceptAmmount').value;
+        totalConcepts += addRow('tableConcepts', conceptComment, conceptAmmount);
+        document.getElementById('totalConcepts').textContent = 'Importe Total: $' + totalConcepts;
+    };
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        $('textarea#description').characterCounter();
+    });
+
+    function addRow(tableID, comment, value) {
+        var tableRef = document.getElementById(tableID);
+        var newRow = tableRef.insertRow(-1);
+
+        newRow.insertCell(0).appendChild(document.createTextNode(comment));
+        newRow.insertCell(1).appendChild(document.createTextNode('$' + value));
+        newRow.insertCell(2).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="' + newRow.rowIndex + '" onClick=deleteItem(this)><i class="material-icons">delete</i></a>'
+
+        newCell = newRow.insertCell(3)
+        newCell.appendChild(document.createTextNode(newRow.rowIndex));
+        newCell.style.visibility = 'hidden';
+
+        return parseFloat(value);
+    }
+
+    function deleteItem(button) {
+        const id = button.dataset.id;
+        console.log("id:" + id);
+
+        var tableRef = document.getElementById('tableConcepts');
+
+        for (var i = 1, row; row = tableRef.rows[i]; i++) { //iterate through rows //rows would be accessed using the "row" variable assigned in the for loop 
+            col = row.cells[3];
+            if (id === col.textContent) {
+                alert('la fila con id ' + id + ' es la posicion ' + i)
+                tableRef.deleteRow(i);
+            }
+        }
+
+    }
+</script>

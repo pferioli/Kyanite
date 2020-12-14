@@ -4,6 +4,8 @@ const Client = Model.client;
 const Collection = Model.collection;
 const BillingPeriod = Model.billingPeriod;
 const HomeOwner = Model.homeOwner;
+const Account = Model.account;
+const AccountType = Model.accountType;
 const User = Model.user;
 
 const winston = require('../helpers/winston.helper');
@@ -11,6 +13,9 @@ const winston = require('../helpers/winston.helper');
 const { v4: uuidv4 } = require('uuid');
 
 const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_MENU;
+
+const CollectionStatus = require('../utils/statusMessages.util').Collections;
+const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
 module.exports.listAll = async function (req, res) {
 
@@ -33,7 +38,9 @@ module.exports.listAll = async function (req, res) {
     const autoRefresh = (req.query.refresh === undefined || req.query.refresh.toLowerCase() === 'false' ? false : true);
     const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
 
-    const status = (showAll === true) ? [0, 1, 2, 3, 4, 5] : [1, 2];
+    //CollectionStatus.eStatus.get('opened').value
+
+    const status = (showAll === true) ? [0, 1, 2, 3, 4] : [1, 2, 3];
 
     let options = {
         where: {
@@ -61,12 +68,15 @@ module.exports.listAll = async function (req, res) {
 module.exports.showNewForm = async function (req, res) {
     const clientId = req.params.clientId;
     const client = await Client.findByPk(clientId);
-    const suppliers = await Supplier.findAll(
-        {
-            /*include: [{ model: SupplierCategory }],*/
-            order: [['name', 'asc']]
-        });
-    res.render('expenses/bills/add', { menu: CURRENT_MENU, data: { client, suppliers } });
+
+    const Accounts = await Account.findAll(
+        { where: { clientId: clientId }, include: [{ model: AccountType }] });
+
+    const period = await BillingPeriod.findOne({
+        where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
+    });
+
+    res.render("incomes/collections/add.ejs", { menu: CURRENT_MENU, data: { client, clientAccounts: Accounts, period } });
 };
 
 module.exports.addNew = async function (req, res, next) {

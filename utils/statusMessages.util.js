@@ -64,3 +64,16 @@ module.exports.SplitCheck = class {
         return new Enum({ 'pending': 0, 'assigned': 1, 'cancelled': 2 })
     }
 }
+
+module.exports.Collections = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["Deshabilitada", "Pendiente", "En Proceso", "Procesada", "Anulada"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'disabled': 0, 'pending': 1, 'inprogress': 2, 'processed': 3, 'deleted': 4 })
+    }
+}
