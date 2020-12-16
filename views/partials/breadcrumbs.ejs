@@ -1,42 +1,47 @@
-<% if (locals.menu === 'incomes') { %>
-<a href="#!" class="breadcrumb">Ingresos</a>
-<a href="#!" class="breadcrumb">Listado de Cobranzas</a>
-<%}%>
+<% if (locals.menu==='incomes' ) { %>
+    <a href="#!" class="breadcrumb">Ingresos</a>
+    <a href="#!" class="breadcrumb">Listado de Cobranzas</a>
+    <%}%>
 
-<% if (locals.menu === 'clients') { %>
-<a href="/clients" class="breadcrumb">Clientes</a>
-<%}%>
+        <% if (locals.menu==='clients' ) { %>
+            <a href="/clients" class="breadcrumb">Clientes</a>
+            <%}%>
 
-<% if (locals.menu === 'periods') { %>
-<a href="/periods" class="breadcrumb">Periodos</a>
-<%}%>
+                <% if (locals.menu==='periods' ) { %>
+                    <a href="/periods" class="breadcrumb">Periodos</a>
+                    <%}%>
 
-<% if (locals.menu === 'suppliers') { %>
-<a href="/suppliers" class="breadcrumb">Proveedores</a>
-<%}%>
+                        <% if (locals.menu==='suppliers' ) { %>
+                            <a href="/suppliers" class="breadcrumb">Proveedores</a>
+                            <%}%>
 
-<% if (locals.menu === 'homeOwners') { %>
-<a href="/homeOwners" class="breadcrumb">Propietarios</a>
-<%}%>
+                                <% if (locals.menu==='homeOwners' ) { %>
+                                    <a href="/homeOwners" class="breadcrumb">Propietarios</a>
+                                    <%}%>
 
-<% if (locals.menu === 'accounts') { %>
-<a href="/accounts" class="breadcrumb">Cuentas</a>
-<%}%>
+                                        <% if (locals.menu==='accounts' ) { %>
+                                            <a href="/accounts" class="breadcrumb">Cuentas</a>
+                                            <%}%>
 
-<% if (locals.menu === 'accountTransfers') { %>
-<a href="/transfers" class="breadcrumb">Transferencias</a>
-<%}%>
+                                                <% if (locals.menu==='accountTransfers' ) { %>
+                                                    <a href="/transfers" class="breadcrumb">Transferencias</a>
+                                                    <%}%>
 
-<% if (locals.menu === 'checks') { %>
-<a href="/checks" class="breadcrumb">Cheques</a>
-<%}%>
+                                                        <% if (locals.menu==='checks' ) { %>
+                                                            <a href="/checks" class="breadcrumb">Cheques</a>
+                                                            <%}%>
 
-<% if (locals.menu === 'splittedChecks') { %>
-<a href="/checks" class="breadcrumb">Cheques</a>
-<a href="/checks/splitted" class="breadcrumb">Subdivisiones</a>
-<%}%>
+                                                                <% if (locals.menu==='splittedChecks' ) { %>
+                                                                    <a href="/checks" class="breadcrumb">Cheques</a>
+                                                                    <a href="/checks/splitted" class="breadcrumb">Subdivisiones</a>
+                                                                    <%}%>
 
-<% if (locals.menu === 'paymentReceipts') { %>
-<a href="/expenses" class="breadcrumb">Egresos</a>
-<a href="/expenses/paymentReceipts" class="breadcrumb">Comprobantes</a>
-<%}%>
+                                                                        <% if (locals.menu==='paymentReceipts' ) { %>
+                                                                            <a href="/expenses" class="breadcrumb">Egresos</a>
+                                                                            <a href="/expenses/paymentReceipts" class="breadcrumb">Comprobantes</a>
+                                                                            <%}%>
+
+                                                                                <% if (locals.menu==='collections_manual' ) { %>
+                                                                                    <a href="/incomes" class="breadcrumb">Ingresos</a>
+                                                                                    <a href="/incomes/collections" class="breadcrumb">Cobranzas</a>
+                                                                                    <%}%>

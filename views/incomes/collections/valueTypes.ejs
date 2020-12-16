@@ -4,7 +4,7 @@
         margin-right: auto;
     }
 </style>
-
+ 
 <div class="card">
     <div class="card-content">
         <span class="card-title">Valores</span>
@@ -14,8 +14,11 @@
                 <table id="tableValues" class="table centered_table" style="width: 80% !important;">
                     <thead>
                         <tr>
-                            <th style="width: 50%;">Valor</th>
-                            <th style="width: 40%;">Importe</th>
+                            <th style="width: 5%;">Id</th>
+                            <th style="width: 25%;">Valor</th>
+                            <th style="width: 20%;">Importe</th>
+                            <th style="width: 20%;">Cuenta</th>
+                            <th style="width: 20%;">Cheque</th>
                             <th style="width: 10%;">Remover</th>
                         </tr>
                     </thead>
@@ -31,27 +34,132 @@
             </div>
         </div>
     </div>
-    <div class="card-action right-align">
+    <div class="card-action">
         <div class="row">
-            <div class="input-field col s4 offset-s5">
+            <div class="input-field col s3 offset-s1">
                 <select id="valueSelect" class="required">
                     <option value="" disabled selected>Seleccione un tipo de valor</option>
-                    <option value="1">Efectivo</option>
-                    <option value="2">Deposito en Cuenta</option>
-                    <option value="3">Cheque</option>
+                    <option value="EF">Efectivo</option>
+                    <option value="DC">Deposito en Cuenta</option>
+                    <option value="CH">Cheque</option>
                 </select>
                 <label>Tipo de Valor</label>
                 <input type="hidden" name="valueTypeId" id="valueTypeId" />
                 <input type="hidden" name="valueTypeDesc" id="valueTypeDesc" />
+            </div>
+            <div id="auxiliarSelectDiv" class="input-field col s5" hidden>
+                <select id="auxiliarSelect" disabled>
+                    <option value="" disabled selected>Seleccione una opcion</option>
+                    <option value="EF">Efectivo</option>
+                    <option value="DC">Deposito en Cuenta</option>
+                    <option value="CH">Cheque</option>
+                </select>
+                <label>Seleccione la cuenta o cheque si aplica</label>
             </div>
             <div class="input-field col s2">
                 <input id="valueAmmount" name="valueAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
                 <label for="valueAmmount">Importe</label>
             </div>
             <div class="input-field col s1 center-align">
-                <button class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewValue()" ; style="margin-right: 10px;">
+                <button class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewValueType()" ; style="margin-right: 10px;">
                     <i class="material-icons right">playlist_add</i>Agregar</button>
             </div>
         </div>
     </div>
 </div>
+
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
+
+<script>
+
+    var totalValues = 0;
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.getElementById("valueSelect").addEventListener('change', (event) => {
+            
+            document.getElementById("valueTypeId").value = event.target.value;
+            document.getElementById("valueTypeDesc").value = event.target.options[event.target.selectedIndex].text;
+            
+            auxSelect = document.getElementById('auxiliarSelect');
+            auxSelectDiv = document.getElementById('auxiliarSelectDiv')
+
+            switch (event.target.value) {
+                case "EF": {
+                    auxSelectDiv.hidden = true;
+                    auxSelect.disabled = true; 
+                    auxSelect.hidden = true;
+                    auxSelect.innerHTML = "<option value=\"\" selected disabled>" + "Seleccione la cuenta o cheque si aplica" + "</option>"
+                    auxSelect.selectedIndex = 0;
+                    M.FormSelect.init(auxSelect, {});
+                } break;
+
+                case "DC": {
+                    auxSelect.disabled = false;
+                    auxSelectDiv.hidden = false;
+                    getClientAccounts(htmlDecode("<%=data.client.id%>"),"auxiliarSelect",null);
+                } break;
+
+                case "CH": {
+                    auxSelectDiv.hidden = false;
+                    auxSelect.disabled = false;
+                } break;
+            };
+        });
+    });
+
+    function addNewValueType() {
+
+        const valueTypeId = document.getElementById('valueTypeId').value;
+        const valueComment = document.getElementById('valueTypeDesc').value;
+        const valueAmmount = document.getElementById('valueAmmount').value;
+
+        switch (valueTypeId) {
+            case "EF": {
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, "", "");
+            } break;
+
+            case "DC": {
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, "", "");                
+            } break;
+
+            case "CH": {
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, "", "");
+            } break;
+
+            default: { alert("No selecciono ningun tipo de valor válido"); return; };
+        };
+
+        updateTotalValues();
+
+        const valueSelect = document.getElementById('valueSelect')
+        valueSelect.selectedIndex = 0;
+        M.FormSelect.init(valueSelect, {});
+
+        document.getElementById('valueTypeId').value = "";
+        document.getElementById('valueTypeDesc').value = "";
+        document.getElementById('valueAmmount').value = "0.00";
+    }
+
+    function updateTotalValues() {
+        document.getElementById('totalValues').textContent = 'Importe Total: ' + formatter.format(totalValues);
+    }
+
+    function addValueTypeRow(id, comment, value, account, check) {
+        var tableRef = document.getElementById('tableValues');
+        var newRow = tableRef.insertRow(-1);
+
+        newRow.insertCell(0).appendChild(document.createTextNode(id));
+        newRow.insertCell(1).appendChild(document.createTextNode(comment));
+
+        const valueAmmount = formatter.format(value).replace(",", "");
+
+        newRow.insertCell(2).appendChild(document.createTextNode(valueAmmount));
+        newRow.insertCell(3).appendChild(document.createTextNode(account));
+        newRow.insertCell(4).appendChild(document.createTextNode(check));
+
+        newRow.insertCell(5).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="' + newRow.rowIndex + '" onClick=deleteValueTypeItem(this)><i class="material-icons">delete</i></a>'
+        return parseFloat(value);
+    }
+
+</script>

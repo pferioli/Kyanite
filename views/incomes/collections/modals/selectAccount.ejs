@@ -3,40 +3,30 @@
         <div class="row">
             <h5>Nuevo Valor</h5>
         </div>
-        <p>Seleccione el valor que desea agregar y el importe.</p>
+        <p>Seleccione la cuenta en la cual se hizo el depósito</p>
         <div class="row">
             <div class="input-field col s7">
                 <i class="material-icons prefix">home</i>
-                <select id="conceptsSelect" class="required">
-                    <option value="" disabled selected>Seleccione un valor</option>
-                    <option value="1">Efectivo en Pesos</option>
-                    <option value="2">Efectivo en Dolares</option>
-                    <option value="3">Depósito en cuenta</option>
-                    <option value="4">Cheque</option>
+                <select id="accountSelect" class="required">
+                    <option value="" disabled selected>Seleccione la cuenta</option>
                 </select>
                 <label>Concepto</label>
-                <input type="hidden" name="valueId" id="valueId" />
-                <input type="hidden" name="valueDesc" id="valueDesc" />
-            </div>
-            <div class="input-field col s3">
-                <input id="conceptAmmount" name="conceptAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
-                <label for="conceptAmmount">Importe</label>
+                <input type="hidden" name="accountId" id="accountId" />
+                <input type="hidden" name="accountDesc" id="accountDesc" />
             </div>
         </div>
     </div>
 
     <div class="modal-footer">
-        <a id="conceptsAcceptBtn" class="modal-close waves-effect waves-red btn green primary" style="margin-left: 10px; margin-right: 20px;">Aceptar</a>
-        <a id="conceptsCancelBtn" class="modal-close waves-effect waves-red btn red secondary" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        <a id="AcceptBtn" class="modal-close waves-effect waves-red btn green primary" data-id="modal-account" style="margin-left: 10px; margin-right: 20px;">Aceptar</a>
+        <a id="CancelBtn" class="modal-close waves-effect waves-red btn red secondary" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
     </div>
 </div>
 
 <script>
-    const conceptsSelect = document.getElementById("conceptsSelect");
-    conceptsSelect.addEventListener('change', (event) => {
-        const conceptId = document.getElementById("conceptId");
-        conceptId.value = event.target.value;
-        const conceptDesc = document.getElementById("conceptDesc");
-        conceptDesc.value = event.target.options[event.target.selectedIndex].text;
+    const accountSelect = document.getElementById("accountSelect");
+    accountSelect.addEventListener('change', (event) => {
+        document.getElementById("conceptId") = event.target.value;
+        document.getElementById("conceptDesc") = event.target.options[event.target.selectedIndex].text;
     });
 </script>

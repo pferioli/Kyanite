@@ -12,7 +12,7 @@ const winston = require('../helpers/winston.helper');
 
 const { v4: uuidv4 } = require('uuid');
 
-const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_MENU;
+const CURRENT_MENU = 'collections_manual'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 const CollectionStatus = require('../utils/statusMessages.util').Collections;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;

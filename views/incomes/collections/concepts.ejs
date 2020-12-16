@@ -14,7 +14,8 @@
                 <table id="tableConcepts" class="table centered_table" style="width: 80% !important;">
                     <thead>
                         <tr>
-                            <th style="width: 50%;">Concepto</th>
+                            <th style="width: 5%;">Id</th>
+                            <th style="width: 45%;">Concepto</th>
                             <th style="width: 40%;">Importe</th>
                             <th style="width: 10%;">Remover</th>
                         </tr>
@@ -31,15 +32,15 @@
         </div>
     </div>
 
-    <div class="card-action right-align">
+    <div class="card-action">
         <div class="row">
-            <div class="input-field col s4 offset-s5">
+            <div class="input-field col s3 offset-s1">
                 <select id="conceptsSelect" class="required">
                     <option value="" disabled selected>Seleccione un concepto</option>
-                    <option value="1">Expensas comunes</option>
-                    <option value="2">Expensas extraordinarias</option>
-                    <option value="3">A cuenta de expensas</option>
-                    <option value="4">Otros</option>
+                    <option value="EC">Expensas comunes</option>
+                    <option value="EE">Expensas extraordinarias</option>
+                    <option value="CE">A cuenta de expensas</option>
+                    <option value="OT">Otros</option>
                 </select>
                 <label>Concepto</label>
                 <input type="hidden" name="conceptId" id="conceptId" />
@@ -59,22 +60,25 @@
 
 <script>
 
+    var totalConcepts = 0;
+
     document.addEventListener("DOMContentLoaded", function () {
 
         document.getElementById("conceptsSelect").addEventListener('change', (event) => {
-            const conceptId = document.getElementById("conceptId");
-            conceptId.value = event.target.value;
-            const conceptDesc = document.getElementById("conceptDesc");
-            conceptDesc.value = event.target.options[event.target.selectedIndex].text;
+            document.getElementById("conceptId").value = event.target.value;
+            document.getElementById("conceptDesc").value = event.target.options[event.target.selectedIndex].text;
         });
     });
 
     function addNewConcept() {
 
-        if (document.getElementById('conceptId').value === '') { alert("No selecciono ningun tipo de concepto"); return; };
-        conceptComment = document.getElementById('conceptDesc').value;
-        conceptAmmount = document.getElementById('conceptAmmount').value;
-        totalConcepts += addConceptRow(conceptComment, conceptAmmount);
+        const conceptId = document.getElementById('conceptId').value
+
+        if (conceptId === '') { alert("No selecciono ningun tipo de concepto"); return; };
+
+        const conceptComment = document.getElementById('conceptDesc').value;
+        const conceptAmmount = document.getElementById('conceptAmmount').value;
+        totalConcepts += addConceptRow(conceptId, conceptComment, conceptAmmount);
         updateTotalConcepts();
 
         const conceptsSelect = document.getElementById('conceptsSelect')
@@ -90,16 +94,17 @@
         document.getElementById('totalConcepts').textContent = 'Importe Total: ' + formatter.format(totalConcepts);
     }
 
-    function addConceptRow(comment, value) {
+    function addConceptRow(id, comment, value) {
         var tableRef = document.getElementById('tableConcepts');
         var newRow = tableRef.insertRow(-1);
 
-        newRow.insertCell(0).appendChild(document.createTextNode(comment));
+        newRow.insertCell(0).appendChild(document.createTextNode(id));
+        newRow.insertCell(1).appendChild(document.createTextNode(comment));
 
-        conceptValue = formatter.format(value).replace(",", "");
+        const conceptAmmount = formatter.format(value).replace(",", "");
 
-        newRow.insertCell(1).appendChild(document.createTextNode(conceptValue));
-        newRow.insertCell(2).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="' + newRow.rowIndex + '" onClick=deleteConceptItem(this)><i class="material-icons">delete</i></a>'
+        newRow.insertCell(2).appendChild(document.createTextNode(conceptAmmount));
+        newRow.insertCell(3).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="' + newRow.rowIndex + '" onClick=deleteConceptItem(this)><i class="material-icons">delete</i></a>'
         return parseFloat(value);
     }
 

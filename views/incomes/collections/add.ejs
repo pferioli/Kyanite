@@ -61,15 +61,15 @@
 
                 <%- include ("./concepts.ejs") %>
 
-                    <%- include ("./valueTypes.ejs") %>
+                <%- include ("./valueTypes.ejs") %>
 
-                        <div class="card">
-                            <div class="card-action right-align">
-                                <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
-                                <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
-                                <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
-                            </div>
-                        </div>
+                <div class="card">
+                    <div class="card-action right-align">
+                        <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
+                        <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
+                        <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                    </div>
+                </div>
             </form>
         </div>
         <center>
@@ -77,115 +77,111 @@
         </center>
     </main>
 
-    <%- include ("../../partials/footer") %>
+<%- include ("../../partials/footer") %>
 
-        <script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
-        <script type="text/javascript" src="/javascripts/homeOwners.js"></script>
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/homeOwners.js"></script>
 
-        <script>
+<script>
 
-            var totalConcepts = 0; var totalValues = 0;
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
 
-            document.addEventListener("DOMContentLoaded", function () {
-                var elems = document.querySelectorAll("select");
-                var instances = M.FormSelect.init(elems, {});
-
-                elems = document.querySelectorAll('.datepicker');
-                instances = M.Datepicker.init(elems, {
-                    format: 'dd/mm/yyyy',
-                    autoClose: true,
-                    onOpen: function (e) {
-                        var that = this;
-                        that.hasEvent = false;
-                        this.cancelBtn.addEventListener('click', Cancel.bind(that))
-                        this.doneBtn.addEventListener('click', Done.bind(that))
-                    },
-                    onClose: function (e) {
-                        var that = this;
-                        this.cancelBtn.removeEventListener('click', Cancel.bind(that))
-                        this.doneBtn.removeEventListener('click', Done.bind(that))
-                    },
-                    onSelect: function (selectedDate) {
-                        if (this.el.id === 'dtpEmissionDate') {
-                            document.getElementById('emissionDate').value = this.date.toISOString();
-                        }
-                    }
-                });
-
-                elems = document.querySelectorAll('.modal');
-                instances = M.Modal.init(elems,
-                    {
-                        dismissible: true,
-                        onOpenStart: (e) => {
-                            //console.log("Open Start");                   
-                        },
-                        onOpenEnd: (e) => {
-                            //console.log("Open End");                  
-                        },
-                        onCloseStart: (e) => {
-                            //console.log("Close Start");
-                        },
-                        onCloseEnd: (e) => {
-                            //console.log("Close End";
-                        }
-                    });
-
-                getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
-            });
-
-            document.addEventListener("DOMContentLoaded", async function () {
-
-                let homeOwners = await getHomeOwnersByClient("<%=data.client.id%>");
-                let data = {};
-
-                for (i = 0; i < homeOwners.length; i++) {
-                    data[`${homeOwners[i].property} - ${homeOwners[i].name} [${homeOwners[i].id}]`] = null;
-                }
-
-                var elems = document.querySelectorAll('.autocomplete');
-
-                var instances = M.Autocomplete.init(elems, {
-                    minLength: 1, data: data,
-                    onAutocomplete: function (e) {
-
-                        var matches = e.match(/\[(.*?)\]/);
-
-                        if (matches)
-                            document.getElementById('homeOwnerId').value = matches[1]
-                        else
-                            document.getElementById('homeOwnerId').value = ''
-
-                    }
-                });
-            });
-
-            function Cancel() {
-                if (!this.hasEvent) {
-                    this.hasEvent = true;
-                    console.log('Clicked on cancel btn:', this.cancelBtn);
+        elems = document.querySelectorAll('.datepicker');
+        instances = M.Datepicker.init(elems, {
+            format: 'dd/mm/yyyy',
+            autoClose: true,
+            onOpen: function (e) {
+                var that = this;
+                that.hasEvent = false;
+                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                this.doneBtn.addEventListener('click', Done.bind(that))
+            },
+            onClose: function (e) {
+                var that = this;
+                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                this.doneBtn.removeEventListener('click', Done.bind(that))
+            },
+            onSelect: function (selectedDate) {
+                if (this.el.id === 'dtpEmissionDate') {
+                    document.getElementById('emissionDate').value = this.date.toISOString();
                 }
             }
-            function Done() {
-                if (!this.hasEvent) {
-                    this.hasEvent = true;
-                    console.log('Clicked on done btn:', this.doneBtn);
-                    if (this.date) {
-                        if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
-                    }
-                }
+        });
+
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems,
+        {
+            dismissible: true,
+            onOpenStart: (e) => {
+                //console.log("Open Start");                   
+            },
+            onOpenEnd: (e) => {
+                //console.log("Open End");                  
+            },
+            onCloseStart: (e) => {
+                //console.log("Close Start");
+            },
+            onCloseEnd: (e) => {
+                //console.log("Close End";
             }
+        });
 
-            $(document).ready(function () {
-                $('textarea#description').characterCounter();
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+    });
+
+    document.addEventListener("DOMContentLoaded", async function () {
+
+        let homeOwners = await getHomeOwnersByClient("<%=data.client.id%>");
+        let data = {};
+
+        for (i = 0; i < homeOwners.length; i++) {
+            data[`${homeOwners[i].property} - ${homeOwners[i].name} [${homeOwners[i].id}]`] = null;
+        }
+
+        var elems = document.querySelectorAll('.autocomplete');
+
+        var instances = M.Autocomplete.init(elems, {
+            minLength: 1, data: data,
+            onAutocomplete: function (e) {
+                var matches = e.match(/\[(.*?)\]/);
+                if (matches)
+                    document.getElementById('homeOwnerId').value = matches[1]
+                else
+                    document.getElementById('homeOwnerId').value = ''
+                    alert("id de la propiedad seleccionada: " + matches[1])
+                }
             });
+    });
 
-            var formatter = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        $('textarea#description').characterCounter();
+    });
+
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
 
                 // These options are needed to round to whole numbers if that's what you want.
                 //minimumFractionDigits: 0,
                 //maximumFractionDigits: 0,
-            });
+    });
 
-        </script>
+</script>
