@@ -48,4 +48,8 @@ router.post("/edit", function (req, res, next) {
     homeOwnersController.edit(req, res);
 });
 
+router.get("/getByClient/:clientId", function (req, res, next) {
+    homeOwnersController.getHomeOwnersByClient(req, res);
+});
+
 module.exports = router;

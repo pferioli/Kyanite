@@ -281,3 +281,13 @@ module.exports.history = async function (req, res, next) {
 
     res.render('homeOwners/history.ejs', { menu: CURRENT_MENU, data: { property: currentHomeOwner.property, client: currentHomeOwner.client, homeOwners: historyHomeOwners } })
 };
+
+
+//------------------ AJAX CALLS ------------------//
+
+module.exports.getHomeOwnersByClient = async function (req, res, next) {
+    const clientId = req.params.clientId;
+    HomeOwner.findAll({ where: { clientId: clientId } }).then(function (homeOwners) {
+        res.send(homeOwners)
+    });
+}

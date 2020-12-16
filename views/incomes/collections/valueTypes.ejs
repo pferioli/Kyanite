@@ -1,0 +1,57 @@
+<style>
+    table {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+<div class="card">
+    <div class="card-content">
+        <span class="card-title">Valores</span>
+
+        <div class="row" style="margin-top: 20px;">
+            <div class="col s12">
+                <table id="tableValues" class="table centered_table" style="width: 80% !important;">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%;">Valor</th>
+                            <th style="width: 40%;">Importe</th>
+                            <th style="width: 10%;">Remover</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s3 offset-s9">
+                <p id="totalValues">Importe Total: $0.00</p>
+            </div>
+        </div>
+    </div>
+    <div class="card-action right-align">
+        <div class="row">
+            <div class="input-field col s4 offset-s5">
+                <select id="valueSelect" class="required">
+                    <option value="" disabled selected>Seleccione un tipo de valor</option>
+                    <option value="1">Efectivo</option>
+                    <option value="2">Deposito en Cuenta</option>
+                    <option value="3">Cheque</option>
+                </select>
+                <label>Tipo de Valor</label>
+                <input type="hidden" name="valueTypeId" id="valueTypeId" />
+                <input type="hidden" name="valueTypeDesc" id="valueTypeDesc" />
+            </div>
+            <div class="input-field col s2">
+                <input id="valueAmmount" name="valueAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
+                <label for="valueAmmount">Importe</label>
+            </div>
+            <div class="input-field col s1 center-align">
+                <button class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewValue()" ; style="margin-right: 10px;">
+                    <i class="material-icons right">playlist_add</i>Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
