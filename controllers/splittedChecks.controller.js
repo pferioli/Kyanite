@@ -65,16 +65,32 @@ module.exports.addNew = async function (req, res, next) {
 
         const remainingBalance = await calcRemainingBalance(checkId, splitType);
 
-        if (remainingBalance < req.body.partialAmmount) {
-            req.flash("warning", `el importe ingresado es mayor que el saldo remanente del cheque[$${remainingBalance.toFixed(2)}]`);
+        if (remainingBalance <= 0) {
+            req.flash("warning", `al cheque no le queda saldo disponible para la opción seleccionada [$${remainingBalance.toFixed(2)}]`);
             res.redirect("/checks/split/" + checkId);
             return;
         };
+
+        if (remainingBalance < req.body.partialAmmount) {
+            req.flash("warning", `el importe ingresado es mayor que el saldo remanente del cheque [$${remainingBalance.toFixed(2)}]`);
+            res.redirect("/checks/split/" + checkId);
+            return;
+        };
+
+        const homeOwnerId = req.body.homeOwnerId === '' ? null : req.body.homeOwnerId;
+
+        if ((req.body.splitType === 'I') && (homeOwnerId === null)) {
+            req.flash("warning", 'debe seleccionar una propiedad para asignar el cheque parcial, imposible continuar');
+            res.redirect("/checks/split/" + checkId);
+            return;
+        }
 
         const check = {
             checkId: checkId,
             periodId: req.body.billingPeriodId,
             splitType: req.body.splitType,
+            homeOwnerId: homeOwnerId,
+            paymentOrderId: null,
             ammount: req.body.partialAmmount,
             comments: req.body.comments,
             statusId: SplitCheckStatus.eStatus.get('pending').value,
