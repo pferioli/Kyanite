@@ -7,7 +7,7 @@
                 <span class="card-title">Editar transferencia</span>
                 <div class="row" style="margin-top: 20px;">
                     <div class="input-field col s9">
-                        <i class="material-icons prefix">home</i>
+                        <i class="material-icons prefix">location_city</i>
                         <input id="client" name="client" type="text" value="<%=data.accountTransfer.client.name%> [<%=data.accountTransfer.client.internalCode%>]" disabled />
                         <label for="name">Nombre del Barrio</label>
                         <input type="hidden" name="clientId" id="clientId" value="<%=data.accountTransfer.client.id%>" />
@@ -22,24 +22,24 @@
 
                 <div class="row">
                     <div class="input-field col s6">
-                        <i class="material-icons-outlined prefix">info</i>
+                        <i class="material-icons prefix">account_balance</i>
                         <input id="sourceAccount" name="sourceAccount" type="text" value="[<%=data.accountTransfer.sourceAccount.accountType.account%>] <%=data.accountTransfer.sourceAccount.accountType.description%> (ID:<%=data.accountTransfer.sourceAccountId%>)" readonly />
                         <label for="sourceAccount">Cuenta de Origen</label>
                         <input type="hidden" name="sourceAccountId" id="sourceAccountId" value="<%=data.accountTransfer.sourceAccountId%>" />
                     </div>
                     <div class="input-field col s6">
-                        <i class="material-icons-outlined prefix">info</i>
+                        <i class="material-icons prefix">account_balance</i>
                         <input id="destinationAccount" name="destinationAccount" type="text" value="[<%=data.accountTransfer.destinationAccount.accountType.account%>] <%=data.accountTransfer.destinationAccount.accountType.description%> (ID:<%=data.accountTransfer.destinationAccountId%>)" readonly />
                         <label for="destinationAccount">Cuenta de Destino</label>
                         <input type="hidden" name="destinationAccountId" id="destinationAccountId" value="<%=data.accountTransfer.destinationAccountId%>" />
                     </div>
                     <div class="input-field col s12">
-                        <i class="material-icons-outlined prefix">info</i>
+                        <i class="material-icons prefix">info</i>
                         <input id="sourceAccountInfo" name="sourceAccountInfo" type="text" value="" readonly />
                         <label for="sourceAccountInfo">Detalles de la cuenta de Origen</label>
                     </div>
                     <div class="input-field col s12">
-                        <i class="material-icons-outlined prefix">info</i>
+                        <i class="material-icons prefix">info</i>
                         <input id="destinationAccountInfo" name="destinationAccountInfo" type="text" value="" readonly />
                         <label for="destinationAccountInfo">Detalles de la cuenta de destino</label>
                     </div>
@@ -47,7 +47,7 @@
 
                 <div class="row">
                     <div class="input-field col s2">
-                        <i class="material-icons-outlined prefix">monetization_on</i>
+                        <i class="material-icons prefix">monetization_on</i>
                         <input id="ammount" name="ammount" type="text" readonly value="$<%= data.accountTransfer.ammount%>" />
                         <label for="ammount">Importe</label>
                     </div>
@@ -57,7 +57,7 @@
                         <label for="transferDate">Fecha</label>
                     </div>
                     <div class="input-field col s6">
-                        <i class="material-icons-outlined prefix">comment</i>
+                        <i class="material-icons prefix">comment</i>
                         <textarea id="comments" name="comments" class="materialize-textarea" readonly><%= data.accountTransfer.comments%></textarea>
                         <label for="comments">Descripcion de la transferencia</label>
                     </div>
