@@ -1,139 +1,138 @@
 <%- include ("../partials/header") %>
 
 <% if(locals.metadata && locals.metadata.length>0) { %>
-<% var client=metadata[0] %>
+    <% var client=metadata[0] %>
 <% } %>
 
 <main class="site-content">
-  <div class="container" style="margin-top: 50px;">
-    <form class="col s12 m6" method="post" action='/clients/edit/<%=data.client.id%>'>
-      <div class="card">
-        <div class="card-content">
-          <span class="card-title">Editar cliente</span>
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12 m6" method="post" action='/clients/edit/<%=data.client.id%>'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Editar cliente</span>
 
-          <div class="row" style="margin-top: 20px;">
-            <div class="input-field col s10">
-              <i class="material-icons prefix">home</i>
-              <input id="name" name="name" type="text" class="validate" data-length="128" value="<%=data.client.name%>"
-                required />
-              <label for="name">Nombre del Barrio</label>
-            </div>
-            <div class="input-field col s2">
-              <input id="internalCode" name="internalCode" type="text" class="validate" maxlength="3" minlength="2"
-                pattern="[A-Z]{2}[0-9]{0,1}" onkeyup="this.value = this.value.toUpperCase();"
-                title="El código de barrio deben ser una combinación de 2 a 3 digitos compuesto por letras mayusculas y números"
-                value="<%=data.client.internalCode%>" required />
-              <label for="codigo">Codigo Interno</label>
-            </div>
-          </div>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s10">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="name" name="name" type="text" class="validate" data-length="128" value="<%=data.client.name%>" required />
+                            <label for="name">Nombre del Barrio</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">label</i>
+                            <input id="internalCode" name="internalCode" type="text" class="validate" maxlength="3" minlength="2"
+                                pattern="[A-Z]{2}[0-9]{0,1}" onkeyup="this.value = this.value.toUpperCase();"
+                                title="El código de barrio deben ser una combinación de 2 a 3 digitos compuesto por letras mayusculas y números"
+                                value="<%=data.client.internalCode%>" required />
+                            <label for="codigo">Codigo Interno</label>
+                        </div>
+                    </div>
 
-          <div class="row">
-            <div class="input-field col s3">
-              <i class="material-icons prefix">info_outline</i>
-              <input id="cuit" name="cuit" type="text" class="validate" maxlength="13" minlength="13"
-                pattern="^(20|23|27|30|33)([0-9]{9}|-[0-9]{8}-[0-9]{1})$" required value="<%=data.client.cuit%>" />
-              <label for="cuit">C.U.I.T.</label>
-            </div>
-            <div class="input-field col s5">
-              <select id="taxCategorySelect">
-                <% for(var i=0; i < data.taxCategories.length; i++) { %>
-                <option value="<%=data.taxCategories[i].id%>"><%= data.taxCategories[i].name %></option>
-                <% } %>
-              </select>
-              <label>Categoria Impositiva</label>
-            </div>
-            <div class="input-field col s2">
-              <input id="functionalUnitsCount" name="functionalUnitsCount" type="number" min="0" step="1"
-                class="validate" value="<%=data.client.functionalUnitsCount%>" />
-              <label for="functionalUnitsCount">Cantidad de UFs</label>
-            </div>
-            <div class="input-field col s2">
-              <input id="lotSize" name="lotSize" type="number" min="0" step="1" class="validate"
-                value="<%=data.client.lotSize%>" />
-              <label for="lotSize">Tamaño del Lote [m<span><sup>2</sup></span>]</label>
-            </div>
-            <input type="hidden" name="taxCategory" id="taxCategory" value="<%=data.client.taxCategoryId%>" />
-          </div>
+                    <div class="row">
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">info</i>
+                            <input id="cuit" name="cuit" type="text" class="validate" maxlength="13" minlength="13"
+                                pattern="^(20|23|27|30|33)([0-9]{9}|-[0-9]{8}-[0-9]{1})$" required value="<%=data.client.cuit%>" />
+                            <label for="cuit">C.U.I.T.</label>
+                        </div>
+                        <div class="input-field col s5">
+                            <i class="material-icons prefix">point_of_sale</i>
+                            <select id="taxCategorySelect">
+                                <% for(var i=0; i < data.taxCategories.length; i++) { %>
+                                <option value="<%=data.taxCategories[i].id%>"><%= data.taxCategories[i].name %></option>
+                                <% } %>
+                            </select>
+                            <label>Categoria Impositiva</label>
+                            <input type="hidden" name="taxCategory" id="taxCategory" value="<%=data.client.taxCategoryId%>" />
+                        </div>
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">home</i>
+                            <input id="functionalUnitsCount" name="functionalUnitsCount" type="number" min="0" step="1"
+                                class="validate" value="<%=data.client.functionalUnitsCount%>" />
+                            <label for="functionalUnitsCount">Cantidad de UFs</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <input id="lotSize" name="lotSize" type="number" min="0" step="1" class="validate"
+                                value="<%=data.client.lotSize%>" />
+                            <label for="lotSize">Tamaño del Lote [m<span><sup>2</sup></span>]</label>
+                        </div>
+                    </div>
 
-          <div class="row">
-            <div class="input-field col s9">
-              <i class="material-icons prefix">mail</i>
-              <input id="email" name="email" type="email" class="validate" value="<%=data.client.email%>" />
-              <label for="email">Correo Electronico</label>
-              <span class="helper-text" data-error="el formato de la dirección es inválida">correo electrónico de
-                contácto del barrio</span>
-            </div>
-            <div class="input-field col s3">
-              <i class="material-icons prefix">local_phone</i>
-              <input id="phone" name="phone" type="tel" class="validate"
-                pattern="\([0-9]{2,3,4}\) [0-9]{3,4}[ -][0-9]{4}" placeholder="(Código de área) Número"
-                title="(Codigo de Area de 2 a 4 digitos) seguido de un espacio, la caracteristica de 3 o 4 digitos un espacio o guión y los 4 digitos finales"
-                value="<%=data.client.phone%>" />
-              <label for="phone">Telefono</label><span class="helper-text" data-error="formato inválido">(xxx)
-                [xxxx-xxxx]</span>
-            </div>
-          </div>
+                    <div class="row">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">mail</i>
+                            <input id="email" name="email" type="email" class="validate" value="<%=data.client.email%>" />
+                            <label for="email">Correo Electronico</label>
+                            <span class="helper-text" data-error="el formato de la dirección es inválida">correo electrónico de contácto del barrio</span>
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">local_phone</i>
+                            <input id="phone" name="phone" type="tel" class="validate"
+                                pattern="\([0-9]{2,3,4}\) [0-9]{3,4}[ -][0-9]{4}" placeholder="(Código de área) Número"
+                                title="(Codigo de Area de 2 a 4 digitos) seguido de un espacio, la caracteristica de 3 o 4 digitos un espacio o guión y los 4 digitos finales"
+                                value="<%=data.client.phone%>" />
+                            <label for="phone">Telefono</label><span class="helper-text" data-error="formato inválido">(xxx) [xxxx-xxxx]</span>
+                        </div>
+                    </div>
 
-          <div class="row">
-            <div class="input-field col s6">
-              <i class="material-icons prefix">location_on</i>
-              <input id="address" name="address" type="text" class="validate" value="<%=data.client.address%>" />
-              <label for="address">Direccion</label>
-            </div>
-            <div class="input-field col s3">
-              <i class="material-icons prefix">location_city</i>
-              <input id="city" name="city" type="text" class="validate" value="<%=data.client.city%>" />
-              <label for="city">Ciudad</label>
-            </div>
-            <div class="input-field col s3">
-              <i class="material-icons-outlined prefix">markunread_mailbox</i>
-              <input id="zipCode" name="zipCode" type="text" class="validate" value="<%=data.client.zipCode%>" />
-              <label for="zipCode">Codigo Postal</label>
-            </div>
-          </div>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">location_on</i>
+                            <input id="address" name="address" type="text" class="validate" value="<%=data.client.address%>" />
+                            <label for="address">Direccion</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">domain</i>
+                            <input id="city" name="city" type="text" class="validate" value="<%=data.client.city%>" />
+                            <label for="city">Ciudad</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">markunread_mailbox</i>
+                            <input id="zipCode" name="zipCode" type="text" class="validate" value="<%=data.client.zipCode%>" />
+                            <label for="zipCode">Codigo Postal</label>
+                        </div>
+                    </div>
 
-          <div class="row">
-            <div class="input-field col s12">
-              <textarea id="comments" name="comments" class="materialize-textarea"><%=data.client.comments%></textarea>
-              <label for="comments">Observaciones</label>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">comment</i>
+                            <textarea id="comments" name="comments" class="materialize-textarea"><%=data.client.comments%></textarea>
+                            <label for="comments">Observaciones</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action right-align">
+                    <button type='submit' class="waves-effect waves-light btn green"><i
+                        class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel"
+                        class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
+                        class="material-icons right">cancel</i>Cancelar</button>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="card-action right-align">
-          <button type='submit' class="waves-effect waves-light btn green"><i
-              class="material-icons right">save</i>Guardar</button>
-          <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel"
-            class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
-              class="material-icons right">cancel</i>Cancelar</button>
-        </div>
-      </div>
-    </form>
-  </div>
-  <div>
+        </form>
+    <div>    
     <center>
-      <%- include ("../partials/alerts") %>
+        <%- include ("../partials/alerts") %>
     </center>
 </main>
 
 <%- include ("../partials/footer") %>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var elems = document.querySelectorAll("select");
-    var instances = M.FormSelect.init(elems, {});
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
 
-    M.CharacterCounter.init(document.getElementById("comments"));
-    M.CharacterCounter.init(document.getElementById("name"));
+        M.CharacterCounter.init(document.getElementById("comments"));
+        M.CharacterCounter.init(document.getElementById("name"));
 
-    var taxCategorySelect = document.getElementById("taxCategorySelect");
-    taxCategorySelect.onchange = function (evt) {
-      document.getElementById("taxCategory").value = evt.target.value;
-    };
+        var taxCategorySelect = document.getElementById("taxCategorySelect");
+        taxCategorySelect.onchange = function (evt) {
+            document.getElementById("taxCategory").value = evt.target.value;
+        };
 
-    const taxCategoryId = document.getElementById("taxCategory").value;
-    taxCategorySelect.options[taxCategoryId - 1].selected = 'selected';
-    taxCategorySelect.value = taxCategoryId;
-    M.FormSelect.init(taxCategorySelect)
-  });
-
+        const taxCategoryId = document.getElementById("taxCategory").value;
+        taxCategorySelect.options[taxCategoryId - 1].selected = 'selected';
+        taxCategorySelect.value = taxCategoryId;
+        M.FormSelect.init(taxCategorySelect)
+    });
 </script>

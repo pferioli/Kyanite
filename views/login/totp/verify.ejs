@@ -14,51 +14,46 @@
 
 <%- include ("../header") %>
 
-<main class="site-content">
+    <main class="site-content">
 
-    <center>
-        <div class="container">
+        <center>
+            <div class="container">
 
-            <div class="section"></div>
-            <div class="section"></div>
+                <div class="section"></div>
+                <div class="section"></div>
 
-            <div class="z-depth-1 white row"
-                style="display: inline-block; padding: 32px 48px 0px 48px; border: 1px solid #EEE;">
+                <div class="z-depth-1 white row" style="display: inline-block; padding: 32px 48px 0px 48px; border: 1px solid #EEE;">
 
-                <form class="col s12" method="post" action='/auth/login/verify'>
-                    <div class='row'>
-                        <div class='col s12'>
-                            <img src="/images/aaii.png" style="width: 150px;" alt="" class="responsive-img">
+                    <form class="col s12" method="post" action='/auth/login/verify'>
+                        <div class='row'>
+                            <div class='col s12'>
+                                <img src="/images/aaii.png" style="width: 150px;" alt="" class="responsive-img">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class='row'>
-                        <div class='input-field col s12'>
-                            <input class='validate' type='text' name='otpToken' id='otpToken' minlength='6'
-                                maxlength='6' pattern="[0-9]{6}"
-                                title="Utilice el Google Authenticator para obtener el token" autofocus />
-                            <label for='otpToken'>Token de seguridad</label> <span class="helper-text"
-                                data-error="el token es de 6 dígitos numéricos">Utilice el Google
-                                Authenticator para obtener el token</span>
+                        <div class='row'>
+                            <div class='input-field col s12' autocomplete="off">
+                                <input class='validate' type='text' name='otpToken' id='otpToken' minlength='6' maxlength='6' pattern="[0-9]{6}" title="Utilice el Google Authenticator para obtener el token" autofocus />
+                                <label for='otpToken'>Token de seguridad</label> <span class="helper-text" data-error="el token es de 6 dígitos numéricos">Utilice el Google
+                                    Authenticator para obtener el token</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class='row'>
-                        <button type='submit' name='btn_login'
-                            class='col s12 btn btn-medium waves-effect'>Verificar</button>
-                    </div>
-                </form>
+                        <div class='row'>
+                            <button type='submit' name='btn_login' class='col s12 btn btn-medium waves-effect'>Verificar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="row">
+                    <a href="/auth/logout">cerrar sesión y volver al formulario de ingreso</a>
+                </div>
+
+                <%- include ("../../partials/alerts") %>
+
             </div>
 
-            <div class="row">
-                <a href="/auth/logout">cerrar sesión y volver al formulario de ingreso</a>
-            </div>
+        </center>
+    </main>
 
-            <%- include ("../../partials/alerts") %>
-
-        </div>
-
-    </center>
-</main>
-
-<%- include ("../../partials/footer") %>
+    <%- include ("../../partials/footer") %>

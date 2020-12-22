@@ -1,3 +1,4 @@
+const Op = require('sequelize').Op
 const Model = require('../models')
 const User = Model.user;
 const Client = Model.client;
@@ -178,10 +179,20 @@ module.exports.getCustomerAccounts = async function (req, res, next) {
 
     const clientId = req.params.clientId || req.body.clientId;
 
-    Account.findAll({
-        where: { clientId: clientId },
-        include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }]
-    }).then(function (accounts) {
+    const accountType = req.params.accountType || req.body.accountType;
+
+    let options = {
+        where: {
+            clientId: clientId,
+        },
+        include: [{ model: User }, { model: Bank },
+        {
+            model: AccountType,
+            // where: { account: ['CC$', 'CA$']}
+        }]
+    };
+
+    Account.findAll(options).then(function (accounts) {
         res.send(accounts)
     });
 }

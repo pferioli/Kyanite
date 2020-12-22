@@ -4,7 +4,7 @@
         margin-right: auto;
     }
 </style>
- 
+
 <div class="card">
     <div class="card-content">
         <span class="card-title">Valores</span>
@@ -35,8 +35,8 @@
         </div>
     </div>
     <div class="card-action">
-        <div class="row">
-            <div class="input-field col s3 offset-s1">
+        <div class="row" style="margin-left: 30px;">
+            <div class="input-field col s3">
                 <select id="valueSelect" class="required">
                     <option value="" disabled selected>Seleccione un tipo de valor</option>
                     <option value="EF">Efectivo</option>
@@ -47,7 +47,7 @@
                 <input type="hidden" name="valueTypeId" id="valueTypeId" />
                 <input type="hidden" name="valueTypeDesc" id="valueTypeDesc" />
             </div>
-            <div id="auxiliarSelectDiv" class="input-field col s5" hidden>
+            <div id="auxiliarSelectDiv" class="input-field col s6" hidden>
                 <select id="auxiliarSelect" disabled>
                     <option value="" disabled selected>Seleccione una opcion</option>
                     <option value="EF">Efectivo</option>
@@ -77,17 +77,17 @@
     document.addEventListener("DOMContentLoaded", function () {
 
         document.getElementById("valueSelect").addEventListener('change', (event) => {
-            
+
             document.getElementById("valueTypeId").value = event.target.value;
             document.getElementById("valueTypeDesc").value = event.target.options[event.target.selectedIndex].text;
-            
+
             auxSelect = document.getElementById('auxiliarSelect');
             auxSelectDiv = document.getElementById('auxiliarSelectDiv')
 
             switch (event.target.value) {
                 case "EF": {
                     auxSelectDiv.hidden = true;
-                    auxSelect.disabled = true; 
+                    auxSelect.disabled = true;
                     auxSelect.hidden = true;
                     auxSelect.innerHTML = "<option value=\"\" selected disabled>" + "Seleccione la cuenta o cheque si aplica" + "</option>"
                     auxSelect.selectedIndex = 0;
@@ -97,12 +97,14 @@
                 case "DC": {
                     auxSelect.disabled = false;
                     auxSelectDiv.hidden = false;
-                    getClientAccounts(htmlDecode("<%=data.client.id%>"),"auxiliarSelect",null);
+                    getDepositAccounts(htmlDecode("<%=data.client.id%>"), "auxiliarSelect");
                 } break;
 
                 case "CH": {
                     auxSelectDiv.hidden = false;
                     auxSelect.disabled = false;
+                    homeOwnerId = document.getElementById('homeOwnerId').value;
+                    if (homeOwnerId === '') { alert("Para poder listar los cheques disponibles primero debe seleccionar a un propietario o propiedad"); return }
                 } break;
             };
         });
@@ -120,7 +122,7 @@
             } break;
 
             case "DC": {
-                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, "", "");                
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, "", "");
             } break;
 
             case "CH": {
@@ -162,4 +164,33 @@
         return parseFloat(value);
     }
 
+    function getDepositAccounts(clientId, fieldID) {
+
+        let selectField = document.getElementById(fieldID);
+        selectField.options.length = 0;
+        selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione la cuenta" + "</option>"
+
+        fetch('/accounts/getByCustomerID/' + clientId)
+            .then(response => {
+                if (response.status == 200) {
+                    return response.text();
+                } else {
+                    throw "Respuesta incorrecta del servidor"
+                }
+            })
+            .then(response => {
+                const accounts = JSON.parse(response);
+                for (i = 0; i < accounts.length; i++) {
+                    if ((accounts[i].accountType.account === 'CA$') || (accounts[i].accountType.account === 'CC$')) {
+                        selectField.innerHTML = selectField.innerHTML + "<option value=\"" + accounts[i].id + "\">" +
+                            "[" + accounts[i].accountType.account + "] " + accounts[i].bank.name + " (" + accounts[i].accountNumber + ")" + "</option>"
+                    }
+                }
+
+                M.FormSelect.init(selectField, {});
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
 </script>

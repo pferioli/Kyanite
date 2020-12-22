@@ -156,3 +156,16 @@ async function calcRemainingBalance(checkId, splitType) {
 
     return remainingBalance;
 };
+
+module.exports.getCollectionChecks = async function (req, res, next) {
+
+    const homeOwnerId = req.params.homeOwnerId; const splitType = 'I';
+
+    Account.findByPk(accountId, { include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }] })
+        .then(account => {
+            res.send(account)
+        });
+    
+    
+    res.send(JSON.parse(`{ "remainingBalance" : "${remainingBalance}" }`));
+}

@@ -8,7 +8,7 @@
                     <span class="card-title">Ingrese un nuevo propietario</span>
                     <div class="row" style="margin-top: 20px;">
                         <div class="input-field col s12">
-                            <i class="material-icons prefix">home</i>
+                            <i class="material-icons prefix">location_city</i>
                             <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
                             <label for="name">Nombre del Barrio</label>
                         </div>
@@ -22,32 +22,31 @@
                     </div>
                     <div class="row">
                         <div class="input-field col s4">
-                            <i class="material-icons prefix">home_work</i>
+                            <i class="material-icons prefix">home</i>
                             <input id="property" name="property" type="text" class="validate" pattern="^(UF|uf)([a-zA-Z0-9])*$" required />
                             <label for="property">Unidad Funcional</label><span class="helper-text" data-error="el formato de la UF es incorrecto, debe comenzar con UF">el nombre de la
                                 propiedad debe ser
                                 UF[xxxx] </xxxx></span>
                         </div>
                         <div class="input-field col s4">
-                            <i class="material-icons-outlined prefix">info</i>
-                            <input id="cuil" name="cuil" type="text" class="validate" maxlength="13" minlength="13" pattern="^(20|23|27|30|33)([0-9]{9}|-[0-9]{8}-[0-9]{1})$" />
-                            <label for="cuit">C.U.I.T./C.U.I.L.</label>
-                        </div>
-                        <div class="input-field col s4">
-                            <i class="material-icons-outlined prefix">apartment</i>
+                            <i class="material-icons prefix">home_work</i>
                             <input id="coefficient" name="coefficient" type="number" value="0.0000" min="0.0000" max="100" step="0.0001" class="validate" required />
                             <label for="coefficient">Coeficiente PH</label>
                         </div>
+                        <div class="input-field col s4">
+                            <i class="material-icons prefix">info</i>
+                            <input id="cuil" name="cuil" type="text" class="validate" maxlength="13" minlength="13" pattern="^(20|23|27|30|33)([0-9]{9}|-[0-9]{8}-[0-9]{1})$" />
+                            <label for="cuit">C.U.I.T./C.U.I.L.</label>
+                        </div>
                     </div>
                     <div class="row">
-                        <div class="input-field col s9">
+                        <div class="input-field col s8">
                             <i class="material-icons prefix">mail</i>
                             <input id="email" name="email" type="email" class="validate" />
                             <label for="email">Correo Electronico</label>
-                            <span class="helper-text" data-error="el formato de la dirección es inválida">correo
-                                electrónico de contácto del propietario</span>
+                            <span class="helper-text" data-error="el formato de la dirección es inválida">correo electrónico de contácto del propietario</span>
                         </div>
-                        <div class="input-field col s3">
+                        <div class="input-field col s4">
                             <i class="material-icons prefix">local_phone</i>
                             <input id="phone" name="phone" type="tel" class="validate" pattern="\([0-9]{2,3,4}\) [0-9]{3,4}[ -][0-9]{4}" placeholder="(Código de área) Número" title="(Codigo de Area de 2 a 4 digitos) seguido de un espacio, la caracteristica de 3 o 4 digitos un espacio o guión y los 4 digitos finales" />
                             <label for="phone">Telefono</label><span class="helper-text" data-error="formato inválido">(xxx)
@@ -56,6 +55,7 @@
                     </div>
                     <div class="row">
                         <div class="input-field col s12">
+                            <i class="material-icons prefix">comment</i>
                             <textarea id="comments" name="comments" class="materialize-textarea"></textarea>
                             <label for="comments">Observaciones</label>
                         </div>
@@ -71,10 +71,10 @@
             </div>
         </form>
     </div>
-    <div>
-        <center>
-            <%- include ("../partials/alerts") %>
-        </center>
+    
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
 </main>
 
 <%- include ("../partials/footer") %>

@@ -1,103 +1,98 @@
 <%- include ("../partials/header") %>
 
-<main class="site-content">
-  <div class="container" style="margin-top: 50px;">
-    <div class="col s12 m6">
-      <div class="card">
-        <div class="card-content">
-          <span class="card-title">Informacion Detallada</span>
-          <div class="row" style="margin-top: 20px;">
-            <div class="input-field col s12">
-              <i class="material-icons prefix">perm_identity</i>
-              <input id="name" name="name" type="text" value="<%=data.supplier.name%>" />
-              <label for="name">Nombre del proveedor</label>
+  <main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">Informacion Detallada</span>
+            <div class="row" style="margin-top: 20px;">
+              <div class="input-field col s12">
+                <i class="material-icons prefix">perm_identity</i>
+                <input id="name" name="name" type="text" value="<%=data.supplier.name%>" />
+                <label for="name">Nombre del proveedor</label>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="input-field col s6">
-              <i class="material-icons prefix">perm_identity</i>
-              <input id="name" name="name" type="text" value="<%=data.supplier.taxCategory.name%>" />
-              <label for="name">Categoria Impositiva</label>
+            <div class="row">
+              <div class="input-field col s6">
+                <i class="material-icons prefix">point_of_sale</i>
+                <input id="name" name="name" type="text" value="<%=data.supplier.taxCategory.name%>" />
+                <label for="name">Categoria Impositiva</label>
+              </div>
+              <div class="input-field col s6">
+                <i class="material-icons prefix">category</i>
+                <input id="name" name="name" type="text" value="<%=data.supplier.supplierCategory.name%>" />
+                <label for="name">Rubro</label>
+              </div>
             </div>
-            <div class="input-field col s6">
-              <i class="material-icons prefix">perm_identity</i>
-              <input id="name" name="name" type="text" value="<%=data.supplier.supplierCategory.name%>" />
-              <label for="name">Rubro</label>
-            </div>
-          </div>
 
-          <div class="row">
-            <div class="input-field col s4">
-              <i class="material-icons-outlined prefix">info</i>
-              <input id="cuit" name="cuit" type="text" value="<%=data.supplier.cuit%>" />
-              <label for="cuit">C.U.I.T. o C.U.I.L.</label>
+            <div class="row">
+              <div class="input-field col s4">
+                <i class="material-icons-outlined prefix">info</i>
+                <input id="cuit" name="cuit" type="text" value="<%=data.supplier.cuit%>" />
+                <label for="cuit">C.U.I.T. o C.U.I.L.</label>
+              </div>
+              <div class="input-field col s4">
+                <i class="material-icons prefix">account_balance</i> <input id="bankAccount" name="bankAccount" type="text" value="<%=data.supplier.bankAccount%>" />
+                <label for="bankAccount">Número de Cuenta o CBU</label>
+              </div>
+              <div class="input-field col s4">
+                <input id="bank" name="bank" type="text" <%if(data.supplier.bank){%> value="<%=data.supplier.bank.name%>" <%}%>/>
+                    <label for="bank">Banco</label>
+              </div>
             </div>
-            <div class="input-field col s4">
-              <i class="material-icons prefix">account_balance</i> <input id="bankAccount" name="bankAccount"
-                type="text" value="<%=data.supplier.bankAccount%>" />
-              <label for="bankAccount">Número de Cuenta o CBU</label>
-            </div>
-            <div class="input-field col s4">
-              <input id="bank" name="bank" type="text" <%if(data.supplier.bank){%> value="<%=data.supplier.bank.name%>" <%}%>/>
-              <label for="bank">Banco</label>
-            </div>
-          </div>
 
-          <div class="row">
-            <div class="input-field col s9">
-              <i class="material-icons prefix">mail</i>
-              <input id="email" name="email" type="email" value="<%=data.supplier.email%>" />
-              <label for="email">Correo Electronico</label>
+            <div class="row">
+              <div class="input-field col s9">
+                <i class="material-icons prefix">mail</i>
+                <input id="email" name="email" type="email" value="<%=data.supplier.email%>" />
+                <label for="email">Correo Electronico</label>
+              </div>
+              <div class="input-field col s3">
+                <i class="material-icons prefix">local_phone</i>
+                <input id="phone" name="phone" type="tel" value="<%=data.supplier.phone%>" />
+                <label for="phone">Telefono</label>
+              </div>
             </div>
-            <div class="input-field col s3">
-              <i class="material-icons prefix">local_phone</i>
-              <input id="phone" name="phone" type="tel" value="<%=data.supplier.phone%>" />
-              <label for="phone">Telefono</label>
+            <div class="row">
+              <div class="input-field col s6">
+                <i class="material-icons prefix">location_on</i>
+                <input id="address" name="address" type="text" value="<%=data.supplier.address%>" />
+                <label for="address">Direccion</label>
+              </div>
+              <div class="input-field col s3">
+                <i class="material-icons prefix">location_city</i>
+                <input id="city" name="city" type="text" value="<%=data.supplier.city%>" />
+                <label for="city">Ciudad</label>
+              </div>
+              <div class="input-field col s3">
+                <i class="material-icons-outlined prefix">markunread_mailbox</i>
+                <input id="zipCode" name="zipCode" type="text" value="<%=data.supplier.zipCode%>" />
+                <label for="zipCode">Codigo Postal</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="input-field col s12">
+                <textarea id="comments" name="comments" class="materialize-textarea"><%=data.supplier.comments%></textarea>
+                <label for="comments">Observaciones</label>
+              </div>
             </div>
           </div>
-          <div class="row">
-            <div class="input-field col s6">
-              <i class="material-icons prefix">location_on</i>
-              <input id="address" name="address" type="text" value="<%=data.supplier.address%>" />
-              <label for="address">Direccion</label>
-            </div>
-            <div class="input-field col s3">
-              <i class="material-icons prefix">location_city</i>
-              <input id="city" name="city" type="text" value="<%=data.supplier.city%>" />
-              <label for="city">Ciudad</label>
-            </div>
-            <div class="input-field col s3">
-              <i class="material-icons-outlined prefix">markunread_mailbox</i>
-              <input id="zipCode" name="zipCode" type="text" value="<%=data.supplier.zipCode%>" />
-              <label for="zipCode">Codigo Postal</label>
-            </div>
+          <div class="card-action right-align">
+            <a href="/suppliers/edit/<%=data.supplier.id%>" class="waves-effect waves-light btn" style="margin-left: 20px;"><i class="material-icons right">edit</i>Modificar</a>
+            <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 20px;"><i class="material-icons right">cancel</i>Volver</button>
           </div>
-          <div class="row">
-            <div class="input-field col s12">
-              <textarea id="comments" name="comments"
-                class="materialize-textarea"><%=data.supplier.comments%></textarea>
-              <label for="comments">Observaciones</label>
-            </div>
-          </div>
-        </div>
-        <div class="card-action right-align">
-          <a href="/suppliers/edit/<%=data.supplier.id%>" class="waves-effect waves-light btn"
-            style="margin-left: 20px;"><i class="material-icons right">edit</i>Modificar</a>
-          <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel"
-            class="waves-effect waves-light btn red" style="margin-left: 20px;"><i
-              class="material-icons right">cancel</i>Volver</button>
         </div>
       </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var elems = document.querySelectorAll("select");
-    var instances = M.FormSelect.init(elems, {});
-    M.FormSelect.init(elems, {});
-  });
-</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var elems = document.querySelectorAll("select");
+      var instances = M.FormSelect.init(elems, {});
+      M.FormSelect.init(elems, {});
+    });
+  </script>
 
-<%- include ("../partials/footer") %>
+  <%- include ("../partials/footer") %>
