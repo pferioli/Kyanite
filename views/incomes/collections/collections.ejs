@@ -7,9 +7,11 @@
     </center>
 
     <div class="table-container">
+
         <div class="table-header">
 
             <span class="table-title">Cobranzas - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+
             <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
                     <div class="circle-clipper left">
@@ -23,6 +25,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="actions">
                 <div class="switch">
                     <label> Mostrar todos los estados <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
@@ -35,39 +38,42 @@
 
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
                 <a href="/incomes/collections/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
-                </div>
+                <a href="/incomes/collections/upload<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
-            <div id="hide-dt" style="display:none">
-                <table id="datatable" class="table display">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Propiedad</th>
-                            <th>Recibo</th>
-                            <th>Conceptos</th>
-                            <th>Valores</th>
-                            <th>Detalles</th>
-                            <th>Fecha</th>
-                            <th>Periodo</th>
-                            <th>Estado</th>
-                            <th>Usuario</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
+            
         </div>
+        
+        <div id="hide-dt" style="display:none">
+            <table id="datatable" class="table display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Propiedad</th>
+                        <th>Recibo</th>
+                        <th>Conceptos</th>
+                        <th>Valores</th>
+                        <th>Detalles</th>
+                        <th>Fecha</th>
+                        <th>Periodo</th>
+                        <th>Estado</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
 
-        <div class="container">
-            <div class="row center-align" style="font-size:small" id="lastUpdate"></div>
+                </tbody>
+            </table>
         </div>
+    </div>
 
-        <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
-        <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
+    <div class="container">
+        <div class="row center-align" style="font-size:small" id="lastUpdate"></div>
+    </div>
+
+    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+    <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
 
 </main>
 

@@ -10,7 +10,8 @@
     "debug": "node --inspect=0.0.0.0:9229 $npm_package_config_entrypoint",
     "debug:brk": "node --inspect-brk=0.0.0.0:9229 $npm_package_config_entrypoint",
     "debug:legacy": "node --debug=0.0.0.0:5858 $npm_package_config_entrypoint",
-    "dev": "nodemon $npm_package_config_entrypoint"
+    "dev": "nodemon $npm_package_config_entrypoint",
+    "chrome": "/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port=9222 --user-data-dir=remote-profile"
   },
   "dependencies": {
     "@google-cloud/debug-agent": "^5.1.2",

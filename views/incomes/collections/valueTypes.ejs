@@ -11,15 +11,15 @@
 
         <div class="row" style="margin-top: 20px;">
             <div class="col s12">
-                <table id="tableValues" class="table centered_table" style="width: 80% !important;">
+                <table id="tableValues" class="table centered_table" style="width: 90% !important;">
                     <thead>
                         <tr>
+                            <th style="width: 15%;">Tipo</th>
+                            <th style="width: 20%;">Valor</th>
+                            <th style="width: 40%;">Detalle</th>
                             <th style="width: 5%;">Id</th>
-                            <th style="width: 25%;">Valor</th>
-                            <th style="width: 20%;">Importe</th>
-                            <th style="width: 20%;">Cuenta</th>
-                            <th style="width: 20%;">Cheque</th>
-                            <th style="width: 10%;">Remover</th>
+                            <th style="width: 10%;">Importe</th>
+                            <th style="width: 10%; text-align:center">Remover</th>
                         </tr>
                     </thead>
 
@@ -29,8 +29,8 @@
             </div>
         </div>
         <div class="row">
-            <div class="input-field col s3 offset-s9">
-                <p id="totalValues">Importe Total: $0.00</p>
+            <div class="input-field col s12 right-align" style="padding-right: 100px;">
+                <h6 id="totalValues">Importe Total: $0.00</h6>
             </div>
         </div>
     </div>
@@ -55,8 +55,10 @@
                     <option value="CH">Cheque</option>
                 </select>
                 <label>Seleccione la cuenta o cheque si aplica</label>
+                <input type="hidden" name="auxSelectId" id="auxSelectId" />
+                <input type="hidden" name="auxSelectDesc" id="auxSelectDesc" />
             </div>
-            <div class="input-field col s2">
+            <div id="valueAmmountDiv" class="input-field col s2">
                 <input id="valueAmmount" name="valueAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
                 <label for="valueAmmount">Importe</label>
             </div>
@@ -69,10 +71,13 @@
 </div>
 
 <script type="text/javascript" src="/javascripts/accounts.js"></script>
+<script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
 
 <script>
 
-    var totalValues = 0;
+    var totalValues = 0; var selAccount = null; var selCheck = null;
+
+    var valuesArray = [];
 
     document.addEventListener("DOMContentLoaded", function () {
 
@@ -81,12 +86,27 @@
             document.getElementById("valueTypeId").value = event.target.value;
             document.getElementById("valueTypeDesc").value = event.target.options[event.target.selectedIndex].text;
 
-            auxSelect = document.getElementById('auxiliarSelect');
-            auxSelectDiv = document.getElementById('auxiliarSelectDiv')
+            const valueAmmount = document.getElementById('valueAmmount');
+            valueAmmount.readOnly = false;
+            valueAmmount.value="0.00";
 
+            auxSelect = document.getElementById('auxiliarSelect');
+            auxSelectDiv = document.getElementById('auxiliarSelectDiv');
+            valueAmmountDiv = document.getElementById('valueAmmountDiv');
+
+            auxSelectDiv.hidden = true;
+            
+            if (auxSelectDiv.classList.contains('s6') === false) {
+                auxiliarSelectDiv.classList.add('s6');
+            };
+            
+            if (auxSelectDiv.classList.contains('s8')) {
+                auxiliarSelectDiv.classList.remove('s8');
+            };
+                     
             switch (event.target.value) {
                 case "EF": {
-                    auxSelectDiv.hidden = true;
+                    valueAmmountDiv.hidden = false;
                     auxSelect.disabled = true;
                     auxSelect.hidden = true;
                     auxSelect.innerHTML = "<option value=\"\" selected disabled>" + "Seleccione la cuenta o cheque si aplica" + "</option>"
@@ -95,18 +115,49 @@
                 } break;
 
                 case "DC": {
-                    auxSelect.disabled = false;
+                    selAccount = null;
+                    valueAmmountDiv.hidden = false;
                     auxSelectDiv.hidden = false;
+                    auxSelect.disabled = false;
+                    
                     getDepositAccounts(htmlDecode("<%=data.client.id%>"), "auxiliarSelect");
                 } break;
 
                 case "CH": {
+                    selCheck = null;
+                    valueAmmountDiv.hidden = true;
+                    
+                    auxiliarSelectDiv.classList.remove('s6');
+                    auxiliarSelectDiv.classList.add('s8');
                     auxSelectDiv.hidden = false;
+
                     auxSelect.disabled = false;
+                    
                     homeOwnerId = document.getElementById('homeOwnerId').value;
                     if (homeOwnerId === '') { alert("Para poder listar los cheques disponibles primero debe seleccionar a un propietario o propiedad"); return }
+                    
+                    valueAmmount.readOnly = true;
+
+                    getSplittedChecks(homeOwnerId, "auxiliarSelect");
                 } break;
             };
+        });
+
+        document.getElementById("auxiliarSelect").addEventListener('change', async (event) => {
+            document.getElementById("auxSelectId").value = event.target.value;
+            document.getElementById("auxSelectDesc").value = event.target.options[event.target.selectedIndex].text;
+            
+            if(document.getElementById("valueTypeId").value === 'DC'){
+                selAccount = await getClientAccountsInfo(event.target.value);
+            }
+
+            if(document.getElementById("valueTypeId").value === 'CH'){
+                selCheck = await getSplittedCheckInfo(event.target.value);
+                
+                const valueAmmount = document.getElementById('valueAmmount');
+                valueAmmount.readOnly = false;
+                valueAmmount.value = selCheck.ammount;
+            }
         });
     });
 
@@ -122,11 +173,25 @@
             } break;
 
             case "DC": {
-                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, "", "");
+
+                const auxSelectId = document.getElementById("auxSelectId").value;
+                const auxSelectDesc = document.getElementById("auxSelectDesc").value;
+
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, auxSelectId, auxSelectDesc);
+
+                selAccount = null;
+
             } break;
 
             case "CH": {
-                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, "", "");
+                
+                const auxSelectId = document.getElementById("auxSelectId").value;
+                const auxSelectDesc = document.getElementById("auxSelectDesc").value;
+
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, auxSelectId, auxSelectDesc);
+
+                selCheck = null;
+
             } break;
 
             default: { alert("No selecciono ningun tipo de valor válido"); return; };
@@ -141,27 +206,48 @@
         document.getElementById('valueTypeId').value = "";
         document.getElementById('valueTypeDesc').value = "";
         document.getElementById('valueAmmount').value = "0.00";
+
+        auxSelect = document.getElementById('auxiliarSelect');
+        auxSelectDiv = document.getElementById('auxiliarSelectDiv')
+
+        auxSelectDiv.hidden = true;
+        auxSelect.disabled = true;
+        auxSelect.hidden = true;
+        auxSelect.innerHTML = "<option value=\"\" selected disabled>" + "Seleccione la cuenta o cheque si aplica" + "</option>"
+        auxSelect.selectedIndex = 0;
+        M.FormSelect.init(auxSelect, {});
     }
 
     function updateTotalValues() {
         document.getElementById('totalValues').textContent = 'Importe Total: ' + formatter.format(totalValues);
     }
 
-    function addValueTypeRow(id, comment, value, account, check) {
+    function addValueTypeRow(type, comment, value, id, auxiliar) {
         var tableRef = document.getElementById('tableValues');
         var newRow = tableRef.insertRow(-1);
 
-        newRow.insertCell(0).appendChild(document.createTextNode(id));
-        newRow.insertCell(1).appendChild(document.createTextNode(comment));
-
         const valueAmmount = formatter.format(value).replace(",", "");
 
-        newRow.insertCell(2).appendChild(document.createTextNode(valueAmmount));
-        newRow.insertCell(3).appendChild(document.createTextNode(account));
-        newRow.insertCell(4).appendChild(document.createTextNode(check));
+        newRow.insertCell(0).appendChild(document.createTextNode(type));
+        newRow.insertCell(1).appendChild(document.createTextNode(comment));
+        newRow.insertCell(2).appendChild(document.createTextNode(auxiliar));
+        newRow.insertCell(3).appendChild(document.createTextNode(id));
+        newRow.insertCell(4).appendChild(document.createTextNode(valueAmmount));
 
-        newRow.insertCell(5).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="' + newRow.rowIndex + '" onClick=deleteValueTypeItem(this)><i class="material-icons">delete</i></a>'
+        newRow.insertCell(5).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light right-align" ' +
+                                         'style="display: block; margin: auto;" data-id="' + newRow.rowIndex + '" ' +
+                                         'onClick=deleteValueTypeItem(this)><i class="material-icons">delete</i></a>'
+
         return parseFloat(value);
+    }
+
+    function deleteValueTypeItem(button) {
+        var row = button.closest("TR");
+        totalValues -= parseInt(row.cells[2].textContent.replace(/[$,]/g, ''))
+        var tableRef = document.getElementById('tableValues');
+        alert(row.rowIndex + ' ' + button.dataset.id)
+        tableRef.deleteRow(row.rowIndex);
+        updateTotalValues();
     }
 
     function getDepositAccounts(clientId, fieldID) {
@@ -187,6 +273,34 @@
                     }
                 }
 
+                M.FormSelect.init(selectField, {});
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    function getSplittedChecks(homeOwnerId, fieldID) {
+
+        let selectField = document.getElementById(fieldID);
+        selectField.options.length = 0;
+        selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el cheque" + "</option>"
+
+        fetch('/checks/split/collections/' + homeOwnerId)
+            .then(response => {
+                if (response.status == 200) {
+                    return response.text();
+                } else {
+                    throw "Respuesta incorrecta del servidor"
+                }
+            })
+            .then(response => {
+                const splittedChecks = JSON.parse(response);
+                for (i = 0; i < splittedChecks.length; i++) {
+                    selectField.innerHTML = selectField.innerHTML + "<option value=\"" + splittedChecks[i].id + "\">" + 
+                        `${splittedChecks[i].check.bank.name} (Nº ${splittedChecks[i].check.number}) $${splittedChecks[i].ammount}` + "</option>"
+                }
+                
                 M.FormSelect.init(selectField, {});
             })
             .catch(err => {

@@ -161,11 +161,24 @@ module.exports.getCollectionChecks = async function (req, res, next) {
 
     const homeOwnerId = req.params.homeOwnerId; const splitType = 'I';
 
-    Account.findByPk(accountId, { include: [{ model: User }, { model: Bank }, { model: AccountType }, { model: User }] })
-        .then(account => {
-            res.send(account)
+    CheckSplitted.findAll({
+        where: { splitType: 'I', homeOwnerId: homeOwnerId, statusId: [0, 1] },
+        include: [
+            {
+                model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }]
+            },
+        ]
+    }).then(splittedChecks => {
+        res.send(splittedChecks)
+    });
+}
+
+module.exports.getSplittedCheckById = async function (req, res, next) {
+
+    const checkId = req.params.checkId;
+
+    CheckSplitted.findByPk(checkId, { include: [{ model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }] }] })
+        .then(splittedCheck => {
+            res.send(splittedCheck)
         });
-    
-    
-    res.send(JSON.parse(`{ "remainingBalance" : "${remainingBalance}" }`));
 }

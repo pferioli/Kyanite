@@ -1,0 +1,5 @@
+2020/12/22-21:23:10.568 f603 Reusing MANIFEST /Users/ferioli/Projects/kyanite/.vscode/chrome/Default/IndexedDB/https_ce86160295c423ef06b923f1e9693e03.safeframe.googlesyndication.com_0.indexeddb.leveldb/MANIFEST-000001
+2020/12/22-21:23:22.023 ec03 Level-0 table #5: started
+2020/12/22-21:23:22.049 ec03 Level-0 table #5: 439 bytes OK
+2020/12/22-21:23:22.094 ec03 Delete type=0 #3
+2020/12/22-21:23:22.095 ec03 Manual compaction at level-0 from (begin) .. (end); will stop at (end)

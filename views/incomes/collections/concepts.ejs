@@ -11,13 +11,13 @@
 
         <div class="row" style="margin-top: 20px;">
             <div class="col s12">
-                <table id="tableConcepts" class="table centered_table" style="width: 80% !important;">
+                <table id="tableConcepts" class="table centered_table" style="width: 90% !important;">
                     <thead>
                         <tr>
-                            <th style="width: 5%;">Id</th>
+                            <th style="width: 15%;">Tipo</th>
                             <th style="width: 45%;">Concepto</th>
-                            <th style="width: 40%;">Importe</th>
-                            <th style="width: 10%;">Remover</th>
+                            <th style="width: 30%;">Importe</th>
+                            <th style="width: 10%; text-align:center">Remover</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -27,7 +27,7 @@
         </div>
         <div class="row">
             <div class="input-field col s12 right-align" style="padding-right: 100px;">
-                <p id="totalConcepts">Importe Total: $0.00</p>
+                <h6 id="totalConcepts">Importe Total: $0.00</h6>
             </div>
         </div>
     </div>
@@ -35,7 +35,7 @@
     <div class="card-action">
         <div class="row" style="margin-left: 30px;">
             <div class="input-field col s3">
-                <select id=" conceptsSelect" class="required">
+                <select id="conceptsSelect" class="required">
                     <option value="" disabled selected>Seleccione un concepto</option>
                     <option value="EC">Expensas comunes</option>
                     <option value="EE">Expensas extraordinarias</option>
@@ -104,13 +104,15 @@
         const conceptAmmount = formatter.format(value).replace(",", "");
 
         newRow.insertCell(2).appendChild(document.createTextNode(conceptAmmount));
-        newRow.insertCell(3).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="' + newRow.rowIndex + '" onClick=deleteConceptItem(this)><i class="material-icons">delete</i></a>'
+        newRow.insertCell(3).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" ' + 
+                                        'style="display: block; margin: auto;" data-id="' + newRow.rowIndex + '" ' +
+                                        'onClick=deleteConceptItem(this)><i class="material-icons">delete</i></a>'
         return parseFloat(value);
     }
 
     function deleteConceptItem(button) {
         var row = button.closest("TR");
-        totalConcepts -= parseInt(row.cells[1].textContent.replace(/[$,]/g, ''))
+        totalConcepts -= parseInt(row.cells[2].textContent.replace(/[$,]/g, ''))
         var tableRef = document.getElementById('tableConcepts');
         tableRef.deleteRow(row.rowIndex);
         updateTotalConcepts();

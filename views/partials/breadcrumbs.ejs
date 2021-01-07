@@ -24,6 +24,9 @@
 
 <% if (locals.menu==='accounts' ) { %>
     <a href="/accounts" class="breadcrumb">Cuentas</a>
+    <% if(locals.data) { %>
+        <a href="/accounts/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+    <% } %>
 <%}%>
 
 <% if (locals.menu==='accountTransfers' ) { %>
@@ -42,9 +45,15 @@
 <% if (locals.menu==='paymentReceipts' ) { %>
     <a href="/expenses" class="breadcrumb">Egresos</a>
     <a href="/expenses/paymentReceipts" class="breadcrumb">Comprobantes</a>
+     <% if(locals.data) { %>
+        <a href="/expenses/paymentReceipts/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+    <% } %>
 <%}%>
 
 <% if (locals.menu==='collections_manual' ) { %>
     <a href="/incomes" class="breadcrumb">Ingresos</a>
     <a href="/incomes/collections" class="breadcrumb">Cobranzas</a>
-<%}%>
+    <% if(locals.data) { %>
+        <a href="/incomes/collections/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+    <% } %>
+<% } %>

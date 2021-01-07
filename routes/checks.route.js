@@ -25,9 +25,17 @@ router.get("/split/:checkId", function (req, res, next) {
     splittedChecksController.listAll(req, res);
 });
 
+router.get("/split/info/:checkId", function (req, res, next) {
+    splittedChecksController.getSplittedCheckById(req, res);
+});
+
 router.post('/split/new/:checkId', function (req, res, next) {
     splittedChecksController.addNew(req, res);
 })
+
+router.get("/split/collections/:homeOwnerId", function (req, res, next) {
+    splittedChecksController.getCollectionChecks(req, res);
+});
 
 router.get("/new/:clientId", function (req, res, next) {
     checksController.showNewForm(req, res);
