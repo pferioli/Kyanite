@@ -1,5 +1,0 @@
-2020/12/22-21:11:48.066 10103 Reusing MANIFEST /Users/ferioli/Projects/kyanite/remote-profile/Default/IndexedDB/https_googleads.g.doubleclick.net_0.indexeddb.leveldb/MANIFEST-000001
-2020/12/22-21:11:54.467 eb03 Level-0 table #5: started
-2020/12/22-21:11:54.494 eb03 Level-0 table #5: 364 bytes OK
-2020/12/22-21:11:54.538 eb03 Delete type=0 #3
-2020/12/22-21:11:54.539 eb03 Manual compaction at level-0 from (begin) .. (end); will stop at (end)

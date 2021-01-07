@@ -1,5 +1,0 @@
-2020/12/22-21:11:16.836 fc03 Reusing MANIFEST /Users/ferioli/Projects/kyanite/remote-profile/Default/IndexedDB/https_896eb7255764eba02576ecb973cb344b.safeframe.googlesyndication.com_0.indexeddb.leveldb/MANIFEST-000001
-2020/12/22-21:11:26.931 fc03 Level-0 table #5: started
-2020/12/22-21:11:26.958 fc03 Level-0 table #5: 439 bytes OK
-2020/12/22-21:11:27.002 fc03 Delete type=0 #3
-2020/12/22-21:11:27.004 fc03 Manual compaction at level-0 from (begin) .. (end); will stop at (end)
