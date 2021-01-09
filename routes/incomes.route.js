@@ -23,4 +23,9 @@ router.get("/collections/client/:clientId", function (req, res, next) {
 router.get("/collections/new/:clientId", function (req, res, next) {
     collectionsController.showNewForm(req, res);
 })
+
+router.post("/collections/new/:clientId", function (req, res, next) {
+    collectionsController.addNew(req, res);
+})
+
 module.exports = router

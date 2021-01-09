@@ -1,0 +1,923 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>5</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>440</x>
+      <y>310</y>
+      <w>125</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Colections&gt;&gt;
+--
+table: collections
+--
+id: Int
+clientId: Int
+periodId: Int
+propertyId: Int
+receiptDate: Date
+receiptNumber: Varchar(32)
+batchNumber: Int
+ammountConcepts: Decimal(10,2)
+ammountSecurities: Decimal(10,2)
+securityCode: Varchar(32)
+comments: Longtext
+statusId: Int
+userId: Int
+createdAt: Datetime
+updatedAt: Datetime
+deletedAt: Datetime
+bg=pink</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>680</x>
+      <y>330</y>
+      <w>125</w>
+      <h>95</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Colections Concepts&gt;&gt;
+--
+table: collections_concepts
+--
+id: Int
+collectionId: Int
+description: Varchar(256)
+ammount: Decimal(10,2)
+userId: Int
+createdAt: Datetime
+updatedAt: Datetime
+deletedAt: Datetime
+bg=pink
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>390</y>
+      <w>130</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+id::colectionId
+</panel_attributes>
+    <additional_attributes>10.0;20.0;240.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>680</x>
+      <y>440</y>
+      <w>125</w>
+      <h>95</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Colections Securities&gt;&gt;
+--
+table: collections_securities
+--
+id: Int
+collectionId: Int
+description: Varchar(256)
+accountId: Int
+checkId: Int
+ammount: Decimal(10,2)
+userId: Int
+createdAt: Datetime
+updatedAt: Datetime
+deletedAt: Datetime
+bg=pink
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>440</x>
+      <y>655</y>
+      <w>125</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Accounts&gt;&gt;
+--
+table: accounts
+--
+id: int(11)
+clientId: int(11)
+accountTypeId: int(11)
+bankId: int(11)
+bankBranch: varchar(128)
+accountNumber: varchar(64)
+accountAlias: varchar(20)
+cbu: varchar(22)
+comments: longtext,
+createdAt: datetime
+updatedAt: datetime
+deletedAt: datetime
+userId: int(11)
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>485</y>
+      <w>130</w>
+      <h>215</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1..1
+accountId::id
+</panel_attributes>
+    <additional_attributes>10.0;400.0;70.0;400.0;70.0;10.0;240.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>210</x>
+      <y>285</y>
+      <w>125</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Clients&gt;&gt;
+--
+table: clients
+--
+id: int(11)
+internalCode varchar(32)
+name varchar(128)
+cuit varchar(13)
+taxCategoryId int(11)
+address varchar(128)
+city varchar(128)
+zipCode varchar(16)
+phone varchar(32)
+email varchar(128)
+comments tinytext,
+functionalUnitsCount int(11)
+lotSize int(11)
+userId int(11)
+createdAt datetime
+updatedAt datetime
+deletedAt datetime
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>210</x>
+      <y>495</y>
+      <w>125</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Users&gt;&gt;
+--
+table: users
+--
+id: int(11)
+name: varchar(64)
+email: varchar(128)
+password: varchar(60)
+securityLevel: tinyint(4)
+enabled: tinyint(4)
+secret: varchar(45)
+mustChange: tinyint(4)
+createdAt: datetime
+updatedAt: datetime
+deletedAt: datetime
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>355</y>
+      <w>120</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+clientId::id</panel_attributes>
+    <additional_attributes>10.0;20.0;220.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>380</y>
+      <w>120</w>
+      <h>320</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+clientId::id</panel_attributes>
+    <additional_attributes>10.0;10.0;80.0;10.0;80.0;620.0;220.0;620.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>435</y>
+      <w>130</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+id::colectionId
+</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0;90.0;80.0;240.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>180</x>
+      <y>455</y>
+      <w>45</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1..1
+userId::Id
+</panel_attributes>
+    <additional_attributes>60.0;130.0;10.0;130.0;10.0;10.0;60.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>210</x>
+      <y>655</y>
+      <w>125</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Account Transfers&gt;&gt;
+--
+table: account_transfers
+--
+id: int(11)
+clientId: int(11)
+periodId: int(11)
+sourceAccountId: int(11)
+destinationAccountId: int(11)
+ammount: decimal(10,2)
+transferDate: date
+comments: longtext
+statusId: int(11)
+userId int(11)
+createdAt: datetime
+updatedAt: datetime
+deletedAt: datetime
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>700</y>
+      <w>120</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+sourceAccountId::id</panel_attributes>
+    <additional_attributes>220.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>720</y>
+      <w>120</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+destinationAccountId::id</panel_attributes>
+    <additional_attributes>220.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>125</x>
+      <y>355</y>
+      <w>95</w>
+      <h>345</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+clientId::id</panel_attributes>
+    <additional_attributes>170.0;10.0;10.0;10.0;10.0;670.0;170.0;670.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>680</x>
+      <y>730</y>
+      <w>125</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Banks&gt;&gt;
+--
+table: banks
+--
+id: int(11)
+name: varchar(128)
+code: varchar(3)
+enabled: tinyint(4)
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>750</y>
+      <w>130</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+bankId::id
+</panel_attributes>
+    <additional_attributes>240.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>440</x>
+      <y>500</y>
+      <w>125</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Billing Periods&gt;&gt;
+--
+table: billing_periods
+--
+id: int(11)
+clientId: int(11)
+name: varchar(16)
+startDate: date
+endDate: date
+openedAt: timestamp
+closedAt: timestamp
+createdAt: timestamp
+updatedAt: timestamp
+deletedAt: timestamp
+statusId: int(11)
+lastPeriodId: int(11)
+previousPeriodId: int(11)
+userId: int(11)
+bg=none
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>380</x>
+      <y>370</y>
+      <w>70</w>
+      <h>165</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+periodId::id</panel_attributes>
+    <additional_attributes>120.0;300.0;10.0;300.0;10.0;10.0;120.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>680</x>
+      <y>560</y>
+      <w>125</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Checks&gt;&gt;
+--
+table: checks
+--
+id: int(11)
+clientId: int(11)
+periodId: int(11)
+accountId: int(11)
+bankId: int(11)
+number: varchar(32)
+ammount: decimal(10,2)
+emissionDate: date
+paymentDate: date
+dueDate: date
+comments: longtext
+statusId: int(11)
+createdAt: datetime
+updatedAt: datetime
+deletedAt: datetime
+userId: int(11)
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>595</y>
+      <w>130</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+periodId::id</panel_attributes>
+    <additional_attributes>10.0;20.0;240.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>610</y>
+      <w>130</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+accountId::id</panel_attributes>
+    <additional_attributes>10.0;190.0;110.0;190.0;110.0;10.0;240.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>800</x>
+      <y>660</y>
+      <w>75</w>
+      <h>115</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+bankId::id</panel_attributes>
+    <additional_attributes>10.0;200.0;60.0;200.0;60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>400</y>
+      <w>360</w>
+      <h>205</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+clientId::id
+
+layer=0</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0;50.0;390.0;700.0;390.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>910</x>
+      <y>560</y>
+      <w>125</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Splitted Checks&gt;&gt;
+--
+table: checks_splitted
+--
+id int(11)
+checkId int(11)
+periodId int(11)
+splitType char(1)
+homeOwnerId int(11)
+paymentOrderId int(11)
+ammount decimal(10,2)
+comments longtext
+statusId int(11)
+createdAt datetime
+updatedAt datetime
+deletedAt datetime
+userId int(11)
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>800</x>
+      <y>635</y>
+      <w>120</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+checkId::id</panel_attributes>
+    <additional_attributes>10.0;20.0;220.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>550</y>
+      <w>360</w>
+      <h>85</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+periodId::id</panel_attributes>
+    <additional_attributes>10.0;10.0;540.0;10.0;540.0;150.0;700.0;150.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>680</x>
+      <y>160</y>
+      <w>125</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;HomeOwners&gt;&gt;
+--
+table: home_owners
+--
+id int(11)
+clientId int(11)
+property varchar(32)
+name varchar(128)
+phone varchar(32)
+email varchar(128)
+cuil varchar(13)
+comments longtext,
+coefficient decimal(10,4)
+createdBy int(11)
+createdAt datetime
+updatedBy int(11)
+updatedAt datetime
+deletedAt datetime
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>800</x>
+      <y>265</y>
+      <w>120</w>
+      <h>355</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+homeOwnerId::id</panel_attributes>
+    <additional_attributes>10.0;10.0;100.0;10.0;100.0;690.0;220.0;690.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>265</y>
+      <w>360</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+clientId::id
+
+layer=0</panel_attributes>
+    <additional_attributes>10.0;170.0;90.0;170.0;90.0;10.0;700.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>440</x>
+      <y>130</y>
+      <w>125</w>
+      <h>165</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Suppliers&gt;&gt;
+--
+table: suppliers
+--
+id: int(11)
+name: varchar(128)
+cuit: varchar(13)
+taxCategoryId: int(11)
+bankId: int(11)
+bankAccount: varchar(128)
+address: varchar(128)
+city: varchar(128)
+zipCode: varchar(16)
+phone: varchar(32)
+email: varchar(128)
+categoryId: int(11)
+comments: tinytext,
+userId: int(11)
+createdAt: datetime
+updatedAt: datetime
+deletedAt: datetime
+bg=yellow
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>220</x>
+      <y>130</y>
+      <w>115</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Suppliers Categories&gt;&gt;
+--
+table: suppliers_categories
+--
+id: int(11)
+name: varchar(128)
+enabled: tinyint(4)
+bg=yellow
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>440</x>
+      <y>820</y>
+      <w>125</w>
+      <h>75</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Account Types&gt;&gt;
+--
+table: account_types
+--
+id: int(11)
+account: varchar(16)
+description: varchar(128)
+enabled: tinyint(4)
+userId: int(11)
+bg=cyan</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>365</x>
+      <y>750</y>
+      <w>85</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+accountTypeId::id</panel_attributes>
+    <additional_attributes>150.0;210.0;10.0;210.0;10.0;10.0;150.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>155</y>
+      <w>120</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+categoryId::id</panel_attributes>
+    <additional_attributes>10.0;20.0;220.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>250</y>
+      <w>130</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+propertyId::id</panel_attributes>
+    <additional_attributes>240.0;10.0;90.0;10.0;90.0;220.0;10.0;220.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>680</x>
+      <y>40</y>
+      <w>125</w>
+      <h>95</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Colections Temp&gt;&gt;
+--
+table: collections_temp
+--
+date: date
+clientCode: varchar(3)
+propertyType: varchar(16)
+property: varchar(16)
+accountId: int(11)
+conceptDesc: varchar(128)
+valueDesc: varchar(128)
+ammount: decimal(10,2)
+bg=gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>70</y>
+      <w>130</w>
+      <h>315</h>
+    </coordinates>
+    <panel_attributes>lt=-()
+m2=populates
+</panel_attributes>
+    <additional_attributes>10.0;610.0;150.0;610.0;150.0;10.0;240.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>220</x>
+      <y>200</y>
+      <w>115</w>
+      <h>55</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Tax Categories&gt;&gt;
+--
+table: tax_categories
+--
+id: int(11)
+name: varchar(128)
+enabled: tinyint(4)
+bg=yellow
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>205</y>
+      <w>120</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+taxCategoryId::id</panel_attributes>
+    <additional_attributes>10.0;20.0;220.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>100</x>
+      <y>225</y>
+      <w>130</w>
+      <h>170</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+taxCategoryId::id</panel_attributes>
+    <additional_attributes>240.0;10.0;10.0;10.0;10.0;320.0;220.0;320.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>970</x>
+      <y>305</y>
+      <w>125</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Payment Receipts&gt;&gt;
+--
+table: payment_receipts
+--
+id: int(11)
+clientId: int(11)
+supplierId: int(11)
+receiptNumber: varchar(64)
+receiptTypeId: int(11)
+emissionDate: date
+description: longtext
+accountingImputationId: int(11)
+ammount: decimal(10,2)
+statusId: int(11)
+periodId: int(11)
+userId: int(11)
+createdAt: datetime
+updatedAt: datetime
+deletedAt: datetime
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>970</x>
+      <y>215</y>
+      <w>125</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Accounting Imputations&gt;&gt;
+--
+table: accounting_imputations
+--
+id: int(11)
+groupId: int(11)
+account: int(11)
+name: varchar(128)
+enabled: tinyint(4)
+layer=1
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1190</x>
+      <y>215</y>
+      <w>125</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;Accounting Groups&gt;&gt;
+--
+table: accounting_groups
+--
+id: int(11)
+group: int(11)
+name: varchar(128)
+enabled: tinyint(4)
+layer=1
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1090</x>
+      <y>240</y>
+      <w>110</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+groupId::id</panel_attributes>
+    <additional_attributes>200.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1090</x>
+      <y>260</y>
+      <w>155</w>
+      <h>85</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+accountingImputationId::id
+</panel_attributes>
+    <additional_attributes>10.0;10.0;110.0;10.0;110.0;150.0;10.0;150.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>330</x>
+      <y>330</y>
+      <w>650</w>
+      <h>55</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+clientId::id
+layer=0</panel_attributes>
+    <additional_attributes>10.0;10.0;1100.0;10.0;1100.0;90.0;1280.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>145</y>
+      <w>420</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+supplierId::id</panel_attributes>
+    <additional_attributes>10.0;10.0;710.0;10.0;710.0;400.0;820.0;400.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>560</x>
+      <y>390</y>
+      <w>420</w>
+      <h>170</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=n..1
+periodId::id
+layer=0</panel_attributes>
+    <additional_attributes>10.0;310.0;720.0;310.0;720.0;10.0;820.0;10.0</additional_attributes>
+  </element>
+</diagram>

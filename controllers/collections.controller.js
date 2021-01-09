@@ -83,7 +83,9 @@ module.exports.addNew = async function (req, res, next) {
 
     const clientId = req.params.clientId;
 
+    const tables = JSON.parse(req.body.tables); console.log(tables);
 
+    res.redirect('/incomes/collections/client/' + clientId);
 };
 
 // module.exports.receiptTypes = async function (req, res) {

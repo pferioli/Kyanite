@@ -1,198 +1,226 @@
 <%- include ("../../partials/header") %>
 
-    <main class="site-content">
-        <div class="container" style="margin-top: 50px;">
-            <form id="addCollectionForm" class="col s12" method="post" action='/expenses/paymentReceipts/new/<%=data.client.id%>'>
-                <div class="card">
-                    <div class="card-content">
-                        <span class="card-title">Nueva Cobranza</span>
-                        <div class="row" style="margin-top: 20px;">
-                            <div class="input-field col s9">
-                                <i class="material-icons prefix">business</i>
-                                <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
-                                <label for="name">Nombre del Barrio</label>
-                            </div>
-                            <div class="input-field col s3">
-                                <i class="material-icons prefix">calendar_today</i>
-                                <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
-                                <label for="billingPeriod">Período de Liquidación</label>
-                                <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
-                            </div>
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form id="addCollectionForm" class="col s12" method="post" action='/incomes/collections/new/<%=data.client.id%>'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Nueva Cobranza</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">business</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
                         </div>
-
-                        <div class="row">
-
-                            <!--<div class="input-field col s9">
-                                <i class="material-icons prefix">home</i>
-                                <select id="homeOwnerSelects">
-                                    <option value="" disabled selected>Seleccione una propiedad</option>
-
-                                </select>
-                                <label>Nombre del Propietario / Propiedad</label>
-                                <input type="hidden" name="homeOwnerId" id="homeOwnerId" />
-                            </div>-->
-
-                            <div id="autocompleteInput" class="input-field col s9" autocomplete="off">
-                                <i class="material-icons prefix">home</i>
-                                <input type="text" id="autocomplete-input" class="autocomplete" required>
-                                <label for="autocomplete-input">Ingrese el nombre del propietario o la propiedad</label>
-                                <input type="hidden" name="homeOwnerId" id="homeOwnerId" value="" />
-
-                            </div>
-
-                            <div class="input-field col s3">
-                                <i class="material-icons prefix">date_range</i>
-                                <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
-                                <label for="dtpEmitted">Fecha de Cobro</label>
-                                <input type="hidden" name="emissionDate" id="emissionDate" />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="input-field col s12">
-                                <i class="material-icons-outlined prefix">comments</i>
-                                <textarea id="description" name="description" class="materialize-textarea" required></textarea>
-                                <label for="description">Comentarios</label>
-                            </div>
-
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
                         </div>
                     </div>
-                </div>
 
-                <%- include ("./concepts.ejs") %>
+                    <div class="row">
 
-                <%- include ("./valueTypes.ejs") %>
+                        <!--<div class="input-field col s9">
+                            <i class="material-icons prefix">home</i>
+                            <select id="homeOwnerSelects">
+                                <option value="" disabled selected>Seleccione una propiedad</option>
+                            </select>
+                            <label>Nombre del Propietario / Propiedad</label>
+                            <input type="hidden" name="homeOwnerId" id="homeOwnerId" />
+                        </div>-->
 
-                <div class="card">
-                    <div class="card-action right-align">
-                        <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
-                        <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
-                        <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                        <div id="autocompleteInput" class="input-field col s9" autocomplete="off">
+                            <i class="material-icons prefix">home</i>
+                            <input type="text" id="autocomplete-input" class="autocomplete" required>
+                            <label for="autocomplete-input">Ingrese el nombre del propietario o la propiedad</label>
+                            <input type="hidden" name="homeOwnerId" id="homeOwnerId" value="" />
+                        </div>
+
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
+                            <label for="dtpEmitted">Fecha de Cobro</label>
+                            <input type="hidden" name="emissionDate" id="emissionDate" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons-outlined prefix">comments</i>
+                            <textarea id="description" name="description" class="materialize-textarea" required></textarea>
+                            <label for="description">Comentarios</label>
+                        </div>
+
                     </div>
                 </div>
-            </form>
-        </div>
-        <center>
-            <%- include ("../../partials/alerts") %>
-        </center>
-    </main>
+            </div>
 
-    <%- include ("../../partials/footer") %>
+            <%- include ("./concepts.ejs") %>
 
-    <script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
-    <script type="text/javascript" src="/javascripts/homeOwners.js"></script>
+            <%- include ("./securities.ejs") %>
 
-    <script>
+            <div class="card">
+                <div class="card-action right-align">
+                    <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                </div>
+            </div>
+            <div>
+                <input type="hidden" name="tables" id="tables" />
+            </div>                        
 
-        document.addEventListener("DOMContentLoaded", function () {
-            var elems = document.querySelectorAll("select");
-            var instances = M.FormSelect.init(elems, {});
+        </form>
+    </div>
 
-            elems = document.querySelectorAll('.datepicker');
-            instances = M.Datepicker.init(elems, {
-                format: 'dd/mm/yyyy',
-                autoClose: true,
-                onOpen: function (e) {
-                    var that = this;
-                    that.hasEvent = false;
-                    this.cancelBtn.addEventListener('click', Cancel.bind(that))
-                    this.doneBtn.addEventListener('click', Done.bind(that))
-                },
-                onClose: function (e) {
-                    var that = this;
-                    this.cancelBtn.removeEventListener('click', Cancel.bind(that))
-                    this.doneBtn.removeEventListener('click', Done.bind(that))
-                },
-                onSelect: function (selectedDate) {
-                    if (this.el.id === 'dtpEmissionDate') {
-                        document.getElementById('emissionDate').value = this.date.toISOString();
-                    }
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
+</main>
+
+<%- include ("../../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/homeOwners.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        elems = document.querySelectorAll('.datepicker');
+        instances = M.Datepicker.init(elems, {
+            format: 'dd/mm/yyyy',
+            autoClose: true,
+            onOpen: function (e) {
+                var that = this;
+                that.hasEvent = false;
+                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                this.doneBtn.addEventListener('click', Done.bind(that))
+            },
+            onClose: function (e) {
+                var that = this;
+                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                this.doneBtn.removeEventListener('click', Done.bind(that))
+            },
+            onSelect: function (selectedDate) {
+                if (this.el.id === 'dtpEmissionDate') {
+                    document.getElementById('emissionDate').value = this.date.toISOString();
                 }
-            });
-
-            elems = document.querySelectorAll('.modal');
-            instances = M.Modal.init(elems,
-            {
-                dismissible: true,
-                onOpenStart: (e) => {
-                    //console.log("Open Start");                   
-                },
-                onOpenEnd: (e) => {
-                    //console.log("Open End");                  
-                },
-                onCloseStart: (e) => {
-                    //console.log("Close Start");
-                },
-                onCloseEnd: (e) => {
-                    //console.log("Close End";
-                }
-            });
-
-            getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+            }
         });
 
-        document.addEventListener("DOMContentLoaded", async function () {
-
-            let homeOwners = await getHomeOwnersByClient("<%=data.client.id%>");
-            let data = {};
-
-            for (i = 0; i < homeOwners.length; i++) {
-                data[`${homeOwners[i].property} - ${homeOwners[i].name} [${homeOwners[i].id}]`] = null;
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems,
+        {
+            dismissible: true,
+            onOpenStart: (e) => {
+                //console.log("Open Start");                   
+            },
+            onOpenEnd: (e) => {
+                //console.log("Open End");                  
+            },
+            onCloseStart: (e) => {
+                //console.log("Close Start");
+            },
+            onCloseEnd: (e) => {
+                //console.log("Close End";
             }
-
-            var elems = document.querySelectorAll('.autocomplete');
-
-            var instances = M.Autocomplete.init(elems, {
-                minLength: 1, data: data,
-                onAutocomplete: function (e) {
-                    var matches = e.match(/\[(.*?)\]/);
-                    if (matches)
-                        document.getElementById('homeOwnerId').value = matches[1];
-                    else
-                        document.getElementById('homeOwnerId').value = '';
-
-                    M.toast({ html: 'se ha seleccionado la propiedad con ID #' + matches[1] });
-                }
-            });
-
-            document.getElementById("autocompleteInput").addEventListener('input', function (e) {
-                document.getElementById('homeOwnerId').value = '';
-            });
-
-            document.getElementById("addCollectionForm").addEventListener("submit", validateForm, true);
         });
 
-        function Cancel() {
-            if (!this.hasEvent) {
-                this.hasEvent = true;
-                console.log('Clicked on cancel btn:', this.cancelBtn);
-            }
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+    });
+
+    document.addEventListener("DOMContentLoaded", async function () {
+
+        let homeOwners = await getHomeOwnersByClient("<%=data.client.id%>");
+        let data = {};
+
+        for (i = 0; i < homeOwners.length; i++) {
+            data[`${homeOwners[i].property} - ${homeOwners[i].name} [${homeOwners[i].id}]`] = null;
         }
+
+        var elems = document.querySelectorAll('.autocomplete');
+
+        var instances = M.Autocomplete.init(elems, {
+            minLength: 1, data: data,
+            onAutocomplete: function (e) {
+                var matches = e.match(/\[(.*?)\]/);
+                if (matches)
+                    document.getElementById('homeOwnerId').value = matches[1];
+                else
+                    document.getElementById('homeOwnerId').value = '';
+
+                M.toast({ html: 'se ha seleccionado la propiedad con ID #' + matches[1] });
+            }
+        });
+
+        document.getElementById("autocompleteInput").addEventListener('input', function (e) {
+            document.getElementById('homeOwnerId').value = '';
+        });
+
+        document.getElementById("addCollectionForm").addEventListener("submit", validateForm, true);
+    });
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
     
-        function Done() {
-            if (!this.hasEvent) {
-                this.hasEvent = true;
-                console.log('Clicked on done btn:', this.doneBtn);
-                if (this.date) {
-                    if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
-                }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
             }
         }
+    }
 
-        $(document).ready(function () {
-            $('textarea#description').characterCounter();
-        });
+    $(document).ready(function () {
+        $('textarea#description').characterCounter();
+    });
 
-        var formatter = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            // These options are needed to round to whole numbers if that's what you want.
-            //minimumFractionDigits: 0,
-            //maximumFractionDigits: 0,
-        });
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        // These options are needed to round to whole numbers if that's what you want.
+        //minimumFractionDigits: 0,
+        //maximumFractionDigits: 0,
+    });
 
-        function validateForm(event) {
-            event.preventDefault(); return;
+    function validateForm(event) {
+        
+        if((event.submitter.id === 'buttonConcept')||(event.submitter.id === 'buttonValues')) { event.preventDefault(); return; };
+        
+        const tConcepts = convertTableToJson("tableConcepts");
+        const tValues = convertTableToJson("tableValues");
+
+        const tables = {concepts: tConcepts, values: tValues};
+
+        document.getElementById('tables').value = JSON.stringify(tables);
+        
+        //event.preventDefault(); return;
+    };
+
+    function convertTableToJson(table){
+        let myRows = [];
+        const $headers = $("#" + table + " th");
+        const $rows = $("#" + table + " tbody tr");
+        for(index = 0; index <$rows.length; index++){
+            $cells = $($rows[index]).find("td");
+            myRows[index] = {};
+            for(cellIndex = 0; cellIndex < $cells.length - 1 ; cellIndex++){            
+                myRows[index][$($headers[cellIndex]).html()] = $($cells[cellIndex]).html();
+            };
         };
+        return myRows;
+    };
 
-    </script>
+</script>

@@ -42,16 +42,14 @@
                     <option value="CE">A cuenta de expensas</option>
                     <option value="OT">Otros</option>
                 </select>
-                <label>Concepto</label>
-                <input type="hidden" name="conceptId" id="conceptId" />
-                <input type="hidden" name="conceptDesc" id="conceptDesc" />
+                <label>Concepto</label>               
             </div>
             <div class="input-field col s2">
                 <input id="conceptAmmount" name="conceptAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
                 <label for="conceptAmmount">Importe</label>
             </div>
             <div class="input-field col s1 center-align">
-                <button class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewConcept()" ; style="margin-right: 10px;">
+                <button id="buttonConcept" class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewConcept()" ; style="margin-right: 10px;">
                     <i class="material-icons right">playlist_add</i>Agregar</button>
             </div>
         </div>
@@ -62,31 +60,21 @@
 
     var totalConcepts = 0;
 
-    document.addEventListener("DOMContentLoaded", function () {
-
-        document.getElementById("conceptsSelect").addEventListener('change', (event) => {
-            document.getElementById("conceptId").value = event.target.value;
-            document.getElementById("conceptDesc").value = event.target.options[event.target.selectedIndex].text;
-        });
-    });
-
     function addNewConcept() {
 
-        const conceptId = document.getElementById('conceptId').value
+        const conceptSelect = document.getElementById('conceptsSelect');
+        const conceptId = conceptSelect.value;
 
         if (conceptId === '') { alert("No selecciono ningun tipo de concepto"); return; };
 
-        const conceptComment = document.getElementById('conceptDesc').value;
+        const conceptComment = conceptSelect.options[conceptSelect.selectedIndex].text;
         const conceptAmmount = document.getElementById('conceptAmmount').value;
         totalConcepts += addConceptRow(conceptId, conceptComment, conceptAmmount);
         updateTotalConcepts();
 
-        const conceptsSelect = document.getElementById('conceptsSelect')
         conceptsSelect.selectedIndex = 0;
         M.FormSelect.init(conceptsSelect, {});
 
-        document.getElementById('conceptId').value = "";
-        document.getElementById('conceptDesc').value = "";
         document.getElementById('conceptAmmount').value = "0.00";
     }
 
@@ -95,7 +83,9 @@
     }
 
     function addConceptRow(id, comment, value) {
-        var tableRef = document.getElementById('tableConcepts');
+
+        var tableRef = document.getElementById('tableConcepts').getElementsByTagName('tbody')[0];
+
         var newRow = tableRef.insertRow(-1);
 
         newRow.insertCell(0).appendChild(document.createTextNode(id));

@@ -176,7 +176,6 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-
 const scheduledTasks = require('./helpers/scheduledTasks.helper');
 
 module.exports = app;

@@ -5,20 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Client",
-            "type": "chrome",
-            "request": "attach",
-            "url": "https://localhost:3001",
-            "port": 9222,
-            "sourceMaps": true,
-            "webRoot": "${workspaceFolder}",
-            "diagnosticLogging": true,
-            "sourceMapPathOverrides": {
-                "webpack:///./views": "${workspaceFolder}/views",
-                "webpack:///./public": "${workspaceFolder}/public"
-            }
-        },
-        {
             "name": "Server",
             "program": "${workspaceFolder}/bin/server.js",
             "request": "launch",
@@ -30,16 +16,5 @@
             "smartStep": true,
             "internalConsoleOptions": "openOnSessionStart"
         },
-        {
-            "compounds": [
-                {
-                    "name": "Server/Client",
-                    "configurations": [
-                        "Server",
-                        "Client"
-                    ]
-                }
-            ]
-        }
     ]
 }
