@@ -66,8 +66,6 @@ async function writeFileToGCS(req, gcsFileName) {
     });
 };
 
-var fileContents = new Buffer('');
-
 const csv = require('csv-parser')
 
 const results = [];

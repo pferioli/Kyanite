@@ -28,6 +28,8 @@
         <div class="row">
             <div class="input-field col s12 right-align" style="padding-right: 100px;">
                 <h6 id="totalConcepts">Importe Total: $0.00</h6>
+                <input type="hidden" name="ammountConcepts" id="ammountConcepts" />
+
             </div>
         </div>
     </div>
@@ -45,7 +47,7 @@
                 <label>Concepto</label>               
             </div>
             <div class="input-field col s2">
-                <input id="conceptAmmount" name="conceptAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
+                <input id="conceptAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
                 <label for="conceptAmmount">Importe</label>
             </div>
             <div class="input-field col s1 center-align">
@@ -80,6 +82,7 @@
 
     function updateTotalConcepts() {
         document.getElementById('totalConcepts').textContent = 'Importe Total: ' + formatter.format(totalConcepts);
+        document.getElementById('ammountConcepts').value = totalConcepts;
     }
 
     function addConceptRow(id, comment, value) {

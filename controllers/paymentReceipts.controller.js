@@ -11,7 +11,7 @@ const AccountingImputation = Model.accountingImputation;
 const AccountingGroup = Model.accountingGroup;
 const User = Model.user;
 
-const gcs = require('../helpers/googleCloudStorage.helper');
+const gcs = require('../helpers/gcs.helper');
 
 const winston = require('../helpers/winston.helper');
 

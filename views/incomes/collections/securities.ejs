@@ -31,6 +31,7 @@
         <div class="row">
             <div class="input-field col s12 right-align" style="padding-right: 100px;">
                 <h6 id="totalValues">Importe Total: $0.00</h6>
+                <input type="hidden" name="ammountSecurities" id="ammountSecurities" />                
             </div>
         </div>
     </div>
@@ -55,7 +56,7 @@
                 <label>Seleccione la cuenta o cheque si aplica</label>
             </div>
             <div id="valueAmmountDiv" class="input-field col s2">
-                <input id="valueAmmount" name="valueAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
+                <input id="valueAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
                 <label for="valueAmmount">Importe</label>
             </div>
             <div class="input-field col s1 center-align">
@@ -224,6 +225,7 @@
 
     function updateTotalValues() {
         document.getElementById('totalValues').textContent = 'Importe Total: ' + formatter.format(totalValues);
+        document.getElementById('ammountSecurities').value = totalValues;
     }
 
     function addValueTypeRow(type, comment, value, id, auxiliar) {

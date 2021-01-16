@@ -83,9 +83,44 @@ module.exports.addNew = async function (req, res, next) {
 
     const clientId = req.params.clientId;
 
-    const tables = JSON.parse(req.body.tables); console.log(tables);
+    const tables = JSON.parse(req.body.tables); //console.log(tables);
 
-    res.redirect('/incomes/collections/client/' + clientId);
+    const collection = {
+        clientId: clientId,
+        periodId: req.body.billingPeriodId,
+        propertyId: req.body.homeOwnerId,
+        receiptDate: req.body.emissionDate,
+        receiptNumber: "0000",
+        batchNumber: null,
+        ammountConcepts: req.body.ammountConcepts,
+        ammountSecurities: req.body.ammountSecurities,
+        securityCode: uuidv4(),
+        comments: req.body.comments,
+        statusId: CollectionStatus.eStatus.get('pending').value,
+        userId: req.user.id
+    }
+
+    //const collectionConcepts = {}
+    
+    Collection.create(collection).
+        then(function (result) {
+            winston.info(`Collection created succesfully - ${result.id}`)
+            req.flash(
+                "success",
+                "La cobranza ha sido registrada correctamente"
+            )
+        })
+        .catch(function (err) {
+            winston.error(`An error ocurred while user #${req.user.id} tryed to create a new collection ${JSON.stringify(collection)} - ${err}`)
+            req.flash(
+                "error",
+                "Ocurrio un error y no se pudo agregar la nueva cobranza en la base de datos"
+            )
+        })
+        .finally(() => {
+            res.redirect('/incomes/collections/client/' + clientId);
+        })
+
 };
 
 // module.exports.receiptTypes = async function (req, res) {
