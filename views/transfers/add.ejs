@@ -137,8 +137,22 @@
         //getActiveBillingPeriod(clientId);
 
         document.getElementById('sourceAccountSelect').onchange = async function () {
+            
             getSelectedAccountDetails(this.value, 'sourceAccountInfo');
-            getClientAccounts(clientId, 'destinationAccountSelect', this.value);
+
+            const accounts = await getClientAccounts(clientId); //, 'destinationAccountSelect', this.value);
+
+            let destinationAccountSelect = document.getElementById('destinationAccountSelect');
+            destinationAccountSelect.options.length = 0;
+            destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione la cuenta de Destino" + "</option>"
+
+            for (i = 0; i < accounts.length; i++) {
+                if (this.value != accounts[i].id) {
+                    destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"" + accounts[i].id + "\">" +
+                        "[" + accounts[i].accountType.account + "] " + accounts[i].accountType.description + " (ID:" + accounts[i].id + ")" + "</option>"
+                }
+            }
+            M.FormSelect.init(destinationAccountSelect, {});
 
             document.getElementById('sourceAccountId').value = this.value;
             document.getElementById('destinationAccountInfo').value = "";

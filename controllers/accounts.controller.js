@@ -179,18 +179,16 @@ module.exports.getCustomerAccounts = async function (req, res, next) {
 
     const clientId = req.params.clientId || req.body.clientId;
 
-    const accountType = req.params.accountType || req.body.accountType;
+    const accountType = req.query.accountType || req.body.accountType;
 
     let options = {
-        where: {
-            clientId: clientId,
-        },
-        include: [{ model: User }, { model: Bank },
-        {
-            model: AccountType,
-            // where: { account: ['CC$', 'CA$']}
-        }]
+        where: { clientId: clientId },
+        include: [{ model: AccountType }, { model: Bank }, { model: User }]
     };
+
+    if (typeof accountType != 'undefined') {
+        options.include[0].where = { account: [accountType.split(",")] }     // where: { account: ['CC$', 'CA$']}
+    }
 
     Account.findAll(options).then(function (accounts) {
         res.send(accounts)

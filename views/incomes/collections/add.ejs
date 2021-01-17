@@ -219,7 +219,8 @@
             $cells = $($rows[index]).find("td");
             myRows[index] = {};
             for(cellIndex = 0; cellIndex < $cells.length - 1 ; cellIndex++){            
-                myRows[index][$($headers[cellIndex]).html()] = $($cells[cellIndex]).html();
+                hdr=$($headers[cellIndex]).data("id"); //$($headers[cellIndex]).html()                
+                myRows[index][hdr] = $($cells[cellIndex]).html();
             };
         };
         return myRows;
