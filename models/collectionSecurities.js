@@ -12,8 +12,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            CollectionSecurity.hasOne(models.collection, { foreignKey: 'id', sourceKey: 'collectionId' })
-            CollectionSecurity.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            CollectionSecurity.belongsTo(models.collection, { foreignKey: 'id', sourceKey: 'collectionId' })
         }
     };
     CollectionSecurity.init({

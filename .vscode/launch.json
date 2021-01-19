@@ -5,16 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Server",
+            "name": "Launch Program",
             "program": "${workspaceFolder}/bin/server.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "type": "pwa-node",
-            "sourceMaps": true,
-            "smartStep": true,
-            "internalConsoleOptions": "openOnSessionStart"
+            "type": "pwa-node"
         },
     ]
 }

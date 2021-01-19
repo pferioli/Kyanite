@@ -1,0 +1,165 @@
+<style>
+    table {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Informacion Detallada</span>
+                <div class="row" style="margin-top: 20px;">
+                    <div class="input-field col s9">
+                    <i class="material-icons prefix">business</i>
+                        <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                        <label for="name">Nombre del Barrio</label>
+                    </div>                                       
+                    <div class="input-field col s3">
+                        <i class="material-icons prefix">calendar_today</i>
+                        <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.collection.billingPeriod.name%>" disabled />
+                        <label for="billingPeriod">Período de Liquidación</label>
+                        <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.collection.billingPeriod.id%>" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s2">
+                        <i class="material-icons prefix">date_range</i>
+                        <input id="receiptDate" type="date" value="<%=data.collection.receiptDate%>" readonly />
+                        <label for="property">Fecha</label>
+                    </div>                                          
+                    <div class="input-field col s2">
+                        <i class="material-icons prefix">home</i>
+                        <input id="property" type="text" value="<%=data.collection.homeOwner.property%>" readonly />
+                        <label for="property">Propiedad</label>
+                    </div>
+                    <div class="input-field col s8">
+                        <i class="material-icons prefix">face</i>
+                        <input id="homeOwner" type="text" value="<%=data.collection.homeOwner.name%>" readonly />
+                        <label for="homeOwner">Nombre del Propietario</label>
+                    </div>                          
+                </div>    
+                <div class="row">
+                    <div class="input-field col s2">
+                        <i class="material-icons prefix">receipt</i>
+                        <input id="receiptNumber" type="text" value="" readonly />
+                        <label for="property">Recibo</label>
+                    </div>
+                    <div class="input-field col s10">
+                        <i class="material-icons prefix">comment</i>
+                        <textarea id="comments" class="materialize-textarea" readonly><%=data.collection.comments%> </textarea>
+                        <label for="comments">Observaciones</label>
+                    </div>
+                </div>                        
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Conceptos</span>
+                <div class="row">
+                    <div class="col s12" style="margin-top: 10px;">
+                        <table id="tableConcepts" class="table centered_table" style="width: 90% !important;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;" data-id="id">Id</th>
+                                    <th style="width: 10%;" data-id="type">Tipo</th>
+                                    <th style="width: 70%;" data-id="concept">Concepto</th>
+                                    <th style="width: 15%;" data-id="ammount">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for(var i=0; i < data.collection.Concepts.length; i++) { %>
+                                    <tr data-id="<%= data.collection.Concepts[i].id %>">
+                                        <td><%= data.collection.Concepts[i].id %></td>
+                                        <td><%= data.collection.Concepts[i].type %></td>
+                                        <td><%= data.collection.Concepts[i].description %></td>
+                                        <td>$ <%= data.collection.Concepts[i].ammount %></td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12 right-align" style="padding-right: 100px;">
+                        <h6 id="totalConcepts">Importe Total: <%= data.collection.ammountConcepts%></h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">Valores</span>
+                <div class="row">
+                    <div class="col s12" style="margin-top: 10px;">
+                        <table id="tableValues" class="table centered_table" style="width: 90% !important;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;" data-id="id">Id</th>
+                                    <th style="width: 10%;" data-id="type">Tipo</th>
+                                    <th style="width: 20%;" data-id="value">Valor</th>
+                                    <th style="width: 50%;" data-id="comment">Detalle</th>
+                                    <th style="width: 15%;" data-id="ammount">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for(var i=0; i < data.collection.Securities.length; i++) { %>
+                                    <tr data-id="<%= data.collection.Securities[i].id %>">
+                                        <td><%= data.collection.Securities[i].id %></td>
+                                        <td><%= data.collection.Securities[i].type %></td>
+                                        
+                                        <% if(data.collection.Securities[i].type==='EF') { %> 
+                                            <td>Efectivo</td> 
+                                        <% } %>
+                                        <% if(data.collection.Securities[i].type==='DC') { %> 
+                                            <td>Deposito en Cuenta</td> 
+                                        <% } %>
+                                        <% if(data.collection.Securities[i].type==='CH') { %> 
+                                            <td>Cheque</td> 
+                                        <% } %>
+
+                                        <td><%= data.collection.Securities[i].description %></td>
+                                        <td>$ <%= data.collection.Securities[i].ammount %></td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12 right-align" style="padding-right: 100px;">
+                        <h6 id="totalConcepts">Importe Total: <%= data.collection.ammountSecurities%></h6>
+                    </div>
+                </div>            
+            </div>
+        </div> 
+
+        <div class="card">        
+            <div class="card-action right-align">
+                
+                <a href="/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collection.id%>" class="waves-effect waves-light btn"><i class="material-icons right">receipt</i>Ver Recibo</a>
+
+                <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel"
+                    class="waves-effect waves-light btn red" style="margin-left: 20px;"><i class="material-icons right">cancel</i>Volver</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const aux = "0000000000" + "<%=data.collection.receiptNumber%>"
+        receiptNumber = document.getElementById('receiptNumber');
+        receiptNumber.value = aux.slice(-8);
+        M.updateTextFields();
+    });
+
+</script>

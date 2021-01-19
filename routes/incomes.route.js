@@ -16,16 +16,24 @@ router.post("/collections", function (req, res, next) {
     res.redirect("/incomes/collections/client/" + clientId);
 });
 
-router.get("/collections/client/:clientId", function (req, res, next) {
-    collectionsController.listAll(req, res);
-});
-
 router.get("/collections/new/:clientId", function (req, res, next) {
     collectionsController.showNewForm(req, res);
 })
 
 router.post("/collections/new/:clientId", function (req, res, next) {
     collectionsController.addNew(req, res);
+})
+
+router.get("/collections/client/:clientId", function (req, res, next) {
+    collectionsController.listAll(req, res);
+});
+
+router.get("/collections/client/:clientId/details/:collectionId", function (req, res, next) {
+    collectionsController.info(req, res);
+})
+
+router.get("/collections/client/:clientId/invoice/:collectionId", function (req, res, next) {
+    collectionsController.createInvoice(req, res);
 })
 
 module.exports = router

@@ -302,7 +302,7 @@
         selectField.options.length = 0;
         selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el cheque" + "</option>"
 
-        fetch('/checks/split/collections/' + homeOwnerId)
+        fetch('/checks/split/collections/' + homeOwnerId + '?statusId=0')   //0 = pending / 1 = assigned status
             .then(response => {
                 if (response.status == 200) {
                     return response.text();

@@ -3,7 +3,7 @@ const {
     Model
 } = require('sequelize');
 
-const CollectionStatus = require('../utils/statusMessages.util').CollectionStatus;
+const CollectionStatus = require('../utils/statusMessages.util').Collections;
 
 module.exports = (sequelize, DataTypes) => {
     class Collection extends Model {
@@ -18,6 +18,8 @@ module.exports = (sequelize, DataTypes) => {
             Collection.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
             Collection.hasOne(models.homeOwner, { foreignKey: 'id', sourceKey: 'propertyId' })
             Collection.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            Collection.hasMany(models.collectionConcept, { foreignKey: 'collectionId', sourceKey: 'id', as: "Concepts" })
+            Collection.hasMany(models.collectionSecurity, { foreignKey: 'collectionId', sourceKey: 'id', as: "Securities" })
         }
     };
     Collection.init({
@@ -58,6 +60,12 @@ module.exports = (sequelize, DataTypes) => {
         ammountSecurities: {
             allowNull: false,
             type: DataTypes.DECIMAL(10, 2)
+        },
+        balance: {
+            type: new DataTypes.VIRTUAL(DataTypes.DECIMAL(10, 2)),
+            get: function () {
+                return this.get('ammountConcepts') - this.get('ammountSecurities');
+            }
         },
         securityCode: {
             allowNull: false,

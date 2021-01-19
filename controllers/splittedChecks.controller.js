@@ -161,8 +161,10 @@ module.exports.getCollectionChecks = async function (req, res, next) {
 
     const homeOwnerId = req.params.homeOwnerId; const splitType = 'I';
 
+    const statusId = req.query.statusId || req.body.statusId || "0,1,2";   // ?statusId=1,2
+
     CheckSplitted.findAll({
-        where: { splitType: 'I', homeOwnerId: homeOwnerId, statusId: [0, 1] },
+        where: { splitType: 'I', homeOwnerId: homeOwnerId, statusId: statusId.split(",") },
         include: [
             {
                 model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }]

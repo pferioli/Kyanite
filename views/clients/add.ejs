@@ -39,6 +39,7 @@
                         <div class="input-field col s5">    
                             <i class="material-icons prefix">point_of_sale</i>
                             <select id="taxCategorySelect">
+                                <option value="" disabled selected>Seleccione una categoria impositiva</option>
                                 <% for(var i=0; i < data.taxCategories.length; i++) { %>
                                     <option value="<%=data.taxCategories[i].id%>"><%= data.taxCategories[i].name %></option>
                                 <% } %>

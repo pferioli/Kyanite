@@ -12,8 +12,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            CollectionConcept.hasOne(models.collection, { foreignKey: 'id', sourceKey: 'collectionId' })
-            CollectionConcept.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            CollectionConcept.belongsTo(models.collection, { foreignKey: 'id', sourceKey: 'collectionId' })
         }
     };
     CollectionConcept.init({
