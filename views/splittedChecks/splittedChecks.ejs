@@ -59,9 +59,9 @@
                                 <td>
                                     <%= data.check.number %>
                                 </td>
-                                <td> $<%= data.check.ammount%>
+                                <td> $<%= data.check.amount%>
                                 </td>
-                                <td> $<%= data.checks[i].ammount %>
+                                <td> $<%= data.checks[i].amount %>
                                 </td>
 
                                 <% if(data.checks[i].splitType==='I' ) { %>
@@ -103,7 +103,7 @@
                                                     <% } %>
 
                                                         <% if(data.checks[i].statusId===1) { %>
-                                                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.check.client.id%>" data-value="$<%= data.checks[i].ammount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.check.client.id%>" data-value="$<%= data.checks[i].amount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                                                             <% } %>
                                             </td>
                             </tr>

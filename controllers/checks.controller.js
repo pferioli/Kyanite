@@ -119,7 +119,7 @@ module.exports.addNew = async function (req, res, next) {
             accountId: account.id,
             bankId: req.body.bankId,
             number: req.body.checkNumber,
-            ammount: req.body.ammount,
+            amount: req.body.amount,
             emissionDate: req.body.emissionDate,
             paymentDate: req.body.paymentDate,
             dueDate: moment(req.body.paymentDate).add(30, 'days').format('YYYY-MM-DD'),
@@ -184,9 +184,9 @@ module.exports.delete = async function (req, res, next) {
         if (check) {
             check.destroy()
                 .then(numAffectedRows => {
-                    
+
                     //TODO: aca deberia hacer el cascade de los splitted checks si los hay...
-                    
+
                     req.flash(
                         "success",
                         "El cheque fue eliminado exitosamente a la base de datos"

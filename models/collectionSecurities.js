@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
             default: null,
             type: DataTypes.INTEGER
         },
-        ammount: {
+        amount: {
             allowNull: false,
             type: DataTypes.DECIMAL(10, 2)
         },

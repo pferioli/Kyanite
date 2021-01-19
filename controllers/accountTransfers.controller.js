@@ -85,7 +85,7 @@ module.exports.addNew = async function (req, res, next) {
             periodId: req.body.billingPeriodId,
             sourceAccountId: req.body.sourceAccountId,
             destinationAccountId: req.body.destinationAccountId,
-            ammount: req.body.ammount,
+            amount: req.body.amount,
             transferDate: req.body.transferDate,
             comments: req.body.comments,
             statusId: AccountTransferStatus.eStatus.get('pending').value,

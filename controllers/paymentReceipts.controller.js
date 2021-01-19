@@ -93,7 +93,7 @@ module.exports.addNew = async function (req, res, next) {
             emissionDate: req.body.emissionDate,
             description: req.body.description,
             accountingImputationId: req.body.accountingImputationId,
-            ammount: req.body.ammount,
+            amount: req.body.amount,
             supplierId: req.body.supplierId,
             periodId: req.body.billingPeriodId,
             userId: req.user.id,

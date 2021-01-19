@@ -20,8 +20,8 @@ propertyId: Int
 receiptDate: Date
 receiptNumber: Varchar(32)
 batchNumber: Int
-ammountConcepts: Decimal(10,2)
-ammountSecurities: Decimal(10,2)
+amountConcepts: Decimal(10,2)
+amountSecurities: Decimal(10,2)
 securityCode: Varchar(32)
 comments: Longtext
 statusId: Int
@@ -47,7 +47,7 @@ table: collections_concepts
 id: Int
 collectionId: Int
 description: Varchar(256)
-ammount: Decimal(10,2)
+amount: Decimal(10,2)
 userId: Int
 createdAt: Datetime
 updatedAt: Datetime
@@ -87,7 +87,7 @@ collectionId: Int
 description: Varchar(256)
 accountId: Int
 checkId: Int
-ammount: Decimal(10,2)
+amount: Decimal(10,2)
 userId: Int
 createdAt: Datetime
 updatedAt: Datetime
@@ -267,7 +267,7 @@ clientId: int(11)
 periodId: int(11)
 sourceAccountId: int(11)
 destinationAccountId: int(11)
-ammount: decimal(10,2)
+amount: decimal(10,2)
 transferDate: date
 comments: longtext
 statusId: int(11)
@@ -411,7 +411,7 @@ periodId: int(11)
 accountId: int(11)
 bankId: int(11)
 number: varchar(32)
-ammount: decimal(10,2)
+amount: decimal(10,2)
 emissionDate: date
 paymentDate: date
 dueDate: date
@@ -496,7 +496,7 @@ periodId int(11)
 splitType char(1)
 homeOwnerId int(11)
 paymentOrderId int(11)
-ammount decimal(10,2)
+amount decimal(10,2)
 comments longtext
 statusId int(11)
 createdAt datetime
@@ -719,7 +719,7 @@ property: varchar(16)
 accountId: int(11)
 conceptDesc: varchar(128)
 valueDesc: varchar(128)
-ammount: decimal(10,2)
+amount: decimal(10,2)
 bg=gray</panel_attributes>
     <additional_attributes/>
   </element>
@@ -801,7 +801,7 @@ receiptTypeId: int(11)
 emissionDate: date
 description: longtext
 accountingImputationId: int(11)
-ammount: decimal(10,2)
+amount: decimal(10,2)
 statusId: int(11)
 periodId: int(11)
 userId: int(11)

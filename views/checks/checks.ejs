@@ -56,7 +56,7 @@
 
                         <td><%= data.checks[i].bank.name %></td>
                         <td><a href="/checks/info/<%=data.checks[i].id%>" class="blue-text"><%=data.checks[i].number%></a></td>
-                        <td>$<%= data.checks[i].ammount %></td>
+                        <td>$<%= data.checks[i].amount %></td>
 
                         <td><%= data.checks[i].emissionDate %></td>
                         <td><%= data.checks[i].paymentDate %></td>
@@ -130,7 +130,7 @@
                             <% } %>
 
                             <% if((data.checks[i].statusId === 0)||(data.checks[i].statusId === 1)||(data.checks[i].statusId === 2)||(data.checks[i].statusId === 3)||(data.checks[i].statusId === 4)) { %>
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-check="<%=data.checks[i].bank.name%> <%=data.checks[i].number%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.checks[i].ammount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-check="<%=data.checks[i].bank.name%> <%=data.checks[i].number%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.checks[i].amount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                             <% } %>
                         </td>
                     </tr>

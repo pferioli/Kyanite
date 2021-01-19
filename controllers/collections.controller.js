@@ -108,8 +108,8 @@ module.exports.addNew = async function (req, res, next) {
             receiptDate: req.body.emissionDate,
             receiptNumber: 0,
             batchNumber: null,
-            ammountConcepts: req.body.ammountConcepts,
-            ammountSecurities: req.body.ammountSecurities,
+            amountConcepts: req.body.amountConcepts,
+            amountSecurities: req.body.amountSecurities,
             securityCode: uuidv4(),
             comments: req.body.comments,
             statusId: CollectionStatus.eStatus.get('pending').value,
@@ -132,7 +132,7 @@ module.exports.addNew = async function (req, res, next) {
                     collectionId: collection.id,
                     type: tables.concepts[index].type,
                     description: tables.concepts[index].concept,
-                    ammount: parseFloat(tables.concepts[index].ammount.replace(/[^0-9\.-]+/g, "")),
+                    amount: parseFloat(tables.concepts[index].amount.replace(/[^0-9\.-]+/g, "")),
                     userId: req.user.id
                 };
 
@@ -162,7 +162,7 @@ module.exports.addNew = async function (req, res, next) {
                     description: tables.values[index].comment,
                     accountId: null,
                     checkId: null,
-                    ammount: parseFloat(tables.values[index].ammount.replace(/[^0-9\.-]+/g, "")),
+                    amount: parseFloat(tables.values[index].amount.replace(/[^0-9\.-]+/g, "")),
                     userId: req.user.id
                 };
 
@@ -248,41 +248,67 @@ module.exports.info = async function (req, res) {
 
             res.redirect('incomes/collections/client/' + clientId);
         })
-
 };
 
 module.exports.createInvoice = function (req, res) {
 
     const { createInvoice } = require("../helpers/invoiceGenerator.helper");
 
-    const invoice = {
-        shipping: {
-            name: "John Doe",
-            address: "1234 Main Street",
-            city: "San Francisco",
-            state: "CA",
-            country: "US",
-            postal_code: 94111
-        },
-        items: [
-            {
-                item: "TC 100",
-                description: "Toner Cartridge",
-                quantity: 2,
-                amount: 6000
-            },
-            {
-                item: "USB_EXT",
-                description: "USB Cable Extender",
-                quantity: 1,
-                amount: 2000
-            }
-        ],
-        subtotal: 8000,
-        paid: 0,
-        invoice_nr: 1234
-    };
-    let promise = new Promise(function (resolve, reject) {
-        createInvoice(invoice, path.join(__dirname, "..", "public", "invoice.pdf"))
+    const clientId = req.params.clientId;
+    const collectionId = req.params.collectionId;
+
+    Collection.findByPk(collectionId, {
+        include: [{ model: Client }, { model: HomeOwner }, { model: BillingPeriod }, { model: User },
+        { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
     })
+        .then(collection => {
+
+            createInvoice(req, res, collection, path.join(__dirname, "..", "public", "invoice.pdf"))
+
+        })
+        .catch(err => {
+            console.error(err);
+        })
+
+    // const invoice = {
+    //     shipping: {
+    //         name: "John Doe",
+    //         address: "1234 Main Street",
+    //         city: "San Francisco",
+    //         state: "CA",
+    //         country: "US",
+    //         postal_code: 94111
+    //     },
+    //     items: [
+    //         {
+    //             item: "TC 100",
+    //             description: "Toner Cartridge",
+    //             quantity: 2,
+    //             amount: 6000
+    //         },
+    //         {
+    //             item: "USB_EXT",
+    //             description: "USB Cable Extender",
+    //             quantity: 1,
+    //             amount: 2000
+    //         }
+    //     ],
+    //     subtotal: 8000,
+    //     paid: 0,
+    //     invoice_nr: 1234
+    // };
+
+    // createInvoice(req, res, invoice, path.join(__dirname, "..", "public", "invoice.pdf"))
+
+    // let promise = new Promise(function (resolve, reject) {
+    //     if (createInvoice(req, res, invoice, path.join(__dirname, "..", "public", "invoice.pdf"))) {
+    //         resolve({ msg: 'It works', data: 'some data' });
+    //     } else {
+    //         reject(new Error({ msg: 'It does not work' }));
+    //     }
+    // });
+
+    // promise
+    //     .then(function (resolve) { res.send(resolve.msg) })
+    //     .catch(function (err) { console.err(err) })
 }

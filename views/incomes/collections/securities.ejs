@@ -18,7 +18,7 @@
                             <th style="width: 20%;" data-id="value">Valor</th>
                             <th style="width: 40%;" data-id="comment">Detalle</th>
                             <th style="width: 5%;"  data-id="valueId">Id</th>
-                            <th style="width: 10%;" data-id="ammount">Importe</th>
+                            <th style="width: 10%;" data-id="amount">Importe</th>
                             <th style="width: 10%; text-align:center">Remover</th>
                         </tr>
                     </thead>
@@ -31,7 +31,7 @@
         <div class="row">
             <div class="input-field col s12 right-align" style="padding-right: 100px;">
                 <h6 id="totalValues">Importe Total: $0.00</h6>
-                <input type="hidden" name="ammountSecurities" id="ammountSecurities" />                
+                <input type="hidden" name="amountSecurities" id="amountSecurities" />                
             </div>
         </div>
     </div>
@@ -55,9 +55,9 @@
                 </select>
                 <label>Seleccione la cuenta o cheque si aplica</label>
             </div>
-            <div id="valueAmmountDiv" class="input-field col s2">
-                <input id="valueAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
-                <label for="valueAmmount">Importe</label>
+            <div id="valueamountDiv" class="input-field col s2">
+                <input id="valueamount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
+                <label for="valueamount">Importe</label>
             </div>
             <div class="input-field col s1 center-align">
                 <button id="buttonValues" class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewValueType()" ; style="margin-right: 10px;">
@@ -80,13 +80,13 @@
 
         document.getElementById("valueSelect").addEventListener('change', (event) => {
 
-            const valueAmmount = document.getElementById('valueAmmount');
-            valueAmmount.readOnly = false;
-            valueAmmount.value="0.00";
+            const valueamount = document.getElementById('valueamount');
+            valueamount.readOnly = false;
+            valueamount.value="0.00";
 
             auxSelect = document.getElementById('auxiliarSelect');
             auxSelectDiv = document.getElementById('auxiliarSelectDiv');
-            valueAmmountDiv = document.getElementById('valueAmmountDiv');
+            valueamountDiv = document.getElementById('valueamountDiv');
 
             auxSelectDiv.hidden = true;
             
@@ -100,7 +100,7 @@
                      
             switch (event.target.value) {
                 case "EF": {
-                    valueAmmountDiv.hidden = false;
+                    valueamountDiv.hidden = false;
                     auxSelect.disabled = true;
                     auxSelect.hidden = true;
                     auxSelect.innerHTML = "<option value=\"\" selected disabled>" + "Seleccione la cuenta o cheque si aplica" + "</option>"
@@ -110,7 +110,7 @@
 
                 case "DC": {
                     selAccount = null;
-                    valueAmmountDiv.hidden = false;
+                    valueamountDiv.hidden = false;
                     auxSelectDiv.hidden = false;
                     auxSelect.disabled = false;
                     
@@ -119,7 +119,7 @@
 
                 case "CH": {
                     selCheck = null;
-                    valueAmmountDiv.hidden = true;
+                    valueamountDiv.hidden = true;
                     
                     auxiliarSelectDiv.classList.remove('s6');
                     auxiliarSelectDiv.classList.add('s8');
@@ -130,7 +130,7 @@
                     homeOwnerId = document.getElementById('homeOwnerId').value;
                     if (homeOwnerId === '') { alert("Para poder listar los cheques disponibles primero debe seleccionar a un propietario o propiedad"); return }
                     
-                    valueAmmount.readOnly = true;
+                    valueamount.readOnly = true;
 
                     getSplittedChecks(homeOwnerId, "auxiliarSelect");
                 } break;
@@ -151,9 +151,9 @@
                 case 'CH': {
                     selCheck = await getSplittedCheckInfo(event.target.value);
                 
-                    const valueAmmount = document.getElementById('valueAmmount');
-                    valueAmmount.readOnly = false;
-                    valueAmmount.value = selCheck.ammount;
+                    const valueamount = document.getElementById('valueamount');
+                    valueamount.readOnly = false;
+                    valueamount.value = selCheck.amount;
                 } 
                 break;
             };
@@ -165,7 +165,7 @@
         const valueSelect = document.getElementById('valueSelect')
         const valueTypeId = valueSelect.value;
         const valueComment = valueSelect.options[valueSelect.selectedIndex].text;
-        const valueAmmount = document.getElementById('valueAmmount').value;
+        const valueamount = document.getElementById('valueamount').value;
 
         switch (valueTypeId) {
             case "EF": {
@@ -176,7 +176,7 @@
                     alert(`Se encontraron ${account.length} cuentas de tipo CNM, imposible continuar`); return;
                 }
                 
-                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, account[0].id, account[0].accountType.description);
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueamount, account[0].id, account[0].accountType.description);
 
             } break;
 
@@ -189,7 +189,7 @@
                 // const auxSelectId = document.getElementById("auxSelectId").value;
                 // const auxSelectDesc = document.getElementById("auxSelectDesc").value;
 
-                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, auxSelectId, auxSelectDesc);
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueamount, auxSelectId, auxSelectDesc);
 
                 selAccount = null;
 
@@ -204,7 +204,7 @@
                 // const auxSelectId = document.getElementById("auxSelectId").value;
                 // const auxSelectDesc = document.getElementById("auxSelectDesc").value;
 
-                totalValues += addValueTypeRow(valueTypeId, valueComment, valueAmmount, auxSelectId, auxSelectDesc);
+                totalValues += addValueTypeRow(valueTypeId, valueComment, valueamount, auxSelectId, auxSelectDesc);
 
                 selCheck = null;
 
@@ -218,7 +218,7 @@
         valueSelect.selectedIndex = 0;
         M.FormSelect.init(valueSelect, {});
 
-        document.getElementById('valueAmmount').value = "0.00";
+        document.getElementById('valueamount').value = "0.00";
 
         auxSelect = document.getElementById('auxiliarSelect');
         auxSelectDiv = document.getElementById('auxiliarSelectDiv')
@@ -233,7 +233,7 @@
 
     function updateTotalValues() {
         document.getElementById('totalValues').textContent = 'Importe Total: ' + formatter.format(totalValues);
-        document.getElementById('ammountSecurities').value = totalValues;
+        document.getElementById('amountSecurities').value = totalValues;
     }
 
     function addValueTypeRow(type, comment, value, id, auxiliar) {
@@ -242,13 +242,13 @@
 
         var newRow = tableRef.insertRow(-1);
 
-        const valueAmmount = formatter.format(value).replace(",", "");
+        const valueamount = formatter.format(value).replace(",", "");
 
         newRow.insertCell(0).appendChild(document.createTextNode(type));
         newRow.insertCell(1).appendChild(document.createTextNode(comment));
         newRow.insertCell(2).appendChild(document.createTextNode(auxiliar));
         newRow.insertCell(3).appendChild(document.createTextNode(id));
-        newRow.insertCell(4).appendChild(document.createTextNode(valueAmmount));
+        newRow.insertCell(4).appendChild(document.createTextNode(valueamount));
 
         newRow.insertCell(5).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light right-align" ' +
                                          'style="display: block; margin: auto;" data-id="' + newRow.rowIndex + '" ' +
@@ -314,7 +314,7 @@
                 const splittedChecks = JSON.parse(response);
                 for (i = 0; i < splittedChecks.length; i++) {
                     selectField.innerHTML = selectField.innerHTML + "<option value=\"" + splittedChecks[i].id + "\">" + 
-                        `${splittedChecks[i].check.bank.name} (Nº ${splittedChecks[i].check.number}) $${splittedChecks[i].ammount}` + "</option>"
+                        `${splittedChecks[i].check.bank.name} (Nº ${splittedChecks[i].check.number}) $${splittedChecks[i].amount}` + "</option>"
                 }
                 
                 M.FormSelect.init(selectField, {});

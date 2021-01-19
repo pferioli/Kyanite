@@ -16,7 +16,7 @@
                         <tr>
                             <th style="width: 15%;" data-id="type">Tipo</th>
                             <th style="width: 45%;" data-id="concept">Concepto</th>
-                            <th style="width: 30%;" data-id="ammount">Importe</th>
+                            <th style="width: 30%;" data-id="amount">Importe</th>
                             <th style="width: 10%; text-align:center">Remover</th>
                         </tr>
                     </thead>
@@ -28,7 +28,7 @@
         <div class="row">
             <div class="input-field col s12 right-align" style="padding-right: 100px;">
                 <h6 id="totalConcepts">Importe Total: $0.00</h6>
-                <input type="hidden" name="ammountConcepts" id="ammountConcepts" />
+                <input type="hidden" name="amountConcepts" id="amountConcepts" />
 
             </div>
         </div>
@@ -47,8 +47,8 @@
                 <label>Concepto</label>               
             </div>
             <div class="input-field col s2">
-                <input id="conceptAmmount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
-                <label for="conceptAmmount">Importe</label>
+                <input id="conceptamount" type="number" min="0.00" step="0.01" class="validate" value="0.00" required />
+                <label for="conceptamount">Importe</label>
             </div>
             <div class="input-field col s1 center-align">
                 <button id="buttonConcept" class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewConcept()" ; style="margin-right: 10px;">
@@ -70,19 +70,19 @@
         if (conceptId === '') { alert("No selecciono ningun tipo de concepto"); return; };
 
         const conceptComment = conceptSelect.options[conceptSelect.selectedIndex].text;
-        const conceptAmmount = document.getElementById('conceptAmmount').value;
-        totalConcepts += addConceptRow(conceptId, conceptComment, conceptAmmount);
+        const conceptamount = document.getElementById('conceptamount').value;
+        totalConcepts += addConceptRow(conceptId, conceptComment, conceptamount);
         updateTotalConcepts();
 
         conceptsSelect.selectedIndex = 0;
         M.FormSelect.init(conceptsSelect, {});
 
-        document.getElementById('conceptAmmount').value = "0.00";
+        document.getElementById('conceptamount').value = "0.00";
     }
 
     function updateTotalConcepts() {
         document.getElementById('totalConcepts').textContent = 'Importe Total: ' + formatter.format(totalConcepts);
-        document.getElementById('ammountConcepts').value = totalConcepts;
+        document.getElementById('amountConcepts').value = totalConcepts;
     }
 
     function addConceptRow(id, comment, value) {
@@ -94,9 +94,9 @@
         newRow.insertCell(0).appendChild(document.createTextNode(id));
         newRow.insertCell(1).appendChild(document.createTextNode(comment));
 
-        const conceptAmmount = formatter.format(value).replace(",", "");
+        const conceptamount = formatter.format(value).replace(",", "");
 
-        newRow.insertCell(2).appendChild(document.createTextNode(conceptAmmount));
+        newRow.insertCell(2).appendChild(document.createTextNode(conceptamount));
         newRow.insertCell(3).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" ' + 
                                         'style="display: block; margin: auto;" data-id="' + newRow.rowIndex + '" ' +
                                         'onClick=deleteConceptItem(this)><i class="material-icons">delete</i></a>'

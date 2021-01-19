@@ -71,7 +71,7 @@ module.exports.addNew = async function (req, res, next) {
             return;
         };
 
-        if (remainingBalance < req.body.partialAmmount) {
+        if (remainingBalance < req.body.partialamount) {
             req.flash("warning", `el importe ingresado es mayor que el saldo remanente del cheque [$${remainingBalance.toFixed(2)}]`);
             res.redirect("/checks/split/" + checkId);
             return;
@@ -91,7 +91,7 @@ module.exports.addNew = async function (req, res, next) {
             splitType: req.body.splitType,
             homeOwnerId: homeOwnerId,
             paymentOrderId: null,
-            ammount: req.body.partialAmmount,
+            amount: req.body.partialamount,
             comments: req.body.comments,
             statusId: SplitCheckStatus.eStatus.get('pending').value,
             userId: req.user.id
@@ -147,12 +147,12 @@ async function calcRemainingBalance(checkId, splitType) {
         where: { checkId: checkId, splitType: splitType }
     });
 
-    let totalAmmount = check.ammount, used = 0;
+    let totalamount = check.amount, used = 0;
 
     for (i = 0; i < splittedChecks.length; i++) {
-        used += parseFloat(splittedChecks[i].ammount);
+        used += parseFloat(splittedChecks[i].amount);
     }
-    const remainingBalance = totalAmmount - used;
+    const remainingBalance = totalamount - used;
 
     return remainingBalance;
 };
