@@ -12,7 +12,9 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            CollectionSecurity.belongsTo(models.collection, { foreignKey: 'id', sourceKey: 'collectionId' })
+            CollectionSecurity.belongsTo(models.collection, { foreignKey: 'id', sourceKey: 'collectionId' });
+            CollectionSecurity.hasOne(models.checkSplitted, { foreignKey: 'id', sourceKey: 'checkId' })
+            CollectionSecurity.hasOne(models.account, { foreignKey: 'id', sourceKey: 'accountId' })
         }
     };
     CollectionSecurity.init({

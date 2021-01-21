@@ -178,4 +178,16 @@ app.use(function (err, req, res, next) {
 
 const scheduledTasks = require('./helpers/scheduledTasks.helper');
 
+const hasFullICU = (() => {
+  try {
+    const january = new Date(9e8);
+    const spanish = new Intl.DateTimeFormat('es', { month: 'long' });
+    return spanish.format(january) === 'enero';
+  } catch (err) {
+    return false;
+  }
+})();
+
+console.log("support for a non-English locale : " + hasFullICU);
+
 module.exports = app;

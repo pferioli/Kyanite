@@ -252,63 +252,33 @@ module.exports.info = async function (req, res) {
 
 module.exports.createInvoice = function (req, res) {
 
-    const { createInvoice } = require("../helpers/invoiceGenerator.helper");
+    const { createReport } = require("../reports/collections/manualCollection.report");
 
     const clientId = req.params.clientId;
     const collectionId = req.params.collectionId;
 
     Collection.findByPk(collectionId, {
-        include: [{ model: Client }, { model: HomeOwner }, { model: BillingPeriod }, { model: User },
-        { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
+        include: [{ model: Client }, { model: HomeOwner }, { model: BillingPeriod },
+        { model: User, include: [{ model: Model.userSignature }] },
+        { model: CollectionConcept, as: "Concepts", },
+        {
+            model: CollectionSecurity, as: "Securities", include: [
+                {
+                    model: CheckSplitted, include: [{ model: Model.check }]
+                    //where: { checkId: { [Op.ne]: null } }
+                },
+                {
+                    model: Account, include: [{ model: AccountType }, { model: Model.bank }]
+                    //where: { accountId: { [Op.ne]: null } }
+                }]
+        }],
     })
         .then(collection => {
 
-            createInvoice(req, res, collection, path.join(__dirname, "..", "public", "invoice.pdf"))
+            createReport(collection, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
 
         })
         .catch(err => {
             console.error(err);
         })
-
-    // const invoice = {
-    //     shipping: {
-    //         name: "John Doe",
-    //         address: "1234 Main Street",
-    //         city: "San Francisco",
-    //         state: "CA",
-    //         country: "US",
-    //         postal_code: 94111
-    //     },
-    //     items: [
-    //         {
-    //             item: "TC 100",
-    //             description: "Toner Cartridge",
-    //             quantity: 2,
-    //             amount: 6000
-    //         },
-    //         {
-    //             item: "USB_EXT",
-    //             description: "USB Cable Extender",
-    //             quantity: 1,
-    //             amount: 2000
-    //         }
-    //     ],
-    //     subtotal: 8000,
-    //     paid: 0,
-    //     invoice_nr: 1234
-    // };
-
-    // createInvoice(req, res, invoice, path.join(__dirname, "..", "public", "invoice.pdf"))
-
-    // let promise = new Promise(function (resolve, reject) {
-    //     if (createInvoice(req, res, invoice, path.join(__dirname, "..", "public", "invoice.pdf"))) {
-    //         resolve({ msg: 'It works', data: 'some data' });
-    //     } else {
-    //         reject(new Error({ msg: 'It does not work' }));
-    //     }
-    // });
-
-    // promise
-    //     .then(function (resolve) { res.send(resolve.msg) })
-    //     .catch(function (err) { console.err(err) })
 }

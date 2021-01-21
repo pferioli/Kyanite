@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.hasOne(models.userSignature, { foreignKey: 'userId', sourceKey: 'id' })
     }
   };
   User.init({
