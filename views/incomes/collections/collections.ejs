@@ -128,7 +128,7 @@
 
                             <td>
                                 <a href="/incomes/collections/client/<%=data.client.id%>/details/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">more</i></a>
-                                <a id="buttonReceipt" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.collections[i].id%>" data-value="<%= data.collections[i].receiptNumber %>"><i class="material-icons">receipt</i></a>
+                                <a id="buttonReceipt" class="btn-flat btn-small waves-effect waves-light"onclick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collections[i].id%>')"><i class="material-icons">receipt</i></a>
                                 <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.collections[i].id%>" data-value="<%= data.collections[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                             </td>
                         </tr>
@@ -153,6 +153,11 @@
 
     var handler = 0;
 
+    function openInNewTab(url) {
+       var redirectWindow = window.open(url, '_blank');
+        redirectWindow.location;
+    };
+    
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll(".modal");
         var instances = M.Modal.init(elems, {})

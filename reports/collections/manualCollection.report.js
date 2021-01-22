@@ -15,8 +15,17 @@ function createReport(collection, res) {
     generateSignature(doc, collection.user);
     generateFooter(doc);
 
+    const reportName = "cobranza_" + collection.client.internalCode + "_" + collection.homeOwner.property + "_" + collection.receiptNumber + ".pdf"
     //doc.end();
     //doc.pipe(fs.createWriteStream(path));
+
+    // Set some headers
+    res.statusCode = 200;
+    res.setHeader('Content-type', 'application/pdf');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // Header to force download
+    res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
 
     doc.pipe(res).on('finish', function () {
         console.log('PDF closed');
@@ -250,7 +259,8 @@ function generateSignature(doc, user) {
     const endLine1 = startLine1 + lineSize;
     const signatureHeight = 735;
 
-    doc.image(user.userSignature.image, (startLine1 + (lineSize / 2) - (150 / 2)), signatureHeight - 60, { width: 150 })
+    if (user.userSignature)
+        doc.image(user.userSignature.image, (startLine1 + (lineSize / 2) - (150 / 2)), signatureHeight - 60, { width: 150 })
 
     doc
         .lineWidth(1)
