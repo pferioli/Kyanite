@@ -12,6 +12,7 @@ const AccountType = Model.accountType;
 const Check = Model.check;
 const CheckSplitted = Model.checkSplitted;
 const User = Model.user;
+const CollectionImport = Model.collectionImport
 
 const db = require('../models/index');
 
@@ -45,7 +46,6 @@ module.exports.listAll = async function (req, res) {
         if (activePeriod) { periods.push(activePeriod.id) }
     }
 
-    const autoRefresh = (req.query.refresh === undefined || req.query.refresh.toLowerCase() === 'false' ? false : true);
     const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
 
     //CollectionStatus.eStatus.get('opened').value
@@ -71,7 +71,7 @@ module.exports.listAll = async function (req, res) {
         {
             menu: CURRENT_MENU,
             data: { client: client, collections: collections, periods: periods },
-            params: { showAll: showAll, autoRefresh: autoRefresh }
+            params: { showAll: showAll }
         });
 };
 
@@ -280,5 +280,57 @@ module.exports.createInvoice = function (req, res) {
         })
         .catch(err => {
             console.error(err);
+        })
+};
+
+module.exports.importCollections = async function (req, res) {
+
+    const gcs = require('../helpers/gcs.helper');
+
+    gcs.readFileFromGCS('collections/ImpoCobranzas.csv')
+        .then(async (result) => {
+
+            await CollectionImport.destroy({ truncate: true, cascade: false });
+
+            for (i = 0; i < result.length; i++) {
+                try {
+                    const item = result[i];
+                    let collection = {
+                        clientCode: item.Codigo,
+                        propertyType: item.Tipo,
+                        property: item.Propiedad,
+                        accountId: item.Cuenta,
+                        conceptDesc: item.Concepto,
+                        valueDesc: item.Valores,
+                        amount: item.Importe,
+                        date: item.Fecha,
+                    };
+                    collection = await CollectionImport.create(collection);
+                } catch (err) {
+                    console.error(err);
+                }
+
+
+            }
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+        .finally(() => {
+
+            const sequelize = require('sequelize');
+
+            let importedRows = 0;
+
+            CollectionImport.count({})
+                .then((count) => {
+                    importedRows = count; console.log(count)
+                })
+                .catch((err) => {
+                    console.error(err)
+                })
+                .finally(() => {
+                    res.redirect('/incomes/collections/import/finish?rows=' + importedRows);
+                })
         })
 }

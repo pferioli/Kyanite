@@ -68,27 +68,30 @@ async function writeFileToGCS(req, gcsFileName) {
 
 const csv = require('csv-parser')
 
-const results = [];
-
 async function readFileFromGCS(gcsFileName) {
+
+    let results = [];
 
     // Create a new blob in the bucket and upload the file data.
     const file = bucket.file(gcsFileName);
 
-    const stream = file.createReadStream()
-        .pipe(csv())
-        .on('data', (data) => {
-            results.push(data)
-        })
-        .on('end', () => {
-            console.log(results)
-        })
+    return finish = new Promise(function (resolve, reject) {
+
+        const stream = file.createReadStream()
+            .pipe(csv())
+            .on('data', (data) => {
+                results.push(data)
+            })
+            .on('end', () => {
+                resolve(results)
+            })
+    });
 }
 
-//readFileFromGCS('collections/ImpoCobranzas.csv');
 
 module.exports = {
     multer,
     bucket,
-    sendUploadToGCS: writeFileToGCS
+    sendUploadToGCS: writeFileToGCS,
+    readFileFromGCS
 };

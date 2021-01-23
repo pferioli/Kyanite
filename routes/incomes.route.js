@@ -16,6 +16,14 @@ router.post("/collections", function (req, res, next) {
     res.redirect("/incomes/collections/client/" + clientId);
 });
 
+router.get("/collections/import", function (req, res, next) {
+    collectionsController.importCollections(req, res);
+})
+
+router.get("/collections/import/finish", function (req, res, next) {
+    res.send("importacion finalizada, se insertaron " + req.query.rows + " registros")
+})
+
 router.get("/collections/new/:clientId", function (req, res, next) {
     collectionsController.showNewForm(req, res);
 })

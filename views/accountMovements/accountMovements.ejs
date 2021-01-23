@@ -1,0 +1,246 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
+
+    <div class="table-container">
+
+        <div class="table-header">
+
+            <span class="table-title">Cuenta Corriente - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+
+            <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a id="button-filter" class="waves-effect btn-flat nopadding" onclick="filterByAccount(this)"><i class="material-icons">filter_list</i></a>
+                <a href="/movements/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
+            
+        </div>
+        
+        <div id="hide-dt" style="display:none">
+            <table id="datatable" class="table display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Categoria</th>
+                        <th>Importe</th>
+                        <th>Descripcion</th>
+                        <th>Cuenta</th>
+                        <th>Fecha</th>
+                        <th>Periodo</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < data.movements.length; i++) { %>
+                        <tr data-id="<%= data.movements[i].id %>">
+                            <td><%= data.movements[i].id %></td>
+                            <td><%= data.movements[i].category%></td>
+                            <td>$ <%= data.movements[i].amount %></td>
+
+                            <td><%= data.movements[i].accountId %></td>
+                            <td></td>
+
+                            <td><%= data.movements[i].createdAt %></td>
+
+                            <td>
+                                <% if(data.movements[i].billingPeriod.statusId === 0) { %>
+                                <i class="material-icons">calendar_today</i>
+                                <% } %>
+                                <% if(data.movements[i].billingPeriod.statusId=== 1) { %>
+                                <i class="material-icons">lock_open</i>
+                                <% } %>
+                                <% if(data.movements[i].billingPeriod.statusId === 2) { %>
+                                <i class="material-icons">lock</i>
+                                <% } %>
+                                <% if(data.movements[i].billingPeriod.statusId === 3) { %>
+                                <i class="material-icons">cancel</i>
+                                <% } %>
+
+                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.movements[i].billingPeriod.name %></span></a>
+
+                                 <td><%= data.movements[i].user.name %></td>
+
+                                <td>
+                                    <a href="/movements/client/<%=data.client.id%>/details/<%= data.movements[i].id%>" class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">more</i></a>
+                                </td>
+                            </td>
+
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row center-align" style="font-size:small" id="lastUpdate"></div>
+    </div>
+
+    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+    <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
+
+</main>
+
+<%- include ("../partials/footer") %>
+<%- include ("./modals/accountSelection.ejs") %>
+
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {})
+
+        document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
+    });
+    
+    async function clientAccountSelector(fieldId, clientId){
+
+        let selectField = document.getElementById(fieldId);
+        selectField.options.length = 0;
+        selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione las cuentas" + "</option>"
+
+        const accounts = await getClientAccounts(clientId);
+
+        for (i = 0; i < accounts.length; i++) {
+            selectField.innerHTML = selectField.innerHTML + "<option value=\"" + accounts[i].id + "\">" + 
+                `[${accounts[i].accountType.account}] ${accounts[i].accountType.description} (ID:${accounts[i].id})`  + "</option>"
+        }
+                
+        M.FormSelect.init(selectField, {});
+    }
+
+    function filterByAccount(button){
+        
+        var _elem = document.getElementById('modalAccountSelection');
+        
+        var instances = M.Modal.init(_elem, 
+            {   
+                onOpenStart: function(){ clientAccountSelector('accountSelect', htmlDecode("<%= data.client.id %>"))}
+            })
+
+        var modal = M.Modal.getInstance(_elem);
+
+        document.getElementById('modalClientId').value = "<%=data.client.id%>";
+        document.getElementById('modalPeriodId').value = "<%=data.periods%>";
+
+        modal.open();
+    }
+
+    $(document).ready(function () {
+
+        $('.search-toggle').click(function () {
+            if ($('.hiddensearch').css('display') == 'none')
+                $('.hiddensearch').slideDown();
+            else
+                $('.hiddensearch').slideUp();
+        });
+
+        var table = $('#datatable').dataTable({
+            dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+            oLanguage: {
+                sSearch: '',
+                sSearchPlaceholder: 'Escriba aqui su búsqueda',
+                sInfo: '_START_ -_END_ de _TOTAL_',
+                sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+                    '<option value="200">200</option>' +
+                    '<option value="500">500</option>' +
+                    '<option value="1000">1000</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select></div>'
+            },
+            columnDefs: [
+                {
+                    targets: -1,
+                    searchable: false,
+                    sortable: false,
+                    className: "left-align",
+                }
+            ],
+            colReorder: true,
+            fixedColumns: {
+                leftColumns: 1
+            },
+            pageLength: 200,
+            order: [[0, 'asc']],
+            autowidth: true,
+            scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
+            paging: true,
+            buttons: [
+                {
+                    extend: 'colvis',
+                    text: 'Columnas',
+                },
+                {
+                    extend: 'print',
+                    className: '',
+                    title: '',
+                    // autoPrint: false,
+                    customize: function (win) {
+                        $(win.document.body)
+                            .css('font-size', '10pt')
+                            .prepend(
+                                '<h4>Title Test</h4>',
+                            );
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit',);
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: ':visible(th:not(:last-child))',
+                        search: 'applied',
+                        order: 'applied'
+                    },
+                    customize: function (xlsx) {
+                        var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+                        source.setAttribute('name', 'Clientes');
+                    }
+                },
+                { extend: 'csvHtml5' },
+                { extend: 'copyHtml5' },
+                {
+                    text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+                    extend: 'pdfHtml5',
+                    filename: 'clients',
+                    orientation: 'landscape',     //portrait
+                    pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+                    exportOptions: {
+                        columns: ':visible',
+                        search: 'applied',
+                        order: 'applied'
+                    }
+                }
+            ],
+            fnInitComplete: function () {
+                $('#hide-dt').show();
+                $('#progress').hide();
+            },
+        });
+    });
+</script>

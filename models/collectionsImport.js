@@ -1,36 +1,35 @@
 'use strict';
-
 const {
     Model
 } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class CurrentAccount extends Model {
+    class CollectionImport extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            // define association here
-            CurrentAccount.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
-            CurrentAccount.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
-            CurrentAccount.hasOne(models.account, { foreignKey: 'id', sourceKey: 'accountId' })
-            CurrentAccount.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            // define association here            
         }
     };
-    CurrentAccount.init({
+    CollectionImport.init({
         id: {
             allowNull: false,
             autoIncrement: true,
             primaryKey: true,
             type: DataTypes.INTEGER,
         },
-        clientId: {
+        clientCode: {
             allowNull: false,
             type: DataTypes.INTEGER
         },
-        periodId: {
+        propertyType: {
+            allowNull: false,
+            type: DataTypes.INTEGER
+        },
+        property: {
             allowNull: false,
             type: DataTypes.INTEGER
         },
@@ -38,25 +37,29 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
-        category: {
+        conceptDesc: {
             allowNull: false,
-            type: DataTypes.CHAR(1)
+            type: DataTypes.STRING(32)
+        },
+        valueDesc: {
+            allowNull: true,
+            type: DataTypes.INTEGER
         },
         amount: {
             allowNull: false,
             type: DataTypes.DECIMAL(10, 2)
         },
-        userId: {
+        date: {
             allowNull: false,
-            type: DataTypes.INTEGER
+            type: DataTypes.DATEONLY
         },
     }, {
         sequelize,
-        modelName: 'currentAccount',
-        tableName: 'current_account',
+        modelName: 'collectionImport',
+        tableName: 'collections_temp',
         timestamps: true,
-        paranoid: true,
+        paranoid: false,
 
     });
-    return CurrentAccount;
+    return CollectionImport;
 };
