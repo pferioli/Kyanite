@@ -24,11 +24,6 @@ const multer = Multer({
     },
 });
 
-const GCLOUD_STORAGE_BUCKET = process.env.GOOGLE_CLOUD_PROJECT + '_bucket';
-
-// A bucket is a container for objects (files).
-const bucket = storage.bucket(GCLOUD_STORAGE_BUCKET);
-
 async function listBuckets() {
     // Lists all buckets in the current project
 
@@ -39,7 +34,12 @@ async function listBuckets() {
     });
 };
 
-async function writeFileToGCS(req, gcsFileName) {
+async function writeFileToGCS(req, gcsFileName, gcsBucketName) {
+
+    const GCLOUD_STORAGE_BUCKET = gcsBucketName; //process.env.GOOGLE_CLOUD_PROJECT + '_bucket';
+
+    // A bucket is a container for objects (files).
+    const bucket = storage.bucket(GCLOUD_STORAGE_BUCKET);
 
     // Create a new blob in the bucket and upload the file data.
     const file = bucket.file(gcsFileName);
@@ -68,30 +68,41 @@ async function writeFileToGCS(req, gcsFileName) {
 
 const csv = require('csv-parser')
 
-async function readFileFromGCS(gcsFileName) {
+async function readFileFromGCS(gcsFileName, gcsBucketName) {
 
     let results = [];
+
+    const GCLOUD_STORAGE_BUCKET = gcsBucketName;
+
+    // A bucket is a container for objects (files).
+    const bucket = storage.bucket(GCLOUD_STORAGE_BUCKET);
 
     // Create a new blob in the bucket and upload the file data.
     const file = bucket.file(gcsFileName);
 
     return finish = new Promise(function (resolve, reject) {
 
-        const stream = file.createReadStream()
-            .pipe(csv())
-            .on('data', (data) => {
-                results.push(data)
-            })
-            .on('end', () => {
-                resolve(results)
-            })
+        const stream = file.createReadStream().pipe(csv());
+
+        stream.on('data', (data) => {
+            results.push(data)
+        })
+        stream.on('end', () => {
+            resolve(results)
+        });
+        stream.on('error', (err) => {
+            reject(err);
+        })
+
+        setTimeout(() => {
+            stream.emit('end');
+        }, 5000);
     });
 }
 
 
 module.exports = {
     multer,
-    bucket,
     sendUploadToGCS: writeFileToGCS,
     readFileFromGCS
 };

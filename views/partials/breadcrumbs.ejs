@@ -50,11 +50,21 @@
     <% } %>
 <%}%>
 
-<% if (locals.menu==='collections_manual' ) { %>
+<% if (locals.menu==='collections' ) { %>
     <a href="/incomes" class="breadcrumb">Ingresos</a>
     <a href="/incomes/collections" class="breadcrumb">Cobranzas</a>
     <% if(locals.data) { %>
         <a href="/incomes/collections/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+    <% } %>
+<% } %>
+
+<% if (locals.menu==='collections_import' ) { %>
+    <a href="/incomes" class="breadcrumb">Ingresos</a>
+    <a href="/incomes/collections" class="breadcrumb">Cobranzas</a>
+    
+    <% if(locals.data) { %>
+        <a href="/incomes/collections/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a> 
+        <a href="/incomes/collections/client/<%=data.client.id%>/upload" class="breadcrumb">Importacion</a>
     <% } %>
 <% } %>
 

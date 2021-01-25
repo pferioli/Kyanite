@@ -115,9 +115,11 @@ module.exports.addNew = async function (req, res, next) {
 
                 const gcsFileName = `receipts/${receiptImageName}`; //${Date.now()}-${req.file.originalname}
 
+                const gcsBucketName = `${process.env.GOOGLE_CLOUD_PROJECT}_bucket`;
+
                 winston.info(`uploading file ${req.file.originalname} to GSC as ${gcsFileName}`);
 
-                gcs.sendUploadToGCS(req, gcsFileName)
+                gcs.sendUploadToGCS(req, gcsFileName, gcsBucketName)
                     .then(uploadResult => {
 
                         const paymentReceiptImage = PaymentReceiptImage.build(

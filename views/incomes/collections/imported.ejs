@@ -1,0 +1,174 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
+    <div class="table-container">
+
+        <div class="table-header">
+
+            <span class="table-title">Importacion de Cobranzas - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+
+            <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/incomes/collections/upload/confirm/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">check_circle</i></a>
+                <a href="/incomes/collections/upload/cancel/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">unpublished</i></a>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
+            
+        </div>
+        
+        <div id="hide-dt" style="display:none">
+            <table id="datatable" class="table display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Codigo</th>
+                        <th>Tipo</th>
+                        <th>Propiedad</th>
+                        <th>Cuenta</th>
+                        <th>Concepto</th>
+                        <th>Valor</th>
+                        <th>Importe</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < data.collections.length; i++) { %>
+                        <tr data-id="<%= data.collections[i].id %>">
+                            <td><%= data.collections[i].id %></td>
+                            <td><%= data.collections[i].clientCode %></td>
+                            <td><%= data.collections[i].propertyType %></td>
+                            <td><%= data.collections[i].property %></td>
+                            <td><%= data.collections[i].account.accountType.account %> Nº <%= data.collections[i].account.accountNumber %> (ID: <%= data.collections[i].accountId %>)</td>
+                            <td><%= data.collections[i].conceptDesc %></td>
+                            <td><%= data.collections[i].valueDesc %></td>
+                            <td>$<%= data.collections[i].amount %></td>
+                            <td><%= data.collections[i].date %></td>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('.search-toggle').click(function () {
+            if ($('.hiddensearch').css('display') == 'none')
+                $('.hiddensearch').slideDown();
+            else
+                $('.hiddensearch').slideUp();
+        });
+
+        var table = $('#datatable').dataTable({
+            dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+            oLanguage: {
+                sSearch: '',
+                sSearchPlaceholder: 'Escriba aqui su búsqueda',
+                sInfo: '_START_ -_END_ de _TOTAL_',
+                sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+                    '<option value="200">200</option>' +
+                    '<option value="500">500</option>' +
+                    '<option value="1000">1000</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select></div>'
+            },
+            columnDefs: [
+                {
+                    className: "center-align",
+                    targets: 0
+                },
+                {
+                    targets: 7,
+                    type: 'currency',
+                },              
+            ],
+            colReorder: true,  
+            fixedColumns: {
+                leftColumns: 3
+            },                     
+            pageLength: 200,
+            order: [[0, 'asc']],
+            autowidth: true,
+            scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
+            paging: true,
+            // buttons: [
+            //     {
+            //         extend: 'colvis',
+            //         text: 'Columnas',
+            //     },
+            //     {
+            //         extend: 'print',
+            //         className: '',
+            //         title: '',
+            //         // autoPrint: false,
+            //         customize: function (win) {
+            //             $(win.document.body)
+            //                 .css('font-size', '10pt')
+            //                 .prepend(
+            //                     '<h4>Title Test</h4>',
+            //                 );
+            //             $(win.document.body).find('table')
+            //                 .addClass('compact')
+            //                 .css('font-size', 'inherit',);
+            //         }
+            //     },
+            //     {
+            //         extend: 'excelHtml5',
+            //         exportOptions: {
+            //             columns: ':visible(th:not(:last-child))',
+            //             search: 'applied',
+            //             order: 'applied'
+            //         },
+            //         customize: function (xlsx) {
+            //             var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+            //             source.setAttribute('name', 'Clientes');
+            //         }
+            //     },
+            //     { extend: 'csvHtml5' },
+            //     { extend: 'copyHtml5' },
+            //     {
+            //         text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+            //         extend: 'pdfHtml5',
+            //         filename: 'clients',
+            //         orientation: 'landscape',     //portrait
+            //         pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+            //         exportOptions: {
+            //             columns: ':visible',
+            //             search: 'applied',
+            //             order: 'applied'
+            //         }
+            //     }
+            // ],
+            fnInitComplete: function () {
+                $('#hide-dt').show();
+                $('#progress').hide();
+            },            
+        });
+    });
+</script>

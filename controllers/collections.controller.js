@@ -12,7 +12,10 @@ const AccountType = Model.accountType;
 const Check = Model.check;
 const CheckSplitted = Model.checkSplitted;
 const User = Model.user;
-const CollectionImport = Model.collectionImport
+const CollectionImport = Model.collectionImport;
+const CollectionImportControl = Model.collectionImportControl;
+
+const gcs = require('../helpers/gcs.helper'); module.exports = { gcs };
 
 const db = require('../models/index');
 
@@ -22,7 +25,9 @@ const path = require("path");
 
 const { v4: uuidv4 } = require('uuid');
 
-const CURRENT_MENU = 'collections_manual'; module.exports.CURRENT_MENU = CURRENT_MENU;
+const CURRENT_MENU = 'collections'; const CURRENT_MENU_IMPORT = CURRENT_MENU + '_import'
+
+module.exports.CURRENT_MENU = CURRENT_MENU;
 
 const CollectionStatus = require('../utils/statusMessages.util').Collections;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
@@ -274,63 +279,163 @@ module.exports.createInvoice = function (req, res) {
         }],
     })
         .then(collection => {
-
             createReport(collection, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
-
         })
         .catch(err => {
             console.error(err);
         })
 };
 
+module.exports.showUploadForm = async function (req, res) {
+
+    const clientId = req.params.clientId;
+    const client = await Client.findByPk(clientId);
+
+    const period = await BillingPeriod.findOne({
+        where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
+    });
+
+    res.render("incomes/collections/upload.ejs", { menu: CURRENT_MENU_IMPORT, data: { client, period } });
+};
+
 module.exports.importCollections = async function (req, res) {
 
-    const gcs = require('../helpers/gcs.helper');
+    // const gcs = require('../helpers/gcs.helper');
 
-    gcs.readFileFromGCS('collections/ImpoCobranzas.csv')
-        .then(async (result) => {
+    const clientId = req.body.clientId || req.params.clientId;
 
-            await CollectionImport.destroy({ truncate: true, cascade: false });
+    if (!req.file) {
+        req.flash("warning", "No se encontro ningun archivo con datos para hacer la importación");
+        res.redirect("/incomes/collections/upload/" + clientId);
+        return;
+    }
 
-            for (i = 0; i < result.length; i++) {
-                try {
-                    const item = result[i];
-                    let collection = {
-                        clientCode: item.Codigo,
-                        propertyType: item.Tipo,
-                        property: item.Propiedad,
-                        accountId: item.Cuenta,
-                        conceptDesc: item.Concepto,
-                        valueDesc: item.Valores,
-                        amount: item.Importe,
-                        date: item.Fecha,
-                    };
-                    collection = await CollectionImport.create(collection);
-                } catch (err) {
-                    console.error(err);
-                }
+    let importCtrl = await CollectionImportControl.create(
+        {
+            clientId: clientId,
+            startedAt: Date.now(),
+            statusId: 1,    //started
+            userId: req.user.id
+        });
 
+    //console.log("importCtrl ID #" + importCtrl.id);
 
-            }
-        })
-        .catch((err) => {
-            console.log(err)
-        })
-        .finally(() => {
+    CollectionImport.destroy({ truncate: true, cascade: false })
 
-            const sequelize = require('sequelize');
+        .then((truncateResult) => {
 
-            let importedRows = 0;
+            const filename = uuidv4();
 
-            CollectionImport.count({})
-                .then((count) => {
-                    importedRows = count; console.log(count)
+            const gcsFileName = `collections/${filename}.csv`; //${Date.now()}-${req.file.originalname}
+
+            const gcsBucketName = `${process.env.GOOGLE_CLOUD_PROJECT}_bucket_temp`;
+
+            winston.info(`uploading file ${req.file.originalname} to GSC as ${gcsFileName} in bucket ${gcsBucketName}`);
+
+            // const stream = file.createWriteStream({
+            //     contentType: req.file.mimetype
+            // });
+
+            gcs.sendUploadToGCS(req, gcsFileName, gcsBucketName)
+                .then(writeResult => {
+
+                    gcs.readFileFromGCS(gcsFileName, gcsBucketName)
+                        .then(async (readResult) => {
+
+                            for (i = 0; i < readResult.length; i++) {
+                                try {
+                                    const item = readResult[i];
+                                    let collection = {
+                                        clientCode: item.Codigo,
+                                        propertyType: item.Tipo,
+                                        property: item.Propiedad,
+                                        accountId: item.Cuenta,
+                                        conceptDesc: item.Concepto,
+                                        valueDesc: item.Valores,
+                                        amount: item.Importe,
+                                        date: item.Fecha,
+                                    };
+                                    collection = await CollectionImport.create(collection);
+                                } catch (err) {
+                                    console.error(err);
+                                }
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                        })
+                        .finally(() => {
+
+                            const sequelize = require('sequelize');
+
+                            let importedRows = 0;
+
+                            CollectionImport.count({})
+                                .then((count) => {
+                                    importedRows = count; console.log(count)
+                                })
+                                .catch((err) => {
+                                    console.error(err)
+                                })
+                                .finally(() => {
+                                    importCtrl.statusId = 3;
+                                    importCtrl.finishedAt = Date.now();
+                                    importCtrl.records = importedRows;
+                                    importCtrl.save()
+
+                                    console.log("finished")
+                                })
+                        })
                 })
                 .catch((err) => {
-                    console.error(err)
-                })
-                .finally(() => {
-                    res.redirect('/incomes/collections/import/finish?rows=' + importedRows);
+                    winston.error(`An error ocurred while user #${req.user.id} tryed to truncate temp collections table - ${err} `)
                 })
         })
+        .catch((err) => {
+            winston.error(`An error ocurred while user #${req.user.id} tryed to truncate temp collections table - ${err} `)
+        });
+
+    res.redirect(`/incomes/collections/importing/${clientId}/control/${importCtrl.id}`);
+
 }
+
+module.exports.waitImportProcess = function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    const controlId = req.params.controlId;
+
+    res.render('incomes/collections/importing', { menu: CURRENT_MENU_IMPORT, data: { client: { id: clientId }, control: { id: controlId } } });
+};
+
+module.exports.checkImportProcess = function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    const controlId = req.params.controlId;
+
+    CollectionImportControl.findByPk(controlId)
+        .then((result) => { res.send(result) })
+        .catch((err) => { res.sendStatus(400).send(err); })
+};
+
+module.exports.listImportedCollections = async function (req, res) {
+
+    const clientId = req.body.clientId || req.params.clientId;
+
+    const client = await Client.findByPk(clientId);
+
+    CollectionImport.findAll(
+        {
+            include: [{ model: Account, include: [{ model: AccountType }] }]
+        }
+    ).then((collections) => {
+        res.render('incomes/collections/imported', { menu: CURRENT_MENU_IMPORT, data: { client, collections } });
+    });
+}
+
+
+
+
+
+

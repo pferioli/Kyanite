@@ -1,0 +1,95 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <div class="card">
+            <div class="card-content">
+                <div class="row">
+                    <h5 class="center-align">Proceso de importación de cobranzas en curso, por favor espere a que finalice...</h5>
+                    <div class="progress col s12">
+                        <div class="indeterminate"></div>
+                    </div>
+                    <div class="col s12 center-align" style="font-size:small" id="lastUpdate"></div>
+                    <!-- <div class="col s6">
+                        <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+                        <div class="spinner-layer spinner-green-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+            </div>    
+        </div>  
+    </div>
+
+    <!-- <div class="container">
+        <div class="row center-align" style="font-size:small" id="lastUpdate"></div>
+    </div> -->
+
+    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+    <input type="hidden" name="controlId" id="controlId" value=<%=data.control.id%> />
+
+</main>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+    var handler=0;
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
+
+        handler = enableAutoRefresh();
+
+    });
+
+    
+    function enableAutoRefresh() {
+        return setTimeout(function () { checkImportStatus("<%=data.client.id%>","<%=data.control.id%>" ); }, (1 * 1000))
+    }
+
+    function disableAutoRefresh(handler) {
+        if (handler) {
+            clearTimeout(handler);
+            timer = 0;
+        }
+    }
+
+    function checkImportStatus(clientId, controlId){
+
+        fetch(`/incomes/collections/importing/${clientId}/status/${controlId}`)
+            .then(response => {
+                if (response.status == 200) {
+                    return response.text();
+                } else {
+                    throw "Respuesta incorrecta del servidor"
+                }
+            })
+            .then(response => {
+                const importControl = JSON.parse(response);
+
+                if(importControl.statusId != 3) {
+
+                    document.getElementById('lastUpdate').textContent = 'Estado = ' + importControl.statusId + ' / Ultima actualizacion ' + Date();
+                    
+                    enableAutoRefresh();
+
+                } else {
+                    window.location.href = "/incomes/collections/imported/"+clientId;
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+</script>
