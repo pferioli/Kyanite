@@ -1,6 +1,7 @@
 <%- include ("../../partials/header") %>
 
 <main class="site-content">
+
     <div class="container" style="margin-top: 50px;">
         <form class="col s12" method="post" action='/incomes/collections/import/<%=data.client.id%>' enctype="multipart/form-data">
             <div class="card">
@@ -32,9 +33,19 @@
                         </div>                       
                     </div>
 
+                    <% if(data.active) { %>
+                        <h6 class="center-align red-text">hay un proceso de importación activo iniciado por el usuario <%=data.active.user.name%>. 
+                            Si fuerza el cierre de la sesión se cancelará el proceso en curso</h6>
+                    <% } %>
+
                 </div>
 
                 <div class="card-action right-align">
+                    
+                    <% if(data.active) { %>
+                        <button id="kill-button" onclick='alert("<%=data.active.id%>")' class="waves-effect waves-light btn blue" style="margin-right: 10px;"><i class="material-icons right">save</i>Finalizar Sesion</button>
+                    <% } %>
+                    
                     <button id="add-button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Guardar</button>
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
                 </div>

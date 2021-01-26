@@ -41,7 +41,6 @@
                     <tr>
                         <th>ID</th>
                         <th>Codigo</th>
-                        <th>Tipo</th>
                         <th>Propiedad</th>
                         <th>Cuenta</th>
                         <th>Concepto</th>
@@ -55,11 +54,10 @@
                         <tr data-id="<%= data.collections[i].id %>">
                             <td><%= data.collections[i].id %></td>
                             <td><%= data.collections[i].clientCode %></td>
-                            <td><%= data.collections[i].propertyType %></td>
-                            <td><%= data.collections[i].property %></td>
+                            <td><%= data.collections[i].propertyType %><%= data.collections[i].property %></td>
                             <td><%= data.collections[i].account.accountType.account %> Nº <%= data.collections[i].account.accountNumber %> (ID: <%= data.collections[i].accountId %>)</td>
-                            <td><%= data.collections[i].conceptDesc %></td>
-                            <td><%= data.collections[i].valueDesc %></td>
+                            <td>[<%= data.collections[i].conceptType %>] <%= data.collections[i].conceptDesc %></td>
+                            <td>[<%= data.collections[i].valueType %>] <%= data.collections[i].valueDesc %></td>
                             <td>$<%= data.collections[i].amount %></td>
                             <td><%= data.collections[i].date %></td>
                         <% } %>
@@ -108,7 +106,7 @@
             ],
             colReorder: true,  
             fixedColumns: {
-                leftColumns: 3
+                leftColumns: 0
             },                     
             pageLength: 200,
             order: [[0, 'asc']],

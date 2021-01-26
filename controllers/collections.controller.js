@@ -295,17 +295,33 @@ module.exports.showUploadForm = async function (req, res) {
         where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
     });
 
-    res.render("incomes/collections/upload.ejs", { menu: CURRENT_MENU_IMPORT, data: { client, period } });
+    let importCtrl = await CollectionImportControl.findOne({
+        where: { statusId: { [Op.in]: [1, 2] } }, include: [{ model: User }]
+    });
+
+    // if (importCtrl) {
+    //     req.flash("warning", `Hay un proceso de importación sin finalizar del usuario ${importCtrl.user.name}`);
+    // };
+
+    res.render("incomes/collections/upload.ejs", { menu: CURRENT_MENU_IMPORT, data: { client, period, active: importCtrl } });
 };
 
 module.exports.importCollections = async function (req, res) {
 
     // const gcs = require('../helpers/gcs.helper');
 
+    const moment = require('moment');
+
     const clientId = req.body.clientId || req.params.clientId;
 
     if (!req.file) {
         req.flash("warning", "No se encontro ningun archivo con datos para hacer la importación");
+        res.redirect("/incomes/collections/upload/" + clientId);
+        return;
+    }
+
+    if (path.extname(req.file.originalname) != '.csv') {
+        req.flash("error", "El formato del archivo seleccionado no corresponde, debe ser del tipo CSV (codificación UTF-8)");
         res.redirect("/incomes/collections/upload/" + clientId);
         return;
     }
@@ -345,15 +361,18 @@ module.exports.importCollections = async function (req, res) {
                             for (i = 0; i < readResult.length; i++) {
                                 try {
                                     const item = readResult[i];
+
                                     let collection = {
-                                        clientCode: item.Codigo,
-                                        propertyType: item.Tipo,
-                                        property: item.Propiedad,
-                                        accountId: item.Cuenta,
-                                        conceptDesc: item.Concepto,
-                                        valueDesc: item.Valores,
-                                        amount: item.Importe,
-                                        date: item.Fecha,
+                                        clientCode: item.clientCode,
+                                        propertyType: item.propertyType,
+                                        property: item.property,
+                                        accountId: item.accountId,
+                                        conceptDesc: item.concept,
+                                        conceptType: "EC",
+                                        valueDesc: item.value,
+                                        valueType: "DC",
+                                        amount: item.amount.replace(".", '').replace(",", '.'),
+                                        date: moment(item.date, "DD/MM/YYYY").toDate()
                                     };
                                     collection = await CollectionImport.create(collection);
                                 } catch (err) {

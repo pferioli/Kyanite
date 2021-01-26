@@ -66,23 +66,39 @@ async function writeFileToGCS(req, gcsFileName, gcsBucketName) {
     });
 };
 
-const csv = require('csv-parser')
-
 async function readFileFromGCS(gcsFileName, gcsBucketName) {
 
-    let results = [];
+    let results = []; const csv = require('csv-parser')
 
     const GCLOUD_STORAGE_BUCKET = gcsBucketName;
 
-    // A bucket is a container for objects (files).
     const bucket = storage.bucket(GCLOUD_STORAGE_BUCKET);
 
-    // Create a new blob in the bucket and upload the file data.
     const file = bucket.file(gcsFileName);
 
     return finish = new Promise(function (resolve, reject) {
 
-        const stream = file.createReadStream().pipe(csv());
+        const stripBom = require('strip-bom-stream');
+
+        const stream = file.createReadStream()
+            .pipe(stripBom())
+            .pipe(csv(
+                {
+                    separator: ";",
+                    mapHeaders: ({ header, index }) => {
+
+                        switch (header.toLowerCase()) {
+                            case 'fecha': { return "date" };
+                            case 'codigo': { return "clientCode" };
+                            case 'tipo': { return "propertyType" };
+                            case 'propiedad': { return "property" };
+                            case 'cuenta': { return "accountId" };
+                            case 'concepto': { return "concept" };
+                            case 'valores': { return "value" };
+                            case 'importe': { return "amount" };
+                        }
+                    }
+                }));
 
         stream.on('data', (data) => {
             results.push(data)
@@ -96,7 +112,7 @@ async function readFileFromGCS(gcsFileName, gcsBucketName) {
 
         setTimeout(() => {
             stream.emit('end');
-        }, 5000);
+        }, 30 * 1000);
     });
 }
 

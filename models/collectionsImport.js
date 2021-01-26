@@ -39,9 +39,17 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
+        conceptType: {
+            allowNull: false,
+            type: DataTypes.STRING(5)
+        },
         conceptDesc: {
             allowNull: false,
             type: DataTypes.STRING(32)
+        },
+        valueType: {
+            allowNull: false,
+            type: DataTypes.STRING(5)
         },
         valueDesc: {
             allowNull: true,
