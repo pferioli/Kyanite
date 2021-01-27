@@ -1,9 +1,9 @@
-<%- include ("../../partials/header") %>
+<%- include ("../../../partials/header") %>
 
 <main class="site-content">
 
     <center>
-        <%- include ("../../partials/alerts") %>
+        <%- include ("../../../partials/alerts") %>
     </center>
 
     <div class="table-container">
@@ -28,8 +28,8 @@
 
             <div class="actions">
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/incomes/collections/upload/confirm/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">check_circle</i></a>
-                <a href="/incomes/collections/upload/cancel/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">unpublished</i></a>
+                <a href="/incomes/collections/import/confirm/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">check_circle</i></a>
+                <a href="/incomes/collections/import/cancel/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">unpublished</i></a>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             
@@ -68,7 +68,7 @@
 
 </main>
 
-<%- include ("../../partials/footer") %>
+<%- include ("../../../partials/footer") %>
 
 <script>
 

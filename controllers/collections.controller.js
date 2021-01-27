@@ -91,7 +91,7 @@ module.exports.showNewForm = async function (req, res) {
         where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
     });
 
-    res.render("incomes/collections/add.ejs", { menu: CURRENT_MENU, data: { client, clientAccounts: Accounts, period } });
+    res.render("incomes/collections/manual/add", { menu: CURRENT_MENU, data: { client, clientAccounts: Accounts, period } });
 };
 
 module.exports.addNew = async function (req, res, next) {
@@ -303,14 +303,14 @@ module.exports.showUploadForm = async function (req, res) {
     //     req.flash("warning", `Hay un proceso de importación sin finalizar del usuario ${importCtrl.user.name}`);
     // };
 
-    res.render("incomes/collections/upload.ejs", { menu: CURRENT_MENU_IMPORT, data: { client, period, active: importCtrl } });
+    res.render("incomes/collections/import/upload", { menu: CURRENT_MENU_IMPORT, data: { client, period, active: importCtrl } });
 };
 
 module.exports.importCollections = async function (req, res) {
 
     // const gcs = require('../helpers/gcs.helper');
 
-    const moment = require('moment');
+    const moment = require('moment'); let bErrors = false;
 
     const clientId = req.body.clientId || req.params.clientId;
 
@@ -326,15 +326,26 @@ module.exports.importCollections = async function (req, res) {
         return;
     }
 
-    let importCtrl = await CollectionImportControl.create(
-        {
-            clientId: clientId,
-            startedAt: Date.now(),
-            statusId: 1,    //started
-            userId: req.user.id
-        });
+    winston.info(`beginning the collections import from file ${req.file.originalname} for client #${clientId} on user #${req.user.id} request`);
 
-    //console.log("importCtrl ID #" + importCtrl.id);
+    let importCtrl = null; importedRows = 0;
+
+    try {
+        importCtrl = await CollectionImportControl.create(
+            {
+                clientId: clientId,
+                startedAt: Date.now(),
+                statusId: 1,    //started
+                userId: req.user.id
+            });
+
+        winston.info(`current import control record id is ${importCtrl.id}`);
+
+    } catch (error) {
+        winston.error(`An error ocurred while creating the import control register - ${err} `)
+    }
+
+    winston.info(`truncating collections_temp table`);
 
     CollectionImport.destroy({ truncate: true, cascade: false })
 
@@ -359,83 +370,66 @@ module.exports.importCollections = async function (req, res) {
                         .then(async (readResult) => {
 
                             for (i = 0; i < readResult.length; i++) {
-                                try {
-                                    const item = readResult[i];
 
-                                    let collection = {
-                                        clientCode: item.clientCode,
-                                        propertyType: item.propertyType,
-                                        property: item.property,
-                                        accountId: item.accountId,
-                                        conceptDesc: item.concept,
+                                try {
+
+                                    collection = await CollectionImport.create({
+                                        clientCode: readResult[i].clientCode,
+                                        propertyType: readResult[i].propertyType,
+                                        property: readResult[i].property,
+                                        accountId: readResult[i].accountId,
                                         conceptType: "EC",
-                                        valueDesc: item.value,
+                                        conceptDesc: readResult[i].concept,
                                         valueType: "DC",
-                                        amount: item.amount.replace(".", '').replace(",", '.'),
-                                        date: moment(item.date, "DD/MM/YYYY").toDate()
-                                    };
-                                    collection = await CollectionImport.create(collection);
+                                        valueDesc: readResult[i].value,
+                                        amount: readResult[i].amount.replace(".", '').replace(",", '.'),
+                                        date: moment(readResult[i].date, "DD/MM/YYYY").toDate()
+                                    });
+
                                 } catch (err) {
-                                    console.error(err);
+                                    winston.error(`An error ocurred while inserting the record #${index} into temp table - ${err}`)
                                 }
                             }
+
+                            importedRows = i;
+
                         })
                         .catch((err) => {
-                            console.log(err)
+                            winston.error(`An error ocurred while reading the the collections file ${gcsFileName} from bucket ${gcsBucketName} - ${err} `)
                         })
                         .finally(() => {
 
-                            const sequelize = require('sequelize');
+                            importCtrl.statusId = 3;
+                            importCtrl.finishedAt = Date.now();
+                            importCtrl.records = importedRows;
+                            importCtrl.save()
 
-                            let importedRows = 0;
-
-                            CollectionImport.count({})
-                                .then((count) => {
-                                    importedRows = count; console.log(count)
-                                })
-                                .catch((err) => {
-                                    console.error(err)
-                                })
-                                .finally(() => {
-                                    importCtrl.statusId = 3;
-                                    importCtrl.finishedAt = Date.now();
-                                    importCtrl.records = importedRows;
-                                    importCtrl.save()
-
-                                    console.log("finished")
-                                })
                         })
                 })
                 .catch((err) => {
-                    winston.error(`An error ocurred while user #${req.user.id} tryed to truncate temp collections table - ${err} `)
+                    winston.error(`An error ocurred while writing the the collections file ${gcsFileName} from bucket ${gcsBucketName} - ${err} `)
                 })
         })
         .catch((err) => {
-            winston.error(`An error ocurred while user #${req.user.id} tryed to truncate temp collections table - ${err} `)
+            winston.error(`An error ocurred while truncating temp collections table - ${err} `)
         });
 
-    res.redirect(`/incomes/collections/importing/${clientId}/control/${importCtrl.id}`);
-
+    res.redirect(`/incomes/collections/import/${clientId}/wait/${importCtrl.id}`);
 }
 
 module.exports.waitImportProcess = function (req, res) {
 
-    const clientId = req.params.clientId;
-
     const controlId = req.params.controlId;
-
-    res.render('incomes/collections/importing', { menu: CURRENT_MENU_IMPORT, data: { client: { id: clientId }, control: { id: controlId } } });
-};
-
-module.exports.checkImportProcess = function (req, res) {
 
     const clientId = req.params.clientId;
 
-    const controlId = req.params.controlId;
-
-    CollectionImportControl.findByPk(controlId)
-        .then((result) => { res.send(result) })
-        .catch((err) => { res.sendStatus(400).send(err); })
+    Client.findByPk(clientId)
+        .then((client) => {
+            res.render('incomes/collections/import/wait', { menu: CURRENT_MENU_IMPORT, data: { client: client, control: { id: controlId } } });
+        })
+        .catch((err) => {
+            winston.error(`An error ocurred while finding the client record for id #${clientId} - ${err} `)
+        });
 };
 
 module.exports.listImportedCollections = async function (req, res) {
@@ -444,17 +438,37 @@ module.exports.listImportedCollections = async function (req, res) {
 
     const client = await Client.findByPk(clientId);
 
+    // const sequelize = require('sequelize');
+
+    // let importedRows = 0;
+
+    // CollectionImport.count({})
+    //     .then((count) => {
+    //         importedRows = count; console.log(count)
+    //     })
+    //     .catch((err) => {
+    //         console.error(err)
+    //     })
+    //     .finally(() => {
+    //         console.log("finished")
+    //     })
+
     CollectionImport.findAll(
         {
             include: [{ model: Account, include: [{ model: AccountType }] }]
         }
     ).then((collections) => {
-        res.render('incomes/collections/imported', { menu: CURRENT_MENU_IMPORT, data: { client, collections } });
+        res.render('incomes/collections/import/imports', { menu: CURRENT_MENU_IMPORT, data: { client, collections } });
     });
 }
 
+//AJAX
 
+module.exports.checkImportProcess = function (req, res) {
 
+    const controlId = req.params.controlId;
 
-
-
+    CollectionImportControl.findByPk(controlId)
+        .then((result) => { res.send(result) })
+        .catch((err) => { res.sendStatus(400).send(err); })
+};
