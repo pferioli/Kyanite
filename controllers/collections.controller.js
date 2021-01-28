@@ -29,7 +29,8 @@ const CURRENT_MENU = 'collections'; const CURRENT_MENU_IMPORT = CURRENT_MENU + '
 
 module.exports.CURRENT_MENU = CURRENT_MENU;
 
-const CollectionStatus = require('../utils/statusMessages.util').Collections;
+const CollectionStatus = require('../utils/statusMessages.util').Collection;
+const ImportCollectionStatus = require('../utils/statusMessages.util').ImportCollection;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 
@@ -316,26 +317,26 @@ module.exports.importCollections = async function (req, res) {
 
     if (!req.file) {
         req.flash("warning", "No se encontro ningun archivo con datos para hacer la importación");
-        res.redirect("/incomes/collections/upload/" + clientId);
+        res.redirect("/incomes/collections/import/new/" + clientId);
         return;
     }
 
     if (path.extname(req.file.originalname) != '.csv') {
         req.flash("error", "El formato del archivo seleccionado no corresponde, debe ser del tipo CSV (codificación UTF-8)");
-        res.redirect("/incomes/collections/upload/" + clientId);
+        res.redirect("/incomes/collections/import/new/" + clientId);
         return;
     }
 
     winston.info(`beginning the collections import from file ${req.file.originalname} for client #${clientId} on user #${req.user.id} request`);
 
-    let importCtrl = null; importedRows = 0;
+    let importCtrl = null; totalRows = 0;
 
     try {
         importCtrl = await CollectionImportControl.create(
             {
                 clientId: clientId,
                 startedAt: Date.now(),
-                statusId: 1,    //started
+                statusId: ImportCollectionStatus.eStatus.get('started').value,
                 userId: req.user.id
             });
 
@@ -374,7 +375,7 @@ module.exports.importCollections = async function (req, res) {
                                 try {
 
                                     collection = await CollectionImport.create({
-                                        clientCode: readResult[i].clientCode,
+                                        clientCode: readResult[i].clientCode.toUpperCase(),
                                         propertyType: readResult[i].propertyType,
                                         property: readResult[i].property,
                                         accountId: readResult[i].accountId,
@@ -383,7 +384,8 @@ module.exports.importCollections = async function (req, res) {
                                         valueType: "DC",
                                         valueDesc: readResult[i].value,
                                         amount: readResult[i].amount.replace(".", '').replace(",", '.'),
-                                        date: moment(readResult[i].date, "DD/MM/YYYY").toDate()
+                                        date: moment(readResult[i].date, "DD/MM/YYYY").toDate(),
+                                        controlId: importCtrl.id
                                     });
 
                                 } catch (err) {
@@ -391,7 +393,7 @@ module.exports.importCollections = async function (req, res) {
                                 }
                             }
 
-                            importedRows = i;
+                            totalRows = readResult.length;
 
                         })
                         .catch((err) => {
@@ -399,11 +401,26 @@ module.exports.importCollections = async function (req, res) {
                         })
                         .finally(() => {
 
-                            importCtrl.statusId = 3;
-                            importCtrl.finishedAt = Date.now();
-                            importCtrl.records = importedRows;
-                            importCtrl.save()
+                            const sequelize = require('sequelize');
 
+                            let importedRows = 0;
+
+                            CollectionImport.count({})
+                                .then((count) => {
+                                    importedRows = count;
+                                })
+                                .catch((err) => {
+                                    winston.error(`An error ocurred while reading imported rows from temp table - ${err} `)
+                                })
+                                .finally(() => {
+
+                                    importCtrl.totalRows = totalRows;
+                                    importCtrl.importedRows = importedRows;
+                                    importCtrl.finishedAt = Date.now();
+                                    importCtrl.statusId = (totalRows === importedRows ?
+                                        ImportCollectionStatus.eStatus.get('inprogress').value : ImportCollectionStatus.eStatus.get('failed').value);
+                                    importCtrl.save()
+                                })
                         })
                 })
                 .catch((err) => {
@@ -414,12 +431,12 @@ module.exports.importCollections = async function (req, res) {
             winston.error(`An error ocurred while truncating temp collections table - ${err} `)
         });
 
-    res.redirect(`/incomes/collections/import/${clientId}/wait/${importCtrl.id}`);
+    res.redirect(`/incomes/collections/import/wait/${clientId}?controlId=${importCtrl.id}`);
 }
 
 module.exports.waitImportProcess = function (req, res) {
 
-    const controlId = req.params.controlId;
+    const controlId = req.params.controlId || req.query.controlId;
 
     const clientId = req.params.clientId;
 
@@ -432,33 +449,71 @@ module.exports.waitImportProcess = function (req, res) {
         });
 };
 
+module.exports.killActiveSessions = function (req, res) {
+
+    const clientId = req.body.clientId || req.params.clientId;
+
+    CollectionImportControl.update(
+        { statusId: ImportCollectionStatus.eStatus.get('cancelled').value },
+        {
+            where: {
+                statusId: { [Op.in]: [ImportCollectionStatus.eStatus.get('started').value, ImportCollectionStatus.eStatus.get('inprogress').value] }
+            }
+        }
+    )
+        .then((result) => {
+            req.flash("success", `La sesiones previas de importacion fueron correctamente desbloqueadas (cant. ${result.length})`);
+        })
+        .catch((err) => {
+            req.flash("error", "Ocurrio un error y no fue posible desbloquear las sesiones previas de importacion, de aviso al administrador");
+            winston.error(`An error ocurredan wan't possible to updated the importing sessions for client id #${clientId} - ${err} `)
+        })
+        .finally(() => {
+            res.redirect('/incomes/collections/import/new/' + clientId);
+        })
+
+};
+
 module.exports.listImportedCollections = async function (req, res) {
+
+    const controlId = req.params.controlId || req.query.controlId;
 
     const clientId = req.body.clientId || req.params.clientId;
 
     const client = await Client.findByPk(clientId);
 
-    // const sequelize = require('sequelize');
-
-    // let importedRows = 0;
-
-    // CollectionImport.count({})
-    //     .then((count) => {
-    //         importedRows = count; console.log(count)
-    //     })
-    //     .catch((err) => {
-    //         console.error(err)
-    //     })
-    //     .finally(() => {
-    //         console.log("finished")
-    //     })
-
     CollectionImport.findAll(
         {
+            where: { clientCode: client.internalCode },
             include: [{ model: Account, include: [{ model: AccountType }] }]
         }
     ).then((collections) => {
-        res.render('incomes/collections/import/imports', { menu: CURRENT_MENU_IMPORT, data: { client, collections } });
+        res.render('incomes/collections/import/imports', { menu: CURRENT_MENU_IMPORT, data: { client, collections, control: { id: controlId } } });
+    });
+};
+
+module.exports.addNewImportedCollections = async function (req, res) {
+
+    const clientId = req.body.clientId || req.params.clientId;
+
+    const controlId = req.body.controlId || req.params.controlId || req.query.controlId;
+
+    const client = await Client.findByPk(clientId);
+
+    let importCtrl = await CollectionImportControl.findByPk(controlId, { include: [{ model: User }] });
+
+    CollectionImport.findAll({
+        where: { clientCode: client.internalCode, controlId: controlId },
+        include: [{ model: Account, include: [{ model: AccountType }] }]
+    }
+    ).then((collections) => {
+
+
+        
+        importCtrl.statusId = ImportCollectionStatus.eStatus.get('completed').value;
+        importCtrl.save()
+
+        res.redirect('/incomes/collections/client/' + clientId)
     });
 }
 

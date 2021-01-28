@@ -65,7 +65,7 @@ module.exports.SplitCheck = class {
     }
 }
 
-module.exports.Collections = class {
+module.exports.Collection = class {
 
     constructor() { }
 
@@ -75,5 +75,18 @@ module.exports.Collections = class {
 
     static get eStatus() {
         return new Enum({ 'disabled': 0, 'pending': 1, 'inprogress': 2, 'processed': 3, 'deleted': 4 })
+    }
+}
+
+module.exports.ImportCollection = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["Detenido", "Iniciado", "En Proceso", "Completado", "Fallido", "Cancelado"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'stopped': 0, 'started': 1, 'inprogress': 2, 'completed': 3, 'failed': 4, 'cancelled': 5 })
     }
 }

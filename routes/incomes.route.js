@@ -38,10 +38,6 @@ router.post("/collections/new/:clientId", function (req, res, next) {
 
 //IMPORT...
 
-router.get("/collections/import/:clientId", function (req, res, next) {
-    collectionsController.listImportedCollections(req, res);
-});
-
 router.get("/collections/import/new/:clientId", function (req, res, next) {
     collectionsController.showUploadForm(req, res);
 });
@@ -52,12 +48,21 @@ router.post('/collections/import/new/:clientId', [collectionsController.gcs.mult
     },
 );
 
-router.get("/collections/import/:clientId/wait/:controlId", function (req, res, next) {
+router.get("/collections/import/wait/:clientId", function (req, res, next) {
     collectionsController.waitImportProcess(req, res);
 });
 
-//IMPORT CONFIRM/CANCEL
+router.get("/collections/import/show/:clientId", function (req, res, next) {
+    collectionsController.listImportedCollections(req, res);
+});
 
+router.get("/collections/import/confirm/:clientId", function (req, res, next) {
+    collectionsController.addNewImportedCollections(req, res);
+});
+
+router.post("/collections/import/killActiveSessions", function (req, res, next) {
+    collectionsController.killActiveSessions(req, res);
+});
 
 //IMPORT --> AJAX
 

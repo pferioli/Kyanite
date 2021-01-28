@@ -3,7 +3,7 @@ const {
     Model
 } = require('sequelize');
 
-const CollectionStatus = require('../utils/statusMessages.util').Collections;
+const CollectionStatus = require('../utils/statusMessages.util').Collection;
 
 module.exports = (sequelize, DataTypes) => {
     class Collection extends Model {

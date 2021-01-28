@@ -10,7 +10,8 @@
 
         <div class="table-header">
 
-            <span class="table-title">Importacion de Cobranzas - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+            <span class="table-title">Importacion de Cobranzas - [<%=data.client.internalCode%>] 
+                <span style="font-weight: bold;"><%=data.client.name%></span> <span style="font-size:small"> (id control #<%=data.control.id%>)</span></span>
 
             <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
@@ -28,8 +29,7 @@
 
             <div class="actions">
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/incomes/collections/import/confirm/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">check_circle</i></a>
-                <a href="/incomes/collections/import/cancel/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">unpublished</i></a>
+                <button id="button-upload" data-target="modalImportConfirm" class="waves-effect btn-flat nopadding modal-trigger"><i class="material-icons">check_circle</i></button>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             
@@ -61,16 +61,44 @@
                             <td>$<%= data.collections[i].amount %></td>
                             <td><%= data.collections[i].date %></td>
                         <% } %>
+
                 </tbody>
             </table>
         </div>
     </div>
+
+    <div id="modalImportConfirm" class="modal">
+        <div class="modal-content black-text">
+            <div class="row">                
+                <h5><i class="material-icons prefix">help</i><span style="padding-left: 10px; vertical-align: 4px;">Esta seguro que desea continuar ?</span></h5>
+            </div>
+            <p>se van a importar <%= data.collections.length %> nuevas cobranzas del cliente <%=data.client.internalCode%> para el período en curso</p>
+        </div>
+        <div class="modal-footer">
+            <a id="button-continue" class="modal-close waves-effect waves-red btn green primary">Continuar</a>
+            <a id="button-dismiss" class="modal-close waves-effect waves-red btn red secondary" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </div>
+
+    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+    <input type="hidden" name="controlId" id="controlId" value=<%=data.control.id%> />
 
 </main>
 
 <%- include ("../../../partials/footer") %>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, { dismissible: false })
+
+        document.getElementById('button-continue').onclick = function(event) {
+            const clientId = document.getElementById('clientId').value;
+            const controlId = document.getElementById('controlId').value;
+            window.location.href = `/incomes/collections/import/confirm/<%=data.client.id%>?controlId=<%=data.control.id%>`;
+        }
+    });
 
     $(document).ready(function () {
 

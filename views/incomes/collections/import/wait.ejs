@@ -11,12 +11,29 @@
                     </div>
                     <div class="col s12 center-align" style="font-size:small" id="lastUpdate"></div>                    
                 </div>
+            </div>
+            <div class="card-action center-align">                
+                <button id="button-cancel" action="action" type="submit" value="Cancel" class="waves-effect waves-light btn red" disabled>
+                    <i class="material-icons right">cancel</i>cancelar el proceso de importación</button>             
             </div>    
-        </div>  
+        </div>
     </div>
 
     <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
     <input type="hidden" name="controlId" id="controlId" value=<%=data.control.id%> />
+
+    <div id="modalImportErrors" class="modal">
+        <div class="modal-content black-text">
+            <div class="row">                
+                <h5><i class="material-icons prefix">report_problem</i><span style="padding-left: 10px; vertical-align: 4px;">El proceso finalizo con errores</span></h5>
+            </div>
+            <p>por favor verifique la integridad de los datos o contacte al administrador del sistema</p>
+        </div>
+        <div class="modal-footer">
+            <a id="button-continue" class="modal-close waves-effect waves-red btn green primary">Continuar</a>
+            <a id="button-dismiss" class="modal-close waves-effect waves-red btn red secondary" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </div>
 
 </main>
 
@@ -28,10 +45,28 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, { dismissible: false })
+
         document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
 
-        handler = enableAutoRefresh();
+        document.getElementById('button-continue').onclick = function(event) {
+            const clientId = document.getElementById('clientId').value;
+            const controlId = document.getElementById('controlId').value;
+            window.location.href = `/incomes/collections/import/show/${clientId}?controlId=${controlId}`;
+        }
 
+        document.getElementById('button-dismiss').onclick = function(event) {
+            const clientId = document.getElementById('clientId').value;
+            window.location.href = `/incomes/collections/client/${clientId}`;
+        }
+
+        document.getElementById('button-cancel').onclick = function(event) {
+            const clientId = document.getElementById('clientId').value;
+            window.location.href = `/incomes/collections/client/${clientId}`;
+        }
+
+        handler = enableAutoRefresh();
     });
 
     
@@ -46,7 +81,11 @@
         }
     }
 
+    //{ 'stopped': 0, 'started': 1, 'inprogress': 2, 'completed': 3, 'failed': 4, 'cancelled': 5 }
+
     function checkImportStatus(clientId, controlId){
+
+        const STATUS_STARTED = 1; const STATUS_INPROGRESS = 2; const STATUS_FAILED = 4;
 
         fetch(`/incomes/collections/import/status/${controlId}`)
             .then(response => {
@@ -59,19 +98,28 @@
             .then(response => {
                 const importControl = JSON.parse(response);
 
-                if(importControl.statusId != 3) {
-
-                    document.getElementById('lastUpdate').textContent = 'Estado = ' + importControl.statusId + ' / Ultima actualizacion ' + Date();
-                    
+                if(importControl.statusId === STATUS_STARTED) {
+                    document.getElementById('lastUpdate').textContent = 'Ejecucion en proceso (' + importControl.statusId  + ') / Ultima actualizacion ' + Date();
                     enableAutoRefresh();
-
-                } else {
-                    window.location.href = `/incomes/collections/import/${clientId}`;
+                } else if(importControl.statusId === STATUS_INPROGRESS) {
+                    window.location.href = `/incomes/collections/import/show/${clientId}?controlId=${controlId}`;
+                } else if (importControl.statusId === STATUS_FAILED) {
+                    document.getElementById('button-cancel').style.visibility = 'hidden';
+                    showErrorModal();
                 }
+                else {
+                    document.getElementById('lastUpdate').textContent = 'ERROR - Estado desconocido (' + importControl.statusId  + ') / Ultima actualizacion ' + Date();
+                } 
             })
             .catch(err => {
                 console.log(err);
             });
+    }
+
+    function showErrorModal(){
+        var _elem = document.getElementById('modalImportErrors');
+        var modal = M.Modal.getInstance(_elem);
+        modal.open();
     }
 
 </script>

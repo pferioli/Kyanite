@@ -3,6 +3,8 @@ const {
     Model
 } = require('sequelize');
 
+const ImportCollectionStatus = require('../utils/statusMessages.util').ImportCollection;
+
 module.exports = (sequelize, DataTypes) => {
     class CollectionImportControl extends Model {
         /**
@@ -12,8 +14,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            CollectionImportControl.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
-
+            CollectionImportControl.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' });
         }
     };
     CollectionImportControl.init({
@@ -35,11 +36,21 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             type: DataTypes.DATE
         },
+        status: {
+            type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
+            get: function () {
+                return ImportCollectionStatus.Status[this.get('statusId')];
+            }
+        },
         statusId: {
             allowNull: false,
             type: DataTypes.INTEGER
         },
-        records: {
+        totalRows: {
+            allowNull: true,
+            type: DataTypes.INTEGER
+        },
+        importedRows: {
             allowNull: true,
             type: DataTypes.INTEGER
         },

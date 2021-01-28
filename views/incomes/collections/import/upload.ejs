@@ -3,7 +3,7 @@
 <main class="site-content">
 
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12" method="post" action='/incomes/collections/import/new/<%=data.client.id%>' enctype="multipart/form-data">
+        <form id="my_form" class="col s12" action="" method="post">
             <div class="card">
                 <div class="card-content">
                     <span class="card-title">Importación de cobranzas</span>
@@ -34,22 +34,28 @@
                     </div>
 
                     <% if(data.active) { %>
-                        <h6 class="center-align red-text">hay un proceso de importación activo iniciado por el usuario <%=data.active.user.name%>. 
-                            Si fuerza el cierre de la sesión se cancelará el proceso en curso</h6>
+                        <h6 class="center-align red-text">hay un proceso de importación activo iniciado por el usuario <%=data.active.user.name%></h6>
+                            <p class="center-align" style="font-size:small">para continuar debe forzar el cierre de la sesión, pero eso cancelará el proceso en curso</p>
                     <% } %>
 
                 </div>
 
                 <div class="card-action right-align">
-                    
+                
                     <% if(data.active) { %>
-                        <button id="kill-button" onclick='alert("<%=data.active.id%>")' class="waves-effect waves-light btn blue" style="margin-right: 10px;"><i class="material-icons right">save</i>Finalizar Sesion</button>
+                        <button id="button-kill" onclick="javascript:killSessions()" class="waves-effect waves-light btn blue" style="margin-right: 10px;">
+                            <i class="material-icons right">save</i>Finalizar Sesiones</button>
                     <% } %>
-                    
-                    <button id="add-button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Guardar</button>
+
+                    <button id="button-submit" class="waves-effect waves-light btn green" style="margin-right: 10px;">
+                        <i class="material-icons right">save</i>Guardar</button>
+                   
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
                 </div>
             </div>
+            
+            <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+
         </form>
     </div>
     <center>
@@ -60,8 +66,27 @@
 <%- include ("../../../partials/footer") %>
 
 <script>
+        
+        document.addEventListener("DOMContentLoaded", function () {
+        
+            document.getElementById('button-submit').onclick = function(event) {
+                const clientId = document.getElementById('clientId').value;
+                const url = '/incomes/collections/import/new/' + clientId;
+                const form = document.getElementById('my_form')
+                form.action = url
+                form.enctype = "multipart/form-data"
+                form.submit(); //Submit action performed
+                return true;
+            };
 
-    document.addEventListener("DOMContentLoaded", function () {
-    });
+        });
 
+        function killSessions() {
+            const url = '/incomes/collections/import/killActiveSessions';
+            const form = document.getElementById('my_form')
+            form.action = url
+            form.submit(); //Submit action performed
+            return true;
+        };
+            
 </script>
