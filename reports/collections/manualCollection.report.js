@@ -165,7 +165,7 @@ function generateSecuritiesTable(doc, collection, y) {
 
         switch (collection.Securities[i].type) {
             case 'EF': { valueDesc = "Efectivo"; description = description = `${item.account.accountType.description}`; } break;
-            case 'DC': { valueDesc = "Deposito en Cuenta"; description = `CBU: ${item.account.cbu}`; } break;
+            case 'DC': { valueDesc = "Depósito en Cuenta"; description = `CBU: ${item.account.cbu}`; } break;
             case 'CH': { valueDesc = "Cheque"; description = `Nº ${item.checkSplitted.check.number} ($${item.checkSplitted.check.amount}) ${formatDate(new Date(item.checkSplitted.check.paymentDate))}`; } break;
         }
 

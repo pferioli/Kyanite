@@ -96,7 +96,7 @@
         document.getElementById('button-continue').onclick = function(event) {
             const clientId = document.getElementById('clientId').value;
             const controlId = document.getElementById('controlId').value;
-            window.location.href = `/incomes/collections/import/confirm/<%=data.client.id%>?controlId=<%=data.control.id%>`;
+            window.location.href = `/incomes/collections/import/confirm/${clientId}?controlId=${controlId}`;
         }
     });
 

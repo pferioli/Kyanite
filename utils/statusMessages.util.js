@@ -83,10 +83,10 @@ module.exports.ImportCollection = class {
     constructor() { }
 
     static get Status() {
-        return ["Detenido", "Iniciado", "En Proceso", "Completado", "Fallido", "Cancelado"];
+        return ["Detenido", "Iniciado", "Importando", "Procesando", "Completado", "Fallido", "Cancelado"];
     }
 
     static get eStatus() {
-        return new Enum({ 'stopped': 0, 'started': 1, 'inprogress': 2, 'completed': 3, 'failed': 4, 'cancelled': 5 })
+        return new Enum({ 'stopped': 0, 'started': 1, 'importing': 2, 'processing': 3, 'completed': 4, 'failed': 5, 'cancelled': 6 })
     }
 }

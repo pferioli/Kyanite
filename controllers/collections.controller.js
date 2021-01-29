@@ -370,18 +370,51 @@ module.exports.importCollections = async function (req, res) {
                     gcs.readFileFromGCS(gcsFileName, gcsBucketName)
                         .then(async (readResult) => {
 
+                            let accountCache = [];
+
                             for (i = 0; i < readResult.length; i++) {
+
+                                //Implementacion de un cache para el accountID
+
+                                let valueType = 'DC';
+
+                                let accountItem = await accountCache.find(async function (item) {
+                                    return item.id === readResult[i].accountId;
+                                });
+
+                                try {
+
+                                    if (accountItem) {
+                                        valueType = accountItem.valueType;
+                                    } else {
+
+                                        const account = await Account.findByPk(readResult[i].accountId,
+                                            { include: [{ model: AccountType }] });
+
+                                        if (account.accountType.account === 'CMN') {
+                                            valueType = 'EF'
+                                        } else if (account.accountType.account === 'VAL') {
+                                            valueType = 'CH'
+                                        } else if (account.accountType.account.slice(-1) === '$') {
+                                            valueType = 'DC'
+                                        }
+                                        accountCache.push({ id: readResult[i].accountId, valueType: valueType })
+                                    }
+
+                                } catch (err) {
+                                    winston.error(`cannot get the accountType for the record #${index}, asuming "DC" - ${err}`)
+                                }
 
                                 try {
 
                                     collection = await CollectionImport.create({
                                         clientCode: readResult[i].clientCode.toUpperCase(),
-                                        propertyType: readResult[i].propertyType,
+                                        propertyType: readResult[i].propertyType.toUpperCase(),
                                         property: readResult[i].property,
                                         accountId: readResult[i].accountId,
-                                        conceptType: "EC",
+                                        conceptType: "IM",
                                         conceptDesc: readResult[i].concept,
-                                        valueType: "DC",
+                                        valueType: valueType,
                                         valueDesc: readResult[i].value,
                                         amount: readResult[i].amount.replace(".", '').replace(",", '.'),
                                         date: moment(readResult[i].date, "DD/MM/YYYY").toDate(),
@@ -418,7 +451,7 @@ module.exports.importCollections = async function (req, res) {
                                     importCtrl.importedRows = importedRows;
                                     importCtrl.finishedAt = Date.now();
                                     importCtrl.statusId = (totalRows === importedRows ?
-                                        ImportCollectionStatus.eStatus.get('inprogress').value : ImportCollectionStatus.eStatus.get('failed').value);
+                                        ImportCollectionStatus.eStatus.get('importing').value : ImportCollectionStatus.eStatus.get('failed').value);
                                     importCtrl.save()
                                 })
                         })
@@ -457,7 +490,12 @@ module.exports.killActiveSessions = function (req, res) {
         { statusId: ImportCollectionStatus.eStatus.get('cancelled').value },
         {
             where: {
-                statusId: { [Op.in]: [ImportCollectionStatus.eStatus.get('started').value, ImportCollectionStatus.eStatus.get('inprogress').value] }
+                statusId: {
+                    [Op.in]: [ImportCollectionStatus.eStatus.get('started').value,
+                    ImportCollectionStatus.eStatus.get('importing').value,
+                    ImportCollectionStatus.eStatus.get('processing').value
+                    ]
+                }
             }
         }
     )
@@ -466,7 +504,7 @@ module.exports.killActiveSessions = function (req, res) {
         })
         .catch((err) => {
             req.flash("error", "Ocurrio un error y no fue posible desbloquear las sesiones previas de importacion, de aviso al administrador");
-            winston.error(`An error ocurredan wan't possible to updated the importing sessions for client id #${clientId} - ${err} `)
+            winston.error(`An error ocurred and it wans't possible to updated the imported sessions for client id #${clientId} - ${err} `)
         })
         .finally(() => {
             res.redirect('/incomes/collections/import/new/' + clientId);
@@ -498,23 +536,92 @@ module.exports.addNewImportedCollections = async function (req, res) {
 
     const controlId = req.body.controlId || req.params.controlId || req.query.controlId;
 
-    const client = await Client.findByPk(clientId);
+    let promise = new Promise(async function (resolve, reject) {
 
-    let importCtrl = await CollectionImportControl.findByPk(controlId, { include: [{ model: User }] });
-
-    CollectionImport.findAll({
-        where: { clientCode: client.internalCode, controlId: controlId },
-        include: [{ model: Account, include: [{ model: AccountType }] }]
-    }
-    ).then((collections) => {
-
-
-        
-        importCtrl.statusId = ImportCollectionStatus.eStatus.get('completed').value;
+        let importCtrl = await CollectionImportControl.findByPk(controlId, { include: [{ model: User }] });
+        importCtrl.statusId = ImportCollectionStatus.eStatus.get('processing').value;
         importCtrl.save()
 
-        res.redirect('/incomes/collections/client/' + clientId)
-    });
+        const client = await Client.findByPk(clientId);
+
+        const collections = await CollectionImport.findAll({
+            where: { clientCode: client.internalCode, controlId: controlId },
+            include: [{ model: Account, include: [{ model: AccountType }] }]
+        });
+
+        const billingPeriod = await BillingPeriod.findOne({
+            where: { clientId: clientId, statusId: 1 },
+            attributes: ['id']
+        });
+
+        for (index = 0; index < collections.length; index++) {
+
+            const importCollection = collections[index];
+
+            const property = await HomeOwner.findOne({
+                where: { clientId: client.id, property: `${importCollection.propertyType}${importCollection.property}` }
+            })
+
+            let collection = {
+                clientId: client.id,
+                periodId: billingPeriod.id,
+                propertyId: property.id,
+                receiptDate: importCollection.date,
+                receiptNumber: 0,
+                batchNumber: importCtrl.id,
+                amountConcepts: importCollection.amount,
+                amountSecurities: importCollection.amount,
+                securityCode: uuidv4(),
+                comments: 'importación automática de cobranza',
+                statusId: CollectionStatus.eStatus.get('pending').value,
+                userId: req.user.id
+            };
+
+            collection = await Collection.create(collection)
+
+            let collectionConcept = {
+                collectionId: collection.id,
+                type: importCollection.conceptType,
+                description: importCollection.conceptDesc,
+                amount: importCollection.amount,
+                userId: req.user.id
+            };
+
+            collectionConcept = await CollectionConcept.create(collectionConcept)
+
+            let collectionSecurity = {
+                collectionId: collection.id,
+                type: importCollection.valueType,
+                description: importCollection.valueDesc,
+                accountId: importCollection.accountId,
+                checkId: null,
+                amount: importCollection.amount,
+                userId: req.user.id
+            };
+
+            collectionSecurity = await CollectionSecurity.create(collectionSecurity);
+
+            let receiptNumber = await db.sequelize.query(`SELECT nextval('${clientId}','C') as "nextval"`, { type: QueryTypes.SELECT });
+
+            receiptNumber = receiptNumber[0].nextval;
+
+            collection.update({
+                receiptNumber: receiptNumber,
+                statusId: CollectionStatus.eStatus.get('processed').value,
+            });
+
+        }
+        importCtrl.statusId = ImportCollectionStatus.eStatus.get('completed').value;
+        await importCtrl.save();
+
+        resolve();
+    })
+        .then((resolve) => { })
+        .catch((err) => {
+            winston.error(`An error ocurred processing the imported sessions for client id #${clientId} - ${err} `)
+        });
+
+    res.redirect(`/incomes/collections/import/wait/${clientId}?controlId=${controlId}`);
 }
 
 //AJAX

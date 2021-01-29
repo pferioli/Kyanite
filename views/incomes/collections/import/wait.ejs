@@ -81,11 +81,11 @@
         }
     }
 
-    //{ 'stopped': 0, 'started': 1, 'inprogress': 2, 'completed': 3, 'failed': 4, 'cancelled': 5 }
+    //return new Enum({ 'stopped': 0, 'started': 1, 'importing': 2, 'processing': 3, 'completed': 4, 'failed': 5, 'cancelled': 6 })
 
     function checkImportStatus(clientId, controlId){
 
-        const STATUS_STARTED = 1; const STATUS_INPROGRESS = 2; const STATUS_FAILED = 4;
+        const STATUS_STARTED = 1; const STATUS_IMPORTING = 2; const STATUS_PROCESSING = 3; const STATUS_COMPLETED = 4; const STATUS_FAILED = 5;
 
         fetch(`/incomes/collections/import/status/${controlId}`)
             .then(response => {
@@ -98,11 +98,13 @@
             .then(response => {
                 const importControl = JSON.parse(response);
 
-                if(importControl.statusId === STATUS_STARTED) {
+                if((importControl.statusId === STATUS_STARTED) || (importControl.statusId === STATUS_PROCESSING)){
                     document.getElementById('lastUpdate').textContent = 'Ejecucion en proceso (' + importControl.statusId  + ') / Ultima actualizacion ' + Date();
                     enableAutoRefresh();
-                } else if(importControl.statusId === STATUS_INPROGRESS) {
+                } else if(importControl.statusId === STATUS_IMPORTING) {
                     window.location.href = `/incomes/collections/import/show/${clientId}?controlId=${controlId}`;
+                } else if(importControl.statusId === STATUS_COMPLETED) {
+                    window.location.href = `/incomes/collections/client/${clientId}`;
                 } else if (importControl.statusId === STATUS_FAILED) {
                     document.getElementById('button-cancel').style.visibility = 'hidden';
                     showErrorModal();
