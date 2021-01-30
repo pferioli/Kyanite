@@ -538,87 +538,102 @@ module.exports.addNewImportedCollections = async function (req, res) {
 
     let promise = new Promise(async function (resolve, reject) {
 
+        winston.info(`starting processing stage to register collections into db for client #${clientId}`);
+
         let importCtrl = await CollectionImportControl.findByPk(controlId, { include: [{ model: User }] });
         importCtrl.statusId = ImportCollectionStatus.eStatus.get('processing').value;
         importCtrl.save()
 
-        const client = await Client.findByPk(clientId);
+        winston.info(`gathering client, periods and collections for controlId #${controlId}`);
 
-        const collections = await CollectionImport.findAll({
-            where: { clientCode: client.internalCode, controlId: controlId },
-            include: [{ model: Account, include: [{ model: AccountType }] }]
-        });
+        const client = await Client.findByPk(clientId);
 
         const billingPeriod = await BillingPeriod.findOne({
             where: { clientId: clientId, statusId: 1 },
             attributes: ['id']
         });
 
-        for (index = 0; index < collections.length; index++) {
+        const collections = await CollectionImport.findAll({
+            where: { clientCode: client.internalCode, controlId: controlId },
+            include: [{ model: Account, include: [{ model: AccountType }] }]
+        });
 
-            const importCollection = collections[index];
+        try {
 
-            const property = await HomeOwner.findOne({
-                where: { clientId: client.id, property: `${importCollection.propertyType}${importCollection.property}` }
-            })
+            winston.info(`parsing ${collections.length} imported-collections into collections table for controlId #${controlId}`);
 
-            let collection = {
-                clientId: client.id,
-                periodId: billingPeriod.id,
-                propertyId: property.id,
-                receiptDate: importCollection.date,
-                receiptNumber: 0,
-                batchNumber: importCtrl.id,
-                amountConcepts: importCollection.amount,
-                amountSecurities: importCollection.amount,
-                securityCode: uuidv4(),
-                comments: 'importación automática de cobranza',
-                statusId: CollectionStatus.eStatus.get('pending').value,
-                userId: req.user.id
-            };
+            for (index = 0; index < collections.length; index++) {
 
-            collection = await Collection.create(collection)
+                const importCollection = collections[index];
 
-            let collectionConcept = {
-                collectionId: collection.id,
-                type: importCollection.conceptType,
-                description: importCollection.conceptDesc,
-                amount: importCollection.amount,
-                userId: req.user.id
-            };
+                const property = await HomeOwner.findOne({
+                    where: { clientId: client.id, property: `${importCollection.propertyType}${importCollection.property}` }
+                })
 
-            collectionConcept = await CollectionConcept.create(collectionConcept)
+                let collection = {
+                    clientId: client.id,
+                    periodId: billingPeriod.id,
+                    propertyId: property.id,
+                    receiptDate: importCollection.date,
+                    receiptNumber: 0,
+                    batchNumber: importCtrl.id,
+                    amountConcepts: importCollection.amount,
+                    amountSecurities: importCollection.amount,
+                    securityCode: uuidv4(),
+                    comments: 'importación automática de cobranza',
+                    statusId: CollectionStatus.eStatus.get('pending').value,
+                    userId: req.user.id
+                };
 
-            let collectionSecurity = {
-                collectionId: collection.id,
-                type: importCollection.valueType,
-                description: importCollection.valueDesc,
-                accountId: importCollection.accountId,
-                checkId: null,
-                amount: importCollection.amount,
-                userId: req.user.id
-            };
+                collection = await Collection.create(collection)
 
-            collectionSecurity = await CollectionSecurity.create(collectionSecurity);
+                let collectionConcept = {
+                    collectionId: collection.id,
+                    type: importCollection.conceptType,
+                    description: importCollection.conceptDesc,
+                    amount: importCollection.amount,
+                    userId: req.user.id
+                };
 
-            let receiptNumber = await db.sequelize.query(`SELECT nextval('${clientId}','C') as "nextval"`, { type: QueryTypes.SELECT });
+                collectionConcept = await CollectionConcept.create(collectionConcept)
 
-            receiptNumber = receiptNumber[0].nextval;
+                let collectionSecurity = {
+                    collectionId: collection.id,
+                    type: importCollection.valueType,
+                    description: importCollection.valueDesc,
+                    accountId: importCollection.accountId,
+                    checkId: null,
+                    amount: importCollection.amount,
+                    userId: req.user.id
+                };
 
-            collection.update({
-                receiptNumber: receiptNumber,
-                statusId: CollectionStatus.eStatus.get('processed').value,
-            });
+                collectionSecurity = await CollectionSecurity.create(collectionSecurity);
 
+                let receiptNumber = await db.sequelize.query(`SELECT nextval('${clientId}','C') as "nextval"`, { type: QueryTypes.SELECT });
+
+                receiptNumber = receiptNumber[0].nextval;
+
+                await collection.update({
+                    receiptNumber: receiptNumber,
+                    statusId: CollectionStatus.eStatus.get('processed').value,
+                });
+
+            }
+
+        } catch (error) {
+            winston.error(`an error ocurred trying to insert imported collections into db - ${err} `);
+        } finally {
+            importCtrl.statusId = ImportCollectionStatus.eStatus.get('completed').value;
+            await importCtrl.save();
         }
-        importCtrl.statusId = ImportCollectionStatus.eStatus.get('completed').value;
-        await importCtrl.save();
 
         resolve();
     })
-        .then((resolve) => { })
+        .then((resolve) => {
+            winston.info(`the import process finished for controlId #${controlId}`);
+        })
         .catch((err) => {
-            winston.error(`An error ocurred processing the imported sessions for client id #${clientId} - ${err} `)
+            winston.error(`An error ocurred processing imported collections - ${err}`)
         });
 
     res.redirect(`/incomes/collections/import/wait/${clientId}?controlId=${controlId}`);

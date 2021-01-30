@@ -66,7 +66,7 @@ async function writeFileToGCS(req, gcsFileName, gcsBucketName) {
     });
 };
 
-async function readFileFromGCS(gcsFileName, gcsBucketName) {
+async function readCollectionsFileFromGCS(gcsFileName, gcsBucketName) {
 
     let results = []; const csv = require('csv-parser')
 
@@ -116,9 +116,58 @@ async function readFileFromGCS(gcsFileName, gcsBucketName) {
     });
 }
 
+async function readPropertyFileFromGCS(gcsFileName, gcsBucketName) {
 
+    let results = []; const csv = require('csv-parser')
+
+    const GCLOUD_STORAGE_BUCKET = gcsBucketName;
+
+    const bucket = storage.bucket(GCLOUD_STORAGE_BUCKET);
+
+    const file = bucket.file(gcsFileName);
+
+    return finish = new Promise(function (resolve, reject) {
+
+        const stripBom = require('strip-bom-stream');
+
+        const stream = file.createReadStream()
+            .pipe(stripBom())
+            .pipe(csv(
+                {
+                    separator: ";",
+                    mapHeaders: ({ header, index }) => {
+
+                        switch (header.toLowerCase()) {
+                            case 'fecha': { return "date" };
+                            case 'codigo': { return "clientCode" };
+                            case 'tipo': { return "propertyType" };
+                            case 'propiedad': { return "property" };
+                            case 'cuenta': { return "accountId" };
+                            case 'concepto': { return "concept" };
+                            case 'valores': { return "value" };
+                            case 'importe': { return "amount" };
+                        }
+                    }
+                }));
+
+        stream.on('data', (data) => {
+            results.push(data)
+        })
+        stream.on('end', () => {
+            resolve(results)
+        });
+        stream.on('error', (err) => {
+            reject(err);
+        })
+
+        setTimeout(() => {
+            stream.emit('end');
+        }, 30 * 1000);
+    });
+}
 module.exports = {
     multer,
     sendUploadToGCS: writeFileToGCS,
-    readFileFromGCS
+    readCollectionsFileFromGCS: readCollectionsFileFromGCS,
+    readPropertyFileFromGCS: readPropertyFileFromGCS
 };
