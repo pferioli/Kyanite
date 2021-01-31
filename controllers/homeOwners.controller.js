@@ -1,14 +1,19 @@
 const Model = require('../models')
 const Client = Model.client;
 const HomeOwner = Model.homeOwner;
+const Notification = Model.notification;
 
-const gcs = require('../helpers/gcs.helper');
+const gcs = require('../helpers/gcs.helper'); module.exports = { gcs };
+
+const path = require("path");
+
+const { v4: uuidv4 } = require('uuid');
 
 const winston = require('../helpers/winston.helper');
 
-module.exports = { gcs };
+const CURRENT_MENU = 'homeOwners'; const CURRENT_MENU_IMPORT = CURRENT_MENU + '_import';
 
-const CURRENT_MENU = 'homeOwners'; module.exports.CURRENT_MENU = CURRENT_MENU;
+module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = async function (req, res, next) {
 
@@ -282,6 +287,98 @@ module.exports.history = async function (req, res, next) {
     res.render('homeOwners/history.ejs', { menu: CURRENT_MENU, data: { property: currentHomeOwner.property, client: currentHomeOwner.client, homeOwners: historyHomeOwners } })
 };
 
+//-------------------- IMPORT --------------------//
+
+module.exports.showUploadForm = async function (req, res) {
+
+    const clientId = req.params.clientId;
+    const client = await Client.findByPk(clientId);
+
+    res.render("homeOwners/import/upload", { menu: CURRENT_MENU_IMPORT, data: { client } });
+};
+
+module.exports.importHomeOwners = async function (req, res) {
+
+    const moment = require('moment');
+
+    const clientId = req.body.clientId || req.params.clientId;
+
+    if (!req.file) {
+        req.flash("warning", "No se encontro ningun archivo con datos para hacer la importación");
+        res.redirect(`/homeOwners/import/new/${clientId}`);
+        return;
+    }
+
+    if (path.extname(req.file.originalname) != '.csv') {
+        req.flash("error", "El formato del archivo seleccionado no corresponde, debe ser del tipo CSV (codificación UTF-8)");
+        res.redirect(`/homeOwners/import/new/${clientId}`);
+        return;
+    }
+
+    winston.info(`beginning the homeOwners import from file ${req.file.originalname} for client #${clientId} on user #${req.user.id} request`);
+
+    const filename = uuidv4();
+
+    const gcsFileName = `homeOwners/${filename}.csv`; //${Date.now()}-${req.file.originalname}
+
+    const gcsBucketName = `${process.env.GOOGLE_CLOUD_PROJECT}_bucket_temp`;
+
+    winston.info(`uploading file ${req.file.originalname} to GSC as ${gcsFileName} in bucket ${gcsBucketName}`);
+
+    gcs.sendUploadToGCS(req, gcsFileName, gcsBucketName)
+        .then(writeResult => {
+
+            gcs.readPropertyFileFromGCS(gcsFileName, gcsBucketName)
+                .then(async (readResult) => {
+
+                    for (index = 0; index < readResult.length; index++) {
+
+                        try {
+
+                            let homeOwner = {
+                                clientId: clientId,
+                                property: (readResult[index].property.toUpperCase().startsWith('UF'), readResult[index].property.toUpperCase(), 'UF' + readResult[index].property),
+                                name: readResult[index].name,
+                                phone: (readResult[index].phone, readResult[index].phone, null),
+                                email: (readResult[index].email, readResult[index].email, null),
+                                cuil: (readResult[index].cuil, readResult[index].cuil, null),
+                                comments: (readResult[index].comments, readResult[index].comments, null),
+                                coefficient: readResult[index].coefficient.replace(",", '.'),
+                                createdBy: req.user.id
+                            }
+
+                            homeOwner = await HomeOwner.create(homeOwner)
+
+                        } catch (error) {
+                            winston.error(`An error ocurred while inserting the record #${index} into homeOwners table - ${err}`)
+                        }
+                    }
+
+                    return index;
+
+                })
+                .catch((err) => {
+                    winston.error(`An error ocurred while reading the the collections file ${gcsFileName} from bucket ${gcsBucketName} - ${err} `)
+                })
+                .finally((resolve) => {
+                    Notification.create({
+                        type: 0,
+                        severity: 3,
+                        user: req.user.id,
+                        description: 'el proceso de importacion de usuarios finalizo',
+                        enabled: true
+                    })
+
+                    console.log("proceso finalizado")
+                });
+        })
+        .catch((err) => {
+            winston.error(`An error ocurred while writing the the import file ${gcsFileName} from bucket ${gcsBucketName} - ${err} `)
+        });
+
+    req.flash("success", "el proceso de carga puede demorar, se le notificará cuando el proceso este completo");
+    res.redirect(`/homeOwners/client/${clientId}`);
+}
 
 //------------------ AJAX CALLS ------------------//
 

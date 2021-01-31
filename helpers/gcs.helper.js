@@ -138,14 +138,13 @@ async function readPropertyFileFromGCS(gcsFileName, gcsBucketName) {
                     mapHeaders: ({ header, index }) => {
 
                         switch (header.toLowerCase()) {
-                            case 'fecha': { return "date" };
-                            case 'codigo': { return "clientCode" };
-                            case 'tipo': { return "propertyType" };
                             case 'propiedad': { return "property" };
-                            case 'cuenta': { return "accountId" };
-                            case 'concepto': { return "concept" };
-                            case 'valores': { return "value" };
-                            case 'importe': { return "amount" };
+                            case 'propietario': { return "name" };
+                            case 'coeficiente': { return "coefficient" };
+                            case 'telefono': { return "phone" };
+                            case 'correo': { return "email" };
+                            case 'cuil': { return "cuil" };
+                            case 'comentarios': { return "comments" };                            
                         }
                     }
                 }));

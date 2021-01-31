@@ -367,19 +367,19 @@ module.exports.importCollections = async function (req, res) {
             gcs.sendUploadToGCS(req, gcsFileName, gcsBucketName)
                 .then(writeResult => {
 
-                    gcs.readFileFromGCS(gcsFileName, gcsBucketName)
+                    gcs.readCollectionsFileFromGCS(gcsFileName, gcsBucketName)
                         .then(async (readResult) => {
 
                             let accountCache = [];
 
-                            for (i = 0; i < readResult.length; i++) {
+                            for (index = 0; index < readResult.length; index++) {
 
                                 //Implementacion de un cache para el accountID
 
                                 let valueType = 'DC';
 
                                 let accountItem = await accountCache.find(async function (item) {
-                                    return item.id === readResult[i].accountId;
+                                    return item.id === readResult[index].accountId;
                                 });
 
                                 try {
@@ -388,7 +388,7 @@ module.exports.importCollections = async function (req, res) {
                                         valueType = accountItem.valueType;
                                     } else {
 
-                                        const account = await Account.findByPk(readResult[i].accountId,
+                                        const account = await Account.findByPk(readResult[index].accountId,
                                             { include: [{ model: AccountType }] });
 
                                         if (account.accountType.account === 'CMN') {
@@ -408,16 +408,16 @@ module.exports.importCollections = async function (req, res) {
                                 try {
 
                                     collection = await CollectionImport.create({
-                                        clientCode: readResult[i].clientCode.toUpperCase(),
-                                        propertyType: readResult[i].propertyType.toUpperCase(),
-                                        property: readResult[i].property,
-                                        accountId: readResult[i].accountId,
+                                        clientCode: readResult[index].clientCode.toUpperCase(),
+                                        propertyType: readResult[index].propertyType.toUpperCase(),
+                                        property: readResult[index].property,
+                                        accountId: readResult[index].accountId,
                                         conceptType: "IM",
-                                        conceptDesc: readResult[i].concept,
+                                        conceptDesc: readResult[index].concept,
                                         valueType: valueType,
-                                        valueDesc: readResult[i].value,
-                                        amount: readResult[i].amount.replace(".", '').replace(",", '.'),
-                                        date: moment(readResult[i].date, "DD/MM/YYYY").toDate(),
+                                        valueDesc: readResult[index].value,
+                                        amount: readResult[index].amount.replace(".", '').replace(",", '.'),
+                                        date: moment(readResult[index].date, "DD/MM/YYYY").toDate(),
                                         controlId: importCtrl.id
                                     });
 

@@ -48,8 +48,18 @@ router.post("/edit", function (req, res, next) {
     homeOwnersController.edit(req, res);
 });
 
+router.get("/import/new/:clientId", function (req, res, next) {
+    homeOwnersController.showUploadForm(req, res);
+});
+
+router.post("/import/new/:clientId", [homeOwnersController.gcs.multer.single('attachment')],
+    function (req, res, next) {
+        homeOwnersController.importHomeOwners(req, res);
+    });
+
 router.get("/getByClient/:clientId", function (req, res, next) {
     homeOwnersController.getHomeOwnersByClient(req, res);
 });
+
 
 module.exports = router;
