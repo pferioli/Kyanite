@@ -1,0 +1,171 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
+    
+    <div class="table-container" style="margin-top: 50px;">
+        <div class="table-header">
+            <span class="table-title">Notificaciones</span>
+            <div class="actions">
+                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <button id="button-ackAll" onClick="clearAllAlerts();" class="waves-effect btn-flat nopadding"><i class="material-icons">done_all</i></button>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
+        </div>
+
+        <div>
+            <table id="datatable" class="table display">    
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Severidad</th>
+                        <th>Descripcion</th>
+                        <th>Fecha</th>                                    
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < data.notifications.length; i++) { %>
+                        <tr data-id="<%= data.notifications[i].id %>">
+                            <td><%= data.notifications[i].typeMessage %></td>
+                            <td>
+                                <% if(data.notifications[i].severity === 1) { %>
+                                    <i class="material-icons red-text">error</i>
+                                <% } %>
+                                
+                                <% if(data.notifications[i].severity === 2) { %>
+                                    <i class="material-icons amber-text">warning</i>
+                                <% } %>
+
+                                <% if(data.notifications[i].severity === 3) { %>
+                                    <i class="material-icons purple-text">warning_amber</i>
+                                <% } %>
+
+                                <% if(data.notifications[i].severity === 4) { %>
+                                    <i class="material-icons blue-text">notification_important</i>
+                                <% } %>
+                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.notifications[i].severityMessage %></span>
+                                
+                            </td>
+
+                            <td><%= data.notifications[i].description %></td>
+                            <td><%= data.notifications[i].createdAt %></td>
+                            <td>
+                                <button id="button-ack" onClick='ackAlert("<%= data.notifications[i].id %>")' class="waves-effect btn-flat nopadding"><i class="material-icons">done</i></button>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    
+    </div>
+
+</main>
+
+<%- include ("../partials/footer") %>
+
+<script>
+    
+       document.addEventListener("DOMContentLoaded", function () {
+
+        checkNotifications();
+
+        //notificationsTimerStart();
+    });
+
+    function ackAlert(alertId){
+
+        const data = { alertId: alertId };
+
+        fetch('/notifications/ack', {
+            method: 'POST', // or 'PUT'
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        })
+        .then((response) => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+        })
+        .catch((error) => {
+             console.error('Error:', error);
+        });
+    }
+
+    function clearAllAlerts() {
+
+        fetch('/notifications/clearAll', {
+            method: 'POST', // or 'PUT'
+        })
+        .then((response) => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+        })
+        .catch((error) => {
+             console.error('Error:', error);
+        });
+    }
+
+    $(document).ready(function () {
+
+        $('.search-toggle').click(function () {
+            if ($('.hiddensearch').css('display') == 'none')
+                $('.hiddensearch').slideDown();
+            else
+                $('.hiddensearch').slideUp();
+        });
+
+        var table = $('#datatable').dataTable({
+            dom: "<'hiddensearch'f'>tr<'table-footer'lip'>",
+            oLanguage: {
+                sSearch: '',
+                sSearchPlaceholder: 'Escriba aqui su búsqueda',
+                sInfo: '_START_ -_END_ de _TOTAL_',
+                sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+                    '<option value="20">20</option>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select></div>'
+            },
+            columnDefs: [
+                {
+                    className: "center-align",
+                    targets: [0, 1]
+                }, 
+                {
+                    targets: 2,
+                    visible: true,
+                    searchable: false,
+                    render: $.fn.dataTable.render.ellipsis(256, true),
+                    width: "50%"
+
+                },
+                {
+                    className: "center-align",
+                    targets: 3,
+                },
+                {
+                    targets: 4,
+                    searchable: false,
+                    sortable: false,
+                    className: "left-align",
+                },                                                
+            ],
+            colReorder: true,
+            fixedColumns: { leftColumns: 1 },
+            pageLength: 200,
+            order: [[0, 'asc']],
+            autowidth: true,
+            scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
+            paging: true,
+        });
+    });
+</script>

@@ -15,6 +15,8 @@ const CURRENT_MENU = 'homeOwners'; const CURRENT_MENU_IMPORT = CURRENT_MENU + '_
 
 module.exports.CURRENT_MENU = CURRENT_MENU;
 
+const NotificationUtils = require('../utils/notifications.util').notifications;
+
 module.exports.listAll = async function (req, res, next) {
 
     const clientId = req.params.clientId;
@@ -299,8 +301,6 @@ module.exports.showUploadForm = async function (req, res) {
 
 module.exports.importHomeOwners = async function (req, res) {
 
-    const moment = require('moment');
-
     const clientId = req.body.clientId || req.params.clientId;
 
     if (!req.file) {
@@ -325,6 +325,10 @@ module.exports.importHomeOwners = async function (req, res) {
 
     winston.info(`uploading file ${req.file.originalname} to GSC as ${gcsFileName} in bucket ${gcsBucketName}`);
 
+    const client = await Client.findByPk(clientId);
+
+    let regCounter = 0;
+
     gcs.sendUploadToGCS(req, gcsFileName, gcsBucketName)
         .then(writeResult => {
 
@@ -339,15 +343,17 @@ module.exports.importHomeOwners = async function (req, res) {
                                 clientId: clientId,
                                 property: (readResult[index].property.toUpperCase().startsWith('UF'), readResult[index].property.toUpperCase(), 'UF' + readResult[index].property),
                                 name: readResult[index].name,
-                                phone: (readResult[index].phone, readResult[index].phone, null),
-                                email: (readResult[index].email, readResult[index].email, null),
-                                cuil: (readResult[index].cuil, readResult[index].cuil, null),
-                                comments: (readResult[index].comments, readResult[index].comments, null),
+                                phone: (readResult[index].phone ? readResult[index].phone : null),
+                                email: (readResult[index].email ? readResult[index].email : null),
+                                cuil: (readResult[index].cuil ? readResult[index].cuil : null),
+                                comments: (readResult[index].comments ? readResult[index].comments : null),
                                 coefficient: readResult[index].coefficient.replace(",", '.'),
                                 createdBy: req.user.id
                             }
 
                             homeOwner = await HomeOwner.create(homeOwner)
+
+                            regCounter++;
 
                         } catch (error) {
                             winston.error(`An error ocurred while inserting the record #${index} into homeOwners table - ${err}`)
@@ -362,10 +368,10 @@ module.exports.importHomeOwners = async function (req, res) {
                 })
                 .finally((resolve) => {
                     Notification.create({
-                        type: 0,
-                        severity: 3,
+                        type: NotificationUtils.eType.get('homeOwners').value,
+                        severity: NotificationUtils.eSeverity.get('warning').value,
                         user: req.user.id,
-                        description: 'el proceso de importacion de usuarios finalizo',
+                        description: `el proceso de importacion de propietarios para el barrio ${client.internalCode} ha finalizado (${regCounter} registros)`,
                         enabled: true
                     })
 

@@ -28,6 +28,7 @@ app.use(favicon(path.join(__dirname, "public", "images", "favicon.ico")));
 app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+//app.disable('view cache');
 
 app.use(morgan('combined', { stream: winston.stream.write }));
 

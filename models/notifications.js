@@ -2,6 +2,9 @@
 const {
   Model
 } = require('sequelize');
+
+const notification = require('../utils/notifications.util').notifications;
+
 module.exports = (sequelize, DataTypes) => {
   class Notification extends Model {
     /**
@@ -24,21 +27,37 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    typeMessage: {
+      type: new DataTypes.VIRTUAL(DataTypes.STRING, ['type']),
+      get: function () {
+        return notification.Type[this.get('type')];
+      }
+    },
     severity: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    severityMessage: {
+      type: new DataTypes.VIRTUAL(DataTypes.STRING, ['severity']),
+      get: function () {
+        return notification.Severity[this.get('severity')];
+      }
     },
     user: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT('tiny'),
       allowNull: false
     },
     enabled: {
       type: DataTypes.BOOLEAN,
       allowNull: false
+    },
+    ackBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     },
   }, {
     sequelize,

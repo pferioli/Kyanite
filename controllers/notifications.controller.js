@@ -3,6 +3,12 @@ const Model = require('../models')
 const Notification = Model.notification;
 const sequelize = require('sequelize');
 
+const winston = require('../helpers/winston.helper');
+
+const CURRENT_MENU = 'notifications'; module.exports.CURRENT_MENU = CURRENT_MENU;
+
+const NotificationUtils = require('../utils/notifications.util').notifications;
+
 // module.exports.findPendings = async function (req, res) {
 
 //     const notifications = await Notification.findAll(
@@ -20,21 +26,98 @@ const sequelize = require('sequelize');
 //     );
 // }
 
-module.exports.findPendings = async function (req, res) {
+module.exports.findPendings = function (req, res) {
 
     const userid = req.params.id;
 
-    const notifications = await Notification.findAll({
+    Notification.findAll({
+        where: {
+            enabled: true,
+            [Op.or]: [
+                { user: userid }, { user: 0 }
+            ]
+        },
         //group: ['severity'],
         attributes: [
             [sequelize.fn('min', sequelize.col('severity')), 'lowestSeverity'],
             [sequelize.fn('count', sequelize.col('severity')), 'sevCount']
         ]
-    });
-    res.send(
-        notifications[0]
-    );
+    })
+        .then((notifications) => {
+            res.send(notifications[0]);
+        })
+        .catch((err) => { res.sendStatus(500).send(err) })
 }
+
+module.exports.notifications = function (req, res) {
+
+    const userid = req.user.id;
+
+    Notification.findAll(
+        {
+            where: {
+                user: { [Op.in]: [0, userid] },
+                enabled: true
+            }
+        })
+        .then((notifications) => {
+            res.setHeader('Cache-Control', 'no-cache');
+            res.render('notifications/notifications', { menu: CURRENT_MENU, data: { notifications } });
+        })
+}
+
+module.exports.ackNotification = function (req, res) {
+
+    const alertId = req.body.alertId;
+
+    Notification.findByPk(alertId)
+        .then((notification) => {
+            notification.update({ ackBy: req.user.id, enabled: false })
+                .then(() => {
+                    winston.info(`Alert id #${alertId} was acked by user ${req.user.id}`)
+                })
+                .catch((err) => {
+                    winston.error(`Alert id #${alertId} was not acked by user ${req.user.id} - ${err}`)
+                    req.flash("error", `No se pudo borrar la alerta, por favor avisar al administrador si aún sigue activa`)
+                })
+                .finally(() => {
+                    res.redirect('/notifications/show');
+                })
+        })
+        .catch((err) => {
+            winston.error(`Alert id #${alertId} was not acked by user ${req.user.id} - ${err}`)
+            req.flash("error", `No se pudo borrar la alerta, por favor avisar al administrador si aún sigue activa`)
+            res.redirect('/notifications/show/' + req.user.id);
+        })
+}
+
+module.exports.clearNotifications = function (req, res) {
+
+    Notification.update(
+        { ackBy: req.user.id, enabled: false },
+        {
+            where: {
+                user: {
+                    [Op.in]: [0, req.user.id]
+                }
+            }
+        }
+    )
+        .then((results) => {
+            winston.info(`${results.length} alerts were cleared by user ${req.user.id}`)
+        })
+        .catch((err) => {
+            winston.error(`Active alerts for user ${req.user.id} could not be cleared - ${err}`)
+            req.flash("error", `No se pudieron borrar las alertas activas, por favor avisar al administrador si aún continuan`)
+        })
+        .finally(() => {
+            res.redirect('/notifications/show');
+        })
+}
+
+
+
+
 
 
 
