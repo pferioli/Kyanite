@@ -11,18 +11,37 @@ router.post("/", function (req, res, next) {
     paymentReceiptsController.listAll(req, res);
 });
 
-router.get("/info/:clientId", function (req, res, next) {
-});
-
-router.get('/new/:clientId', function (req, res, next) {
+router.get('/client/:clientId/new', function (req, res, next) {
     paymentReceiptsController.showNewForm(req, res);
 })
 
-router.post('/new/:clientId', [paymentReceiptsController.gcs.multer.single('attachment')],
+router.post('/client/:clientId/new', [paymentReceiptsController.gcs.multer.single('attachment')],
     function (req, res, next) {
         paymentReceiptsController.addNew(req, res, next);
     },
 );
+
+router.get("/createPaymentOrder/:receiptId", function (req, res, next) {
+    paymentReceiptsController.showNewPOForm(req, res);
+});
+
+router.post("/createPaymentOrder/:receiptId", function (req, res, next) {
+});
+
+router.get("/info/:receiptId", function (req, res, next) {
+});
+
+router.get("/delete/:receiptId", function (req, res, next) {
+});
+
+router.get("/download/:receiptId", function (req, res, next) {
+});
+
+router.get("/client/:clientId", function (req, res, next) {
+    paymentReceiptsController.listAll(req, res);
+});
+
+//AJAX Calls
 
 router.get("/types", function (req, res, next) {
     paymentReceiptsController.receiptTypes(req, res);
@@ -33,8 +52,5 @@ router.get("/types/:id", function (req, res, next) {
 
 });
 
-router.get("/:clientId", function (req, res, next) {
-    paymentReceiptsController.listAll(req, res);
-});
 
 module.exports = router;

@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             type: DataTypes.INTEGER
         },
-        paymentOrderId: {
+        supplierId: {
             allowNull: true,
             type: DataTypes.INTEGER
         },

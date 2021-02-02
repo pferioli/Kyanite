@@ -34,6 +34,8 @@ const ImportCollectionStatus = require('../utils/statusMessages.util').ImportCol
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 
+const Notifications = require('../utils/notifications.util');
+
 module.exports.listAll = async function (req, res) {
 
     const clientId = req.body.clientId || req.params.clientId;
@@ -346,6 +348,8 @@ module.exports.importCollections = async function (req, res) {
         winston.error(`An error ocurred while creating the import control register - ${err} `)
     }
 
+    const client = await Client.findByPk(clientId);
+
     winston.info(`truncating collections_temp table`);
 
     CollectionImport.destroy({ truncate: true, cascade: false })
@@ -452,7 +456,11 @@ module.exports.importCollections = async function (req, res) {
                                     importCtrl.finishedAt = Date.now();
                                     importCtrl.statusId = (totalRows === importedRows ?
                                         ImportCollectionStatus.eStatus.get('importing').value : ImportCollectionStatus.eStatus.get('failed').value);
-                                    importCtrl.save()
+                                    importCtrl.save();
+
+                                    winston.info(`the collections temp-import from file ${gcsFileName} requested by user #${req.user.id} finished (total ${importedRows} records)`);
+
+                                    (new Notifications).warning('collections', `el proceso de importacion temporal de cobranzas para el barrio ${client.internalCode} ha finalizado (${importedRows} registros)`, req.user.id)
                                 })
                         })
                 })
@@ -536,6 +544,10 @@ module.exports.addNewImportedCollections = async function (req, res) {
 
     const controlId = req.body.controlId || req.params.controlId || req.query.controlId;
 
+    let importedRows = 0;
+
+    const client = await Client.findByPk(clientId);
+
     let promise = new Promise(async function (resolve, reject) {
 
         winston.info(`starting processing stage to register collections into db for client #${clientId}`);
@@ -545,8 +557,6 @@ module.exports.addNewImportedCollections = async function (req, res) {
         importCtrl.save()
 
         winston.info(`gathering client, periods and collections for controlId #${controlId}`);
-
-        const client = await Client.findByPk(clientId);
 
         const billingPeriod = await BillingPeriod.findOne({
             where: { clientId: clientId, statusId: 1 },
@@ -618,6 +628,7 @@ module.exports.addNewImportedCollections = async function (req, res) {
                     statusId: CollectionStatus.eStatus.get('processed').value,
                 });
 
+                importedRows++;
             }
 
         } catch (error) {
@@ -631,6 +642,11 @@ module.exports.addNewImportedCollections = async function (req, res) {
     })
         .then((resolve) => {
             winston.info(`the import process finished for controlId #${controlId}`);
+
+            (new Notifications).warning('collections',
+                `el proceso de importacion de cobranzas para el barrio ${client.internalCode} ha finalizado (${importedRows} registros)`,
+                req.user.id)
+
         })
         .catch((err) => {
             winston.error(`An error ocurred processing imported collections - ${err}`)

@@ -20,7 +20,8 @@
             <table id="datatable" class="table display">    
                 <thead>
                     <tr>
-                        <th>Tipo</th>
+                        <th>Categoría</th>
+                        <th>Destino</th>                        
                         <th>Severidad</th>
                         <th>Descripcion</th>
                         <th>Fecha</th>                                    
@@ -31,6 +32,13 @@
                     <% for(var i=0; i < data.notifications.length; i++) { %>
                         <tr data-id="<%= data.notifications[i].id %>">
                             <td><%= data.notifications[i].typeMessage %></td>
+                            <td>
+                                <% if(data.notifications[i].userId === 0) { %> 
+                                    <i class="material-icons">people</i>
+                                <% } else { %>
+                                    <i class="material-icons">person</i>
+                                <% } %>
+                            </td>
                             <td>
                                 <% if(data.notifications[i].severity === 1) { %>
                                     <i class="material-icons red-text">error</i>
@@ -47,7 +55,7 @@
                                 <% if(data.notifications[i].severity === 4) { %>
                                     <i class="material-icons blue-text">notification_important</i>
                                 <% } %>
-                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.notifications[i].severityMessage %></span>
+                                <span style="padding-left: 10px; vertical-align: 5px;"><%= data.notifications[i].severityMessage %></span>
                                 
                             </td>
 
@@ -136,10 +144,10 @@
             columnDefs: [
                 {
                     className: "center-align",
-                    targets: [0, 1]
+                    targets: [0, 1, 2]
                 }, 
                 {
-                    targets: 2,
+                    targets: 3,
                     visible: true,
                     searchable: false,
                     render: $.fn.dataTable.render.ellipsis(256, true),
@@ -148,10 +156,10 @@
                 },
                 {
                     className: "center-align",
-                    targets: 3,
+                    targets: 4,
                 },
                 {
-                    targets: 4,
+                    targets: 5,
                     searchable: false,
                     sortable: false,
                     className: "left-align",
@@ -160,7 +168,7 @@
             colReorder: true,
             fixedColumns: { leftColumns: 1 },
             pageLength: 200,
-            order: [[0, 'asc']],
+            order: [[4, 'desc']],
             autowidth: true,
             scrollY: '500px',
             scrollX: true,

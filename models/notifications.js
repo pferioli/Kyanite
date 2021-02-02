@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 
-const notification = require('../utils/notifications.util').notifications;
+const NotificationEnums = require('../utils/notifications.util');
 
 module.exports = (sequelize, DataTypes) => {
   class Notification extends Model {
@@ -14,8 +14,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Notification.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
     }
   };
+
+
   Notification.init({
     id: {
       allowNull: false,
@@ -30,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     typeMessage: {
       type: new DataTypes.VIRTUAL(DataTypes.STRING, ['type']),
       get: function () {
-        return notification.Type[this.get('type')];
+        return new NotificationEnums().Type[this.get('type')];
       }
     },
     severity: {
@@ -40,10 +43,10 @@ module.exports = (sequelize, DataTypes) => {
     severityMessage: {
       type: new DataTypes.VIRTUAL(DataTypes.STRING, ['severity']),
       get: function () {
-        return notification.Severity[this.get('severity')];
+        return new NotificationEnums().Severity[this.get('severity')];
       }
     },
-    user: {
+    userId: {
       type: DataTypes.INTEGER,
       allowNull: false
     },

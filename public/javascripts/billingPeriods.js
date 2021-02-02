@@ -27,8 +27,10 @@ function getActiveBillingPeriod(clientId) {
                 billingPeriod.value = period.name
                 M.updateTextFields();
                 if (period.id) {
+
                     document.getElementById('add_button').disabled = false;
-                    document.getElementById('add_next_button').disabled = false;
+                    const add_next_button = document.getElementById('add_next_button')
+                    if (add_next_button) add_next_button.disabled = false;
                 }
             }
         })

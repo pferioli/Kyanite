@@ -33,8 +33,8 @@ router.post('/split/new/:checkId', function (req, res, next) {
     splittedChecksController.addNew(req, res);
 })
 
-router.get("/split/collections/:homeOwnerId", function (req, res, next) {
-    splittedChecksController.getCollectionChecks(req, res);
+router.get("/split/getAvailableChecks/:id", function (req, res, next) {
+    splittedChecksController.getSplittedChecks(req, res);
 });
 
 router.get("/new/:clientId", function (req, res, next) {

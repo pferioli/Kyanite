@@ -1,7 +1,6 @@
 const Model = require('../models')
 const Client = Model.client;
 const HomeOwner = Model.homeOwner;
-const Notification = Model.notification;
 
 const gcs = require('../helpers/gcs.helper'); module.exports = { gcs };
 
@@ -11,11 +10,9 @@ const { v4: uuidv4 } = require('uuid');
 
 const winston = require('../helpers/winston.helper');
 
-const CURRENT_MENU = 'homeOwners'; const CURRENT_MENU_IMPORT = CURRENT_MENU + '_import';
+const Notifications = require('../utils/notifications.util');
 
-module.exports.CURRENT_MENU = CURRENT_MENU;
-
-const NotificationUtils = require('../utils/notifications.util').notifications;
+const CURRENT_MENU = 'homeOwners'; const CURRENT_MENU_IMPORT = CURRENT_MENU + '_import'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = async function (req, res, next) {
 
@@ -105,7 +102,7 @@ module.exports.showEditForm = async function (req, res, next) {
 
         const homeOwner = await HomeOwner.findByPk(ownerId, { include: [{ model: Client }] });
 
-        res.render('homeOwners/edit.ejs', { menu: CURRENT_MENU, mode: mode, data: { homeOwner: homeOwner } })
+        res.render('homeOwners/edit.ejs', { menu: CURRENT_MENU, mode: mode, data: { homeOwner: homeOwner, client: homeOwner.client } })
 
     } catch (err) {
         req.flash(
@@ -133,6 +130,7 @@ async function update(req, res) {
 
     let homeOwner = await HomeOwner.findByPk(ownerId);
 
+    homeOwner.name = req.body.name;
     homeOwner.phone = req.body.phone;
     homeOwner.email = req.body.email;
     homeOwner.cuil = req.body.cuil;
@@ -367,15 +365,10 @@ module.exports.importHomeOwners = async function (req, res) {
                     winston.error(`An error ocurred while reading the the collections file ${gcsFileName} from bucket ${gcsBucketName} - ${err} `)
                 })
                 .finally((resolve) => {
-                    Notification.create({
-                        type: NotificationUtils.eType.get('homeOwners').value,
-                        severity: NotificationUtils.eSeverity.get('warning').value,
-                        user: req.user.id,
-                        description: `el proceso de importacion de propietarios para el barrio ${client.internalCode} ha finalizado (${regCounter} registros)`,
-                        enabled: true
-                    })
 
-                    console.log("proceso finalizado")
+                    (new Notifications).warning('homeOwners', `el proceso de importacion de propietarios para el barrio ${client.internalCode} ha finalizado (${regCounter} registros)`, req.user.id)
+
+                    winston.info(`the homeOwners and properties import from file ${gcsFileName} requested by user #${req.user.id} finished (total ${regCounter} records)`)
                 });
         })
         .catch((err) => {

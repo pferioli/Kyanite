@@ -79,8 +79,16 @@ module.exports.addNew = async function (req, res, next) {
 
         const homeOwnerId = req.body.homeOwnerId === '' ? null : req.body.homeOwnerId;
 
+        const supplierId = req.body.supplierId === '' ? null : req.body.supplierId;
+
         if ((req.body.splitType === 'I') && (homeOwnerId === null)) {
             req.flash("warning", 'debe seleccionar una propiedad para asignar el cheque parcial, imposible continuar');
+            res.redirect("/checks/split/" + checkId);
+            return;
+        }
+
+        if ((req.body.splitType === 'O') && (supplierId === null)) {
+            req.flash("warning", 'debe seleccionar un proveedor para asignar el cheque parcial, imposible continuar');
             res.redirect("/checks/split/" + checkId);
             return;
         }
@@ -90,12 +98,19 @@ module.exports.addNew = async function (req, res, next) {
             periodId: req.body.billingPeriodId,
             splitType: req.body.splitType,
             homeOwnerId: homeOwnerId,
-            paymentOrderId: null,
             amount: req.body.partialamount,
             comments: req.body.comments,
             statusId: SplitCheckStatus.eStatus.get('pending').value,
             userId: req.user.id
         }
+
+        if (req.body.splitType === 'I') {
+            check.homeOwnerId = homeOwnerId;
+        };
+
+        if (req.body.splitType === 'O') {
+            check.homeOwnerId = supplierId;
+        };
 
         CheckSplitted.create(check).
             then(function (result) {
@@ -157,20 +172,43 @@ async function calcRemainingBalance(checkId, splitType) {
     return remainingBalance;
 };
 
-module.exports.getCollectionChecks = async function (req, res, next) {
+module.exports.getSplittedChecks = async function (req, res, next) {
 
-    const homeOwnerId = req.params.homeOwnerId; const splitType = 'I';
+    const splitType = req.query.splitType;
 
     const statusId = req.query.statusId || req.body.statusId || "0,1,2";   // ?statusId=1,2
 
-    CheckSplitted.findAll({
-        where: { splitType: 'I', homeOwnerId: homeOwnerId, statusId: statusId.split(",") },
-        include: [
-            {
-                model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }]
-            },
-        ]
-    }).then(splittedChecks => {
+    let options = {}
+
+    if (splitType.toUpperCase() === 'I') {
+
+        const homeOwnerId = req.params.id;
+
+        options = {
+            where: { splitType: 'I', homeOwnerId: homeOwnerId, statusId: statusId.split(",") },
+            include: [
+                {
+                    model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }]
+                },
+            ]
+        }
+    } else if (splitType.toUpperCase() === 'O') {
+
+        const supplierId = req.params.id;
+
+        options = {
+            where: { splitType: 'O', supplierId: supplierId, statusId: statusId.split(",") },
+            include: [
+                {
+                    model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }]
+                },
+            ]
+        }
+    } else {
+        res.sendStatus(500); return;
+    }
+
+    CheckSplitted.findAll(options).then(splittedChecks => {
         res.send(splittedChecks)
     });
 }

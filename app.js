@@ -155,9 +155,9 @@ app.use('/checks', require('./routes/checks.route'));
 
 app.use('/movements', require('./routes/accountMovements.route'));
 
-app.use('/incomes', require('./routes/incomes.route'));
+app.use('/incomes/collections', require('./routes/incomes.collections.route'));
 
-app.use('/expenses/paymentReceipts', require('./routes/paymentReceipts.route'));
+app.use('/expenses/paymentReceipts', require('./routes/expenses.paymentReceipts.route'));
 
 app.use('/notifications', require('./routes/notifications.route'));
 

@@ -9,17 +9,18 @@ const PaymentReceiptImage = Model.paymentReceiptImage;
 const BillingPeriod = Model.billingPeriod;
 const AccountingImputation = Model.accountingImputation;
 const AccountingGroup = Model.accountingGroup;
+const Account = Model.account;
+const AccountType = Model.accountType;
+
 const User = Model.user;
 
-const gcs = require('../helpers/gcs.helper');
+const gcs = require('../helpers/gcs.helper'); module.exports = { gcs };
 
 const winston = require('../helpers/winston.helper');
 
 const { v4: uuidv4 } = require('uuid');
 
 const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_MENU;
-
-module.exports = { gcs };
 
 module.exports.listAll = async function (req, res) {
 
@@ -152,6 +153,20 @@ module.exports.addNew = async function (req, res, next) {
 
         .finally(() => { res.redirect('/expenses/paymentReceipts/' + clientId); });
 };
+
+module.exports.showNewPOForm = async function (req, res) {
+
+    const receiptId = req.params.receiptId;
+
+    const paymentReceipt = await PaymentReceipt.findByPk(receiptId, { include: [{ model: Client }] });
+
+    const clientAccounts = await Account.findAll({ include: [{ model: AccountType }], where: { clientId: paymentReceipt.client.id } });
+
+    res.render('expenses/bills/createPO', { menu: CURRENT_MENU, data: { client: paymentReceipt.client, paymentReceipt, clientAccounts } });
+};
+
+
+//------------- AJAX CALLS -------------//
 
 module.exports.receiptTypes = async function (req, res) {
     const receiptTypes = await ReceiptType.findAll({ where: { enabled: true } });

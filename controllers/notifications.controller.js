@@ -7,7 +7,7 @@ const winston = require('../helpers/winston.helper');
 
 const CURRENT_MENU = 'notifications'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
-const NotificationUtils = require('../utils/notifications.util').notifications;
+//const NotificationEnums = require('../utils/notifications.util').Notifications;
 
 // module.exports.findPendings = async function (req, res) {
 
@@ -28,13 +28,13 @@ const NotificationUtils = require('../utils/notifications.util').notifications;
 
 module.exports.findPendings = function (req, res) {
 
-    const userid = req.params.id;
+    const userId = req.params.id;
 
     Notification.findAll({
         where: {
             enabled: true,
             [Op.or]: [
-                { user: userid }, { user: 0 }
+                { userId: userId }, { userId: 0 }
             ]
         },
         //group: ['severity'],
@@ -51,14 +51,15 @@ module.exports.findPendings = function (req, res) {
 
 module.exports.notifications = function (req, res) {
 
-    const userid = req.user.id;
+    const userId = req.user.id;
 
     Notification.findAll(
         {
             where: {
-                user: { [Op.in]: [0, userid] },
+                userId: { [Op.in]: [0, userId] },
                 enabled: true
-            }
+            },
+            include: [{ model: Model.user }]
         })
         .then((notifications) => {
             res.setHeader('Cache-Control', 'no-cache');
@@ -97,7 +98,7 @@ module.exports.clearNotifications = function (req, res) {
         { ackBy: req.user.id, enabled: false },
         {
             where: {
-                user: {
+                userId: {
                     [Op.in]: [0, req.user.id]
                 }
             }

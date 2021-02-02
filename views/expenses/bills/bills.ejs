@@ -36,10 +36,10 @@
                 <button id="button-reload" onClick="window.location.reload();"
                     class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
 
-                <a href="/expenses/paymentReceipts/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="/expenses/paymentReceipts/client/<%=data.client.id%>/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
 
-                        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
-                </div>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
             </div>
             <div id="hide-dt" style="display:none">
                 <table id="datatable" class="table display">
@@ -131,12 +131,13 @@
 
                             <td>
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                <a href="/expenses/paymentReceipts/<%=data.clientId%>/edit/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                                <a href="/expenses/paymentReceipts/edit/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
                                     <i class="material-icons">edit</i></a>
                                 <% } %>
 
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                <a id="buttonCreatePO" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">receipt</i></a>
+                                    <a href="/expenses/paymentReceipts/createPaymentOrder/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                                        <i class="material-icons">check_circle</i></a>
                                 <% } %>
 
                                 <a id="buttonDownload" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">cloud_download</i></a>
