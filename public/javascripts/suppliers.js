@@ -2,7 +2,7 @@ function getSupplierCategory(supplierId) {
 
     let supplierCategory = document.getElementById('supplierCategory');
 
-    fetch('/suppliers/info/raw/' + supplierId)
+    fetch('/suppliers/ajax/raw/' + supplierId)
         .then(response => {
             if (response.status == 200) {
                 return response.text();

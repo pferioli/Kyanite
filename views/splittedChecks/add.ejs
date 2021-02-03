@@ -1,3 +1,10 @@
+<style>
+    table {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
 <%- include ("../partials/header") %>
 
     <main class="site-content">
@@ -48,6 +55,7 @@
                                 <label>Tipo</label>
                                 <input type="hidden" name="splitType" id="splitType" />
                             </div>
+
                             <div class="input-field col s3">
                                 <i class="material-icons-outlined prefix">monetization_on</i>
                                 <input id="totalamount" name="totalamount" type="text" value="$<%= data.check.amount %>" readonly />
@@ -65,15 +73,49 @@
                             </div>
                         </div>
 
-                        <div class="row" id="autocompleteDiv" hidden>
-                            <div id="autocompleteInput" class="input-field col s12" autocomplete="off">
-                                <i class="material-icons prefix">home</i>
-                                <input type="text" id="autocomplete-input" class="autocomplete">
-                                <label for="autocomplete-input">Ingrese el nombre del propietario o la propiedad</label>
-                                <input type="hidden" name="homeOwnerId" id="homeOwnerId" value="" />
+                            <div class="row" id="collections-div" hidden>
+                                <div class="input-field col s12" autocomplete="off">
+                                    <i class="material-icons prefix">home</i>
+                                    <input type="text" id="autocomplete-howeOwners" class="autocomplete">
+                                    <label for="autocomplete-howeOwners">Ingrese el nombre del propietario o la propiedad</label>
+                                </div>                            
                             </div>
-                        </div>
 
+                            <div class="row" id="paymentOrders-div" hidden>
+                                <div class="input-field col s12" autocomplete="off">
+                                    <i class="material-icons prefix">store</i>
+                                    <input type="text" id="autocomplete-suppliers" class="autocomplete">
+                                    <label for="autocomplete-suppliers">Ingrese el nombre del proveedor</label>
+                                </div>
+                            
+                                <!-- <div class="input-field col s12">
+                                    <i class="material-icons-outlined prefix">receipt</i>
+                                    <select id="receiptSelect" required>
+                                        <option value="" disabled selected>Seleccione una factura</option>
+                                    </select>
+                                    <label>Factura o Comprobante</label>
+                                </div> -->
+
+                                <div id="table-div" class="row" hidden>
+                                    <div class="col s12">
+                                        <table id="tablePaymentReceipts" class="table centered_table" style="width: 90% !important; margin-top: 20px;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 10%;" data-id="type">ID</th>
+                                                    <th style="width: 20%;" data-id="concept">Factura</th>
+                                                    <th style="width: 40%;" data-id="comments">Comentarios</th>
+                                                    <th style="width: 20%;" data-id="amount">Importe</th>
+                                                    <th style="width: 10%;">Seleccion</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>            
+                                            
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        
                         <div class="row">
                             <div class="input-field col s12">
                                 <i class="material-icons-outlined prefix">comments</i>
@@ -82,9 +124,14 @@
                             </div>
                         </div>
 
+                        <input type="hidden" name="homeOwnerId" id="homeOwnerId" value="" />
+                        <input type="hidden" name="supplierId" id="supplierId" value="" />
+                        <input type="hidden" name="receiptId" id="receiptId" value="" />
+
                         <div class="card-action right-align">
                             <button id="add_button" type='submit' class="waves-effect waves-light btn green"><i class="material-icons right">save</i>Guardar</button>
-                            <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px;"><i class="material-icons right">cancel</i>Cancelar</button>
+                            <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px">
+                                <i class="material-icons right">cancel</i>Cancelar</button>
                         </div>
                     </div>
                 </div>
@@ -95,109 +142,260 @@
 
     <%- include ("../partials/footer") %>
 
-        <script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
-        <script type="text/javascript" src="/javascripts/homeOwners.js"></script>
+<script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
+<script type="text/javascript" src="/javascripts/homeOwners.js"></script>
+<script type="text/javascript" src="/javascripts/paymentReceipts.js"></script>
 
-        <script>
+<script>
+  
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        // These options are needed to round to whole numbers if that's what you want.
+        //minimumFractionDigits: 0,
+        //maximumFractionDigits: 0,
+    });
 
-            document.addEventListener("DOMContentLoaded", async function () {
-                var elems = document.querySelectorAll("select");
-                var instances = M.FormSelect.init(elems, {});
-                M.CharacterCounter.init(document.getElementById("comments"));
+    document.addEventListener("DOMContentLoaded", async function () {
+                
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
 
-                const remainingamount = document.getElementById("remainingamount");
-                const partialamount = document.getElementById("partialamount");
+        M.CharacterCounter.init(document.getElementById("comments"));
 
-                let homeOwners = await getHomeOwnersByClient("<%=data.check.client.id%>");
-                let data = {};
+        const remainingamount = document.getElementById("remainingamount");
+        const partialamount = document.getElementById("partialamount");
 
-                for (i = 0; i < homeOwners.length; i++) {
-                    data[`${homeOwners[i].property} - ${homeOwners[i].name} [${homeOwners[i].id}]`] = null;
-                }
+        initializeAutocompleteComponents();
+    
+        document.getElementById("typeSelect").addEventListener('change', async (event) => {
 
-                var elems = document.querySelectorAll('.autocomplete');
+            const splitType = event.target.value;
 
-                var instances = M.Autocomplete.init(elems, {
-                    minLength: 1, data: data,
-                    onAutocomplete: function (e) {
-                        var matches = e.match(/\[(.*?)\]/);
-                        if (matches)
-                            document.getElementById('homeOwnerId').value = matches[1]
-                        else
-                            document.getElementById('homeOwnerId').value = ''
+            document.getElementById("splitType").value = splitType;
 
-                        M.toast({ html: 'se ha seleccionado la propiedad con ID #' + matches[1] });
-                    }
-                });
+            if (splitType === "I") {
+                document.getElementById("paymentOrders-div").hidden = true;
+                document.getElementById("collections-div").hidden = false;
+            } else {                        
+                document.getElementById("collections-div").hidden = true;
+                document.getElementById('table-div').hidden = true;
+                document.getElementById("paymentOrders-div").hidden = false;
+            }
 
-                document.getElementById("autocompleteInput").addEventListener('input', function (e) {
-                    document.getElementById('homeOwnerId').value = '';
-                    //M.toast({ html: 'se elimino el id de la propiedad' });
-                });
+            let aux = await getCheckRemainingBalance("<%= data.check.id %>", event.target.value);
 
-                document.getElementById("typeSelect").addEventListener('change', async (event) => {
+            var formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
 
-                    const splitType = event.target.value;
-
-                    document.getElementById("splitType").value = splitType;
-
-                    if (splitType === "I") {
-                        document.getElementById("autocompleteDiv").hidden = false;
-                    } else {
-                        document.getElementById("autocompleteDiv").hidden = true;
-                    }
-
-                    let aux = await getCheckRemainingBalance("<%= data.check.id %>", event.target.value);
-
-                    var formatter = new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
-
-                        // These options are needed to round to whole numbers if that's what you want.
-                        //minimumFractionDigits: 0,
-                        //maximumFractionDigits: 0,
-                    });
-
-                    remainingamount.value = formatter.format(aux.remainingBalance).replace(",", "");
-
-                    // var formatter = new Intl.NumberFormat('es-AR', {
-                    //     style: 'currency',
-                    //     currency: 'ARS',
-
-                    //     // These options are needed to round to whole numbers if that's what you want.
-                    //     //minimumFractionDigits: 0,
-                    //     //maximumFractionDigits: 0,
-                    // });
-
-                    // remainingamount.value = Intl.NumberFormat('en-US', { style: 'decimal' }).format(aux.remainingBalance, {
-                    //     minimumFractionDigits: 0,
-                    //     maximumFractionDigits: 2
-                    // })
-
-                    partialamount.max = aux.remainingBalance;
-                    partialamount.value = aux.remainingBalance;
-                    M.updateTextFields();
-
-                    if (remainingamount.value === "$0.00") {
-                        alert("No es posible agregar una nueva división al cheque, ya no queda saldo remanente para la opción seleccionada")
-                    }
-                });
-
-                document.getElementById("splittedChecksForm").addEventListener("submit", validateForm, true);
-
-                function validateForm(event) {
-
-                    if (remainingamount.value === "$0.00") {
-                        alert("No es posible agregar una nueva división al cheque, ya no queda saldo remanente para la opción seleccionada");
-                        event.preventDefault(); return;
-                    }
-
-                    if ((document.getElementById("splitType").value === 'I') && (document.getElementById("homeOwnerId").value === "")) {
-                        alert("La propiedad seleccionada es invalida o no fue correctamente seleccionada, imposible continuar")
-                        event.preventDefault(); return;
-                    }
-                };
-
+                // These options are needed to round to whole numbers if that's what you want.
+                //minimumFractionDigits: 0,
+                //maximumFractionDigits: 0,
             });
 
-        </script>
+            remainingamount.value = formatter.format(aux.remainingBalance).replace(",", "");
+
+            // var formatter = new Intl.NumberFormat('es-AR', {
+            //     style: 'currency',
+            //     currency: 'ARS',
+
+            //     // These options are needed to round to whole numbers if that's what you want.
+            //     //minimumFractionDigits: 0,
+            //     //maximumFractionDigits: 0,
+            // });
+
+            // remainingamount.value = Intl.NumberFormat('en-US', { style: 'decimal' }).format(aux.remainingBalance, {
+            //     minimumFractionDigits: 0,
+            //     maximumFractionDigits: 2
+            // })
+
+            partialamount.max = aux.remainingBalance;
+            partialamount.value = aux.remainingBalance;
+            M.updateTextFields();
+
+            if (remainingamount.value === "$0.00") {
+                alert("No es posible agregar una nueva división al cheque, ya no queda saldo remanente para la opción seleccionada")
+            }
+            
+            partialamount.select();
+            partialamount.focus();
+
+        });
+
+        document.getElementById("splittedChecksForm").addEventListener("submit", validateForm, true);
+    });
+
+    /*
+     * funcion para validar el formulario antes de hacer el submit
+     */
+
+    function validateForm(event) {
+
+            if (remainingamount.value === "$0.00") {
+                alert("No es posible agregar una nueva división al cheque, ya no queda saldo remanente para la opción seleccionada");
+                event.preventDefault(); return;
+            }
+
+            if ((document.getElementById("splitType").value === 'I') && (document.getElementById("homeOwnerId").value === "")) {
+                alert("La propiedad seleccionada es invalida o no fue correctamente seleccionada, imposible continuar")
+                event.preventDefault(); return;
+            }
+
+            if ((document.getElementById("splitType").value === 'O') && (document.getElementById("receiptId").value === "")) {
+                alert("La factura seleccionada es invalida o no fue correctamente seleccionada, imposible continuar")
+                event.preventDefault(); return;
+            }
+        };
+
+    /*
+     * funcion para inicializar los dos cuadros de texto con autocomplete
+     */
+
+    async function initializeAutocompleteComponents(){
+
+        //HOMEOWNERS
+
+        const homeOwners = await getHomeOwnersByClient("<%=data.check.client.id%>");
+
+        let dataHomeOwners= {};
+
+        for (i = 0; i < homeOwners.length; i++) {
+            dataHomeOwners[`${homeOwners[i].property} - ${homeOwners[i].name} [${homeOwners[i].id}]`] = null;
+        }
+
+        let homeOwnersAutoComplete = document.getElementById("autocomplete-howeOwners");
+
+        M.Autocomplete.init(homeOwnersAutoComplete, {
+            minLength: 1, 
+            data: dataHomeOwners,
+            onAutocomplete: autoCompleteSelectionHomeOwners
+        });
+
+        homeOwnersAutoComplete.addEventListener('input', function (e) { document.getElementById('homeOwnerId').value = ''; });
+                
+        //SUPPLIERS
+
+        const suppliers = await getPendingPaymentReceiptsSuppliersList("<%=data.check.client.id%>");
+
+        let dataSuppliers = {};
+
+        for (i = 0; i < suppliers.length; i++) {
+            dataSuppliers[`${suppliers[i].name} (${suppliers[i].cuit}) [${suppliers[i].id}]`] = null;
+        }
+
+        let suppliersAutoComplete = document.getElementById("autocomplete-suppliers");
+                
+        M.Autocomplete.init(suppliersAutoComplete, {
+            minLength: 1, 
+            data: dataSuppliers,
+            onAutocomplete: autoCompleteSelectionSuppliers
+        });
+
+        suppliersAutoComplete.addEventListener('input', function (e) { document.getElementById('supplierId').value = ''; });
+    }
+
+    /*
+     * funcion para procesar el callback de autocomplete para los propietarios
+     */
+
+    function autoCompleteSelectionHomeOwners(e){
+                
+        var matches = e.match(/\[(.*?)\]/);
+
+        if (matches) {
+            document.getElementById('homeOwnerId').value = matches[1]
+            M.toast({ html: 'se ha seleccionado la propiedad con ID #' + matches[1] });
+        } else {
+            document.getElementById('homeOwnerId').value = ''
+        }
+    }
+    
+    /*
+     * funcion para procesar el callback de autocomplete para los proveedores
+     */
+
+    async function autoCompleteSelectionSuppliers(e){
+                
+        var matches = e.match(/\[(.*?)\]/);
+
+        if (matches) {
+            const supplierId = matches[1];
+                    
+            document.getElementById('supplierId').value = supplierId
+
+            populatePaymentReceiptsTable("<%=data.check.client.id%>", supplierId);
+
+            M.toast({ html: 'se ha seleccionado el proveedor con ID #' + supplierId });
+        }
+        else {
+            document.getElementById('supplierId').value = ''
+        }
+    }
+
+    /*
+     * funcion para completar la tabla de comprobantes para cuando se selecciona un proveedor
+     */
+
+    async function populatePaymentReceiptsTable(clientId, supplierId){
+
+        const paymentReceipts = await getPendingPaymentReceiptsBySupplierId(clientId, supplierId);
+
+        for(index = 0; index <paymentReceipts.length ; index ++ )
+            addPaymentReceiptRow(paymentReceipts[index]);
+
+        document.getElementById('table-div').hidden = false;
+
+        document.getElementById('receiptId').value = ''
+
+    }
+
+    function addPaymentReceiptRow(paymentReceipts) {
+
+        var tableRef = document.getElementById('tablePaymentReceipts').getElementsByTagName('tbody')[0];
+
+        var newRow = tableRef.insertRow(-1);
+
+        // <th style="width: 10%;" data-id="type">ID</th>
+        // <th style="width: 20%;" data-id="concept">Factura</th>
+        // <th style="width: 40%;" data-id="comments">Comentarios</th>
+        // <th style="width: 20%;" data-id="amount">Importe</th>
+        // <th style="width: 10%; text-align:center">Seleccion</th>
+
+        const amount = formatter.format(paymentReceipts.amount).replace(",", "");
+        
+        newRow.insertCell(0).appendChild(document.createTextNode(paymentReceipts.id));
+        newRow.insertCell(1).appendChild(document.createTextNode(`(${paymentReceipts.receiptType.Type}) ${paymentReceipts.receiptNumber}`));
+        newRow.insertCell(2).appendChild(document.createTextNode(paymentReceipts.description));
+        newRow.insertCell(3).appendChild(document.createTextNode(amount));        
+        
+        newRow.insertCell(4).innerHTML = '<div class="switch"><label>' +
+                                         '<input onchange="switchHandler(this)" data-id="' + paymentReceipts.id + '" id="switch' + newRow.rowIndex+ '" type="checkbox">'+
+                                         '<span class="lever"></span></label></div>'
+    }
+    
+    function switchHandler(e){
+        
+        //console.log("switchId:" + e.id + " receiptId:" + e.dataset.id + " checked: " + e.checked);
+
+        const receiptId = e.dataset.id;
+
+        let switchs = document.querySelectorAll('*[id^="switch"]');
+        
+        for(index=0; index<switchs.length; index++){
+            if( switchs[index].id != e.id){
+                switchs[index].checked=false;
+            }
+        }
+        
+        if(e.checked) {
+            document.getElementById('receiptId').value = receiptId;
+            M.toast({ html: 'se ha seleccionado la factura con ID #' + receiptId });
+        } else {
+            document.getElementById('receiptId').value = '';
+            M.toast({ html: 'No se ha seleccionado ninguna factura'});
+        }
+
+    }
+
+    </script>

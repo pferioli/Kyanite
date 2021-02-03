@@ -2,7 +2,7 @@ function populateReceiptTypes(fieldID) {
     selectField = document.getElementById(fieldID);
     selectField.options.length = 0;
     selectField.innerHTML = "<option value=\"\" selected disabled>" + "Seleccione el Tipo de Factura" + "</option>"
-    fetch('/expenses/paymentReceipts/types')
+    fetch('/expenses/paymentReceipts/ajax/types')
         .then(response => {
             if (response.status == 200) {
                 return response.text();

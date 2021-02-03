@@ -28,7 +28,7 @@
 
 async function getHomeOwnersByClient(clientId) {
 
-    const response = await fetch('/homeOwners/getByClient/' + clientId);
+    const response = await fetch('/homeOwners/ajax/getByClient/' + clientId);
 
     if (!response.ok) {
         const message = `An error has occured: ${response.status}`;

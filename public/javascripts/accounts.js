@@ -1,7 +1,7 @@
 
 async function getClientAccounts(clientId, accountType) {
 
-    let fetchUrl = '/accounts/getByCustomerID/' + clientId
+    let fetchUrl = '/accounts/ajax/getByCustomerID/' + clientId
     if (accountType !== undefined) { fetchUrl = fetchUrl + '?' + 'accountType=' + accountType }
 
     try {
@@ -20,7 +20,7 @@ async function getClientAccounts(clientId, accountType) {
 async function getClientAccountsInfo(accountId) {
 
     try {
-        const response = await fetch('/accounts/getByAccountID/' + accountId)
+        const response = await fetch('/accounts/ajax/getByAccountID/' + accountId)
         if (response.status == 200) {
             var data = await response.json();
             return data;

@@ -57,7 +57,7 @@ router.post("/import/new/:clientId", [homeOwnersController.gcs.multer.single('at
         homeOwnersController.importHomeOwners(req, res);
     });
 
-router.get("/getByClient/:clientId", function (req, res, next) {
+router.get("/ajax/getByClient/:clientId", function (req, res, next) {
     homeOwnersController.getHomeOwnersByClient(req, res);
 });
 

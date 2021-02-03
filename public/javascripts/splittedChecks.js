@@ -1,6 +1,6 @@
 async function getCheckRemainingBalance(checkId, splitType) {
 
-    const response = await fetch('/checks/split/remainingBalance/' + checkId + '?' + new URLSearchParams({ splitType: splitType }));
+    const response = await fetch('/checks/split/ajax/remainingBalance/' + checkId + '?' + new URLSearchParams({ splitType: splitType }));
 
     if (!response.ok) {
         const message = `An error has occured: ${response.status}`;
@@ -13,7 +13,7 @@ async function getCheckRemainingBalance(checkId, splitType) {
 
 async function getSplittedCheckInfo(checkId) {
 
-    const response = await fetch('/checks/split/info/' + checkId);
+    const response = await fetch('/checks/split/ajax/info/' + checkId);
 
     if (!response.ok) {
         const message = `An error has occured: ${response.status}`;

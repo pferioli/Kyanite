@@ -22,6 +22,8 @@ const { v4: uuidv4 } = require('uuid');
 
 const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
+const PaymentReceiptStatus = require('../utils/statusMessages.util').PaymentReceipt;
+
 module.exports.listAll = async function (req, res) {
 
     const clientId = req.body.clientId || req.params.clientId;
@@ -151,7 +153,7 @@ module.exports.addNew = async function (req, res, next) {
             winston.error(`An error ocurred while user #${req.user.id} tryed to create a new payment receipt ${JSON.stringify(req.body)} - ${error}`);
         })
 
-        .finally(() => { res.redirect('/expenses/paymentReceipts/' + clientId); });
+        .finally(() => { res.redirect('/expenses/paymentReceipts/client/' + clientId); });
 };
 
 module.exports.showNewPOForm = async function (req, res) {
@@ -173,8 +175,57 @@ module.exports.receiptTypes = async function (req, res) {
     res.send(receiptTypes)
 };
 
-module.exports.receiptTypesByID = async function receiptTypesByID(req, res) {
+module.exports.receiptTypesByID = async function (req, res) {
     const receiptTypeId = req.params.id;
     const receiptTypes = await ReceiptType.findByPk(receiptTypeId);
     res.send(receiptTypes)
+};
+
+module.exports.getPendingSuppliersList = async function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    PaymentReceipt.findAll(
+        {
+            where: {
+                statusId: {
+                    [Op.in]: [PaymentReceiptStatus.eStatus.get('pending').value, PaymentReceiptStatus.eStatus.get('inprogress').value]
+                },
+                clientId: clientId
+            },
+            attributes: ['supplierId']
+        }
+    ).then((paymentReceipts) => {
+
+        const supplierIds = paymentReceipts.map(i => i.supplierId);
+
+        Supplier.findAll({
+            where: { id: { [Op.in]: supplierIds } },
+            distinct: 'id',
+            attributes: ['id', 'name', 'cuit']
+
+        }).then((suppliers) => {
+            res.send(suppliers)
+        });
+    });
+};
+
+module.exports.pendingBySupplierId = async function (req, res) {
+
+    const clientId = req.params.clientId;
+    const supplierId = req.params.supplierId;
+
+    PaymentReceipt.findAll(
+        {
+            where: {
+                statusId: {
+                    [Op.in]: [PaymentReceiptStatus.eStatus.get('pending').value, PaymentReceiptStatus.eStatus.get('inprogress').value]
+                },
+                clientId: clientId, supplierId: supplierId
+            },
+            include: [{ model: ReceiptType, attributes: [['receiptType', 'Type'], 'name'] }]
+        }
+    ).then((paymentReceipts) => {
+        res.send(paymentReceipts)
+    });
 };

@@ -43,7 +43,7 @@ module.exports.listAll = async function (req, res, next) {
     const splittedChecks = await CheckSplitted.findAll(options);
 
     res.render('splittedChecks/splittedChecks', {
-        menu: CURRENT_MENU, data: { check: check, checks: splittedChecks },
+        menu: CURRENT_MENU, data: { check: check, client: check.client, checks: splittedChecks },
     });
 };
 
@@ -81,13 +81,15 @@ module.exports.addNew = async function (req, res, next) {
 
         const supplierId = req.body.supplierId === '' ? null : req.body.supplierId;
 
+        const receiptId = req.body.receiptId === '' ? null : req.body.receiptId;
+
         if ((req.body.splitType === 'I') && (homeOwnerId === null)) {
             req.flash("warning", 'debe seleccionar una propiedad para asignar el cheque parcial, imposible continuar');
             res.redirect("/checks/split/" + checkId);
             return;
         }
 
-        if ((req.body.splitType === 'O') && (supplierId === null)) {
+        if ((req.body.splitType === 'O') && (receiptId === null)) {
             req.flash("warning", 'debe seleccionar un proveedor para asignar el cheque parcial, imposible continuar');
             res.redirect("/checks/split/" + checkId);
             return;
@@ -109,7 +111,7 @@ module.exports.addNew = async function (req, res, next) {
         };
 
         if (req.body.splitType === 'O') {
-            check.homeOwnerId = supplierId;
+            check.paymentReceiptId = receiptId;
         };
 
         CheckSplitted.create(check).
@@ -142,6 +144,26 @@ module.exports.addNew = async function (req, res, next) {
         res.redirect("/checks/split/" + checkId);
     }
 };
+
+module.exports.showEditForm = async function (req, res, next) {
+    const checkId = req.params.checkId;
+    const splittedCheck = await CheckSplitted.findByPk(checkId, { include: [{ model: Check, include: [{ model: Client }, { model: BillingPeriod }] }] });
+    res.render("splittedChecks/edit.ejs", { menu: CURRENT_MENU, data: { splittedCheck, check: splittedCheck.check } });
+};
+
+module.exports.edit = async function (req, res, next) {
+
+    const clientId = req.body.clientId;
+
+    req.flash("warning", "La funcion de editar una subdivision aun no esta implementada");
+
+    res.redirect('/checks/client/' + clientId)
+}
+
+module.exports.delete = async function (req, res, next) {
+    const checkId = req.params.checkId;
+    res.redirect('/checks/split/' + checkId)
+}
 
 //------------------ AJAX CALLS ------------------//
 

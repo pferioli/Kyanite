@@ -32,10 +32,6 @@ router.post("/categories/:id", function (req, res, next) {
   suppliersController.newCategory(req, res);
 });
 
-router.get("/info/raw/:id", function (req, res, next) {
-  suppliersController.findSupplierById(req, res);
-});
-
 router.get("/info/:id", function (req, res, next) {
   suppliersController.info(req, res);
 });
@@ -46,6 +42,12 @@ router.post("/edit/:id", function (req, res, next) {
 
 router.get("/edit/:id", function (req, res, next) {
   suppliersController.showEditForm(req, res);
+});
+
+//AJAX
+
+router.get("/ajax/raw/:id", function (req, res, next) {
+  suppliersController.findSupplierById(req, res);
 });
 
 module.exports = router;

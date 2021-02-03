@@ -35,11 +35,17 @@
 
 <% if (locals.menu==='checks' ) { %>
     <a href="/checks" class="breadcrumb">Cheques</a>
+    <% if(locals.data) { %>
+        <a href="/checks/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+    <% } %>
 <%}%>
 
 <% if (locals.menu==='splittedChecks' ) { %>
     <a href="/checks" class="breadcrumb">Cheques</a>
-    <a href="/checks/splitted" class="breadcrumb">Subdivisiones</a>
+    <% if(locals.data) { %>
+            <a href="/checks/client/<%=data.check.client.id%>" class="breadcrumb"><%=data.check.client.internalCode%></a>     
+    <% } %>
+    <a href="/checks/split/<%=data.check.id%>" class="breadcrumb">Subdivisiones</a>
 <%}%>
 
 <% if (locals.menu==='paymentReceipts' ) { %>

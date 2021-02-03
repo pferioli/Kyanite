@@ -43,14 +43,21 @@ router.get("/client/:clientId", function (req, res, next) {
 
 //AJAX Calls
 
-router.get("/types", function (req, res, next) {
+router.get("/ajax/types", function (req, res, next) {
     paymentReceiptsController.receiptTypes(req, res);
 });
 
-router.get("/types/:id", function (req, res, next) {
+router.get("/ajax/types/:id", function (req, res, next) {
     paymentReceiptsController.receiptTypesByID(req, res);
 
 });
 
+router.get("/ajax/pending/getSuppliersList/:clientId", function (req, res, next) {
+    paymentReceiptsController.getPendingSuppliersList(req, res);
+});
+
+router.get("/ajax/pending/client/:clientId/bySupplierId/:supplierId", function (req, res, next) {
+    paymentReceiptsController.pendingBySupplierId(req, res);
+});
 
 module.exports = router;

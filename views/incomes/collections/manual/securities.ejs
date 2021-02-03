@@ -266,7 +266,7 @@
         selectField.options.length = 0;
         selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione la cuenta" + "</option>"
 
-        fetch('/accounts/getByCustomerID/' + clientId)
+        fetch('/accounts/ajax/getByCustomerID/' + clientId)
             .then(response => {
                 if (response.status == 200) {
                     return response.text();
@@ -296,7 +296,7 @@
         selectField.options.length = 0;
         selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el cheque" + "</option>"
 
-        fetch('/checks/split/getAvailableChecks/' + homeOwnerId + '?splitType=I&statusId=0')   //0 = pending / 1 = assigned status
+        fetch('/checks/split/ajax/getAvailableChecks/' + homeOwnerId + '?splitType=I&statusId=0')   //0 = pending / 1 = assigned status
             .then(response => {
                 if (response.status == 200) {
                     return response.text();
