@@ -1,7 +1,13 @@
-async function getPendingPaymentReceiptsSuppliersList(clientId) {
+async function getPendingPaymentReceiptsSuppliersList(clientId, checkId) {
 
     try {
-        const response = await fetch('/expenses/paymentReceipts/ajax/pending/getSuppliersList/' + clientId)
+
+        let url = '/expenses/paymentReceipts/ajax/pending/getSuppliersList/' + clientId;
+
+        if (checkId != undefined) { url = url + '?checkId=' + checkId; }
+
+        const response = await fetch(url);
+
         if (response.status == 200) {
             var data = await response.json();
             return data;

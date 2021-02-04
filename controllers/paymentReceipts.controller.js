@@ -11,6 +11,7 @@ const AccountingImputation = Model.accountingImputation;
 const AccountingGroup = Model.accountingGroup;
 const Account = Model.account;
 const AccountType = Model.accountType;
+const CheckSplitted = Model.checkSplitted;
 
 const User = Model.user;
 
@@ -167,7 +168,6 @@ module.exports.showNewPOForm = async function (req, res) {
     res.render('expenses/bills/createPO', { menu: CURRENT_MENU, data: { client: paymentReceipt.client, paymentReceipt, clientAccounts } });
 };
 
-
 //------------- AJAX CALLS -------------//
 
 module.exports.receiptTypes = async function (req, res) {
@@ -184,29 +184,53 @@ module.exports.receiptTypesByID = async function (req, res) {
 module.exports.getPendingSuppliersList = async function (req, res) {
 
     const clientId = req.params.clientId;
+    const checkId = req.query.checkId;
 
-    PaymentReceipt.findAll(
-        {
-            where: {
-                statusId: {
-                    [Op.in]: [PaymentReceiptStatus.eStatus.get('pending').value, PaymentReceiptStatus.eStatus.get('inprogress').value]
-                },
-                clientId: clientId
-            },
-            attributes: ['supplierId']
+    let supplierIds = []; fixed = false;
+
+    //check into current splitted checks if there is a previous supplier already asigned, if not we can list all suppliers
+
+    if (checkId != undefined) {
+
+        const splittedCheck = await CheckSplitted.findOne(
+            {
+                where: { checkId: checkId, splitType: 'O' },
+                include: [
+                    {
+                        model: PaymentReceipt,
+                        include: [{ model: Supplier }]
+                    }]
+            })
+
+        if (splittedCheck) {
+            supplierIds.push(splittedCheck.paymentReceipt.supplierId); fixed = true;
         }
-    ).then((paymentReceipts) => {
+    }
 
-        const supplierIds = paymentReceipts.map(i => i.supplierId);
+    if (supplierIds.length === 0) {
 
-        Supplier.findAll({
-            where: { id: { [Op.in]: supplierIds } },
-            distinct: 'id',
-            attributes: ['id', 'name', 'cuit']
+        const paymentReceipts = await PaymentReceipt.findAll(
+            {
+                where: {
+                    statusId: {
+                        [Op.in]: [PaymentReceiptStatus.eStatus.get('pending').value, PaymentReceiptStatus.eStatus.get('inprogress').value]
+                    },
+                    clientId: clientId
+                },
+                attributes: ['supplierId']
+            }
+        );
 
-        }).then((suppliers) => {
-            res.send(suppliers)
-        });
+        supplierIds = paymentReceipts.map(i => i.supplierId);
+    }
+
+    Supplier.findAll({
+        where: { id: { [Op.in]: supplierIds } },
+        distinct: 'id',
+        attributes: ['id', 'name', 'cuit']
+
+    }).then((suppliers) => {
+        res.send({ suppliers, isFixed: fixed })
     });
 };
 
@@ -226,6 +250,6 @@ module.exports.pendingBySupplierId = async function (req, res) {
             include: [{ model: ReceiptType, attributes: [['receiptType', 'Type'], 'name'] }]
         }
     ).then((paymentReceipts) => {
-        res.send(paymentReceipts)
+        res.send(paymentReceipts);
     });
 };

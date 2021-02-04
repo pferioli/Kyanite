@@ -16,6 +16,8 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
             CheckSplitted.hasOne(models.check, { foreignKey: 'id', sourceKey: 'checkId' })
             CheckSplitted.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            CheckSplitted.hasOne(models.homeOwner, { foreignKey: 'id', sourceKey: 'homeOwnerId' })
+            CheckSplitted.hasOne(models.paymentReceipt, { foreignKey: 'id', sourceKey: 'paymentReceiptId' })
         }
     };
     CheckSplitted.init({

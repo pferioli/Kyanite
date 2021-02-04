@@ -88,6 +88,8 @@
                                     <label for="autocomplete-suppliers">Ingrese el nombre del proveedor</label>
                                 </div>
                             
+                                <div class="col s12 center-align" id="fixedSupplier-warning" style="font-size:small;" hidden></div>
+                                
                                 <!-- <div class="input-field col s12">
                                     <i class="material-icons-outlined prefix">receipt</i>
                                     <select id="receiptSelect" required>
@@ -156,6 +158,8 @@
         //maximumFractionDigits: 0,
     });
 
+    let fixedSupplier = {isFixed : false, supplier : undefined};
+
     document.addEventListener("DOMContentLoaded", async function () {
                 
         var elems = document.querySelectorAll("select");
@@ -181,6 +185,24 @@
                 document.getElementById("collections-div").hidden = true;
                 document.getElementById('table-div').hidden = true;
                 document.getElementById("paymentOrders-div").hidden = false;
+
+                const fixedSupplierWarning = document.getElementById('fixedSupplier-warning');
+                    
+                if(fixedSupplier.isFixed === true) {
+                                  
+                    // const suppliersAutoComplete = document.getElementById("autocomplete-suppliers");
+
+                    // const instance = M.Autocomplete.getInstance(suppliersAutoComplete);
+            
+                    // const supplier = {}; supplier[fixedSupplier.supplier]=null;
+
+                    // instance.selectOption(supplier);
+            
+                    fixedSupplierWarning.innerHTML = `como ya existen subdivisiones anteriores asignadas a un proveedor, solo se pueden crear para 
+                    <span class="red-text" style="font-weight: bolder";>${fixedSupplier.supplier}</span>`
+                }
+                
+                fixedSupplierWarning.hidden=!(fixedSupplier.isFixed);
             }
 
             let aux = await getCheckRemainingBalance("<%= data.check.id %>", event.target.value);
@@ -276,12 +298,18 @@
                 
         //SUPPLIERS
 
-        const suppliers = await getPendingPaymentReceiptsSuppliersList("<%=data.check.client.id%>");
+        const suppliers = await getPendingPaymentReceiptsSuppliersList("<%=data.check.client.id%>","<%=data.check.id%>");
 
         let dataSuppliers = {};
+        
+        for (i = 0; i < suppliers.suppliers.length; i++) {
+            const supplier = suppliers.suppliers[i];
+            dataSuppliers[`${supplier.name} (${supplier.cuit}) [${supplier.id}]`] = null;
+        }
 
-        for (i = 0; i < suppliers.length; i++) {
-            dataSuppliers[`${suppliers[i].name} (${suppliers[i].cuit}) [${suppliers[i].id}]`] = null;
+        if(suppliers.isFixed===true) {
+            fixedSupplier.isFixed = suppliers.isFixed,
+            fixedSupplier.supplier = `${suppliers.suppliers[0].name} (${suppliers.suppliers[0].cuit}) [${suppliers.suppliers[0].id}]`
         }
 
         let suppliersAutoComplete = document.getElementById("autocomplete-suppliers");

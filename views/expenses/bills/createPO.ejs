@@ -22,6 +22,33 @@
 
                     <div class="row">
                         
+                        <div class="input-field col s4">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="accountSelect" required >
+                                <option value="" disabled selected>Seleccione la cuenta</option>
+                                <% for(var i=0; i < data.clientAccounts.length; i++) { %>
+                                    <option value=" <%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                <% } %>
+                            </select>
+                            <label>Cuenta de Origen de los fondos</label>
+                            <input type="hidden" name="accountId" id="accountId" />
+                        </div>
+            
+                        <div id="accountInfoDiv" class="input-field col s8">
+                            <input id="accountInfo" name="accountInfo" type="text" value="" style="font-size: smaller;" readonly />
+                            <label for="accountInfo">Detalles de la cuenta</label>
+                        </div>
+
+                        <div id="checksSelectDiv" class="input-field col s12">
+                            <i class="material-icons prefix">money</i>
+                            <select id="checksSelect" disabled>
+                                <option value="" disabled selected>Seleccione un cheque</option>                               
+                            </select>
+                            <label>Seleccione un cheque para vincular con la Orden de Pago</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
                         <div class="input-field col s2">
                             <i class="material-icons prefix">monetization_on</i>
                             <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
@@ -40,31 +67,6 @@
                             <input type="hidden" name="paymentDate" id="paymentDate" />
                         </div>
                     
-                        <div class="input-field col s6">
-                            <i class="material-icons prefix">account_balance</i>
-                            <select id="accountSelect" required>
-                                <option value="" disabled selected>Seleccione la cuenta</option>
-                                <% for(var i=0; i < data.clientAccounts.length; i++) { %>
-                                    <option value=" <%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
-                                <% } %>
-                            </select>
-                            <label>Cuenta de Origen de los fondos</label>
-                            <input type="hidden" name="accountId" id="accountId" />
-                        </div>
-            
-                        <div id="accountInfoDiv" class="input-field col s12">
-                            <i class="material-icons prefix">info</i>
-                            <input id="accountInfo" name="accountInfo" type="text" value="" readonly />
-                            <label for="accountInfo">Detalles de la cuenta</label>
-                        </div>
-
-                         <div id="checksSelectDiv" class="input-field col s12">
-                            <i class="material-icons prefix">money</i>
-                            <select id="checksSelect" disabled>
-                                <option value="" disabled selected>Seleccione un cheque</option>                               
-                            </select>
-                            <label>Seleccione un cheque para vincular con la Orden de Pago</label>
-                        </div>
                     </div>
 
                 </div>
