@@ -58,6 +58,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
+        skippedRows: {
+            allowNull: true,
+            type: DataTypes.JSON
+        }
     }, {
         sequelize,
         modelName: 'collectionImportControl',

@@ -2,6 +2,11 @@
 
 <main class="site-content">
 
+    <% if(data.control.statusId != 6 ){ %>
+        <% locals.warning = "se detectaron inconsistencias graves en los datos durante el proceso de importacion temporal y " 
+        + (data.control.totalRows - data.control.importedRows) + " registro(s) debieron ser omitidos, debe verificar las lineas " + data.control.skippedRows %>;
+    <% } %>         
+        
     <center>
         <%- include ("../../../partials/alerts") %>
     </center>

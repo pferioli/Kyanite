@@ -1,6 +1,8 @@
+const Sequelize = require('sequelize');
 const { QueryTypes } = require('sequelize');
 const Op = require('sequelize').Op
 const Model = require('../models')
+
 const Client = Model.client;
 const Collection = Model.collection;
 const CollectionConcept = Model.collectionConcept;
@@ -331,7 +333,7 @@ module.exports.importCollections = async function (req, res) {
 
     winston.info(`beginning the collections import from file ${req.file.originalname} for client #${clientId} on user #${req.user.id} request`);
 
-    let importCtrl = null; totalRows = 0;
+    let importCtrl = null; totalRows = 0; let skippedRecords = [];
 
     try {
         importCtrl = await CollectionImportControl.create(
@@ -374,71 +376,92 @@ module.exports.importCollections = async function (req, res) {
                     gcs.readCollectionsFileFromGCS(gcsFileName, gcsBucketName)
                         .then(async (readResult) => {
 
-                            let accountCache = [];
+                            let accountCache = []; totalRows = readResult.length;
 
                             for (index = 0; index < readResult.length; index++) {
 
-                                //Implementacion de un cache para el accountID
+                                if (client.internalCode.toUpperCase() === readResult[index].clientCode.toUpperCase()) {
 
-                                let valueType = 'DC';
+                                    //Implementacion de un cache para el accountID
 
-                                let accountItem = await accountCache.find(async function (item) {
-                                    return item.id === readResult[index].accountId;
-                                });
+                                    let valueType = 'DC'; let invalidAccountId = false;
 
-                                try {
+                                    let accountItem = await accountCache.find(element => element.id === readResult[index].accountId);
 
-                                    if (accountItem) {
-                                        valueType = accountItem.valueType;
-                                    } else {
+                                    try {
 
-                                        const account = await Account.findByPk(readResult[index].accountId,
-                                            { include: [{ model: AccountType }] });
+                                        if (accountItem) {
+                                            valueType = accountItem.valueType;
+                                        } else {
 
-                                        if (account.accountType.account === 'CMN') {
-                                            valueType = 'EF'
-                                        } else if (account.accountType.account === 'VAL') {
-                                            valueType = 'CH'
-                                        } else if (account.accountType.account.slice(-1) === '$') {
-                                            valueType = 'DC'
+                                            const account = await Account.findByPk(readResult[index].accountId,
+                                                { include: [{ model: AccountType }] });
+
+                                            if (account != undefined) {
+                                                if (account.accountType.account === 'CMN') {
+                                                    valueType = 'EF'
+                                                } else if (account.accountType.account === 'VAL') {
+                                                    valueType = 'CH'
+                                                } else if (account.accountType.account.slice(-1) === '$') {
+                                                    valueType = 'DC'
+                                                }
+
+                                                if (account.clientId === client.id)
+                                                    accountCache.push({ id: readResult[index].accountId, valueType: valueType })
+                                                else {
+                                                    invalidAccountId = true;
+                                                }
+                                            } else {
+                                                invalidAccountId = true;
+                                            }
                                         }
-                                        accountCache.push({ id: readResult[i].accountId, valueType: valueType })
+
+                                    } catch (err) {
+                                        invalidAccountId = true;
+                                        skippedRecords.push(index);
+                                        winston.warn(`cannot get the accountType for the record #${index}, asuming "DC" - ${err}`);
                                     }
 
-                                } catch (err) {
-                                    winston.error(`cannot get the accountType for the record #${index}, asuming "DC" - ${err}`)
-                                }
+                                    try {
 
-                                try {
+                                        if (invalidAccountId === false) {
 
-                                    collection = await CollectionImport.create({
-                                        clientCode: readResult[index].clientCode.toUpperCase(),
-                                        propertyType: readResult[index].propertyType.toUpperCase(),
-                                        property: readResult[index].property,
-                                        accountId: readResult[index].accountId,
-                                        conceptType: "IM",
-                                        conceptDesc: readResult[index].concept,
-                                        valueType: valueType,
-                                        valueDesc: readResult[index].value,
-                                        amount: readResult[index].amount.replace(".", '').replace(",", '.'),
-                                        date: moment(readResult[index].date, "DD/MM/YYYY").toDate(),
-                                        controlId: importCtrl.id
-                                    });
+                                            collection = await CollectionImport.create({
+                                                clientCode: readResult[index].clientCode.toUpperCase(),
+                                                propertyType: readResult[index].propertyType.toUpperCase(),
+                                                property: readResult[index].property,
+                                                accountId: readResult[index].accountId,
+                                                conceptType: "IM",
+                                                conceptDesc: readResult[index].concept,
+                                                valueType: valueType,
+                                                valueDesc: readResult[index].value,
+                                                amount: readResult[index].amount.replace(".", '').replace(",", '.'),
+                                                date: moment(readResult[index].date, "DD/MM/YYYY").toDate(),
+                                                controlId: importCtrl.id
+                                            });
+                                        } else {
+                                            skippedRecords.push(index);
 
-                                } catch (err) {
-                                    winston.error(`An error ocurred while inserting the record #${index} into temp table - ${err}`)
+                                            winston.warn(`the record #${index} has an invalid AccountID #${readResult[index].accountId} for this client ${readResult[index].clientCode}`)
+                                        }
+
+                                    } catch (err) {
+                                        skippedRecords.push(index);
+
+                                        winston.error(`An error ocurred while inserting the record #${index} into temp table - ${err}`);
+                                    }
+
+                                } else {
+                                    skippedRecords.push(index);
+
+                                    winston.warn(`the record #${index} belongs to a different client, invalid clientCode ${readResult[index].clientCode}`)
                                 }
                             }
-
-                            totalRows = readResult.length;
-
                         })
                         .catch((err) => {
                             winston.error(`An error ocurred while reading the the collections file ${gcsFileName} from bucket ${gcsBucketName} - ${err} `)
                         })
                         .finally(() => {
-
-                            const sequelize = require('sequelize');
 
                             let importedRows = 0;
 
@@ -456,6 +479,8 @@ module.exports.importCollections = async function (req, res) {
                                     importCtrl.finishedAt = Date.now();
                                     importCtrl.statusId = (totalRows === importedRows ?
                                         ImportCollectionStatus.eStatus.get('importing').value : ImportCollectionStatus.eStatus.get('failed').value);
+                                    importCtrl.skippedRows = JSON.stringify(skippedRecords);
+
                                     importCtrl.save();
 
                                     winston.info(`the collections temp-import from file ${gcsFileName} requested by user #${req.user.id} finished (total ${importedRows} records)`);
@@ -528,13 +553,15 @@ module.exports.listImportedCollections = async function (req, res) {
 
     const client = await Client.findByPk(clientId);
 
+    const importCtrl = await CollectionImportControl.findByPk(controlId)
+
     CollectionImport.findAll(
         {
             where: { clientCode: client.internalCode },
             include: [{ model: Account, include: [{ model: AccountType }] }]
         }
     ).then((collections) => {
-        res.render('incomes/collections/import/imports', { menu: CURRENT_MENU_IMPORT, data: { client, collections, control: { id: controlId } } });
+        res.render('incomes/collections/import/imports', { menu: CURRENT_MENU_IMPORT, data: { client, collections, control: importCtrl } });
     });
 };
 
