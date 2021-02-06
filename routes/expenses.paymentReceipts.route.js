@@ -21,11 +21,12 @@ router.post('/client/:clientId/new', [paymentReceiptsController.gcs.multer.singl
     },
 );
 
-router.get("/createPaymentOrder/:receiptId", function (req, res, next) {
+router.get("/client/:clientId/createPaymentOrder/:receiptId", function (req, res, next) {
     paymentReceiptsController.showNewPOForm(req, res);
 });
 
-router.post("/createPaymentOrder/:receiptId", function (req, res, next) {
+router.post("/client/:clientId/createPaymentOrder/:receiptId", function (req, res, next) {
+    res.redirect('/expenses/paymentReceipts');
 });
 
 router.get("/info/:receiptId", function (req, res, next) {

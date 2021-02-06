@@ -2,7 +2,7 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12" method="post" action='/expenses/paymentReceipts/createPaymentOrder/<%=data.paymentReceipt.id%>' enctype="multipart/form-data">
+        <form class="col s12" method="post" action="/expenses/paymentReceipts/client/<%=data.client.id%>/createPaymentOrder/<%=data.paymentReceipt.id%>">
             <div class="card">
                 <div class="card-content">
                     <span class="card-title">Cree una nueva Orden de Pago para una factura o comprobante</span>
@@ -22,57 +22,62 @@
 
                     <div class="row">
                         
-                        <div class="input-field col s4">
+                        <div class="input-field col s6">
                             <i class="material-icons prefix">account_balance</i>
                             <select id="accountSelect" required >
                                 <option value="" disabled selected>Seleccione la cuenta</option>
                                 <% for(var i=0; i < data.clientAccounts.length; i++) { %>
-                                    <option value=" <%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                    <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
                                 <% } %>
                             </select>
                             <label>Cuenta de Origen de los fondos</label>
                             <input type="hidden" name="accountId" id="accountId" />
                         </div>
             
-                        <div id="accountInfoDiv" class="input-field col s8">
-                            <input id="accountInfo" name="accountInfo" type="text" value="" style="font-size: smaller;" readonly />
-                            <label for="accountInfo">Detalles de la cuenta</label>
-                        </div>
-
-                        <div id="checksSelectDiv" class="input-field col s12">
-                            <i class="material-icons prefix">money</i>
-                            <select id="checksSelect" disabled>
-                                <option value="" disabled selected>Seleccione un cheque</option>                               
-                            </select>
-                            <label>Seleccione un cheque para vincular con la Orden de Pago</label>
-                        </div>
-                    </div>
-
-                    <div class="row">
                         <div class="input-field col s2">
                             <i class="material-icons prefix">monetization_on</i>
-                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
-                            <label for="amount">Importe a pagar</label>
+                            <input id="paymentOrderAmount" name="paymentOrderAmount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <label for="paymentOrderAmount">Importe a pagar</label>
                         </div>
                         
                         <div class="input-field col s2">
-                            <input id="total" class="validate" readonly />
-                            <label for="amount">Importe Total</label>
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="pendingAmount" type="text" value="$ <%= data.paymentReceipt.amount %>" />
+                            <label for="pendingAmount">Importe Pendiente</label>
                         </div>
-  
+                        
                         <div class="input-field col s2">
                             <i class="material-icons prefix">date_range</i>
                             <input type="text" class="datepicker" id="dtpPaymentDate" name="dtpPaymentDate" required>
                             <label for="dtpPaymentDate">Fecha</label>
                             <input type="hidden" name="paymentDate" id="paymentDate" />
                         </div>
-                    
+
+                        <div id="accountInfoDiv" class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="accountInfo" name="accountInfo" type="text" value="" readonly />
+                            <label for="accountInfo">Detalles de la cuenta</label>
+                        </div>
+                    </div>
+
+                    <div class="row" id="checksSelectDiv" hidden>
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">money</i>
+                            <select id="checksSelect" disabled>
+                                <option value="" disabled selected>Seleccione un cheque</option>                               
+                            </select>
+                            <label>Seleccione un cheque para vincular con la Orden de Pago</label>
+                            <input type="hidden" name="checkId" id="checkId" />
+                        </div>                        
                     </div>
 
                 </div>
 
+                <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
+                <input type="hidden" name="paymentReceipt" id="paymentReceipt" value="<%=data.paymentReceipt.id%>" />
+
                 <div class="card-action right-align">
-                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Crear OP</button>
+                    <button id="button-add" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Crear OP</button>
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
                 </div>
             </div>
@@ -91,13 +96,17 @@
 <script type="text/javascript" src="/javascripts/accounts.js"></script>
 <script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
 
-
 <script>
+
+    var remainingBalance = 0;
 
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
 
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});       
+        
         elems = document.querySelectorAll('.datepicker');
         instances = M.Datepicker.init(elems, {
             format: 'dd/mm/yyyy',
@@ -120,20 +129,64 @@
             }
         });
 
-        elems = document.querySelectorAll('.modal');
-        instances = M.Modal.init(elems, {});       
+        M.updateTextFields();
 
         getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
 
-        document.getElementById('accountSelect').onchange = async function () {
+        document.getElementById('accountSelect').onchange = selectAccount;
+    
+        document.getElementById('checksSelect').onchange = selectCheck;
 
-            getSelectedAccountDetails(this.value, 'accountInfo');
-
-            document.getElementById('accountId').value = this.value;
-            
-            M.updateTextFields();
-        }
     });
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
+            }
+        }
+    }
+
+    async function selectAccount(e){
+            
+        getSelectedAccountDetails(this.value, 'accountInfo');
+
+        const accountId = e.srcElement.options[e.srcElement.selectedIndex].value;
+
+        document.getElementById('accountId').value = accountId;
+            
+        M.updateTextFields();
+    };
+
+    async function selectCheck(e){
+
+        const checkId = e.srcElement.options[e.srcElement.selectedIndex].value;
+
+        document.getElementById('checkId').value = checkId;
+
+        const check = await getSplittedCheckInfo(checkId);
+
+        const paymentOrderAmount = document.getElementById('paymentOrderAmount');
+                        
+        paymentOrderAmount.classList.remove("validate");
+            
+        if(paymentOrderAmount.classList.contains('invalid')) {
+            paymentOrderAmount.classList.remove("invalid");
+        }
+            
+        paymentOrderAmount.disabled = true;            
+        paymentOrderAmount.value = check.amount;
+                        
+        M.updateTextFields();
+    }
 
     async function getSelectedAccountDetails(accountId, infoField) {
 
@@ -152,57 +205,41 @@
 
         document.getElementById(infoField).value = message; M.updateTextFields();
 
-        const checksSelect = document.getElementById('checksSelect');
+        const checksSelectDiv = document.getElementById('checksSelectDiv');
+        
+        const paymentOrderAmount = document.getElementById('paymentOrderAmount');
 
         if(account.accountType.account === 'VAL') {
-            checksSelect.disabled = false; M.FormSelect.init(checksSelect, {});
+
+            await getSplittedChecks(htmlDecode("<%= data.paymentReceipt.id %>"));
+        
+            checksSelectDiv.hidden = false;
+
         } else {
-            checksSelect.disabled = true;
+            checksSelectDiv.hidden = true;
+            paymentOrderAmount.disabled = false;
+            paymentOrderAmount.value = 0;            
+            paymentOrderAmount.classList.add("validate");
+            paymentOrderAmount.select();
+            paymentOrderAmount.focus();
         }        
     }
 
-    function getSplittedChecks(homeOwnerId, fieldID) {
+    async function getSplittedChecks(paymentId) {
 
-        let selectField = document.getElementById(fieldID);
-        selectField.options.length = 0;
-        selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el cheque" + "</option>"
+        const splittedChecks = await getAvailableSplittedChecks('O', paymentId, '0'); // O = PaymentOrder, '0' = Status(Pending)
 
-        fetch('/checks/split/po/' + homeOwnerId + '?statusId=0')   //0 = pending / 1 = assigned status
-            .then(response => {
-                if (response.status == 200) {
-                    return response.text();
-                } else {
-                    throw "Respuesta incorrecta del servidor"
-                }
-            })
-            .then(response => {
-                const splittedChecks = JSON.parse(response);
-                for (i = 0; i < splittedChecks.length; i++) {
-                    selectField.innerHTML = selectField.innerHTML + "<option value=\"" + splittedChecks[i].id + "\">" + 
-                        `${splittedChecks[i].check.bank.name} (Nº ${splittedChecks[i].check.number}) $${splittedChecks[i].amount}` + "</option>"
-                }
-                
-                M.FormSelect.init(selectField, {});
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    }
+        let checksSelect = document.getElementById('checksSelect');
+        checksSelect.disabled = false;        
+        checksSelect.options.length = 0;
+        checksSelect.innerHTML = checksSelect.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el cheque" + "</option>"
 
-    function Cancel() {
-        if (!this.hasEvent) {
-            this.hasEvent = true;
-            console.log('Clicked on cancel btn:', this.cancelBtn);
+        for (i = 0; i < splittedChecks.length; i++) {
+            checksSelect.innerHTML = checksSelect.innerHTML + "<option value=\"" + splittedChecks[i].id + "\">" + 
+            `${splittedChecks[i].check.bank.name} (Nº ${splittedChecks[i].check.number}) $${splittedChecks[i].amount}` + "</option>"
         }
-    }
-    function Done() {
-        if (!this.hasEvent) {
-            this.hasEvent = true;
-            console.log('Clicked on done btn:', this.doneBtn);
-            if (this.date) {
-                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
-            }
-        }
+        
+        M.FormSelect.init(checksSelect, {});        
     }
   
 </script>

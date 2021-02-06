@@ -136,14 +136,14 @@
                                 <% } %>
 
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                    <a href="/expenses/paymentReceipts/createPaymentOrder/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                                    <a href="/expenses/paymentReceipts/client/<%= data.client.id %>/createPaymentOrder/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
                                         <i class="material-icons">check_circle</i></a>
                                 <% } %>
 
                                 <a id="buttonDownload" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">cloud_download</i></a>
 
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                    <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                                 <% } %>
                             </td>
                         </tr>

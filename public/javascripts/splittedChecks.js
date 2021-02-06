@@ -23,3 +23,22 @@ async function getSplittedCheckInfo(checkId) {
 
     return balance;
 }
+
+async function getAvailableSplittedChecks(type, id, statusId) {
+
+    let url = '/checks/split/ajax/getAvailableChecks/' + id + '?splitType=' + type;
+
+    if (statusId != undefined) {
+        url = url + '&statusId=' + statusId
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        const message = `An error has occured: ${response.status}`;
+        throw new Error(message);
+    }
+    const balance = await response.json();
+
+    return balance;
+}

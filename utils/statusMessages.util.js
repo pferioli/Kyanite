@@ -39,6 +39,19 @@ module.exports.PaymentReceipt = class {
     }
 }
 
+module.exports.PaymentOrder = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["Deshabilitado", "Pendiente", "En Proceso", "Procesado", "Anulado"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'disabled': 0, 'pending': 1, 'inprogress': 2, 'processed': 3, 'deleted': 4 })
+    }
+}
+
 module.exports.Check = class {
 
     constructor() { }

@@ -12,11 +12,8 @@ const CheckSplitted = Model.checkSplitted;
 
 const winston = require('../helpers/winston.helper');
 
-const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
-const CheckStatus = require('../utils/statusMessages.util').Check;
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 
-const moment = require('moment');
 const CURRENT_MENU = 'splittedChecks'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = async function (req, res, next) {
@@ -198,7 +195,8 @@ module.exports.getSplittedChecks = async function (req, res, next) {
 
     const splitType = req.query.splitType;
 
-    const statusId = req.query.statusId || req.body.statusId || "0,1,2";   // ?statusId=1,2
+    const statusId = (req.query.statusId || req.body.statusId).split(",") ||
+        [SplitCheckStatus.eStatus.get('pending').value, SplitCheckStatus.eStatus.get('assigned').value, SplitCheckStatus.eStatus.get('cancelled').value]
 
     let options = {}
 
@@ -207,7 +205,10 @@ module.exports.getSplittedChecks = async function (req, res, next) {
         const homeOwnerId = req.params.id;
 
         options = {
-            where: { splitType: 'I', homeOwnerId: homeOwnerId, statusId: statusId.split(",") },
+            where: {
+                splitType: 'I', homeOwnerId: homeOwnerId,
+                statusId: { [Op.in]: statusId }
+            },
             include: [
                 {
                     model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }]
@@ -216,10 +217,13 @@ module.exports.getSplittedChecks = async function (req, res, next) {
         }
     } else if (splitType.toUpperCase() === 'O') {
 
-        const supplierId = req.params.id;
+        const paymentReceiptId = req.params.id;
 
         options = {
-            where: { splitType: 'O', supplierId: supplierId, statusId: statusId.split(",") },
+            where: {
+                splitType: 'O', paymentReceiptId: paymentReceiptId,
+                statusId: { [Op.in]: statusId }
+            },
             include: [
                 {
                     model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }]
