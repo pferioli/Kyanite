@@ -1,3 +1,4 @@
+const { QueryTypes } = require('sequelize');
 const Op = require('sequelize').Op
 const Model = require('../models')
 const Client = Model.client;
@@ -6,16 +7,18 @@ const SupplierCategory = Model.supplierCategory;
 const ReceiptType = Model.receiptType;
 const PaymentReceipt = Model.paymentReceipt;
 const PaymentReceiptImage = Model.paymentReceiptImage;
+const PaymentOrder = Model.paymentOrder;
 const BillingPeriod = Model.billingPeriod;
 const AccountingImputation = Model.accountingImputation;
 const AccountingGroup = Model.accountingGroup;
 const Account = Model.account;
 const AccountType = Model.accountType;
 const CheckSplitted = Model.checkSplitted;
-
 const User = Model.user;
 
 const gcs = require('../helpers/gcs.helper'); module.exports = { gcs };
+
+const db = require('../models/index');
 
 const winston = require('../helpers/winston.helper');
 
@@ -24,6 +27,8 @@ const { v4: uuidv4 } = require('uuid');
 const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 const PaymentReceiptStatus = require('../utils/statusMessages.util').PaymentReceipt;
+const PaymentOrderStatus = require('../utils/statusMessages.util').PaymentOrder;
+const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 
 module.exports.listAll = async function (req, res) {
 
@@ -31,8 +36,8 @@ module.exports.listAll = async function (req, res) {
 
     let periods = [];
 
-    if (typeof req.body.periodId != 'undefined') {
-        periods = req.body.periodId.split(',');
+    if (req.query.periodId != undefined) {
+        periods = req.query.periodId.split(',');
     } else {
 
         const activePeriod = await BillingPeriod.findOne({
@@ -101,7 +106,7 @@ module.exports.addNew = async function (req, res, next) {
             supplierId: req.body.supplierId,
             periodId: req.body.billingPeriodId,
             userId: req.user.id,
-            statusId: 1,
+            statusId: PaymentReceiptStatus.eStatus.get('pending').value
         }
     )
         .then(paymentReceipt => {
@@ -141,17 +146,13 @@ module.exports.addNew = async function (req, res, next) {
 
                         })
                     })
-                    .catch(error => { winston.error(`An error ocurred while user #${req.user.id} tryed to upload payment receipt file ${req.file.originalname} to GCS - ${error}`); })
+                    .catch((err) => { winston.error(`An error ocurred while user #${req.user.id} tryed to upload payment receipt file ${req.file.originalname} to GCS - ${err}`); })
 
             };
         })
-        .catch(error => {
-            req.flash(
-                "error",
-                "Ocurrio un error y no se pudo crear el registro en la base de datos"
-            );
-
-            winston.error(`An error ocurred while user #${req.user.id} tryed to create a new payment receipt ${JSON.stringify(req.body)} - ${error}`);
+        .catch(err => {
+            req.flash("error", "Ocurrio un error y no se pudo crear el registro de la factura en la base de datos");
+            winston.error(`An error ocurred while user #${req.user.id} tryed to create a new payment receipt ${JSON.stringify(req.body)} - ${err}`);
         })
 
         .finally(() => { res.redirect('/expenses/paymentReceipts/client/' + clientId); });
@@ -161,11 +162,94 @@ module.exports.showNewPOForm = async function (req, res) {
 
     const receiptId = req.params.receiptId;
 
-    const paymentReceipt = await PaymentReceipt.findByPk(receiptId, { include: [{ model: Client }] });
+    const paymentReceipt = await PaymentReceipt.findByPk(receiptId, { include: [{ model: Client }, { model: Supplier }, { model: ReceiptType }] });
 
     const clientAccounts = await Account.findAll({ include: [{ model: AccountType }], where: { clientId: paymentReceipt.client.id } });
 
     res.render('expenses/bills/createPO', { menu: CURRENT_MENU, data: { client: paymentReceipt.client, paymentReceipt, clientAccounts } });
+};
+
+module.exports.createPO = async function (req, res) {
+
+    const clientId = req.params.clientId;
+    const receiptId = req.params.receiptId;
+
+    const paymentOrdersController = require('./paymentOrders.controller')
+
+    let remainingBalance = await paymentOrdersController.calculateRemainingBalance(receiptId);
+
+    PaymentOrder.create(
+        {
+            paymentReceiptId: receiptId,
+            poNumber: 0,
+            periodId: req.body.billingPeriodId,
+            accountId: req.body.accountId,
+            checkId: ((req.body.checkId === undefined) || (req.body.checkId === '') ? null : req.body.checkId),
+            paymentDate: req.body.paymentDate,
+            amount: req.body.paymentOrderAmount,
+            statusId: PaymentOrderStatus.eStatus.get('disabled').value,
+            userId: req.user.id
+        })
+        .then(async (paymentOrder) => {
+
+            //PO Number !
+
+            let poNumber = await db.sequelize.query(`SELECT nextval('${clientId}','P') as "nextval"`, { type: QueryTypes.SELECT });
+
+            poNumber = poNumber[0].nextval;
+
+            paymentOrder.update({
+                poNumber: poNumber,
+                statusId: PaymentOrderStatus.eStatus.get('pending').value
+            })
+                .then(async (paymentOrder) => {
+
+                    const checkId = req.body.checkId;
+
+                    if (checkId) {
+
+                        CheckSplitted.findByPk(checkId).then((check) => {
+                            check.update(
+                                { statusId: SplitCheckStatus.eStatus.get('assigned').value })
+                                .then((checkUpdate) => {
+                                    console.log(checkUpdate)
+                                })
+                        })
+                    }
+
+                    let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
+
+                    if ((remainingBalance - paymentOrder.amount) <= 0) {
+                        prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
+                    }
+
+                    PaymentReceipt.findByPk(receiptId)
+                        .then((paymentReceipt) => {
+                            paymentReceipt.update({ statusId: PaymentReceiptStatus.eStatus.get('processed').value })
+                                .then(() => {
+                                    req.flash("success", `La OP #${poNumber} se genero correctamente en la base de datos`);
+                                })
+                                .catch((err) => {
+                                    req.flash("error", "Ocurrio un error y no se pudo actualizar el estado del recibo para la OP en la base de datos");
+                                    winston.error(`An error ocurred while user #${req.user.id} tryed to update the PO number for record id #${paymentOrder.id}  - ${err}`);
+                                })
+                                .finally(() => {
+                                    res.redirect('/expenses/paymentReceipts/client/' + clientId);
+                                })
+                        })
+                })
+                .catch((err) => {
+                    req.flash("error", "Ocurrio un error y no se pudo actualizar el numero de recibo para la OP en la base de datos");
+                    winston.error(`An error ocurred while user #${req.user.id} tryed to update the PO number for record id #${paymentOrder.id}  - ${err}`);
+                    res.redirect('/expenses/paymentReceipts/client/' + clientId);
+                })
+
+        })
+        .catch((err) => {
+            req.flash("error", "Ocurrio un error y no se pudo crear el registro de la OP en la base de datos");
+            winston.error(`An error ocurred while user #${req.user.id} tryed to create a new PO ${JSON.stringify(req.body)} - ${err}`);
+            res.redirect('/expenses/paymentReceipts/client/' + clientId);
+        })
 };
 
 //------------- AJAX CALLS -------------//

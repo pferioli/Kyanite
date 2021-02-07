@@ -74,7 +74,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'paymentOrder',
-        tableName: 'payment_order',
+        tableName: 'payment_orders',
         timestamps: true,
         paranoid: true,
         deletedAt: 'deletedAt'

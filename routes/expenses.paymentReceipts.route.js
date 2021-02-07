@@ -8,8 +8,18 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
-    paymentReceiptsController.listAll(req, res);
+
+    let redirectUrl = '/expenses/paymentReceipts/client/' + req.body.clientId + '?periodId=' + req.body.periodId
+
+    if (req.query.refresh) redirectUrl = redirectUrl + '&refresh=' + req.query.refresh;
+    if (req.query.showAll) redirectUrl = redirectUrl + '&showAll=' + req.query.showAll;
+
+    res.redirect(redirectUrl);
 });
+
+router.get('/client/:clientId', function (req, res, next) {
+    paymentReceiptsController.listAll(req, res);
+})
 
 router.get('/client/:clientId/new', function (req, res, next) {
     paymentReceiptsController.showNewForm(req, res);
@@ -26,7 +36,7 @@ router.get("/client/:clientId/createPaymentOrder/:receiptId", function (req, res
 });
 
 router.post("/client/:clientId/createPaymentOrder/:receiptId", function (req, res, next) {
-    res.redirect('/expenses/paymentReceipts');
+    paymentReceiptsController.createPO(req, res)
 });
 
 router.get("/info/:receiptId", function (req, res, next) {

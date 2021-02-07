@@ -21,6 +21,19 @@
                     </div>
 
                     <div class="row">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">storefront</i>
+                            <input id="supplier" type="text" value="<%=data.paymentReceipt.supplier.name%> [C.U.I.T <%=data.paymentReceipt.supplier.cuit%>]" disabled />
+                            <label for="supplier">Proveedor</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">receipt_long</i>
+                            <input id="receiptNumber" type="text" value="[<%=data.paymentReceipt.receiptType.receiptType %>] <%=data.paymentReceipt.receiptNumber%>" disabled />
+                            <label for="receiptNumber">Factura o Comprobante</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
                         
                         <div class="input-field col s6">
                             <i class="material-icons prefix">account_balance</i>
@@ -33,7 +46,14 @@
                             <label>Cuenta de Origen de los fondos</label>
                             <input type="hidden" name="accountId" id="accountId" />
                         </div>
-            
+                   
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpPaymentDate" name="dtpPaymentDate" required>
+                            <label for="dtpPaymentDate">Fecha</label>
+                            <input type="hidden" name="paymentDate" id="paymentDate" />
+                        </div>
+
                         <div class="input-field col s2">
                             <i class="material-icons prefix">monetization_on</i>
                             <input id="paymentOrderAmount" name="paymentOrderAmount" type="number" min="0.00" step="0.01" class="validate" required />
@@ -44,13 +64,6 @@
                             <i class="material-icons prefix">monetization_on</i>
                             <input id="pendingAmount" type="text" value="$ <%= data.paymentReceipt.amount %>" />
                             <label for="pendingAmount">Importe Pendiente</label>
-                        </div>
-                        
-                        <div class="input-field col s2">
-                            <i class="material-icons prefix">date_range</i>
-                            <input type="text" class="datepicker" id="dtpPaymentDate" name="dtpPaymentDate" required>
-                            <label for="dtpPaymentDate">Fecha</label>
-                            <input type="hidden" name="paymentDate" id="paymentDate" />
                         </div>
 
                         <div id="accountInfoDiv" class="input-field col s12">
@@ -123,8 +136,8 @@
                 this.doneBtn.removeEventListener('click', Done.bind(that))
             },
             onSelect: function (selectedDate) {
-                if (this.el.id === 'dtpEmissionDate') {
-                    document.getElementById('emissionDate').value = this.date.toISOString();
+                if (this.el.id === 'dtpPaymentDate') {
+                    document.getElementById('paymentDate').value = this.date.toISOString();
                 }
             }
         });
@@ -150,7 +163,7 @@
             this.hasEvent = true;
             console.log('Clicked on done btn:', this.doneBtn);
             if (this.date) {
-                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
+                if (this.el.id === 'dtpPaymentDate') { document.getElementById('paymentDate').value = this.date.toISOString(); }
             }
         }
     }
@@ -182,7 +195,7 @@
             paymentOrderAmount.classList.remove("invalid");
         }
             
-        paymentOrderAmount.disabled = true;            
+        paymentOrderAmount.readonly = true;            
         paymentOrderAmount.value = check.amount;
                         
         M.updateTextFields();
@@ -217,7 +230,7 @@
 
         } else {
             checksSelectDiv.hidden = true;
-            paymentOrderAmount.disabled = false;
+            paymentOrderAmount.readonly = false;
             paymentOrderAmount.value = 0;            
             paymentOrderAmount.classList.add("validate");
             paymentOrderAmount.select();

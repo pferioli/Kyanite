@@ -169,7 +169,7 @@
             this.hasEvent = true;
             console.log('Clicked on done btn:', this.doneBtn);
             if (this.date) {
-                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date; }
+                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date.toISOString(); }
             }
         }
     }
