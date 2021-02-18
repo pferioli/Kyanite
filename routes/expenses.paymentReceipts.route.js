@@ -4,7 +4,7 @@ const router = express.Router();
 const paymentReceiptsController = require('../controllers/paymentReceipts.controller');
 
 router.get("/", function (req, res, next) {
-    res.render('expenses/bills/index');
+    res.render('expenses/paymentReceipts/index');
 });
 
 router.post("/", function (req, res, next) {

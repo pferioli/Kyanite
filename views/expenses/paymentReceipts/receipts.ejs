@@ -140,10 +140,10 @@
                                         <i class="material-icons">check_circle</i></a>
                                 <% } %>
 
-                                <a id="buttonDownload" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">cloud_download</i></a>
+                                <a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">cloud_download</i></a>
 
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                    <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                    <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                                 <% } %>
                             </td>
                         </tr>

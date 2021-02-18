@@ -1,0 +1,301 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
+    <div class="table-container">
+        <div class="table-header">
+
+            <span class="table-title">Órdenes de Pago - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+            <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
+            </div>
+            <div id="hide-dt" style="display:none">
+                <table id="datatable" class="table display">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>OP</th>
+                            <th>Proveedor</th>
+                            <th>Factura</th>
+                            <th>Fecha de Emisión</th>
+                            <th>Cuenta</th>
+                            <th>Cheque</th>
+                            <th>Importe</th>
+                            <th>Fecha de Pago</th>
+                            <th>Periodo</th>
+                            <th>Estado</th>
+                            <th>Usuario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < data.paymentOrders.length; i++) { %>
+                        <tr data-id="<%= data.paymentOrders[i].id %>">
+                            <td><%= data.paymentOrders[i].id %></td>
+                            <td><%= data.paymentOrders[i].poNumberFormatted %></td>
+                            <td><%= data.paymentOrders[i].paymentReceipt.supplier.name %></td>
+                            <td>[<%= data.paymentOrders[i].paymentReceipt.receiptType.receiptType %>] <%= data.paymentOrders[i].paymentReceipt.receiptNumber %></td>
+                            <td><%= data.paymentOrders[i].paymentReceipt.emissionDate %></td>
+                            <td><%= data.paymentOrders[i].account.accountType.account %> (ID: <%= data.paymentOrders[i].accountId %>)</td>
+                            <td>
+                                <% if(data.paymentOrders[i].checkId){ %>
+                                    <%= data.paymentOrders[i].checkSplitted.check.number %> (ID: <%= data.paymentOrders[i].checkSplitted.check.id %>-><%= data.paymentOrders[i].checkSplitted.id %>)
+                                <% } %>
+                            </td>
+                            <td>$<%= data.paymentOrders[i].amount %></td>
+                            <td><%= data.paymentOrders[i].paymentDate %></td>
+                            
+                            <td>
+                                <% if(data.paymentOrders[i].billingPeriod.statusId === 0) { %>
+                                <i class="material-icons">calendar_today</i>
+                                <% } %>
+                                <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
+                                <i class="material-icons">lock_open</i>
+                                <% } %>
+                                <% if(data.paymentOrders[i].billingPeriod.statusId === 2) { %>
+                                <i class="material-icons">lock</i>
+                                <% } %>
+                                <% if(data.paymentOrders[i].billingPeriod.statusId === 3) { %>
+                                <i class="material-icons">cancel</i>
+                                <% } %>
+
+                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentOrders[i].billingPeriod.name %></span></a>
+                            </td>
+
+                            <td>
+                                <!--DESHABILITADO-->
+                                <% if(data.paymentOrders[i].statusId === 0) { %>
+                                <i class="material-icons">disabled_by_default</i>
+                                <% } %>
+
+                                <!--PENDIENTE-->
+                                <% if(data.paymentOrders[i].statusId === 1) { %>
+                                <i class="material-icons">assignment</i>
+                                <% } %>
+
+                                <!--EN_PROCESO-->
+                                <% if(data.paymentOrders[i].statusId === 2) { %>
+                                <i class="material-icons">assignment_ind</i>
+                                <% } %>
+
+                                <!--PROCESADO-->
+                                <% if(data.paymentOrders[i].statusId === 3) { %>
+                                <i class="material-icons">assignment_turned_in</i>
+                                <% } %>
+
+                                <!--ANULADO-->
+                                <% if(data.paymentOrders[i].statusId === 4) { %>
+                                <i class="material-icons">assignment_returned</i>
+                                <% } %>
+
+                                <!--PAUSADO-->
+                                <% if(data.paymentOrders[i].statusId === 5) { %>
+                                <i class="material-icons">pending</i>
+                                <% } %>
+                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentOrders[i].status %></span>
+                            </td>
+
+                            <!-- <td><%#= data.paymentOrders[i].status %></td> -->
+
+                            <td><%= data.paymentOrders[i].user.name %></td>                                
+                                
+                            <td>
+                                <a id="button-receipt" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">receipt</i></a>
+                                <a id="button-preview" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">preview</i></a>
+                                <a id="button-print" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">print</i></a>                            
+                                <a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">cloud_download</i></a>
+                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            </td>
+
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row center-align" style="font-size:small" id="lastUpdate"></div>
+        </div>
+
+        <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+        <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
+
+</main>
+
+<%- include ("./modals/delete") %>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+    var handler = 0;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {})
+
+        document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
+    });
+
+    function reloadPage() {
+        const clientId = document.getElementById('clientId').value;
+        const periodId = document.getElementById('periodId').value;
+
+        const redirectUrl = '/expenses/paymentOrders?refresh=' + swRefresh + '&' + 'showAll=' + swStatus;
+
+        var form = $('<form action="' + redirectUrl + '" method="post">' +
+            '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
+            '<input type="hidden" name="periodId" value="' + periodId + '"></input>' +
+            '</form>');
+
+        $('body').append(form);
+        $(form).submit();
+    }
+
+    function deleteDialog(button) {
+        var _elem = document.getElementById('modalDelete');
+        var modal = M.Modal.getInstance(_elem);
+        const message = `[ID: ${button.dataset.id}] - OP #${button.dataset.value}`
+        document.getElementById('modalDeleteMessage').textContent = message;
+        document.getElementById('modalDeleteClientId').value = button.dataset.id;
+        modal.open();
+    };
+
+    $(document).ready(function () {
+
+        $('.search-toggle').click(function () {
+            if ($('.hiddensearch').css('display') == 'none')
+                $('.hiddensearch').slideDown();
+            else
+                $('.hiddensearch').slideUp();
+        });
+
+        var table = $('#datatable').dataTable({
+            dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+            oLanguage: {
+                sSearch: '',
+                sSearchPlaceholder: 'Escriba aqui su búsqueda',
+                sInfo: '_START_ -_END_ de _TOTAL_',
+                sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+                    '<option value="200">200</option>' +
+                    '<option value="500">500</option>' +
+                    '<option value="1000">1000</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select></div>'
+            },
+            columnDefs: [
+                {
+                    targets: -1,
+                    searchable: false,
+                    sortable: false,
+                    className: "left-align",
+                },
+                {
+                    className: "center-align",
+                    targets: 0
+                },
+                {
+                    targets: 7,
+                    type: 'currency',
+                },
+            //     {
+            //         targets: 4,
+            //         visible: true,
+            //         searchable: false,
+            //         render: $.fn.dataTable.render.ellipsis(32, true)
+            //         // render: function (data, type, full, meta) {
+            //         //     return type === 'display' ? '<div title="' + full.description + '">' + data : data;
+            //         // }
+            //     }
+            ],
+
+            colReorder: true,
+            fixedColumns: {
+                leftColumns: 3
+            },
+            pageLength: 200,
+            order: [[0, 'asc']],
+            autowidth: true,
+            scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
+            paging: true,
+            buttons: [
+                {
+                    extend: 'colvis',
+                    text: 'Columnas',
+                },
+                {
+                    extend: 'print',
+                    className: '',
+                    title: '',
+                    // autoPrint: false,
+                    customize: function (win) {
+                        $(win.document.body)
+                            .css('font-size', '10pt')
+                            .prepend(
+                                '<h4>Title Test</h4>',
+                            );
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit',);
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: ':visible(th:not(:last-child))',
+                        search: 'applied',
+                        order: 'applied'
+                    },
+                    customize: function (xlsx) {
+                        var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+                        source.setAttribute('name', 'Clientes');
+                    }
+                },
+                { extend: 'csvHtml5' },
+                { extend: 'copyHtml5' },
+                {
+                    text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+                    extend: 'pdfHtml5',
+                    filename: 'clients',
+                    orientation: 'landscape',     //portrait
+                    pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+                    exportOptions: {
+                        columns: ':visible',
+                        search: 'applied',
+                        order: 'applied'
+                    }
+                }
+            ],
+            fnInitComplete: function () {
+                $('#hide-dt').show();
+                $('#progress').hide();
+            },
+            // "footerCallback": function (row, data, start, end, display) {
+            //     var api = this.api();
+            //     $(api.column(4).footer()).html('prueba');
+            // }
+        });
+    });
+</script>

@@ -37,6 +37,12 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
+        poNumberFormatted: {
+            type: new DataTypes.VIRTUAL(DataTypes.STRING, ['poNumber']),
+            get: function () {
+                return new String("00000000" + this.get('poNumber')).slice(-8);
+            }
+        },
         periodId: {
             allowNull: false,
             type: DataTypes.INTEGER

@@ -71,7 +71,7 @@ module.exports.listAll = async function (req, res) {
 
     const paymentReceipts = await PaymentReceipt.findAll(options);
 
-    res.render('expenses/bills/bills',
+    res.render('expenses/paymentReceipts/receipts',
         {
             menu: CURRENT_MENU,
             data: { client: client, paymentReceipts: paymentReceipts, periods: periods },
@@ -87,7 +87,7 @@ module.exports.showNewForm = async function (req, res) {
             /*include: [{ model: SupplierCategory }],*/
             order: [['name', 'asc']]
         });
-    res.render('expenses/bills/add', { menu: CURRENT_MENU, data: { client, suppliers } });
+    res.render('expenses/paymentReceipts/add', { menu: CURRENT_MENU, data: { client, suppliers } });
 };
 
 module.exports.addNew = async function (req, res, next) {
@@ -166,7 +166,7 @@ module.exports.showNewPOForm = async function (req, res) {
 
     const clientAccounts = await Account.findAll({ include: [{ model: AccountType }], where: { clientId: paymentReceipt.client.id } });
 
-    res.render('expenses/bills/createPO', { menu: CURRENT_MENU, data: { client: paymentReceipt.client, paymentReceipt, clientAccounts } });
+    res.render('expenses/paymentReceipts/createPO', { menu: CURRENT_MENU, data: { client: paymentReceipt.client, paymentReceipt, clientAccounts } });
 };
 
 module.exports.createPO = async function (req, res) {
