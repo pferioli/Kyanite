@@ -29,6 +29,7 @@ const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_ME
 const PaymentReceiptStatus = require('../utils/statusMessages.util').PaymentReceipt;
 const PaymentOrderStatus = require('../utils/statusMessages.util').PaymentOrder;
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
+const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
 module.exports.listAll = async function (req, res) {
 
@@ -77,6 +78,43 @@ module.exports.listAll = async function (req, res) {
             data: { client: client, paymentReceipts: paymentReceipts, periods: periods },
             params: { showAll: showAll, autoRefresh: autoRefresh }
         });
+};
+
+
+module.exports.showEditForm = async function (req, res) {
+
+    const receiptId = req.params.receiptId;
+
+    const paymentReceipt = await PaymentReceipt.findByPk(receiptId,
+        {
+            include: [{ model: Client }, { model: Supplier, include: [{ model: SupplierCategory }] }, { model: BillingPeriod }, { model: ReceiptType },
+            { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
+        });
+
+    const suppliers = await Supplier.findAll(
+        {
+            /*include: [{ model: SupplierCategory }],*/
+            order: [['name', 'asc']]
+        });
+
+    if (paymentReceipt.billingPeriod.statusId === BillingPeriodStatus.eStatus.get('opened').value) {
+        res.render('expenses/paymentReceipts/edit', { menu: CURRENT_MENU, data: { client: paymentReceipt.client, paymentReceipt, suppliers } });
+    } else {
+
+        req.flash("error", "La factura que quiere modificar pertenece a un período finalizado");
+
+        res.redirect('/expenses/paymentReceipts/client/' + paymentReceipt.client.id);
+    }
+};
+
+
+module.exports.info = async function (req, res) {
+
+    const receiptId = req.params.receiptId;
+
+    const paymentReceipt = await Client.findByPk(receiptId);
+
+    res.render('expenses/paymentReceipts/info', { menu: CURRENT_MENU, data: { paymentReceipt } });
 };
 
 module.exports.showNewForm = async function (req, res) {

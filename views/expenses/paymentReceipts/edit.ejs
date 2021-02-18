@@ -2,10 +2,10 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12" method="post" action='/expenses/paymentReceipts/client/<%=data.client.id%>/new' enctype="multipart/form-data">
+        <form class="col s12" method="post" action='/expenses/paymentReceipts/edit/<%=data.paymentReceipt.id%>' enctype="multipart/form-data">
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title">Ingrese una nueva factura o comprobante</span>
+                    <span class="card-title">Modifique la factura o comprobante</span>
                     <div class="row" style="margin-top: 20px;">
                         <div class="input-field col s9">
                             <i class="material-icons prefix">location_city</i>
@@ -24,9 +24,9 @@
                         <div class="input-field col s9">
                             <i class="material-icons prefix">storefront</i>
                             <select id="supplierSelect">
-                                <option value="" disabled selected>Seleccione un proveedor</option>
                                 <% for(var i=0; i < data.suppliers.length; i++) { %>
-                                    <option value="<%=data.suppliers[i].id%>"><%= data.suppliers[i].name %></option>
+                                    <option value="<%=data.suppliers[i].id%>"
+                                        <% if(data.suppliers[i].id === data.paymentReceipt.supplierId) { %> selected <% } %>><%= data.suppliers[i].name %></option>
                                 <% } %>
                             </select>
                             <label>Nombre del Proveedor</label>
@@ -34,7 +34,7 @@
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">category</i>
-                            <input id="supplierCategory" name="supplierCategory" type="text" />
+                            <input id="supplierCategory" name="supplierCategory" type="text" value="<%= data.paymentReceipt.supplier.supplierCategory.name %>" />
                             <label for="name">Rubro</label>
                         </div>
                     </div>
@@ -44,24 +44,23 @@
                             <i class="material-icons prefix">point_of_sale</i>
                             <select id="receiptTypeSelect"></select>
                             <label>Tipo de Factura</label>
-                            <input type="hidden" name="receiptTypeId" id="receiptTypeId" />
+                            <input type="hidden" name="receiptTypeId" id="receiptTypeId" value="<%=data.paymentReceipt.receiptType.id%>" />
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">receipt_long</i>
-                            <input id="receiptNumber" name="receiptNumber" type="text" class="validate" required />
+                            <input id="receiptNumber" name="receiptNumber" type="text" class="validate" value="<%= data.paymentReceipt.receiptNumber %>" required />
                             <label for="name">Número de Factura</label>
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">monetization_on</i>
-                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" value="<%= data.paymentReceipt.amount %>" required />
                             <label for="amount">Importe</label>
                         </div>
                         <div class="input-field col s2">
                             <i class="material-icons prefix">date_range</i>
-                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
+                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" value="<%=data.paymentReceipt.emissionDate%>" required>
                             <label for="dtpEmitted">Emitida</label>
-                            <input type="hidden" name="emissionDate" id="emissionDate" />
-
+                            <input type="hidden" name="emissionDate" id="emissionDate" value="<%=data.paymentReceipt.emissionDate%>"/>
                         </div>
                     </div>
 
@@ -94,14 +93,13 @@
                     <div class="row">
                         <div class="input-field col s12">
                             <i class="material-icons prefix">comments</i>
-                            <textarea id="description" name="description" class="materialize-textarea" required></textarea>
+                            <textarea id="description" name="description" class="materialize-textarea" value="<%=data.paymentReceipt.description%>" required></textarea>
                             <label for="description">Detalle del servicio o de la factura</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="card-action right-align">
-                    <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
                     <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
                 </div>
@@ -124,6 +122,8 @@
 
 <script>
 
+    const d = htmlDecode("<%=data.paymentReceipt.emissionDate%>").split("-");
+    
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
@@ -147,16 +147,39 @@
                 if (this.el.id === 'dtpEmissionDate') {
                     document.getElementById('emissionDate').value = this.date.toISOString();
                 }
-            }
+            },
+            defaultDate: new Date(d[0],d[1]-1,d[2]),
+            setDefaultDate: true
         });
 
         elems = document.querySelectorAll('.modal');
         instances = M.Modal.init(elems, {});
 
-        populateAccountingGroups('accountingGroupSelect');
-        populateReceiptTypes('receiptTypeSelect');
-
         getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+
+        populateAccountingGroups('accountingGroupSelect', '<%= data.paymentReceipt.accountingImputation.accountingGroup.id %>');
+
+        populateImputations('accountingImputationSelect', '<%= data.paymentReceipt.accountingImputation.accountingGroup.id %>', '<%= data.paymentReceipt.accountingImputation.id %>');
+
+        populateReceiptTypes('receiptTypeSelect',"<%=data.paymentReceipt.receiptType.id%>");
+
+        document.getElementById("supplierSelect").onchange = function (e) {
+            document.getElementById("supplierId").value = e.target.value;
+            getSupplierCategory(evt.target.value);
+        };
+        
+        let receiptTypeSelect = document.getElementById("receiptTypeSelect").onchange = function (evt) {
+            document.getElementById("receiptTypeId").value = evt.target.value;
+        };
+
+        let accountingGroupSelect = document.getElementById("accountingGroupSelect").onchange = function (evt) {
+            document.getElementById("accountingGroupId").value = evt.target.value;
+            populateImputations('accountingImputationSelect', evt.target.value);
+        };
+
+        let accountingImputationSelect = document.getElementById("accountingImputationSelect").onchange = function (evt) {
+            document.getElementById("accountingImputationId").value = evt.target.value;
+        };
     });
 
     function Cancel() {
@@ -176,23 +199,6 @@
     }
 
     $(document).ready(function () {
-        $('textarea#description').characterCounter();
-
-        let supplierSelect = document.getElementById("supplierSelect").onchange = function (evt) {
-            document.getElementById("supplierId").value = evt.target.value;
-            getSupplierCategory(evt.target.value);
-        };
-        let receiptTypeSelect = document.getElementById("receiptTypeSelect").onchange = function (evt) {
-            document.getElementById("receiptTypeId").value = evt.target.value;
-        };
-
-        let accountingGroupSelect = document.getElementById("accountingGroupSelect").onchange = function (evt) {
-            document.getElementById("accountingGroupId").value = evt.target.value;
-            populateImputations('accountingImputationSelect', evt.target.value);
-        };
-
-        let accountingImputationSelect = document.getElementById("accountingImputationSelect").onchange = function (evt) {
-            document.getElementById("accountingImputationId").value = evt.target.value;
-        };
+        $('textarea#description').characterCounter();      
     });  
 </script>

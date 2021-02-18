@@ -1,7 +1,9 @@
-function populateAccountingGroups(fieldID) {
+function populateAccountingGroups(fieldID, selectedId) {
     let selectField = document.getElementById(fieldID);
     selectField.options.length = 0;
-    selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el grupo de cuentas" + "</option>"
+
+    if (selectedId === undefined)
+        selectField.innerHTML = selectField.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el grupo de cuentas" + "</option>"
 
     fetch('/accountingImputations/groups')
         .then(response => {
@@ -16,7 +18,11 @@ function populateAccountingGroups(fieldID) {
             let groups = JSON.parse(response);
 
             for (i = 0; i < groups.length; i++) {
-                selectField.innerHTML = selectField.innerHTML + "<option value=\"" + groups[i].id + "\">" + groups[i].name + "</option>"
+                if (Number.parseInt(selectedId) === groups[i].id) {
+                    selectField.innerHTML = selectField.innerHTML + "<option value=\"" + groups[i].id + "\" selected>" + groups[i].name + "</option>"
+                } else {
+                    selectField.innerHTML = selectField.innerHTML + "<option value=\"" + groups[i].id + "\">" + groups[i].name + "</option>"
+                }
             }
             M.FormSelect.init(selectField, {});
         })
@@ -25,7 +31,7 @@ function populateAccountingGroups(fieldID) {
         });
 }
 
-function populateImputations(fieldID, groupId) {
+function populateImputations(fieldID, groupId, selectedId) {
 
     if ((typeof groupId === 'undefined') || (groupId === '')) return;
 
@@ -45,7 +51,11 @@ function populateImputations(fieldID, groupId) {
             let imputations = JSON.parse(response);
 
             for (i = 0; i < imputations.length; i++) {
-                selectField.innerHTML = selectField.innerHTML + "<option value=\"" + imputations[i].id + "\">" + imputations[i].name + "</option>"
+                if (Number.parseInt(selectedId) === imputations[i].id) {
+                    selectField.innerHTML = selectField.innerHTML + "<option value=\"" + imputations[i].id + "\" selected>" + imputations[i].name + "</option>"
+                } else {
+                    selectField.innerHTML = selectField.innerHTML + "<option value=\"" + imputations[i].id + "\">" + imputations[i].name + "</option>"
+                }
             }
             M.FormSelect.init(selectField, {});
         })

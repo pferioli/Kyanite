@@ -31,6 +31,20 @@ router.post('/client/:clientId/new', [paymentReceiptsController.gcs.multer.singl
     },
 );
 
+router.get('/info/:receiptId', function (req, res, next) {
+    paymentReceiptsController.info(req, res);
+})
+
+router.get('/edit/:receiptId', function (req, res, next) {
+    paymentReceiptsController.showEditForm(req, res);
+})
+
+router.post('/edit/:receiptId', [paymentReceiptsController.gcs.multer.single('attachment')],
+    function (req, res, next) {
+        paymentReceiptsController.edit(req, res, next);
+    },
+);
+
 router.get("/client/:clientId/createPaymentOrder/:receiptId", function (req, res, next) {
     paymentReceiptsController.showNewPOForm(req, res);
 });
