@@ -1,13 +1,12 @@
 <div id="modalDelete" class="modal">
-    <form action="/transfers/delete" method="post">
+    <form action="/expenses/paymentReceipts/delete" method="post">
         <div class="modal-content">
             <div class="row">
-                <h5>Eliminar Transferencia entre cuentas ?</h5>
+                <h5>Eliminar Factura o Comprobante ?</h5>
             </div>
             <div id="modalDeleteMessage" class="center-left"></div>
             <p>Esta tarea no puede ser cancelada, esta seguro que desea continuar ?</p>
-            <input type="hidden" name="transferId" id="modalDeleteTransferId" value="" />
-            <input type="hidden" name="clientId" id="modalDeleteClientId" value="" />
+            <input type="hidden" name="receiptId" id="modalDeleteReceiptId" value="" />
         </div>
         <div class="modal-footer">
             <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>

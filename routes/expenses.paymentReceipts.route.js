@@ -45,6 +45,11 @@ router.post('/edit/:receiptId', [paymentReceiptsController.gcs.multer.single('at
     },
 );
 
+router.post('/delete', function (req, res, next) {
+    paymentReceiptsController.delete(req, res, next);
+},
+);
+
 router.get("/client/:clientId/createPaymentOrder/:receiptId", function (req, res, next) {
     paymentReceiptsController.showNewPOForm(req, res);
 });

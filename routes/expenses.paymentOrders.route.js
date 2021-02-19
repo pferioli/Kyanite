@@ -21,5 +21,16 @@ router.get('/client/:clientId', function (req, res, next) {
     paymentOrdersController.listAll(req, res);
 })
 
+// AJAX CALLS
+
+router.get('/ajax/calculateRemainingBalance/:receiptId', function (req, res, next) {
+    paymentOrdersController.calculateRemainingBalance(req.params.receiptId)
+        .then(balance => {
+            res.send({ balance: balance });
+        })
+        .catch(err => {
+            res.sendStatus(500).send(err)
+        })
+})
 
 module.exports = router;

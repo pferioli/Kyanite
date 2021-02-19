@@ -37,6 +37,8 @@
                     class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
 
                 <a href="/expenses/paymentReceipts/client/<%=data.client.id%>/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                
+                <a href="/expenses/paymentOrders/client/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment_turned_in</i></a>
 
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
@@ -66,7 +68,7 @@
                             <td><a class="blue-text" href="/suppliers/info/<%= data.paymentReceipts[i].supplier.id %>"><%= data.paymentReceipts[i].supplier.name %>
                                 </a>
                             </td>
-                            <td>(<%=data.paymentReceipts[i].receiptType.receiptType%>)
+                            <td>[<%=data.paymentReceipts[i].receiptType.receiptType%>]
                                 <%=data.paymentReceipts[i].receiptNumber%>
                             </td>
                             <td>$<%= data.paymentReceipts[i].amount %></td>
@@ -130,9 +132,9 @@
                             <td><%= data.paymentReceipts[i].user.name %></td>
 
                             <td>
-                                <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                <a href="/expenses/paymentReceipts/edit/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
-                                    <i class="material-icons">edit</i></a>
+                                <% if((data.paymentReceipts[i].statusId === 1)||(data.paymentReceipts[i].statusId === 2)) { %>
+                                    <a href="/expenses/paymentReceipts/edit/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                                        <i class="material-icons">edit</i></a>
                                 <% } %>
 
                                 <% if((data.paymentReceipts[i].statusId === 1)||(data.paymentReceipts[i].statusId === 2)) { %>
@@ -140,10 +142,13 @@
                                         <i class="material-icons">check_circle</i></a>
                                 <% } %>
 
-                                <a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">cloud_download</i></a>
-
+                                <% if(data.paymentReceipts[i].paymentReceiptImage != undefined) { %>
+                                    <a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">cloud_download</i></a>
+                                <% } %>
+                                
                                 <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                    <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                    <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>"  data-clientId="<%=data.client.id%>"
+                                        data-value="<%= data.paymentReceipts[i].supplier.name %> [<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                                 <% } %>
                             </td>
                         </tr>
@@ -161,6 +166,8 @@
         <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
 
 </main>
+
+<%- include ("./modals/delete") %>
 
 <%- include ("../../partials/footer") %>
 
@@ -200,11 +207,12 @@
     }
 
     function deleteDialog(button) {
-        var _elem = document.getElementById('modalDeleteClient');
+        var _elem = document.getElementById('modalDelete');
         var modal = M.Modal.getInstance(_elem);
         const message = `[ID: ${button.dataset.id}] - ${button.dataset.value}`
         document.getElementById('modalDeleteMessage').textContent = message;
-        document.getElementById('modalDeleteClientId').value = button.dataset.id;
+        document.getElementById('modalDeleteReceiptId').value = button.dataset.id;
+
         modal.open();
     };
 

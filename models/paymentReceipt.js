@@ -20,6 +20,8 @@ module.exports = (sequelize, DataTypes) => {
             PaymentReceipt.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
             PaymentReceipt.hasOne(models.accountingImputation, { foreignKey: 'id', sourceKey: 'accountingImputationId' })
             PaymentReceipt.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            PaymentReceipt.hasOne(models.paymentReceiptImage, { foreignKey: 'paymentReceiptId', sourceKey: 'id' })
+
         }
     };
 

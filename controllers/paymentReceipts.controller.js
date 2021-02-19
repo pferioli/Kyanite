@@ -62,7 +62,7 @@ module.exports.listAll = async function (req, res) {
             },
             statusId: { [Op.in]: status }
         },
-        include: [{ model: Supplier }, { model: ReceiptType }, { model: BillingPeriod }, { model: User },
+        include: [{ model: Supplier }, { model: ReceiptType }, { model: BillingPeriod }, { model: User }, { model: PaymentReceiptImage },
         {
             model: AccountingImputation, include: [{ model: AccountingGroup }]
         }],
@@ -72,6 +72,7 @@ module.exports.listAll = async function (req, res) {
 
     const paymentReceipts = await PaymentReceipt.findAll(options);
 
+    //const paymentReceiptImage = await PaymentReceiptImage.findByPk
     res.render('expenses/paymentReceipts/receipts',
         {
             menu: CURRENT_MENU,
@@ -79,7 +80,6 @@ module.exports.listAll = async function (req, res) {
             params: { showAll: showAll, autoRefresh: autoRefresh }
         });
 };
-
 
 module.exports.showEditForm = async function (req, res) {
 
@@ -108,6 +108,99 @@ module.exports.showEditForm = async function (req, res) {
 };
 
 
+module.exports.edit = async function (req, res, next) {
+
+    const receiptId = req.params.receiptId;
+
+    const clientId = req.params.clientId || req.body.clientId;
+
+    try {
+
+        let paymentReceipt = await PaymentReceipt.findByPk(receiptId)
+
+        //TODO: revisar si el importe se modifico respecto del original para hacer las adecuaciones a las OPs
+
+        if ((paymentReceipt.statusId != PaymentReceiptStatus.eStatus.get('pending').value) && (paymentReceipt.statusId != PaymentReceiptStatus.eStatus.get('inprogress').value)) {
+            req.flash("warning", "Solo se permite editar facturas o comprobante en estado \"pendiente\" o \"en proceso\"");
+            res.redirect('/expenses/paymentReceipts/client/' + clientId); return;
+        }
+
+
+        if ((Number.parseFloat(req.body.amount) < paymentReceipt.amount) && (paymentReceipt.statusId === PaymentReceiptStatus.eStatus.get('inprogress').value)) {
+            req.flash("warning", "Ya hay OPs existentes creadas, no se puede modificar a un importe menor");
+            res.redirect('/expenses/paymentReceipts/client/' + clientId); return;
+        }
+
+        paymentReceipt.update({
+            receiptNumber: req.body.receiptNumber,
+            receiptTypeId: req.body.receiptTypeId,
+            emissionDate: req.body.emissionDate,
+            description: req.body.description,
+            accountingImputationId: req.body.accountingImputationId,
+            amount: req.body.amount,
+            supplierId: req.body.supplierId,
+            userId: req.user.id,
+        })
+            .then((updateResult) => {
+
+                req.flash("success", "La factura o comprobante se actualizo exitosamente en la base de datos");
+                winston.info(`User #${req.user.id} updated succesfully payment receipt #${paymentReceipt.id} ${JSON.stringify(paymentReceipt)}`);
+
+                //------------ UPLOAD PAYMENT RECEIPT TO GSC ------------//
+
+                if (req.file) {
+
+                    const receiptImageName = uuidv4();
+
+                    const gcsFileName = `receipts/${receiptImageName}`; //${Date.now()}-${req.file.originalname}
+
+                    const gcsBucketName = `${process.env.GOOGLE_CLOUD_PROJECT}_bucket`;
+
+                    winston.info(`uploading file ${req.file.originalname} to GSC as ${gcsFileName}`);
+
+                    gcs.sendUploadToGCS(req, gcsFileName, gcsBucketName)
+                        .then(async uploadResult => {
+
+                            let paymentReceiptImage = await PaymentReceiptImage.findOne({ where: { paymentReceiptId: paymentReceipt.id } })
+
+                            let paymentReceiptImageAux = {
+                                paymentReceiptId: paymentReceipt.id,
+                                name: req.file.cloudStorageObject,
+                                originalName: req.file.originalname,
+                                authenticatedUrl: req.file.gcsUrl,
+                                fileSize: req.file.size,
+                                userId: req.user.id
+                            }
+
+                            if (paymentReceiptImage) { paymentReceiptImageAux.id = paymentReceiptImage.id }
+
+                            PaymentReceiptImage.upsert(paymentReceiptImageAux)
+                                .then((result) => {
+                                    winston.info(`uploading file ${gcsFileName} to GSC is completed, receiptId: ${result.id} - receiptImageId: ${uploadResult.id}`);
+                                })
+                                .catch((err) => {
+                                    winston.error(`an error ocurred when updating the payment receipt image register in database - ${err}`);
+                                })
+
+                        })
+                        .catch((err) => { winston.error(`An error ocurred while user #${req.user.id} tryed to upload payment receipt file ${req.file.originalname} to GCS - ${err}`); })
+                };
+            })
+            .catch(err => {
+                req.flash("error", "Ocurrio un error y no se pudo modificar el registro de la factura en la base de datos");
+                winston.error(`An error ocurred while user #${req.user.id} tryed to update an existing payment receipt ${JSON.stringify(req.body)} - ${err}`);
+            })
+            .finally(() => {
+                res.redirect('/expenses/paymentReceipts/client/' + clientId);
+            })
+
+    } catch (err) {
+        winston.error(`An error ocurred searching for an existing payment receipt ${JSON.stringify(req.body)} - ${err}`);
+        req.flash("error", "Ocurrio un error y no se pudo modificar el registro de la factura en la base de datos");
+        res.redirect('/expenses/paymentReceipts/client/' + clientId);
+    }
+}
+
 module.exports.info = async function (req, res) {
 
     const receiptId = req.params.receiptId;
@@ -116,6 +209,46 @@ module.exports.info = async function (req, res) {
 
     res.render('expenses/paymentReceipts/info', { menu: CURRENT_MENU, data: { paymentReceipt } });
 };
+
+module.exports.delete = async function (req, res) {
+
+    const receiptId = req.body.receiptId;
+
+    const paymentReceipt = await PaymentReceipt.findByPk(receiptId);
+
+    if (paymentReceipt.statusId != PaymentReceiptStatus.eStatus.get('pending').value) {
+
+        req.flash("warning", "Solamente se pueden eliminar comprobantes o facturas en estado \"Pendiente\"");
+
+        res.redirect('/expenses/paymentReceipts/client/' + paymentReceipt.clientId);
+
+        return;
+
+    } else {
+
+        paymentReceipt.update(
+            {
+                statusId: PaymentReceiptStatus.eStatus.get('deleted').value,
+                userId: req.user.id
+            })
+            .then(() => {
+
+                winston.info(`User #${req.user.id} deleted succesfully payment receipt #${paymentReceipt.id} ${JSON.stringify(paymentReceipt)}`);
+
+                req.flash("success", "El comprobante fue eliminado exitosamente de la base de datos");
+            })
+            .catch(err => {
+                req.flash("error", "Ocurrio un error y no se pudo eliminar el registro de la factura en la base de datos");
+                winston.error(`An error ocurred while user #${req.user.id} tryed to delete a payment receipt ${JSON.stringify(req.body)} - ${err}`);
+
+            })
+            .finally(() => {
+                res.redirect('/expenses/paymentReceipts/client/' + paymentReceipt.clientId);
+            })
+    }
+
+    //winston.info(`delete`);
+}
 
 module.exports.showNewForm = async function (req, res) {
     const clientId = req.params.clientId;
@@ -255,15 +388,15 @@ module.exports.createPO = async function (req, res) {
                         })
                     }
 
-                    let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
-
-                    if ((remainingBalance - paymentOrder.amount) <= 0) {
-                        prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
-                    }
-
                     PaymentReceipt.findByPk(receiptId)
                         .then((paymentReceipt) => {
-                            paymentReceipt.update({ statusId: PaymentReceiptStatus.eStatus.get('processed').value })
+
+                            let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
+
+                            if ((remainingBalance - Number.parseFloat(paymentOrder.amount)) <= 0) {
+                                prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
+                            }
+                            paymentReceipt.update({ statusId: prStatus })
                                 .then(() => {
                                     req.flash("success", `La OP #${poNumber} se genero correctamente en la base de datos`);
                                 })

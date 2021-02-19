@@ -11,6 +11,7 @@
                             <i class="material-icons prefix">location_city</i>
                             <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
                             <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">calendar_today</i>
@@ -30,7 +31,7 @@
                                 <% } %>
                             </select>
                             <label>Nombre del Proveedor</label>
-                            <input type="hidden" name="supplierId" id="supplierId" />
+                            <input type="hidden" name="supplierId" id="supplierId" value="<%=data.paymentReceipt.supplierId%>"/>
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">category</i>
@@ -77,7 +78,7 @@
                                 <option value="" selected disabled>Seleccion Primero el grupo de Cuentas</option>
                             </select>
                             <label>Imputacion Contable</label>
-                            <input type="hidden" name="accountingImputationId" id="accountingImputationId" />
+                            <input type="hidden" name="accountingImputationId" id="accountingImputationId" value="<%= data.paymentReceipt.accountingImputation.id %>" />
                         </div> 
                         <div class="file-field input-field col s4">
                             <div class="btn"><i class="material-icons center">cloud_upload</i>
@@ -93,7 +94,7 @@
                     <div class="row">
                         <div class="input-field col s12">
                             <i class="material-icons prefix">comments</i>
-                            <textarea id="description" name="description" class="materialize-textarea" value="<%=data.paymentReceipt.description%>" required></textarea>
+                            <textarea id="description" name="description" class="materialize-textarea" required><%=data.paymentReceipt.description%></textarea>
                             <label for="description">Detalle del servicio o de la factura</label>
                         </div>
                     </div>
@@ -165,7 +166,7 @@
 
         document.getElementById("supplierSelect").onchange = function (e) {
             document.getElementById("supplierId").value = e.target.value;
-            getSupplierCategory(evt.target.value);
+            getSupplierCategory(e.target.value);
         };
         
         let receiptTypeSelect = document.getElementById("receiptTypeSelect").onchange = function (evt) {

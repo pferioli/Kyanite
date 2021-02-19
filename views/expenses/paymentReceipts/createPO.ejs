@@ -62,7 +62,7 @@
                         
                         <div class="input-field col s2">
                             <i class="material-icons prefix">monetization_on</i>
-                            <input id="pendingAmount" type="text" value="$ <%= data.paymentReceipt.amount %>" />
+                            <input id="pendingAmount" type="text"/>
                             <label for="pendingAmount">Importe Pendiente</label>
                         </div>
 
@@ -108,12 +108,13 @@
 <script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
 <script type="text/javascript" src="/javascripts/accounts.js"></script>
 <script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
+<script type="text/javascript" src="/javascripts/paymentOrders.js"></script>
 
 <script>
 
     var remainingBalance = 0;
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", async function () {
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
 
@@ -142,13 +143,17 @@
             }
         });
 
-        M.updateTextFields();
-
         getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
 
         document.getElementById('accountSelect').onchange = selectAccount;
     
         document.getElementById('checksSelect').onchange = selectCheck;
+
+        const balance = await calculateRemainingBalance("<%=data.paymentReceipt.id%>")
+        document.getElementById('pendingAmount').value = "$" + balance.balance;
+        document.getElementById('paymentOrderAmount').max = balance.balance;
+
+        M.updateTextFields();
 
     });
 

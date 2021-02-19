@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER
         },
         checkId: {
-            allowNull: false,
+            allowNull: true,
             type: DataTypes.INTEGER
         },
         paymentDate: {
