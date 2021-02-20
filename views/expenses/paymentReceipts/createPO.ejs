@@ -48,13 +48,6 @@
                         </div>
                    
                         <div class="input-field col s2">
-                            <i class="material-icons prefix">date_range</i>
-                            <input type="text" class="datepicker" id="dtpPaymentDate" name="dtpPaymentDate" required>
-                            <label for="dtpPaymentDate">Fecha</label>
-                            <input type="hidden" name="paymentDate" id="paymentDate" />
-                        </div>
-
-                        <div class="input-field col s2">
                             <i class="material-icons prefix">monetization_on</i>
                             <input id="paymentOrderAmount" name="paymentOrderAmount" type="number" min="0.00" step="0.01" class="validate" required />
                             <label for="paymentOrderAmount">Importe a pagar</label>
@@ -65,12 +58,20 @@
                             <input id="pendingAmount" type="text"/>
                             <label for="pendingAmount">Importe Pendiente</label>
                         </div>
-
+  
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpPaymentDate" name="dtpPaymentDate" required>
+                            <label for="dtpPaymentDate">Fecha</label>
+                            <input type="hidden" name="paymentDate" id="paymentDate" />
+                        </div>
+                        
                         <div id="accountInfoDiv" class="input-field col s12">
                             <i class="material-icons prefix">info</i>
                             <input id="accountInfo" name="accountInfo" type="text" value="" readonly />
                             <label for="accountInfo">Detalles de la cuenta</label>
                         </div>
+                       
                     </div>
 
                     <div class="row" id="checksSelectDiv" hidden>
@@ -149,12 +150,12 @@
     
         document.getElementById('checksSelect').onchange = selectCheck;
 
-        const balance = await calculateRemainingBalance("<%=data.paymentReceipt.id%>")
-        document.getElementById('pendingAmount').value = "$" + balance.balance;
-        document.getElementById('paymentOrderAmount').max = balance.balance;
+        remainingBalance = await calculateRemainingBalance("<%=data.paymentReceipt.id%>")
+        document.getElementById('pendingAmount').value = "$" + remainingBalance.value;
+        document.getElementById('paymentOrderAmount').max = remainingBalance.value;
+        document.getElementById('paymentOrderAmount').value = remainingBalance.value;
 
         M.updateTextFields();
-
     });
 
     function Cancel() {
@@ -202,8 +203,14 @@
             
         paymentOrderAmount.readonly = true;            
         paymentOrderAmount.value = check.amount;
-                        
+               
         M.updateTextFields();
+        
+        const balance = Number.parseFloat(check.amount - remainingBalance.value);
+
+        if(balance>0){
+            alert("El importe del cheque seleccionado es superior al de la factura o comprobante que esta procesando, el saldo a favor del proveedor es de $" + balance.toFixed(2))
+        }
     }
 
     async function getSelectedAccountDetails(accountId, infoField) {
@@ -236,7 +243,7 @@
         } else {
             checksSelectDiv.hidden = true;
             paymentOrderAmount.readonly = false;
-            paymentOrderAmount.value = 0;            
+            paymentOrderAmount.value = remainingBalance.value; //0;            
             paymentOrderAmount.classList.add("validate");
             paymentOrderAmount.select();
             paymentOrderAmount.focus();

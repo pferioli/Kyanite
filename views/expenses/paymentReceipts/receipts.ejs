@@ -36,9 +36,9 @@
                 <button id="button-reload" onClick="window.location.reload();"
                     class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
 
-                <a href="/expenses/paymentReceipts/client/<%=data.client.id%>/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="/expenses/paymentReceipts/client/<%=data.client.id%>/new" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
                 
-                <a href="/expenses/paymentOrders/client/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment_turned_in</i></a>
+                <a href="/expenses/paymentOrders/client/<%=data.client.id%>" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment_turned_in</i></a>
 
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
@@ -65,12 +65,8 @@
                         <% for(var i=0; i < data.paymentReceipts.length; i++) { %>
                         <tr data-id="<%= data.paymentReceipts[i].id %>">
                             <td><%= data.paymentReceipts[i].id %></td>
-                            <td><a class="blue-text" href="/suppliers/info/<%= data.paymentReceipts[i].supplier.id %>"><%= data.paymentReceipts[i].supplier.name %>
-                                </a>
-                            </td>
-                            <td>[<%=data.paymentReceipts[i].receiptType.receiptType%>]
-                                <%=data.paymentReceipts[i].receiptNumber%>
-                            </td>
+                            <td><a class="blue-text" href="/suppliers/info/<%= data.paymentReceipts[i].supplier.id %>"><%= data.paymentReceipts[i].supplier.name %></a></td>
+                            <td><a class="blue-text" href="/expenses/paymentReceipts/info/<%= data.paymentReceipts[i].id %>">[<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%></a></td>
                             <td>$<%= data.paymentReceipts[i].amount %></td>
                             <td><%= data.paymentReceipts[i].description %></td>
                             <td><%= data.paymentReceipts[i].emissionDate %></td>

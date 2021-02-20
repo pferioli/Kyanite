@@ -26,7 +26,7 @@ router.get('/client/:clientId', function (req, res, next) {
 router.get('/ajax/calculateRemainingBalance/:receiptId', function (req, res, next) {
     paymentOrdersController.calculateRemainingBalance(req.params.receiptId)
         .then(balance => {
-            res.send({ balance: balance });
+            res.send({ value: balance });
         })
         .catch(err => {
             res.sendStatus(500).send(err)

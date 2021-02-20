@@ -393,7 +393,7 @@
         const amount = formatter.format(paymentReceipts.amount).replace(",", "");
         
         newRow.insertCell(0).appendChild(document.createTextNode(paymentReceipts.id));
-        newRow.insertCell(1).appendChild(document.createTextNode(`(${paymentReceipts.receiptType.Type}) ${paymentReceipts.receiptNumber}`));
+        newRow.insertCell(1).appendChild(document.createTextNode(`[${paymentReceipts.receiptType.Type}] ${paymentReceipts.receiptNumber}`));
         newRow.insertCell(2).appendChild(document.createTextNode(paymentReceipts.description));
         newRow.insertCell(3).appendChild(document.createTextNode(amount));        
         

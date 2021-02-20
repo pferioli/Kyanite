@@ -205,9 +205,12 @@ module.exports.info = async function (req, res) {
 
     const receiptId = req.params.receiptId;
 
-    const paymentReceipt = await Client.findByPk(receiptId);
+    const paymentReceipt = await PaymentReceipt.findByPk(receiptId, {
+        include: [{ model: Client }, { model: Supplier, include: [{ model: SupplierCategory }] }, { model: BillingPeriod }, { model: ReceiptType },
+        { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
+    });
 
-    res.render('expenses/paymentReceipts/info', { menu: CURRENT_MENU, data: { paymentReceipt } });
+    res.render('expenses/paymentReceipts/info', { menu: CURRENT_MENU, data: { client: paymentReceipt.client, paymentReceipt } });
 };
 
 module.exports.delete = async function (req, res) {
