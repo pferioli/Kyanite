@@ -45,7 +45,7 @@ module.exports.listAll = async function (req, res) {
     const autoRefresh = (req.query.refresh === undefined || req.query.refresh.toLowerCase() === 'false' ? false : true);
     const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
 
-    const status = (showAll === true) ? [0, 1, 2, 3, 4, 5] : [1, 2];
+    const status = (showAll === true) ? [0, 1, 2, 3, 4, 5] : [1, 2, 3];
 
     let options = {
         where: {
@@ -89,3 +89,24 @@ module.exports.calculateRemainingBalance = async function (paymentReceiptId) {
 
     return parseFloat(paymentReceipt.amount - paymentOrdersTotal);
 }
+
+module.exports.createInvoice = function (req, res) {
+
+    const { createReport } = require("../reports/paymentOrders/paymentOrder.report");
+
+    const clientId = req.params.clientId;
+    const paymentOrderId = req.params.paymentOrderId;
+
+    PaymentOrder.findByPk(paymentOrderId, {
+        include: [
+            { model: PaymentReceipt, include: [{ model: Client }, { model: Supplier }] }, { model: BillingPeriod },
+            { model: User, include: [{ model: Model.userSignature }] }
+        ]
+    })
+        .then(paymentOrder => {
+            createReport(paymentOrder, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+        })
+        .catch(err => {
+            console.error(err);
+        })
+};

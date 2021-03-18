@@ -374,7 +374,7 @@ module.exports.createPO = async function (req, res) {
 
             paymentOrder.update({
                 poNumber: poNumber,
-                statusId: PaymentOrderStatus.eStatus.get('pending').value
+                statusId: PaymentOrderStatus.eStatus.get('processed').value
             })
                 .then(async (paymentOrder) => {
 

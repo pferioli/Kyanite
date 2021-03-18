@@ -21,6 +21,12 @@ router.get('/client/:clientId', function (req, res, next) {
     paymentOrdersController.listAll(req, res);
 })
 
+//REPORTS...
+
+router.get("/client/:clientId/invoice/:paymentOrderId", function (req, res, next) {
+    paymentOrdersController.createInvoice(req, res);
+});
+
 // AJAX CALLS
 
 router.get('/ajax/calculateRemainingBalance/:receiptId', function (req, res, next) {
@@ -32,5 +38,6 @@ router.get('/ajax/calculateRemainingBalance/:receiptId', function (req, res, nex
             res.sendStatus(500).send(err)
         })
 })
+
 
 module.exports = router;

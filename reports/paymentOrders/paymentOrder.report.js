@@ -2,30 +2,36 @@ const PDFDocument = require("pdfkit");
 const path = require("path");
 const dateFormat = require("dateformat");
 
+// const fs = require('fs');
+
 const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
-function createReport(collection, res) {
+function createReport(paymentOrder, res) {
 
     let doc = new PDFDocument({ size: "A4", margin: 50, bufferPages: true });
 
     generateHeader(doc);
-    generateCustomerInformation(doc, collection);
-    const tableConceptsHeight = generateConceptsTable(doc, collection, 240);
-    const tableSecuritiesHeight = generateSecuritiesTable(doc, collection, tableConceptsHeight + 45);
-    generateSignature(doc, collection.user);
+    generateCustomerInformation(doc, paymentOrder);
+    paymentOrderSection(doc, paymentOrder, 180);
+    paymentReceiptSection(doc, paymentOrder, 310);
+
+    //const tablePaymentOrderHeight = generatePaymentOrderTable(doc, paymentOrder, 240);
+
+    // const tableSecuritiesHeight = generateSecuritiesTable(doc, collection, tableConceptsHeight + 45);
+    generateSignature(doc, paymentOrder.user);
     generateFooter(doc);
 
-    const reportName = "cobranza_" + collection.client.internalCode + "_" + collection.homeOwner.property + "_" + collection.receiptNumber + ".pdf"
-    //doc.end();
-    //doc.pipe(fs.createWriteStream(path));
+    const reportName = "op_" + paymentOrder.paymentReceipt.client.internalCode + "_" + paymentOrder.poNumberFormatted + ".pdf"
+    // doc.end();
+    // doc.pipe(fs.createWriteStream(path));
 
     // Set some headers
     res.statusCode = 200;
     res.setHeader('Content-type', 'application/pdf');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    // Header to force download
-    res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
+    // // Header to force download
+    // res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
 
     doc.pipe(res).on('finish', function () {
         console.log('PDF closed');
@@ -38,7 +44,7 @@ function createReport(collection, res) {
 
 // <----- HEADER ----->
 
-function generateHeader(doc, collection) {
+function generateHeader(doc) {
     doc
         .image(path.join(image_folder, "aaii.png"), 50, 45, { width: 50 })
         .fillColor("#444444")
@@ -55,152 +61,65 @@ function generateHeader(doc, collection) {
 
 // <----- CUSTOMER INFORMATION ----->
 
-function generateCustomerInformation(doc, collection) {
+function generateCustomerInformation(doc, paymentOrder) {
     doc
         .fillColor("#444444")
         .fontSize(20)
-        .text("Recibo de cobranza provisoria", 50, 125, { width: 500, align: 'center' });
+        .font("Helvetica")
+        .text("Orden de Pago", 50, 125, { width: 500, align: 'center' })
+}
 
+function paymentOrderSection(doc, paymentOrder, y) {
 
-    const customerInformationTop = 170;
+    const sectionTopOffset = y;
 
-    generateHr(doc, customerInformationTop);
+    doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .text("Detalles de la orden de pago", 50, sectionTopOffset);
+
+    generateHr(doc, sectionTopOffset + 20);
+
+    doc
+        .fontSize(10)
+
+        .font("Helvetica-Bold")
+        .font("Helvetica")
+        .text("Proveedor: ", 50, sectionTopOffset + 35)
+
+        .font("Helvetica-Bold")
+        .text(paymentOrder.paymentReceipt.supplier.name, 105, sectionTopOffset + 35)
+
+        .font("Helvetica")
+        .text("Consorcio: " + paymentOrder.paymentReceipt.client.name, 50, sectionTopOffset + 60)
+
+        .text("Número de Orden:", 50, sectionTopOffset + 85)
+        .text("Código Interno:", 200, sectionTopOffset + 85)
+        .text("Fecha:", 350, sectionTopOffset + 85);
+}
+
+function paymentReceiptSection(doc, paymentOrder, y) {
+
+    const sectionTopOffset = y;
+
+    doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .text("Detalles de la factura o comprobante", 50, sectionTopOffset);
+
+    generateHr(doc, sectionTopOffset + 20);
 
     doc
         .fontSize(10)
         .font("Helvetica")
-        .text("Barrio:", 50, customerInformationTop + 10)
-        .font("Helvetica-Bold")
-        .text(collection.client.name, 110, customerInformationTop + 10)
 
-        .font("Helvetica")
-        .text("Fecha:", 450, customerInformationTop + 10)
-        .text(collection.receiptDate, 490, customerInformationTop + 10)
-        .text("Propiedad:", 50, customerInformationTop + 25)
-        .text(`${collection.homeOwner.property} - ${collection.homeOwner.name}`, 110, customerInformationTop + 25)
-        .text("Recibo:", 450, customerInformationTop + 25)
-        .text(("00000000" + collection.receiptNumber).slice(-8), 490, customerInformationTop + 25)
+        .text("Tipo:", 50, sectionTopOffset + 35)
+        .text("Número:", 200, sectionTopOffset + 35)
+        .text("Fecha Recepcion:", 350, sectionTopOffset + 35)
 
-        .moveDown();
-
-    generateHr(doc, 215);
+        .text("Descripción del servicio:", 50, sectionTopOffset + 60);
 }
 
-// <----- CONCEPTOS ----->
-
-function generateConceptsTable(doc, collection, y) {
-    let i;
-    const invoiceTableTop = y;
-
-    doc
-        .fontSize(10)
-        .font("Helvetica-Bold");
-
-    generateTableRowConcepts(
-        doc,
-        invoiceTableTop,
-        ["Concepto", "Importe"]
-    );
-    generateHr(doc, invoiceTableTop + 20);
-    doc.font("Helvetica");
-
-    for (i = 0; i < collection.Concepts.length; i++) {
-        const item = collection.Concepts[i];
-        const position = invoiceTableTop + (i + 1) * 30;
-
-        generateTableRowConcepts(
-            doc,
-            position,
-            [item.description, formatCurrency(item.amount)]
-        );
-
-        generateHr(doc, position + 20);
-    }
-
-    const subtotalPosition = invoiceTableTop + (i + 1) * 30;
-    doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .text("Subtotal: " + formatCurrency(collection.amountConcepts), 400, subtotalPosition, { align: "right" });
-
-    doc.font("Helvetica");
-
-    return subtotalPosition;
-}
-
-function generateTableRowConcepts(
-    doc,
-    y,
-    rowItem
-) {
-    doc
-        .fontSize(10)
-        .text(rowItem[0], 50, y)
-        .text(rowItem[1], 450, y, { width: 90, align: "right" })
-}
-
-// <----- VALORES ----->
-
-function generateSecuritiesTable(doc, collection, y) {
-    let i;
-    const invoiceTableTop = y;
-
-    doc
-        .fontSize(10)
-        .font("Helvetica-Bold");
-
-    generateTableRowValues(
-        doc,
-        invoiceTableTop,
-        ["Valor", "Cuenta", "Detalle", "Importe"]
-    );
-    generateHr(doc, invoiceTableTop + 20);
-    doc.font("Helvetica");
-
-    for (i = 0; i < collection.Securities.length; i++) {
-        const item = collection.Securities[i];
-        const position = invoiceTableTop + (i + 1) * 30;
-
-        let valueDesc = ""; let description = "";
-
-        switch (collection.Securities[i].type) {
-            case 'EF': { valueDesc = "Efectivo"; description = description = `${item.account.accountType.description}`; } break;
-            case 'DC': { valueDesc = "Depósito en Cuenta"; description = `CBU: ${item.account.cbu}`; } break;
-            case 'CH': { valueDesc = "Cheque"; description = `Nº ${item.checkSplitted.check.number} ($${item.checkSplitted.check.amount}) ${formatDate(new Date(item.checkSplitted.check.paymentDate))}`; } break;
-        }
-
-        generateTableRowValues(
-            doc,
-            position,
-            [valueDesc, item.account.accountType.account, description, formatCurrency(item.amount)]
-        );
-
-        generateHr(doc, position + 20);
-    }
-
-    const subtotalPosition = invoiceTableTop + (i + 1) * 30;
-    doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .text("Subtotal: " + formatCurrency(collection.amountSecurities), 400, subtotalPosition, { align: "right" });
-
-    doc.font("Helvetica");
-
-    return subtotalPosition;
-}
-
-function generateTableRowValues(
-    doc,
-    y,
-    rowItem
-) {
-    doc
-        .fontSize(10)
-        .text(rowItem[0], 50, y)
-        .text(rowItem[1], 160, y)
-        .text(rowItem[2], 220, y)
-        .text(rowItem[3], 450, y, { width: 90, align: "right" })
-}
 // <----- PIE DE PAGINA ----->
 
 function generateFooter(doc) {

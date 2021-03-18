@@ -122,8 +122,10 @@
                             <td>
                                 <a id="button-edit" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">edit</i></a>
                                 <a id="button-preview" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">preview</i></a>
-                                <a id="button-print" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">print</i></a>                            
-                                <a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">cloud_download</i></a>
+                                <a id="button-print" href="/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">print</i></a>                            
+                                
+                                <!--<a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%#=data.paymentOrders[i].id%>"><i class="material-icons">cloud_download</i></a>-->
+
                                 <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                             </td>
 
