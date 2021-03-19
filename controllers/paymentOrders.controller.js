@@ -7,8 +7,11 @@ const PaymentReceipt = Model.paymentReceipt;
 const PaymentReceiptImage = Model.paymentReceiptImage;
 const PaymentOrder = Model.paymentOrder;
 const BillingPeriod = Model.billingPeriod;
+const Bank = Model.bank;
 const Account = Model.account;
 const AccountType = Model.accountType;
+const AccountingImputation = Model.accountingImputation;
+const AccountingGroup = Model.accountingGroup;
 const CheckSplitted = Model.checkSplitted;
 const Check = Model.check;
 const Supplier = Model.supplier;
@@ -99,8 +102,11 @@ module.exports.createInvoice = function (req, res) {
 
     PaymentOrder.findByPk(paymentOrderId, {
         include: [
-            { model: PaymentReceipt, include: [{ model: Client }, { model: Supplier }] }, { model: BillingPeriod },
-            { model: User, include: [{ model: Model.userSignature }] }
+            {
+                model: PaymentReceipt, include: [{ model: Client }, { model: Supplier }, { model: ReceiptType }, { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
+            },
+            { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] }, { model: Account, include: [{ model: AccountType }, { model: Bank }] },
+            { model: CheckSplitted, include: [{ model: Check }] }
         ]
     })
         .then(paymentOrder => {
