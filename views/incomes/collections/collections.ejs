@@ -64,8 +64,20 @@
                     <% for(var i=0; i < data.collections.length; i++) { %>
                         <tr data-id="<%= data.collections[i].id %>">
                             <td><%= data.collections[i].id %></td>
-                            <td><%= data.collections[i].homeOwner.property %></td>
-                            <td><%= data.collections[i].homeOwner.name %></td>
+                            <td>
+                                <%if(data.collections[i].homeOwner){%>
+                                    <%= data.collections[i].homeOwner.property %>
+                                <%} else {%>
+                                    DNI
+                                <%}%>
+                            </td>
+                            <td>
+                                <%if(data.collections[i].homeOwner){%>
+                                    <%= data.collections[i].homeOwner.name %>
+                                <%} else {%>
+                                    Depósito no identificado
+                                <%}%>
+                            </td>
                             <td><%= data.collections[i].receiptNumber %></td>
                             <td><%= data.collections[i].batchNumber %></td>
                             <td>$<%= data.collections[i].amountConcepts %></td>

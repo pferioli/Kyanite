@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER
         },
         propertyId: {
-            allowNull: false,
+            allowNull: true,
             type: DataTypes.INTEGER
         },
         receiptDate: {

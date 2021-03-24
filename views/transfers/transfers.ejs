@@ -57,8 +57,8 @@
                     <tr data-id="<%= data.accountTransfers[i].id %>">
                         <td><%= data.accountTransfers[i].id %></td>
 
-                        <td><%= data.accountTransfers[i].sourceAccount.accountType.account %> [ID:<%= data.accountTransfers[i].sourceAccountId%>]</td>
-                        <td><%= data.accountTransfers[i].destinationAccount.accountType.account %> [ID:<%= data.accountTransfers[i].destinationAccountId%>]</td>
+                        <td><%= data.accountTransfers[i].sourceAccount.accountType.account %> (ID: <%= data.accountTransfers[i].sourceAccountId%>)</td>
+                        <td><%= data.accountTransfers[i].destinationAccount.accountType.account %> (ID: <%= data.accountTransfers[i].destinationAccountId%>)</td>
                         <td>$<%= data.accountTransfers[i].amount %></td>
                         <td><%= data.accountTransfers[i].transferDate %></td>
                         <td><%= data.accountTransfers[i].comments %></td>

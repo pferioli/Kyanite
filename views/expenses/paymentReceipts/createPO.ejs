@@ -4,7 +4,7 @@
     <div class="container" style="margin-top: 50px;">
         <form class="col s12" method="post" action="/expenses/paymentReceipts/client/<%=data.client.id%>/createPaymentOrder/<%=data.paymentReceipt.id%>">
             <div class="card">
-                <div class="card-content">
+                <div class="card-content" id="cardContentDiv">
                     <span class="card-title">Cree una nueva Orden de Pago para una factura o comprobante</span>
                     <div class="row" style="margin-top: 20px;">
                         <div class="input-field col s9">
@@ -85,6 +85,10 @@
                         </div>                        
                     </div>
 
+                    <div id="checkWarningDiv" class="row" hidden>
+                        <p class="red-text center-align" style="font-size: smaller;">Tiene uno o más cheques disponibles para la OP del comprobante seleccionado</p>
+                    </div>
+
                 </div>
 
                 <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
@@ -156,6 +160,12 @@
         document.getElementById('paymentOrderAmount').value = remainingBalance.value;
 
         M.updateTextFields();
+
+        const splittedChecks = await getAvailableSplittedChecks('O', htmlDecode("<%= data.paymentReceipt.id %>"), '0'); // O = PaymentOrder, '0' = Status(Pending)
+
+        if(splittedChecks.length){
+            document.getElementById('checkWarningDiv').hidden=false;
+        }
     });
 
     function Cancel() {
@@ -192,7 +202,7 @@
         document.getElementById('checkId').value = checkId;
 
         const check = await getSplittedCheckInfo(checkId);
-
+            
         const paymentOrderAmount = document.getElementById('paymentOrderAmount');
                         
         paymentOrderAmount.classList.remove("validate");
@@ -235,6 +245,8 @@
         const paymentOrderAmount = document.getElementById('paymentOrderAmount');
 
         if(account.accountType.account === 'VAL') {
+
+            document.getElementById('checkWarningDiv').hidden = true;
 
             await getSplittedChecks(htmlDecode("<%= data.paymentReceipt.id %>"));
         

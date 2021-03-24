@@ -8,6 +8,19 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
+    const clientId = req.body.clientId;
+    const accountsIds = req.body.accountId;
+
+    let redirectUrl = "/movements/client/" + clientId;
+
+    if (accountsIds != undefined) {
+        redirectUrl += "?accountId=" + accountsIds
+    }
+
+    res.redirect(redirectUrl);
+});
+
+router.get("/client/:clientId", function (req, res, next) {
     accountMovementsController.listAll(req, res);
 });
 

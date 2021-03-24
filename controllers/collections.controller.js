@@ -176,24 +176,43 @@ module.exports.addNew = async function (req, res, next) {
                     userId: req.user.id
                 };
 
-                switch (collectionSecurity.type) {
-                    case "EF": { collectionSecurity.accountId = tables.values[index].valueId; } break;
+                if ((collectionSecurity.type === 'EF') || (collectionSecurity.type === 'DC')) {
+                    collectionSecurity.accountId = tables.values[index].valueId;
+                } else if (collectionSecurity.type === 'CH') {
 
-                    case "DC": { collectionSecurity.accountId = tables.values[index].valueId; } break;
+                    const check = await CheckSplitted.findByPk(tables.values[index].valueId, { include: [{ model: Check }] });
+                    check.update({ statusId: SplitCheckStatus.eStatus.get('assigned').value });
+                    collectionSecurity.accountId = check.check.accountId;
+                    collectionSecurity.checkId = check.id;
 
-                    case "CH": {
-                        const check = await CheckSplitted.findByPk(tables.values[index].valueId, { include: [{ model: Check }] });
-
-                        check.update({ statusId: SplitCheckStatus.eStatus.get('assigned').value });
-
-                        collectionSecurity.accountId = check.check.accountId;
-                        collectionSecurity.checkId = check.id;
-                    } break;
+                    //TODO: validar si se completo la utilizacion del cheque
                 }
 
                 collectionSecurity = await CollectionSecurity.create(collectionSecurity);
 
                 winston.info(`the collection security(${collectionSecurity.type}) was saved succesfully - collectionId: ${collection.id} id: ${collectionSecurity.id} `)
+
+                //-----------------------------------------------------------------
+                // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
+                //-----------------------------------------------------------------
+
+                //Si se esta usando cheque cargado en el sistema, viene de una cuenta de "Cheques a depositar" y por
+                //lo tanto ya esta computado el ingreso en la CC y no se debe insertar nuevamente.
+
+                if (collectionSecurity.type != 'CH') {
+
+                    const AccountMovement = require('./accountMovements.controller');
+
+                    const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                    const accountMovement = await AccountMovement.addMovement(clientId, collectionSecurity.accountId, collection.periodId, collectionSecurity.amount,
+                        accountMovementCategory.eStatus.get('INGRESO_COBRANZA').value, collectionSecurity.id, collection.userId)
+
+                    if (accountMovement === null) {
+                        winston.error(`It was not possible to add account movement record for the PO (ID: ${paymentOrder.id})  - ${err}`);
+                        throw new Error("It was not possible to add the collection into the account movements table");
+                    }
+                }
 
             } catch (error) {
 
@@ -603,14 +622,22 @@ module.exports.addNewImportedCollections = async function (req, res) {
 
                 const importCollection = collections[index];
 
+                const importProperty = `${importCollection.propertyType}${importCollection.property}`;
+
                 const property = await HomeOwner.findOne({
                     where: { clientId: client.id, property: `${importCollection.propertyType}${importCollection.property}` }
                 })
 
+                let isUndenfiedDeposit = false;
+
+                if (property === null && importProperty.toUpperCase() === 'UF999') {
+                    isUndenfiedDeposit = true;
+                }
+
                 let collection = {
                     clientId: client.id,
                     periodId: billingPeriod.id,
-                    propertyId: property.id,
+                    propertyId: (isUndenfiedDeposit === false ? property.id : null),
                     receiptDate: importCollection.date,
                     receiptNumber: 0,
                     batchNumber: importCtrl.id,
@@ -646,6 +673,29 @@ module.exports.addNewImportedCollections = async function (req, res) {
 
                 collectionSecurity = await CollectionSecurity.create(collectionSecurity);
 
+                //-----------------------------------------------------------------
+                // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
+                //-----------------------------------------------------------------
+
+                //Si se esta usando cheque cargado en el sistema, viene de una cuenta de "Cheques a depositar" y por
+                //lo tanto ya esta computado el ingreso en la CC y no se debe insertar nuevamente.
+                try {
+                    const AccountMovement = require('./accountMovements.controller');
+
+                    const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                    const accountMovement = await AccountMovement.addMovement(clientId, collectionSecurity.accountId, collection.periodId, collectionSecurity.amount,
+                        accountMovementCategory.eStatus.get('IMPORTACION_COBRANZA').value, collectionSecurity.id, collection.userId)
+
+                } catch (err) {
+
+                    winston.error(`It was not possible to add account movement record for the imported collection (ID: ${collection.id})`);
+
+                    throw new Error("It was not possible to add the imported collection into the account movements table");
+                }
+
+                //assing receiptNumber to collection
+
                 let receiptNumber = await db.sequelize.query(`SELECT nextval('${clientId}','C') as "nextval"`, { type: QueryTypes.SELECT });
 
                 receiptNumber = receiptNumber[0].nextval;
@@ -658,7 +708,7 @@ module.exports.addNewImportedCollections = async function (req, res) {
                 importedRows++;
             }
 
-        } catch (error) {
+        } catch (err) {
             winston.error(`an error ocurred trying to insert imported collections into db - ${err} `);
         } finally {
             importCtrl.statusId = ImportCollectionStatus.eStatus.get('completed').value;

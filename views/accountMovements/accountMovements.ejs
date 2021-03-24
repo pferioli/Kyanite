@@ -28,7 +28,13 @@
 
             <div class="actions">
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a id="button-filter" class="waves-effect btn-flat nopadding" onclick="filterByAccount(this)"><i class="material-icons">filter_list</i></a>
+                
+                <% if(data.isFiltered===false) { %>
+                    <a id="button-filter" class="waves-effect btn-flat nopadding" onclick='filterByAccount(this,"<%=data.isFiltered%>")'><i class="material-icons">filter_list</i></a>
+                <% } else { %>
+                    <a id="button-filter" class="waves-effect btn-flat nopadding" onclick='filterByAccount(this,"<%=data.isFiltered%>")'><i class="material-icons red-text">filter_list</i></a>
+                <% } %>
+                
                 <a href="/movements/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
@@ -41,10 +47,11 @@
                     <tr>
                         <th>ID</th>
                         <th>Categoria</th>
+                        <th>Sentido</th>
                         <th>Importe</th>
-                        <th>Descripcion</th>
                         <th>Cuenta</th>
                         <th>Fecha</th>
+                        <th>Descripcion</th>
                         <th>Periodo</th>
                         <th>Usuario</th>
                         <th>Acciones</th>
@@ -54,13 +61,19 @@
                     <% for(var i=0; i < data.movements.length; i++) { %>
                         <tr data-id="<%= data.movements[i].id %>">
                             <td><%= data.movements[i].id %></td>
-                            <td><%= data.movements[i].category%></td>
+                            <td><%= data.movements[i].categoryName%> [<%= data.movements[i].category%>]</td>
+                             <td>
+                                <% if(Math.sign(data.movements[i].amount) === 1) { %>
+                                <i class="material-icons">add_circle_outline</i>
+                                <% } %>
+                                <% if(Math.sign(data.movements[i].amount) === -1) { %>
+                                <i class="material-icons">remove_circle_outline</i>
+                                <% } %>                                
+                            </td>
                             <td>$ <%= data.movements[i].amount %></td>
-
-                            <td><%= data.movements[i].accountId %></td>
-                            <td></td>
-
+                            <td><%= data.movements[i].account.accountType.account %> (ID: <%= data.movements[i].accountId %>)</td>
                             <td><%= data.movements[i].createdAt %></td>
+                            <td></td>
 
                             <td>
                                 <% if(data.movements[i].billingPeriod.statusId === 0) { %>
@@ -131,13 +144,19 @@
         M.FormSelect.init(selectField, {});
     }
 
-    function filterByAccount(button){
+    function filterByAccount(button, isFiltered){
         
+        const clientId = htmlDecode("<%= data.client.id %>");
+
+        if(isFiltered === "true") {
+            window.location.href = '/movements/client/' + clientId; return;
+        }
+
         var _elem = document.getElementById('modalAccountSelection');
         
         var instances = M.Modal.init(_elem, 
             {   
-                onOpenStart: function(){ clientAccountSelector('accountSelect', htmlDecode("<%= data.client.id %>"))}
+                onOpenStart: function(){ clientAccountSelector('accountSelect', clientId)}
             })
 
         var modal = M.Modal.getInstance(_elem);
@@ -176,7 +195,24 @@
                     searchable: false,
                     sortable: false,
                     className: "left-align",
-                }
+                },
+                {
+                    targets: 3,
+                    type: 'currency',
+                },
+                {
+                    targets: 2,
+                    searchable: false,
+                    sortable: true,
+                    className: "center-align",
+                },
+                {   targets: 5,
+                    render: function (data) {
+                        if (data)
+                            return moment(data).format('DD/MM/YYYY HH:mm:ss');
+                        else return "";
+                    }, 
+                },
             ],
             colReorder: true,
             fixedColumns: {

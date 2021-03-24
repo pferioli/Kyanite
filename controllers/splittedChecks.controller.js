@@ -248,3 +248,18 @@ module.exports.getSplittedCheckById = async function (req, res, next) {
             res.send(splittedCheck)
         });
 }
+
+module.exports.getSplittedCheckByPaymentReceiptId = async function (req, res, next) {
+
+    const paymentReceiptId = req.params.paymentReceiptId;
+
+    CheckSplitted.findAll({ where: { splitType: 'O', paymentReceiptId: paymentReceiptId, statusId: SplitCheckStatus.eStatus.get('pending').value } },
+        { include: [{ model: Check, include: [{ model: Bank, attributes: [['name', 'name']] }] }] })
+        .then(splittedCheck => {
+            res.send(splittedCheck)
+        });
+}
+
+module.exports.checkIsFullyAsigned = async function () {
+    
+}

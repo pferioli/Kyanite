@@ -143,8 +143,26 @@ module.exports.addNew = async function (req, res, next) {
         };
 
         Check.create(check).
-            then(function (result) {
+            then(async function (result) {
+
+                //-----------------------------------------------------------------
+                // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
+                //-----------------------------------------------------------------
+
+                const AccountMovement = require('./accountMovements.controller');
+
+                const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                const accountMovement = await AccountMovement.addMovement(result.clientId, result.accountId, result.periodId, result.amount,
+                    accountMovementCategory.eStatus.get('CHEQUE_EN_CARTERA').value, result.id, result.userId)
+
+                if (accountMovement === null) {
+                    winston.error(`It was not possible to add account movement record for the PO (ID: ${paymentOrder.id})  - ${err}`);
+                    throw new Error("It was not possible to add the collection into the account movements table");
+                }
+
                 winston.info(`User #${req.user.id} created succesfully a new check into account #${result.accountId} ${JSON.stringify(check)} - ${result.id}`)
+
                 req.flash(
                     "success",
                     "Un nuevo cheque fue agregado exitosamente a la base de datos"

@@ -27,8 +27,6 @@ const { v4: uuidv4 } = require('uuid');
 const CURRENT_MENU = 'paymentReceipts'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 const PaymentReceiptStatus = require('../utils/statusMessages.util').PaymentReceipt;
-const PaymentOrderStatus = require('../utils/statusMessages.util').PaymentOrder;
-const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
 module.exports.listAll = async function (req, res) {
@@ -124,7 +122,6 @@ module.exports.edit = async function (req, res, next) {
             req.flash("warning", "Solo se permite editar facturas o comprobante en estado \"pendiente\" o \"en proceso\"");
             res.redirect('/expenses/paymentReceipts/client/' + clientId); return;
         }
-
 
         if ((Number.parseFloat(req.body.amount) < paymentReceipt.amount) && (paymentReceipt.statusId === PaymentReceiptStatus.eStatus.get('inprogress').value)) {
             req.flash("warning", "Ya hay OPs existentes creadas, no se puede modificar a un importe menor");
@@ -345,85 +342,9 @@ module.exports.showNewPOForm = async function (req, res) {
 
 module.exports.createPO = async function (req, res) {
 
-    const clientId = req.params.clientId;
-    const receiptId = req.params.receiptId;
-
     const paymentOrdersController = require('./paymentOrders.controller')
 
-    let remainingBalance = await paymentOrdersController.calculateRemainingBalance(receiptId);
-
-    PaymentOrder.create(
-        {
-            paymentReceiptId: receiptId,
-            poNumber: 0,
-            periodId: req.body.billingPeriodId,
-            accountId: req.body.accountId,
-            checkId: ((req.body.checkId === undefined) || (req.body.checkId === '') ? null : req.body.checkId),
-            paymentDate: req.body.paymentDate,
-            amount: req.body.paymentOrderAmount,
-            statusId: PaymentOrderStatus.eStatus.get('disabled').value,
-            userId: req.user.id
-        })
-        .then(async (paymentOrder) => {
-
-            //PO Number !
-
-            let poNumber = await db.sequelize.query(`SELECT nextval('${clientId}','P') as "nextval"`, { type: QueryTypes.SELECT });
-
-            poNumber = poNumber[0].nextval;
-
-            paymentOrder.update({
-                poNumber: poNumber,
-                statusId: PaymentOrderStatus.eStatus.get('processed').value
-            })
-                .then(async (paymentOrder) => {
-
-                    const checkId = req.body.checkId;
-
-                    if (checkId) {
-
-                        CheckSplitted.findByPk(checkId).then((check) => {
-                            check.update(
-                                { statusId: SplitCheckStatus.eStatus.get('assigned').value })
-                                .then((checkUpdate) => {
-                                    console.log(checkUpdate)
-                                })
-                        })
-                    }
-
-                    PaymentReceipt.findByPk(receiptId)
-                        .then((paymentReceipt) => {
-
-                            let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
-
-                            if ((remainingBalance - Number.parseFloat(paymentOrder.amount)) <= 0) {
-                                prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
-                            }
-                            paymentReceipt.update({ statusId: prStatus })
-                                .then(() => {
-                                    req.flash("success", `La OP #${poNumber} se genero correctamente en la base de datos`);
-                                })
-                                .catch((err) => {
-                                    req.flash("error", "Ocurrio un error y no se pudo actualizar el estado del recibo para la OP en la base de datos");
-                                    winston.error(`An error ocurred while user #${req.user.id} tryed to update the PO number for record id #${paymentOrder.id}  - ${err}`);
-                                })
-                                .finally(() => {
-                                    res.redirect('/expenses/paymentReceipts/client/' + clientId);
-                                })
-                        })
-                })
-                .catch((err) => {
-                    req.flash("error", "Ocurrio un error y no se pudo actualizar el numero de recibo para la OP en la base de datos");
-                    winston.error(`An error ocurred while user #${req.user.id} tryed to update the PO number for record id #${paymentOrder.id}  - ${err}`);
-                    res.redirect('/expenses/paymentReceipts/client/' + clientId);
-                })
-
-        })
-        .catch((err) => {
-            req.flash("error", "Ocurrio un error y no se pudo crear el registro de la OP en la base de datos");
-            winston.error(`An error ocurred while user #${req.user.id} tryed to create a new PO ${JSON.stringify(req.body)} - ${err}`);
-            res.redirect('/expenses/paymentReceipts/client/' + clientId);
-        })
+    paymentOrdersController.createPO(req, res);
 };
 
 //------------- AJAX CALLS -------------//

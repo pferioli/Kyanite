@@ -46,10 +46,28 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.DECIMAL(10, 2)
         },
+        movementId: {
+            allowNull: false,
+            type: DataTypes.INTEGER
+        },
         userId: {
             allowNull: false,
             type: DataTypes.INTEGER
         },
+        categoryName: {
+            type: new DataTypes.VIRTUAL(DataTypes.STRING, ['category']),
+            get: function () {
+                switch (this.get('category')) {
+                    case 'P': return ('Pago a Proveedor');
+                    case 'C': return ('Cobranza');
+                    case 'Q': return ('Cheque');
+                    case 'T': return ('Transferencia');
+                    case 'S': return ('Saldo Período Anterior');
+                    case 'I': return ('Importación de Cobranza');
+                    default: return ('Otro');
+                }
+            },
+        }
     }, {
         sequelize,
         modelName: 'accountMovement',

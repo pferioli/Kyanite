@@ -29,8 +29,8 @@ function createReport(paymentOrder, res) {
     res.setHeader('Content-type', 'application/pdf');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    // // Header to force download
-    // res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
+    // Header to force download
+    res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
 
     doc.pipe(res).on('finish', function () {
         console.log('PDF closed');

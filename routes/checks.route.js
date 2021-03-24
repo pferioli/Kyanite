@@ -71,4 +71,7 @@ router.get("/split/ajax/remainingBalance/:checkId", function (req, res, next) {
     splittedChecksController.getRemainingBalance(req, res);
 });
 
+router.get("/split/ajax/getChecksByPaymentReceipt/:paymentReceiptId", function (req, res, next) {
+    splittedChecksController.getSplittedCheckByPaymentReceiptId(req, res);
+});
 module.exports = router;
