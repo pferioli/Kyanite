@@ -16,6 +16,7 @@ const CheckSplitted = Model.checkSplitted;
 const User = Model.user;
 const CollectionImport = Model.collectionImport;
 const CollectionImportControl = Model.collectionImportControl;
+const UnidentifiedDeposit = Model.unidentifiedDeposit;
 
 const gcs = require('../helpers/gcs.helper'); module.exports = { gcs };
 
@@ -35,6 +36,7 @@ const CollectionStatus = require('../utils/statusMessages.util').Collection;
 const ImportCollectionStatus = require('../utils/statusMessages.util').ImportCollection;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
+const UnidentifiedDepositStatus = require('../utils/statusMessages.util').UnidentifiedDepositStatus;
 
 const Notifications = require('../utils/notifications.util');
 
@@ -628,16 +630,16 @@ module.exports.addNewImportedCollections = async function (req, res) {
                     where: { clientId: client.id, property: `${importCollection.propertyType}${importCollection.property}` }
                 })
 
-                let isUndenfiedDeposit = false;
+                let isUnidentifiedDeposit = false;
 
                 if (property === null && importProperty.toUpperCase() === 'UF999') {
-                    isUndenfiedDeposit = true;
+                    isUnidentifiedDeposit = true;
                 }
 
                 let collection = {
                     clientId: client.id,
                     periodId: billingPeriod.id,
-                    propertyId: (isUndenfiedDeposit === false ? property.id : null),
+                    propertyId: (isUnidentifiedDeposit === false ? property.id : null),
                     receiptDate: importCollection.date,
                     receiptNumber: 0,
                     batchNumber: importCtrl.id,
@@ -702,8 +704,28 @@ module.exports.addNewImportedCollections = async function (req, res) {
 
                 await collection.update({
                     receiptNumber: receiptNumber,
-                    statusId: CollectionStatus.eStatus.get('processed').value,
+                    statusId: (isUnidentifiedDeposit === false ? CollectionStatus.eStatus.get('processed').value : CollectionStatus.eStatus.get('pending').value)
                 });
+
+                //-------------------------------------------------------------
+                // DNI --- > add collection to DNI table
+                //-------------------------------------------------------------
+
+                if (isUnidentifiedDeposit === true) {
+
+                    UnidentifiedDeposit.create({
+                        collectionId: collection.id,
+                        comments: null,
+                        statusId: UnidentifiedDepositStatus.eStatus.get('pending').value,
+                        userId: req.user.id
+                    })
+                        .then(unidentifiedDeposit => {
+                            winston.info(`a DNI (${importProperty}) record was succesfully created for collection id# ${collection.id} `);
+                        })
+                        .catch(err => {
+                            winston.error(`An error ocurred processing unidentified deposit for collection ${collection.id} - ${err}`)
+                        })
+                }
 
                 importedRows++;
             }

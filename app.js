@@ -157,6 +157,8 @@ app.use('/movements', require('./routes/accountMovements.route'));
 
 app.use('/incomes/collections', require('./routes/incomes.collections.route'));
 
+app.use('/incomes/unidentifiedDeposits', require('./routes/incomes.unidentifiedDeposits.route'));
+
 app.use('/expenses/paymentReceipts', require('./routes/expenses.paymentReceipts.route'));
 
 app.use('/expenses/paymentOrders', require('./routes/expenses.paymentOrders.route'));

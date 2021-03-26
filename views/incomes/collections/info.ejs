@@ -33,12 +33,24 @@
                     </div>                                          
                     <div class="input-field col s2">
                         <i class="material-icons prefix">home</i>
-                        <input id="property" type="text" value="<%=data.collection.homeOwner.property%>" readonly />
+                        <input id="property" type="text" 
+                            <% if(data.collection.homeOwner != null) { %>
+                                value="<%=data.collection.homeOwner.property%>" 
+                            <% } else { %>
+                                value="UF999" 
+                            <% } %>
+                        readonly />
                         <label for="property">Propiedad</label>
                     </div>
                     <div class="input-field col s8">
                         <i class="material-icons prefix">face</i>
-                        <input id="homeOwner" type="text" value="<%=data.collection.homeOwner.name%>" readonly />
+                        <input id="homeOwner" type="text" 
+                            <% if(data.collection.homeOwner != null) { %>
+                                value="<%=data.collection.homeOwner.name%>" 
+                            <% } else { %>
+                                value="Depósito No Identificado" 
+                            <% } %>
+                            readonly />
                         <label for="homeOwner">Nombre del Propietario</label>
                     </div>                          
                 </div>    

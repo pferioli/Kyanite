@@ -1,0 +1,246 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
+    <div class="table-container">
+        <div class="table-header">
+            <span class="table-title">Depósitos No Identificados - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+            <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/incomes/collections/client/<%=data.client.id%>" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">payment</i></a>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
+        </div>
+
+        <div id="hide-dt" style="display:none">
+            <table id="datatable" class="table display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cobranza</th>
+                        <th>Importe Conceptos</th>
+                        <th>Importe Valores</th>
+                        <th>Fecha</th>
+                        <th>Período</th>
+                        <th>Estado</th>
+                        <th>Comentarios</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < data.unidentifiedDeposits.length; i++) { %>
+                        <tr data-id="<%= data.unidentifiedDeposits[i].id %>">
+                            <td><%= data.unidentifiedDeposits[i].id %></td>
+                            <td>
+                                <a class="blue-text" href="/incomes/collections/client/<%=data.client.id%>/details/<%= data.unidentifiedDeposits[i].collection.id %>"><%= data.unidentifiedDeposits[i].collection.id %></a>
+                            </td>
+                            <td>$ <%= data.unidentifiedDeposits[i].collection.amountConcepts %></td>
+                            <td>$ <%= data.unidentifiedDeposits[i].collection.amountSecurities %></td>
+                            <td><%= data.unidentifiedDeposits[i].createdAt %></td>
+                           
+                            <td>
+                                <% if(data.unidentifiedDeposits[i].collection.billingPeriod.statusId === 0) { %>
+                                <i class="material-icons">calendar_today</i>
+                                <% } %>
+                                <% if(data.unidentifiedDeposits[i].collection.billingPeriod.statusId=== 1) { %>
+                                <i class="material-icons">lock_open</i>
+                                <% } %>
+                                <% if(data.unidentifiedDeposits[i].collection.billingPeriod.statusId === 2) { %>
+                                <i class="material-icons">lock</i>
+                                <% } %>
+                                <% if(data.unidentifiedDeposits[i].collection.billingPeriod.statusId === 3) { %>
+                                <i class="material-icons">cancel</i>
+                                <% } %>
+
+                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.unidentifiedDeposits[i].collection.billingPeriod.name %></span></a>
+                            </td>
+
+                            <td>
+                                <!--PENDIENTE-->
+                                <% if(data.unidentifiedDeposits[i].statusId===0) { %>
+                                    <i class="material-icons">account_balance_wallet</i>
+                                <% } %>
+
+                                <!--ASIGNADO-->
+                                <% if(data.unidentifiedDeposits[i].statusId===1) { %>
+                                    <i class="material-icons">done</i>
+                                <% } %>
+
+                                <!--ANULADO-->
+                                <% if(data.unidentifiedDeposits[i].statusId===2) { %>
+                                    <i class="material-icons">delete_outline</i>
+                                <% } %>
+
+                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.unidentifiedDeposits[i].status %></span>
+
+                                <%if(data.unidentifiedDeposits[i].comments === null) {%>
+                                    <td></td>
+                                <% } else { %>
+                                    <td><%= data.unidentifiedDeposits[i].comments %></td>
+                                <% } %> 
+
+                                <td><%= data.unidentifiedDeposits[i].user.name %></td>
+                                
+                                <td>
+                                    <% if(data.unidentifiedDeposits[i].statusId===0) { %>
+                                        <a href="/collections/unidentifiedDeposits/client/<%=data.client.id%>/identify/<%=data.unidentifiedDeposits[i].id%>" 
+                                            class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">check_circle</i></a>
+                                    <% } %>
+
+                                </td>
+                            </td>                    
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+
+</main>
+
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {})
+    });
+
+    $(document).ready(function () {
+
+    $('.search-toggle').click(function () {
+        if ($('.hiddensearch').css('display') == 'none')
+            $('.hiddensearch').slideDown();
+        else
+            $('.hiddensearch').slideUp();
+        });
+
+        var table = $('#datatable').dataTable({
+            dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+            oLanguage: {
+                sSearch: '',
+                sSearchPlaceholder: 'Escriba aqui su búsqueda',
+                sInfo: '_START_ -_END_ de _TOTAL_',
+                sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+                    '<option value="200">200</option>' +
+                    '<option value="500">500</option>' +
+                    '<option value="1000">1000</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select></div>'
+                },
+            columnDefs: [
+                {
+                    targets: -1,
+                    searchable: false,
+                    sortable: false,
+                    className: "left-align",
+                },
+                {
+                    className: "center-align",
+                    targets: [0,1]
+                },
+                {
+                    targets: [2,3],
+                    type: 'currency',
+                },
+                {   targets: 4,
+                    render: function (data) {
+                        if (data)
+                            return moment(data).format('DD/MM/YYYY HH:mm:ss');
+                        else return "";
+                    }, 
+                },
+                {
+                    targets: 7,
+                    visible: true,
+                    searchable: false,
+                    render: $.fn.dataTable.render.ellipsis(32, true)
+                },
+            ],
+            colReorder: true,
+            fixedColumns: { leftColumns: 2 },
+            pageLength: 200,
+            order: [[0, 'asc']],
+            autowidth: true,
+            scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
+            paging: true,
+            buttons: [
+                {
+                    extend: 'colvis',
+                    text: 'Columnas',
+                },
+                {
+                    extend: 'print',
+                    className: '',
+                    title: '',
+                    // autoPrint: false,
+                    customize: function (win) {
+                        $(win.document.body)
+                            .css('font-size', '10pt')
+                            .prepend(
+                                '<h4>Title Test</h4>',
+                            );
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit',);
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: ':visible(th:not(:last-child))',
+                        search: 'applied',
+                        order: 'applied'
+                    },
+                    customize: function (xlsx) {
+                        var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+                        source.setAttribute('name', 'Clientes');
+                    }
+                },
+                { extend: 'csvHtml5' },
+                { extend: 'copyHtml5' },
+                {
+                    text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+                    extend: 'pdfHtml5',
+                    filename: 'clients',
+                    orientation: 'landscape',     //portrait
+                    pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+                    exportOptions: {
+                        columns: ':visible',
+                        search: 'applied',
+                        order: 'applied'
+                    }
+                }
+            ],
+            fnInitComplete: function () {
+                $('#hide-dt').show();
+                $('#progress').hide();
+            },
+        });
+    });
+    
+</script>

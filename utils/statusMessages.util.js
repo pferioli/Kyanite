@@ -103,3 +103,17 @@ module.exports.ImportCollection = class {
         return new Enum({ 'stopped': 0, 'started': 1, 'importing': 2, 'processing': 3, 'completed': 4, 'failed': 5, 'cancelled': 6 })
     }
 }
+
+module.exports.UnidentifiedDepositStatus = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["Pendiente", "Asignado", "Anulado"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'pending': 0, 'assigned': 1, 'cancelled': 2 })
+    }
+}
+
