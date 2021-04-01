@@ -33,24 +33,26 @@
                     </div>                                          
                     <div class="input-field col s2">
                         <i class="material-icons prefix">home</i>
-                        <input id="property" type="text" 
-                            <% if(data.collection.homeOwner != null) { %>
-                                value="<%=data.collection.homeOwner.property%>" 
+                        <input id="property" type="text" readonly
+                            <% if (data.collection.Properties.length===0) { %>
+                                value="UF999 (DNI)"
+                            <% } else if (data.collection.Properties.length===1) { %>
+                                value="<%= data.collection.Properties[0].homeOwner.property%>"
                             <% } else { %>
-                                value="UF999" 
                             <% } %>
-                        readonly />
+                         />
                         <label for="property">Propiedad</label>
                     </div>
                     <div class="input-field col s8">
                         <i class="material-icons prefix">face</i>
-                        <input id="homeOwner" type="text" 
-                            <% if(data.collection.homeOwner != null) { %>
-                                value="<%=data.collection.homeOwner.name%>" 
+                        <input id="homeOwner" type="text" readonly
+                             <% if (data.collection.Properties.length===0) { %>
+                                value="Depósito no identificado"
+                            <% } else if (data.collection.Properties.length===1) { %>
+                                value="<%= data.collection.Properties[0].homeOwner.name%>"
                             <% } else { %>
-                                value="Depósito No Identificado" 
-                            <% } %>
-                            readonly />
+                            <% } %>   
+                         />
                         <label for="homeOwner">Nombre del Propietario</label>
                     </div>                          
                 </div>    

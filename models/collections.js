@@ -16,10 +16,10 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
             Collection.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
             Collection.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
-            Collection.hasOne(models.homeOwner, { foreignKey: 'id', sourceKey: 'propertyId' })
             Collection.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
             Collection.hasMany(models.collectionConcept, { foreignKey: 'collectionId', sourceKey: 'id', as: "Concepts" })
             Collection.hasMany(models.collectionSecurity, { foreignKey: 'collectionId', sourceKey: 'id', as: "Securities" })
+            Collection.hasMany(models.collectionProperty, { foreignKey: 'collectionId', sourceKey: 'id', as: "Properties" })
         }
     };
     Collection.init({
@@ -35,10 +35,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         periodId: {
             allowNull: false,
-            type: DataTypes.INTEGER
-        },
-        propertyId: {
-            allowNull: true,
             type: DataTypes.INTEGER
         },
         receiptDate: {

@@ -18,7 +18,11 @@ router.get("/client/:clientId", function (req, res, next) {
     unidentifiedDepositsController.listAll(req, res);
 });
 
-router.get("/client/:clientId/identify/:depositId", function (req, res, next) {
+router.get("/identify/:depositId", function (req, res, next) {
+    unidentifiedDepositsController.showIdentifyDepositForm(req, res);
+});
+
+router.post("/identify/:depositId", function (req, res, next) {
     unidentifiedDepositsController.identifyDeposit(req, res);
 });
 

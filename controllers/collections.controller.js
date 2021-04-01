@@ -7,6 +7,7 @@ const Client = Model.client;
 const Collection = Model.collection;
 const CollectionConcept = Model.collectionConcept;
 const CollectionSecurity = Model.collectionSecurity;
+const CollectionProperty = Model.collectionProperty;
 const BillingPeriod = Model.billingPeriod;
 const HomeOwner = Model.homeOwner;
 const Account = Model.account;
@@ -72,7 +73,9 @@ module.exports.listAll = async function (req, res) {
             },
             statusId: { [Op.in]: status }
         },
-        include: [{ model: HomeOwner }, { model: BillingPeriod }, { model: User }],
+        include: [{ model: BillingPeriod }, { model: User },
+        { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] }
+        ],
     };
 
     const client = await Client.findByPk(clientId);
@@ -88,6 +91,7 @@ module.exports.listAll = async function (req, res) {
 };
 
 module.exports.showNewForm = async function (req, res) {
+
     const clientId = req.params.clientId;
     const client = await Client.findByPk(clientId);
 
@@ -116,7 +120,6 @@ module.exports.addNew = async function (req, res, next) {
         let collection = {
             clientId: clientId,
             periodId: req.body.billingPeriodId,
-            propertyId: req.body.homeOwnerId,
             receiptDate: req.body.emissionDate,
             receiptNumber: 0,
             batchNumber: null,
@@ -131,6 +134,18 @@ module.exports.addNew = async function (req, res, next) {
         collection = await Collection.create(collection)
 
         winston.info(`the collection was saved succesfully with id: ${collection.id} - ${collection}`)
+
+        //TABLE PROPERTIES
+
+        winston.info(`now saving propertyId: ${req.body.homeOwnerId} for collectionId: ${collection.id}`)
+
+        const collectionProperty = await CollectionProperty.create({
+            collectionId: collection.id,
+            propertyId: req.body.homeOwnerId,
+            amount: req.body.amountSecurities,
+            receiptNumber: null,
+            userId: req.user.id
+        })
 
         //TABLE CONCEPTS --> CONCEPTS
 
@@ -258,8 +273,10 @@ module.exports.info = async function (req, res) {
     const client = await Client.findByPk(clientId);
 
     Collection.findByPk(collectionId, {
-        include: [{ model: HomeOwner }, { model: BillingPeriod }, { model: User },
-        { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
+        include: [
+            { model: BillingPeriod }, { model: User },
+            { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
+            { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
     })
         .then(collection => {
             res.render('incomes/collections/info',
@@ -278,37 +295,6 @@ module.exports.info = async function (req, res) {
             winston.error(`An error ocurred while user #${req.user.id} tryed to find collection #${collectionId} details from database - ${err} `)
 
             res.redirect('incomes/collections/client/' + clientId);
-        })
-};
-
-module.exports.createInvoice = function (req, res) {
-
-    const { createReport } = require("../reports/collections/manualCollection.report");
-
-    const clientId = req.params.clientId;
-    const collectionId = req.params.collectionId;
-
-    Collection.findByPk(collectionId, {
-        include: [{ model: Client }, { model: HomeOwner }, { model: BillingPeriod },
-        { model: User, include: [{ model: Model.userSignature }] },
-        { model: CollectionConcept, as: "Concepts", },
-        {
-            model: CollectionSecurity, as: "Securities", include: [
-                {
-                    model: CheckSplitted, include: [{ model: Model.check }]
-                    //where: { checkId: { [Op.ne]: null } }
-                },
-                {
-                    model: Account, include: [{ model: AccountType }, { model: Model.bank }]
-                    //where: { accountId: { [Op.ne]: null } }
-                }]
-        }],
-    })
-        .then(collection => {
-            createReport(collection, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
-        })
-        .catch(err => {
-            console.error(err);
         })
 };
 
@@ -639,7 +625,6 @@ module.exports.addNewImportedCollections = async function (req, res) {
                 let collection = {
                     clientId: client.id,
                     periodId: billingPeriod.id,
-                    propertyId: (isUnidentifiedDeposit === false ? property.id : null),
                     receiptDate: importCollection.date,
                     receiptNumber: 0,
                     batchNumber: importCtrl.id,
@@ -652,6 +637,19 @@ module.exports.addNewImportedCollections = async function (req, res) {
                 };
 
                 collection = await Collection.create(collection)
+
+                if (isUnidentifiedDeposit === false) {
+
+                    const collectionProperty = await CollectionProperty.create({
+                        collectionId: collection.id,
+                        propertyId: property.id,
+                        amount: importCollection.amount,
+                        receiptNumber: null,
+                        userId: req.user.id
+                    })
+                } else {
+                    winston.info(`collection ${collection.id} has no property associated, marked as unidentified deposit (DNI)`);
+                }
 
                 let collectionConcept = {
                     collectionId: collection.id,
@@ -754,7 +752,85 @@ module.exports.addNewImportedCollections = async function (req, res) {
     res.redirect(`/incomes/collections/import/wait/${clientId}?controlId=${controlId}`);
 }
 
-//AJAX
+//-----------------------------------------------------------------
+// INVOICES & REPORTS
+//-----------------------------------------------------------------
+
+module.exports.createInvoice = function (req, res) {
+
+    const { createReport } = require("../reports/collections/manualCollection.report");
+
+    const clientId = req.params.clientId;
+    const collectionId = req.params.collectionId;
+
+    Collection.findByPk(collectionId, {
+        include: [{ model: Client }, { model: BillingPeriod },
+        { model: User, include: [{ model: Model.userSignature }] },
+        { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
+        { model: CollectionConcept, as: "Concepts", },
+        {
+            model: CollectionSecurity, as: "Securities", include: [
+                {
+                    model: CheckSplitted, include: [{ model: Model.check }]
+                    //where: { checkId: { [Op.ne]: null } }
+                },
+                {
+                    model: Account, include: [{ model: AccountType }, { model: Model.bank }]
+                    //where: { accountId: { [Op.ne]: null } }
+                }]
+        }],
+    })
+        .then(collection => {
+            if (collection.Properties.length > 0) {
+                createReport(collection, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+            } else {
+                req.flash("warning", "El deposito seleccionado corresponde a un depósito no identificado (DNI)");
+                res.redirect('/incomes/collections/client/' + clientId);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        })
+};
+
+module.exports.printCollectionReceipts = async function (req, res) {
+
+    const { createReport } = require("../reports/collections/finalCollection.report");
+
+    const clientId = req.params.clientId;
+
+    const billingPeriodId = req.params.periodId;
+
+    const client = await Client.findByPk(clientId);
+
+    Collection.findAll({ where: { statusId: CollectionStatus.eStatus.get('processed').value, periodId: billingPeriodId } }, {
+        include: [{ model: Client }, { model: BillingPeriod },
+        { model: User, include: [{ model: Model.userSignature }] },
+        { model: User, include: [{ model: Model.userSignature }] },
+        { model: CollectionConcept, as: "Concepts", },
+        {
+            model: CollectionSecurity, as: "Securities", include: [
+                {
+                    model: CheckSplitted, include: [{ model: Model.check }]
+                    //where: { checkId: { [Op.ne]: null } }
+                },
+                {
+                    model: Account, include: [{ model: AccountType }, { model: Model.bank }]
+                    //where: { accountId: { [Op.ne]: null } }
+                }]
+        }],
+    })
+        .then(collections => {
+            //createReport(collections, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
+//-----------------------------------------------------------------
+// AJAX
+//-----------------------------------------------------------------
 
 module.exports.checkImportProcess = function (req, res) {
 

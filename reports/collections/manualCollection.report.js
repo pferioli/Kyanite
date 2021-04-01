@@ -15,7 +15,7 @@ function createReport(collection, res) {
     generateSignature(doc, collection.user);
     generateFooter(doc);
 
-    const reportName = "cobranza_" + collection.client.internalCode + "_" + collection.homeOwner.property + "_" + collection.receiptNumber + ".pdf"
+    const reportName = "cobranza_" + collection.client.internalCode + "_" + collection.Properties[0].homeOwner.property + "_" + collection.receiptNumber + ".pdf"
     //doc.end();
     //doc.pipe(fs.createWriteStream(path));
 
@@ -77,7 +77,7 @@ function generateCustomerInformation(doc, collection) {
         .text("Fecha:", 450, customerInformationTop + 10)
         .text(collection.receiptDate, 490, customerInformationTop + 10)
         .text("Propiedad:", 50, customerInformationTop + 25)
-        .text(`${collection.homeOwner.property} - ${collection.homeOwner.name}`, 110, customerInformationTop + 25)
+        .text(`${collection.Properties[0].homeOwner.property} - ${collection.Properties[0].homeOwner.name}`, 110, customerInformationTop + 25)
         .text("Recibo:", 450, customerInformationTop + 25)
         .text(("00000000" + collection.receiptNumber).slice(-8), 490, customerInformationTop + 25)
 

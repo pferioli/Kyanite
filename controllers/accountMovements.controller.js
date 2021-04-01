@@ -4,7 +4,8 @@ const User = Model.user;
 const Client = Model.client;
 const Account = Model.account;
 const AccountType = Model.accountType;
-const AccountMovements = Model.accountMovement;
+const AccountMovement = Model.accountMovement;
+const AccountAdjustment = Model.accountAdjustment;
 const BillingPeriod = Model.billingPeriod;
 
 const Enum = require('enum');
@@ -12,6 +13,8 @@ const Enum = require('enum');
 const winston = require('../helpers/winston.helper');
 
 const CURRENT_MENU = 'accountMovements'; module.exports.CURRENT_MENU = CURRENT_MENU;
+
+const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
 module.exports.AccountMovementsCategories = class {
 
@@ -92,7 +95,7 @@ module.exports.listAll = async function (req, res, next) {
         }, { model: User }],
     };
 
-    AccountMovements.findAll(options).then(function (movements) {
+    AccountMovement.findAll(options).then(function (movements) {
         res.render('accountMovements/accountMovements', {
             menu: CURRENT_MENU,
             data: { movements: movements, client: client, periods: periods, accountId: accountIds, isFiltered: isFiltered },
@@ -100,9 +103,86 @@ module.exports.listAll = async function (req, res, next) {
     });
 };
 
+module.exports.showNewForm = async function (req, res) {
+
+    const clientId = req.params.clientId;
+    const client = await Client.findByPk(clientId);
+
+    const Accounts = await Account.findAll(
+        { where: { clientId: clientId }, include: [{ model: AccountType }] });
+
+    const period = await BillingPeriod.findOne({
+        where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
+    });
+
+    res.render("accountMovements/add", { menu: CURRENT_MENU, data: { client, clientAccounts: Accounts, period } });
+};
+
+module.exports.addNew = async function (req, res, next) {
+
+    const clientId = req.body.clientId;
+
+    const accountId = req.body.accountId;
+
+    let amount = 0;
+
+    if (req.body.radioType.toUpperCase() === 'I') {
+        amount = req.body.amount;
+    } else if (req.body.radioType.toUpperCase() === 'O') {
+        amount = (-1) * req.body.amount;
+    } else {
+
+        winston.error(`An error ocurred while user #${req.user.id} tryed to add a new movement adjustmen, the type is invalid ${req.body.radioType}`)
+
+        req.flash("error", "Ocurrio un error y no se pudo procesar el ajuste de saldo, tipo incorrecto");
+
+        res.redirect("/movements/client/" + clientId); return;
+    }
+
+    AccountAdjustment.create({
+        clientId: clientId,
+        periodId: req.body.billingPeriodId,
+        accountId: accountId,
+        amount: amount,
+        comments: req.body.comments,
+        userId: req.user.id
+    })
+        .then(async (accountAdjustment) => {
+
+            try {
+                const movement = await this.addMovement(clientId, accountId, req.body.billingPeriodId, amount,
+                    this.AccountMovementsCategories.eStatus.get('AJUSTE_SALDO').value, accountAdjustment.id, req.user.id)
+
+                winston.info(`Account Adjustment ${accountAdjustment.id} created succesfully`)
+
+                req.flash("success", `El ajuste de saldo se registro en la cuenta correctamente`)
+
+            } catch (error) {
+                throw error
+            }
+        })
+        .catch((err) => {
+
+            req.flash("error", "Ocurrio un error y no se pudo procesar el ajuste de saldo");
+
+            winston.error(`An error ocurred adding an account adjustment - ${err}`);
+        })
+        .finally(() => {
+
+            let redirectUrl = "/movements/client/" + clientId;
+
+            if (accountId != undefined) {
+                redirectUrl += "?accountId=" + accountId
+            }
+
+            res.redirect(redirectUrl);
+        })
+};
+
+
 module.exports.addMovement = async function (clientId, accountId, periodId, amount, category, refId, userId) {
 
-    return AccountMovements.create({
+    return AccountMovement.create({
         clientId: clientId,
         periodId: periodId,
         accountId: accountId,

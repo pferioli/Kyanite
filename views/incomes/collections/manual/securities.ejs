@@ -253,9 +253,8 @@
 
     function deleteValueTypeItem(button) {
         var row = button.closest("TR");
-        totalValues -= parseInt(row.cells[2].textContent.replace(/[$,]/g, ''))
+        totalValues -= parseFloat(row.cells[4].textContent.replace(/[$,]/g, ''))
         var tableRef = document.getElementById('tableValues');
-        alert(row.rowIndex + ' ' + button.dataset.id)
         tableRef.deleteRow(row.rowIndex);
         updateTotalValues();
     }

@@ -27,7 +27,7 @@
                             <select id="sourceAccountSelect" required disabled>
                                 <option value="" disabled selected>Seleccione la cuenta de Origen</option>
                                 <% for(var i=0; i < data.clientAccounts.length; i++) { %>
-                                    <option value=" <%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                    <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
                                 <% } %>
                             </select>
                             <label>Cuenta de Origen</label>

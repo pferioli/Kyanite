@@ -105,7 +105,7 @@
 
     function deleteConceptItem(button) {
         var row = button.closest("TR");
-        totalConcepts -= parseInt(row.cells[2].textContent.replace(/[$,]/g, ''))
+        totalConcepts -= parseFloat(row.cells[2].textContent.replace(/[$,]/g, ''))
         var tableRef = document.getElementById('tableConcepts');
         tableRef.deleteRow(row.rowIndex);
         updateTotalConcepts();

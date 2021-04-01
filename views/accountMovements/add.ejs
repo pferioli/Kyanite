@@ -1,0 +1,137 @@
+<style>
+    .© {
+      display: inline;
+    }
+</style>
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" method="post" action='/movements/new/<%=data.client.id%>'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Realizar un ajuste de saldo</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="accountSelect" required disabled>
+                                <option value="" disabled selected>Seleccione la cuenta</option>
+                                <% for(var i=0; i < data.clientAccounts.length; i++) { %>
+                                    <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                <% } %>
+                            </select>
+                            <label>Cuenta</label>
+                            <input type="hidden" name="accountId" id="accountId" />
+                        </div>
+
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <label for="amount">Importe</label>
+                        </div>
+
+                        <div class="input-field col s4" >
+                            <div style="display: inline-block; vertical-align: middle; margin-top: 15px; align-content: center;">
+                            <label style="margin-right: 30px;">
+                                <input class="with-gap" name="radioType" type="radio" id="radio_income" value="I" checked />
+                                <span>Ingreso</span>
+                            </label>
+                            <label>
+                                <input class="with-gap" name="radioType" type="radio" id="radio_outcome" value="O"/>
+                                <span>Egreso</span>
+                            </label>
+                            </div>
+                        </div>
+
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="accountInfo" name="accountInfo" type="text" value="" readonly />
+                            <label for="accountInfo">Detalles de la cuenta</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">comments</i>
+                            <textarea id="comments" name="comments" class="materialize-textarea" required></textarea>
+                            <label for="comments">Comentarios</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-action right-align">
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green"><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px;"><i class="material-icons right">cancel</i>Cancelar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+
+<%- include ("../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/homeOwners.js"></script>
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const clientId = document.getElementById('clientId').value
+
+        const billingPeriodId = document.getElementById('billingPeriodId').value;
+
+        if (billingPeriodId) {
+            document.getElementById('accountSelect').disabled = false;
+        }
+
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        M.CharacterCounter.init(document.getElementById("comments"));
+
+        document.getElementById('accountSelect').onchange = async function () {
+            
+            document.getElementById('accountId').value = this.value;
+
+            getSelectedAccountDetails(this.value, 'accountInfo');
+
+            M.updateTextFields();
+        }
+    });
+
+     async function getSelectedAccountDetails(accountId, infoField) {
+
+        const account = await getClientAccountsInfo(accountId);
+
+        let message = "[" + account.accountType.account + "] " + account.accountType.description;
+
+        if (account.accountType.account.includes("CC$") || account.accountType.account.includes("CA$") || account.accountType.account.includes("CCU$") || account.accountType.account.includes("CAU$")) {
+            message = "[" + account.accountType.account + "]" + " - " + account.bank.name;
+            if (account.cbu) { message = message + " / CBU: " + account.cbu };
+            if (account.accountNumber) { message = message + " / CUENTA: " + account.accountNumber };
+            if (account.accountAlias) { message = message + " / ALIAS: " + account.accountAlias };
+        }
+
+        if (account.comments) { message = message + " - " + account.comments; }
+
+        document.getElementById(infoField).value = message; M.updateTextFields();
+    }
+
+</script>

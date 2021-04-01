@@ -24,4 +24,12 @@ router.get("/client/:clientId", function (req, res, next) {
     accountMovementsController.listAll(req, res);
 });
 
+router.get("/new/:clientId", function (req, res, next) {
+    accountMovementsController.showNewForm(req, res);
+});
+
+router.post("/new/:clientId", function (req, res, next) {
+    accountMovementsController.addNew(req, res);
+});
+
 module.exports = router;

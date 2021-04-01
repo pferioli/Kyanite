@@ -1,0 +1,239 @@
+<style>
+    table {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" id="identifyDepositForm" method="post" action='/incomes/unidentifiedDeposits/identify/<%=data.unidentifiedDeposit.id%>'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Asociar depósito no identificado a una o mas propiedades</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
+                        </div>
+                    </div>
+
+                      <div class="row">
+                        <div id="autocompleteInput" class="input-field col s7" autocomplete="off">
+                            <i class="material-icons prefix">home</i>
+                            <input type="text" id="autocomplete-input" class="autocomplete" required>
+                            <label for="autocomplete-input">Ingrese el nombre del propietario o la propiedad</label>
+                            <input type="hidden" name="homeOwnerId" id="homeOwnerId" value="" />
+                            <input type="hidden" name="homeOwner" id="homeOwner" value="" />
+                        </div>
+
+                         <div class="input-field col s2">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <label for="amount">Importe</label>
+                        </div>
+
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="totalAmount" name="totalAmount" type="text" class="validate" value="$ <%=data.unidentifiedDeposit.collection.amountSecurities%>" readonly />
+                            <label for="totalAmount">Importe Total</label>
+                        </div>
+                        
+                       <div class="input-field col s1 center-align">
+                            <button id="buttonProperties" class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewProperty()" ; style="margin-right: 10px;">
+                            <i class="material-icons right">playlist_add</i>Agregar</button>
+                        </div>
+                        
+                    </div>
+
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="col s12">
+                            <table id="tableProperties" class="table centered_table" style="width: 90% !important;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 15%;" data-id="propertyId">ID</th>
+                                        <th style="width: 55%;" data-id="homeOwner">Propiedad</th>
+                                        <th style="width: 20%;" data-id="amount">Importe</th>
+                                        <th style="width: 10%; text-align:center">Remover</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+ 
+                    <div class="row">
+                        <div class="input-field col s12 right-align" style="padding-right: 100px;">
+                            <h6 id="subtotal">Importe Restante: $ <%=data.unidentifiedDeposit.collection.amountSecurities%></h6>
+                            <input type="hidden" name="remainingAmount" id="remainingAmount" />                
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">comments</i>
+                            <textarea id="comments" name="comments" class="materialize-textarea"></textarea>
+                            <label for="comments">Comentarios</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-action right-align">
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" disabled><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px;"><i class="material-icons right">cancel</i>Cancelar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+
+<%- include ("../../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/homeOwners.js"></script>
+
+<script>
+
+    var subtotal = Number.parseFloat("<%=data.unidentifiedDeposit.collection.amountSecurities%>");
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+        M.CharacterCounter.init(document.getElementById("comments"));
+
+        let homeOwners = await getHomeOwnersByClient("<%=data.client.id%>");
+        
+        let data = {};
+
+        for (i = 0; i < homeOwners.length; i++) {
+            data[`${homeOwners[i].property} - ${homeOwners[i].name} [${homeOwners[i].id}]`] = null;
+        }
+
+        var elems = document.querySelectorAll('.autocomplete');
+
+        var instances = M.Autocomplete.init(elems, {
+            minLength: 1, data: data,
+            onAutocomplete: function (e) {
+                var matches = e.match(/\[(.*?)\]/);
+                if (matches) {
+                    document.getElementById('homeOwnerId').value = matches[1];
+                    document.getElementById('homeOwner').value = e;
+                    document.getElementById('amount').value = subtotal; M.updateTextFields();
+                    document.getElementById('amount').select();
+                    document.getElementById('amount').focus();
+                }
+                else {
+                    document.getElementById('homeOwnerId').value = '';
+                    document.getElementById('homeOwner').value = '';
+                }
+
+                M.toast({ html: 'se ha seleccionado la propiedad con ID #' + matches[1] });
+            }
+        });
+
+        document.getElementById("autocompleteInput").addEventListener('input', function (e) {
+            document.getElementById('homeOwnerId').value = '';
+        });
+
+        document.getElementById("identifyDepositForm").addEventListener("submit", validateForm, true);
+    });
+
+    
+    var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        // These options are needed to round to whole numbers if that's what you want.
+        //minimumFractionDigits: 0,
+        //maximumFractionDigits: 0,
+    });
+
+    async function addNewProperty() {
+
+        const homeOwnerId = document.getElementById('homeOwnerId').value
+        const homeOwner = document.getElementById('homeOwner').value
+        const amount = document.getElementById('amount').value;
+
+        let retAmount = addPropertytRow(homeOwnerId, homeOwner, amount)
+        
+        subtotal = subtotal-retAmount;
+
+        updateTotalValues();
+    }
+
+     function updateTotalValues() {
+        document.getElementById('subtotal').textContent = 'Importe Restante: ' + formatter.format(subtotal).replace(",", "");;
+        document.getElementById('remainingAmount').value = subtotal;
+
+        if(subtotal===0){
+            document.getElementById('add_button').disabled = false;
+        } else {
+            document.getElementById('add_button').disabled = true;            
+        }
+    }
+
+     function deletePropertyItem(button) {
+        var row = button.closest("TR");
+        subtotal += parseFloat(row.cells[2].textContent.replace(/[$,]/g, ''))
+        var tableRef = document.getElementById('tableProperties');
+        tableRef.deleteRow(row.rowIndex);
+        updateTotalValues();
+    }
+
+    function addPropertytRow(propertyId, homeOwner, amount) {
+
+        var tableRef = document.getElementById('tableProperties').getElementsByTagName('tbody')[0];
+
+        var newRow = tableRef.insertRow(-1);
+
+        newRow.insertCell(0).appendChild(document.createTextNode(propertyId));
+        newRow.insertCell(1).appendChild(document.createTextNode(homeOwner));
+
+        const collectionAmount = formatter.format(amount).replace(",", "");
+
+        newRow.insertCell(2).appendChild(document.createTextNode(collectionAmount));
+        newRow.insertCell(3).innerHTML = '<a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" ' + 
+                                        'style="display: block; margin: auto;" data-id="' + newRow.rowIndex + '" ' +
+                                        'onClick=deletePropertyItem(this)><i class="material-icons">delete</i></a>'
+        return parseFloat(amount);
+    }
+
+    function validateForm(event) {
+        
+        if(event.submitter.id === 'buttonProperties') { event.preventDefault(); return; };
+        
+        const tProperties = convertTableToJson("tableProperties");
+
+        const tables = {properties: tProperties};
+
+        document.getElementById('tables').value = JSON.stringify(tables);
+        
+        //event.preventDefault(); return;
+    };
+
+    function convertTableToJson(table){
+        let myRows = [];
+        const $headers = $("#" + table + " th");
+        const $rows = $("#" + table + " tbody tr");
+        for(index = 0; index <$rows.length; index++){
+            $cells = $($rows[index]).find("td");
+            myRows[index] = {};
+            for(cellIndex = 0; cellIndex < $cells.length - 1 ; cellIndex++){            
+                hdr=$($headers[cellIndex]).data("id"); //$($headers[cellIndex]).html()                
+                myRows[index][hdr] = $($cells[cellIndex]).html();
+            };
+        };
+        return myRows;
+    };
+
+</script>

@@ -5,6 +5,7 @@ const Model = require('../models')
 
 const Client = Model.client;
 const Collection = Model.collection;
+const CollectionProperty = Model.collectionProperty;
 const CollectionConcept = Model.collectionConcept;
 const CollectionSecurity = Model.collectionSecurity;
 const BillingPeriod = Model.billingPeriod;
@@ -38,7 +39,8 @@ module.exports.listAll = async function (req, res) {
                 {
                     model: Collection,
                     include: [
-                        { model: Client }, { model: BillingPeriod }, { model: HomeOwner },
+                        { model: Client }, { model: BillingPeriod },
+                        { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
                         { model: CollectionConcept, as: "Concepts" },
                         { model: CollectionSecurity, as: "Securities", include: [{ model: Account, include: [{ model: AccountType }] }] }
                     ]
@@ -46,12 +48,40 @@ module.exports.listAll = async function (req, res) {
             ]
         });
 
-res.render('incomes/unidentifiedDeposits/unidentifiedDeposits',
-    {
-        menu: CURRENT_MENU,
-        data: { client: client, unidentifiedDeposits: unidentifiedDeposits }
-    });
+    res.render('incomes/unidentifiedDeposits/unidentifiedDeposits',
+        {
+            menu: CURRENT_MENU,
+            data: { client: client, unidentifiedDeposits: unidentifiedDeposits }
+        });
 };
 
-module.exports.identifyDeposit = async function (req, res) {
+module.exports.showIdentifyDepositForm = async function (req, res) {
+
+    const unidentifiedDeposit = await UnidentifiedDeposit.findByPk(req.params.depositId,
+        { include: [{ model: Collection, include: [{ model: Client }, { model: BillingPeriod }] }] });
+
+    //ofrecer la lista de propiedades para vincular con el deposito
+
+    //deberia ser 1 o mas y vincular cada propiedad con un parcial del importe
+
+    res.render('incomes/unidentifiedDeposits/identify',
+        {
+            menu: CURRENT_MENU,
+            data: { client: unidentifiedDeposit.collection.client, period: unidentifiedDeposit.collection.billingPeriod, unidentifiedDeposit: unidentifiedDeposit }
+        });
 }
+
+module.exports.identifyDeposit = async function (req, res) {
+
+    const depositId = req.params.depositId;
+
+    const clientId = req.body.clientId;
+
+    //pasar la cobranza a PROCESADO
+
+    //pasar el deposito a PROCESADO
+
+
+    res.redirect("/incomes/unidentifiedDeposits/client/" + clientId);
+}
+

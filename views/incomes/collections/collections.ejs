@@ -66,18 +66,22 @@
                         <tr data-id="<%= data.collections[i].id %>">
                             <td><%= data.collections[i].id %></td>
                             <td>
-                                <%if(data.collections[i].homeOwner){%>
-                                    <%= data.collections[i].homeOwner.property %>
-                                <%} else {%>
+                                <% if (data.collections[i].Properties.length===0) { %>
                                     DNI
-                                <%}%>
+                                <% } else if (data.collections[i].Properties.length===1) { %>
+                                    <%= data.collections[i].Properties[0].homeOwner.property %>
+                                <% } else { %>
+                                    <!--SON VARIAS PROPIEDADES DE UN UNICO DEPOSITO-->
+                                <% } %>
                             </td>
                             <td>
-                                <%if(data.collections[i].homeOwner){%>
-                                    <%= data.collections[i].homeOwner.name %>
-                                <%} else {%>
+                                <% if (data.collections[i].Properties.length===0) { %>
                                     Depósito no identificado
-                                <%}%>
+                                <% } else if (data.collections[i].Properties.length===1) { %>
+                                    <%= data.collections[i].Properties[0].homeOwner.name %>
+                                <% } else { %>
+                                    <!--SON VARIAS PROPIEDADES DE UN UNICO DEPOSITO-->
+                                <% } %>
                             </td>
                             <td><%= data.collections[i].receiptNumber %></td>
                             <td><%= data.collections[i].batchNumber %></td>
@@ -143,7 +147,11 @@
 
                             <td>
                                 <a href="/incomes/collections/client/<%=data.client.id%>/details/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">more</i></a>
-                                <a id="buttonReceipt" class="btn-flat btn-small waves-effect waves-light"onclick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collections[i].id%>')"><i class="material-icons">receipt</i></a>
+                                
+                                <% if (data.collections[i].Properties.length != 0) { %>
+                                    <a id="buttonReceipt" class="btn-flat btn-small waves-effect waves-light" onclick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collections[i].id%>')"><i class="material-icons">receipt</i></a>
+                                <% } %>
+                                
                                 <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.collections[i].id%>" data-value="<%= data.collections[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                             </td>
                         </tr>
@@ -236,7 +244,7 @@
                 },
                 {
                     className: "center-align",
-                    targets: 0
+                    targets: [0,1,2,3,4]
                 },
                 {
                     targets: [5,6,7],
