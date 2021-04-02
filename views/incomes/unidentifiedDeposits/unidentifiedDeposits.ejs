@@ -103,6 +103,9 @@
                                     <% if(data.unidentifiedDeposits[i].statusId===0) { %>
                                         <a href="/incomes/unidentifiedDeposits/identify/<%=data.unidentifiedDeposits[i].id%>" 
                                             class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">check_circle</i></a>
+                                        
+                                        <a id="button-notes" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.unidentifiedDeposits[i].id%>" data-client="<%=data.client.id%>" onclick='notesDialog(this)'
+                                            ><i class="material-icons">chat</i></a>
                                     <% } %>
 
                                 </td>
@@ -118,8 +121,11 @@
 
 </main>
 
+<%- include ("./modals/notes") %>
 
 <%- include ("../../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/unidentifiedDeposits.js"></script>
 
 <script>
 
@@ -127,6 +133,45 @@
         var elems = document.querySelectorAll(".modal");
         var instances = M.Modal.init(elems, {})
     });
+
+    async function notesDialog(button) {
+        var _elem = document.getElementById('modalNotes');
+        var modal = M.Modal.getInstance(_elem);
+        
+        const depositId = button.dataset.id;
+
+        document.getElementById('modalDepositId').value = depositId
+        document.getElementById('modalClientId').value = button.dataset.client;
+
+        const modalNotes = document.getElementById('modalNotesTextArea'); modalNotes.value="";
+        
+        const notes = await getNotesByDepositId(depositId)
+
+        for(i=0; i<notes.length; i++) {
+            const note = notes[i]
+            modalNotes.value += `el día ${formatDateTime(note.createdAt)} ${note.user.name} dijo: ${note.comments}\n\n`
+        }
+
+        if(notes.length)
+            modalNotes.value += `\n----------------- FIN -----------------\n`;
+        else
+            modalNotes.value = "nadie ha agregado notas aún, anímate y se el primero";
+        
+        M.updateTextFields();
+        M.textareaAutoResize(modalNotes);
+
+        modal.open();
+    };
+
+    function formatDateTime(datetime) {
+        // const datetimeParts = datetime.split("T")
+        // const strDate = datetimeParts[0];
+        // const strTime = datetimeParts[1].split(".")[0];
+        
+        // return `${strDate} a las ${strTime}`
+        
+        return datetime.replace(",", " a las");
+    }
 
     $(document).ready(function () {
 

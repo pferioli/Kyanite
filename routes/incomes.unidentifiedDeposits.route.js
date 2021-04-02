@@ -26,4 +26,12 @@ router.post("/identify/:depositId", function (req, res, next) {
     unidentifiedDepositsController.identifyDeposit(req, res);
 });
 
+router.get("/ajax/getNotesByDepositId/:depositId", function (req, res, next) {
+    unidentifiedDepositsController.getNotes(req, res);
+});
+
+router.post("/ajax/addNotesByDepositId", function (req, res, next) {
+    unidentifiedDepositsController.addNotes(req, res);
+});
+
 module.exports = router

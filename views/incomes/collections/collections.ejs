@@ -46,6 +46,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Tipo</th>
                         <th>Propiedad</th>
                         <th>Propietario</th>
                         <th>Recibo</th>
@@ -65,24 +66,53 @@
                     <% for(var i=0; i < data.collections.length; i++) { %>
                         <tr data-id="<%= data.collections[i].id %>">
                             <td><%= data.collections[i].id %></td>
+                            
+                            <td>
+                                <% if (data.collections[i].Properties.length===0) { %>
+                                    <i class="material-icons">person_off</i>
+                                <% } else if (data.collections[i].Properties.length===1) { %>
+                                    <i class="material-icons">person</i>
+                                <% } else { %>
+                                    <i class="material-icons">groups</i>
+                                <% } %>
+                            </td>
+                            
                             <td>
                                 <% if (data.collections[i].Properties.length===0) { %>
                                     DNI
                                 <% } else if (data.collections[i].Properties.length===1) { %>
                                     <%= data.collections[i].Properties[0].homeOwner.property %>
                                 <% } else { %>
-                                    <!--SON VARIAS PROPIEDADES DE UN UNICO DEPOSITO-->
+                                    <% let properties = [] %>                                    
+                                    <% for(j=0; j<data.collections[i].Properties.length; j++) { %>
+                                        <% properties.push(data.collections[i].Properties[j].homeOwner.property); %>
+                                    <% } %>
+                                    <%=properties.join(", ");%>
                                 <% } %>
                             </td>
+                            
                             <td>
                                 <% if (data.collections[i].Properties.length===0) { %>
                                     Depósito no identificado
                                 <% } else if (data.collections[i].Properties.length===1) { %>
                                     <%= data.collections[i].Properties[0].homeOwner.name %>
                                 <% } else { %>
-                                    <!--SON VARIAS PROPIEDADES DE UN UNICO DEPOSITO-->
+                                    <% let differentHomeOwners = false; %> 
+                                    <% for (j=0; j<data.collections[i].Properties.length; j++) { %>
+                                        <% for (k=(j+1); k<data.collections[i].Properties.length; k++) { %>
+                                            <% if (data.collections[i].Properties[j].homeOwner.name.localeCompare(data.collections[i].Properties[k].homeOwner.name,'es',{sensitivity: 'base'})!=0) { %>
+                                                <% differentHomeOwners = true; %>
+                                            <% } %>
+                                        <% } %>
+                                    <% } %>
+                                    <% if(differentHomeOwners === false) { %>
+                                        <%= data.collections[i].Properties[0].homeOwner.name %>
+                                    <% } else { %>
+                                        (múltiples propietarios)
+                                    <% } %>
                                 <% } %>
                             </td>
+                            
                             <td><%= data.collections[i].receiptNumber %></td>
                             <td><%= data.collections[i].batchNumber %></td>
                             <td>$<%= data.collections[i].amountConcepts %></td>
@@ -244,14 +274,14 @@
                 },
                 {
                     className: "center-align",
-                    targets: [0,1,2,3,4]
+                    targets: [0,1,2,3,4,5]
                 },
                 {
-                    targets: [5,6,7],
+                    targets: [6,7,8],
                     type: 'currency',
                 },
                 {
-                    targets: 8,
+                    targets: 9,
                     visible: true,
                     searchable: false,
                     render: $.fn.dataTable.render.ellipsis(32, true)
@@ -262,7 +292,7 @@
             ],
             colReorder: true,
             fixedColumns: {
-                leftColumns: 3
+                leftColumns: 4
             },
             pageLength: 200,
             order: [[0, 'asc']],

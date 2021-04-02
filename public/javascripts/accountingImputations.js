@@ -38,7 +38,7 @@ function populateImputations(fieldID, groupId, selectedId) {
     let selectField = document.getElementById(fieldID);
     selectField.options.length = 0;
 
-    fetch('/accountingImputations/byGroup/' + groupId)
+    return fetch('/accountingImputations/byGroup/' + groupId)
         .then(response => {
             if (response.status == 200) {
                 return response.text();
@@ -58,6 +58,8 @@ function populateImputations(fieldID, groupId, selectedId) {
                 }
             }
             M.FormSelect.init(selectField, {});
+
+            return selectField.value
         })
         .catch(err => {
             console.log(err);

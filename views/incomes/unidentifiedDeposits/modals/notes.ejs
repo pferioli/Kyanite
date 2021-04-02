@@ -1,0 +1,54 @@
+<div id="modalNotes" class="modal" style="width:70%;">
+    <form id="modalNotesForm" action="/incomes/unidentifiedDeposits/ajax/addNotesByDepositId" method="post">
+        <div class="modal-content">
+            <div class="row">
+                <h5>Depósitos no Identificados - Notas</h5>
+            </div>
+
+            <input type="hidden" name="depositId" id="modalDepositId" value="" />
+            <input type="hidden" name="clientId" id="modalClientId" value="" />
+
+            <div class="row">
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">chat</i>
+                    <textarea id="modalNotesTextArea" class="materialize-textarea" readonly>nadie ha agregado notas aun</textarea>
+                    <label for="modalNotesTextArea">Bitácora de actividad</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">edit</i>
+                    <input placeholder="escriba aqui su nota" id="modalNewNote" name="modalNewNote" type="text" class="validate" required>                    
+                    <label for="modalNewNote">Nueva Nota</label>
+                </div> 
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="waves-effect waves-green btn tile" type="submit" value="SUBMIT">Agregar Nota</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("modalNotesForm").addEventListener("submit", validateModalForm, true);
+    });
+
+    function validateModalForm(event) {
+       
+        const modalNewNote = document.getElementById("modalNewNote");
+
+        if(modalNewNote.value === "") {
+            event.preventDefault(); return;
+        }
+        console.log(modalNewNote.value);
+
+        var _elem = document.getElementById('modalNotes');
+        var modal = M.Modal.getInstance(_elem);
+        modal.close();
+    };
+
+</script>

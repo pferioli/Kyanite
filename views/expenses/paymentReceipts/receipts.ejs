@@ -63,91 +63,92 @@
                     </thead>
                     <tbody>
                         <% for(var i=0; i < data.paymentReceipts.length; i++) { %>
-                        <tr data-id="<%= data.paymentReceipts[i].id %>">
-                            <td><%= data.paymentReceipts[i].id %></td>
-                            <td><a class="blue-text" href="/suppliers/info/<%= data.paymentReceipts[i].supplier.id %>"><%= data.paymentReceipts[i].supplier.name %></a></td>
-                            <td><a class="blue-text" href="/expenses/paymentReceipts/info/<%= data.paymentReceipts[i].id %>">[<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%></a></td>
-                            <td>$<%= data.paymentReceipts[i].amount %></td>
-                            <td><%= data.paymentReceipts[i].description %></td>
-                            <td><%= data.paymentReceipts[i].emissionDate %></td>
-                            <td><%= data.paymentReceipts[i].accountingImputation.accountingGroup.name %></td>
-                            <td><%= data.paymentReceipts[i].accountingImputation.name %></td>
+                            <tr data-id="<%= data.paymentReceipts[i].id %>">
+                                <td><%= data.paymentReceipts[i].id %></td>
+                                <td><a class="blue-text" href="/suppliers/info/<%= data.paymentReceipts[i].supplier.id %>"><%= data.paymentReceipts[i].supplier.name %></a></td>
+                                <td><a class="blue-text" href="/expenses/paymentReceipts/info/<%= data.paymentReceipts[i].id %>">[<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%></a></td>
+                                <td>$<%= data.paymentReceipts[i].amount %></td>
+                                <td><%= data.paymentReceipts[i].description %></td>
+                                <td><%= data.paymentReceipts[i].emissionDate %></td>
+                                <td><%= data.paymentReceipts[i].accountingImputation.accountingGroup.name %></td>
+                                <td><%= data.paymentReceipts[i].accountingImputation.name %></td>
 
-                            <td>
-                                <% if(data.paymentReceipts[i].billingPeriod.statusId === 0) { %>
-                                <i class="material-icons">calendar_today</i>
-                                <% } %>
-                                <% if(data.paymentReceipts[i].billingPeriod.statusId=== 1) { %>
-                                <i class="material-icons">lock_open</i>
-                                <% } %>
-                                <% if(data.paymentReceipts[i].billingPeriod.statusId === 2) { %>
-                                <i class="material-icons">lock</i>
-                                <% } %>
-                                <% if(data.paymentReceipts[i].billingPeriod.statusId === 3) { %>
-                                <i class="material-icons">cancel</i>
-                                <% } %>
+                                <td>
+                                    <% if(data.paymentReceipts[i].billingPeriod.statusId === 0) { %>
+                                    <i class="material-icons">calendar_today</i>
+                                    <% } %>
+                                    <% if(data.paymentReceipts[i].billingPeriod.statusId=== 1) { %>
+                                    <i class="material-icons">lock_open</i>
+                                    <% } %>
+                                    <% if(data.paymentReceipts[i].billingPeriod.statusId === 2) { %>
+                                    <i class="material-icons">lock</i>
+                                    <% } %>
+                                    <% if(data.paymentReceipts[i].billingPeriod.statusId === 3) { %>
+                                    <i class="material-icons">cancel</i>
+                                    <% } %>
 
-                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].billingPeriod.name %></span></a>
-                            </td>
+                                    <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].billingPeriod.name %></span></a>
+                                </td>
 
-                            <td>
-                                <!--DESHABILITADO-->
-                                <% if(data.paymentReceipts[i].statusId === 0) { %>
-                                <i class="material-icons">disabled_by_default</i>
-                                <% } %>
+                                <td>
+                                    <!--DESHABILITADO-->
+                                    <% if(data.paymentReceipts[i].statusId === 0) { %>
+                                    <i class="material-icons">disabled_by_default</i>
+                                    <% } %>
 
-                                <!--PENDIENTE-->
-                                <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                <i class="material-icons">assignment</i>
-                                <% } %>
+                                    <!--PENDIENTE-->
+                                    <% if(data.paymentReceipts[i].statusId === 1) { %>
+                                    <i class="material-icons">assignment</i>
+                                    <% } %>
 
-                                <!--EN_PROCESO-->
-                                <% if(data.paymentReceipts[i].statusId === 2) { %>
-                                <i class="material-icons">assignment_ind</i>
-                                <% } %>
+                                    <!--EN_PROCESO-->
+                                    <% if(data.paymentReceipts[i].statusId === 2) { %>
+                                    <i class="material-icons">assignment_ind</i>
+                                    <% } %>
 
-                                <!--PROCESADO-->
-                                <% if(data.paymentReceipts[i].statusId === 3) { %>
-                                <i class="material-icons">assignment_turned_in</i>
-                                <% } %>
+                                    <!--PROCESADO-->
+                                    <% if(data.paymentReceipts[i].statusId === 3) { %>
+                                    <i class="material-icons">assignment_turned_in</i>
+                                    <% } %>
 
-                                <!--ANULADO-->
-                                <% if(data.paymentReceipts[i].statusId === 4) { %>
-                                <i class="material-icons">assignment_returned</i>
-                                <% } %>
+                                    <!--ANULADO-->
+                                    <% if(data.paymentReceipts[i].statusId === 4) { %>
+                                    <i class="material-icons">assignment_returned</i>
+                                    <% } %>
 
-                                <!--PAUSADO-->
-                                <% if(data.paymentReceipts[i].statusId === 5) { %>
-                                <i class="material-icons">pending</i>
-                                <% } %>
-                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].status %></span>
-                            </td>
+                                    <!--PAUSADO-->
+                                    <% if(data.paymentReceipts[i].statusId === 5) { %>
+                                    <i class="material-icons">pending</i>
+                                    <% } %>
+                                    <span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentReceipts[i].status %></span>
+                                </td>
 
-                            <!-- <td><%#= data.paymentReceipts[i].status %></td> -->
+                                <!-- <td><%#= data.paymentReceipts[i].status %></td> -->
 
-                            <td><%= data.paymentReceipts[i].user.name %></td>
+                                <td><%= data.paymentReceipts[i].user.name %></td>
 
-                            <td>
-                                <% if((data.paymentReceipts[i].statusId === 1)||(data.paymentReceipts[i].statusId === 2)) { %>
-                                    <a href="/expenses/paymentReceipts/edit/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
-                                        <i class="material-icons">edit</i></a>
-                                <% } %>
+                                <td>
+                                    <% if((data.paymentReceipts[i].statusId === 1)||(data.paymentReceipts[i].statusId === 2)) { %>
+                                        <a href="/expenses/paymentReceipts/edit/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                                            <i class="material-icons">edit</i></a>
+                                    <% } %>
 
-                                <% if((data.paymentReceipts[i].statusId === 1)||(data.paymentReceipts[i].statusId === 2)) { %>
-                                    <a href="/expenses/paymentReceipts/client/<%= data.client.id %>/createPaymentOrder/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
-                                        <i class="material-icons">check_circle</i></a>
-                                <% } %>
+                                    <% if((data.paymentReceipts[i].statusId === 1)||(data.paymentReceipts[i].statusId === 2)) { %>
+                                        <a href="/expenses/paymentReceipts/client/<%= data.client.id %>/createPaymentOrder/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                                            <i class="material-icons">check_circle</i></a>
+                                    <% } %>
 
-                                <% if(data.paymentReceipts[i].paymentReceiptImage != undefined) { %>
-                                    <a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>"><i class="material-icons">cloud_download</i></a>
-                                <% } %>
-                                
-                                <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                    <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>"  data-clientId="<%=data.client.id%>"
-                                        data-value="<%= data.paymentReceipts[i].supplier.name %> [<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
-                                <% } %>
-                            </td>
-                        </tr>
+                                    <% if(data.paymentReceipts[i].paymentReceiptImage != undefined) { %>
+                                        <a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>">
+                                            <i class="material-icons">cloud_download</i></a>
+                                    <% } %>
+                                    
+                                    <% if(data.paymentReceipts[i].statusId === 1) { %>
+                                        <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>"  data-clientId="<%=data.client.id%>"
+                                            data-value="<%= data.paymentReceipts[i].supplier.name %> [<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                    <% } %>
+                                </td>
+                            </tr>
                         <% } %>
                     </tbody>
                 </table>

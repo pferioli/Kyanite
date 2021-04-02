@@ -33,23 +33,23 @@
                             <i class="material-icons prefix">home</i>
                             <input type="text" id="autocomplete-input" class="autocomplete" required>
                             <label for="autocomplete-input">Ingrese el nombre del propietario o la propiedad</label>
-                            <input type="hidden" name="homeOwnerId" id="homeOwnerId" value="" />
-                            <input type="hidden" name="homeOwner" id="homeOwner" value="" />
+                            <input type="hidden" id="homeOwnerId" value="" />
+                            <input type="hidden" id="homeOwner" value="" />
                         </div>
 
                          <div class="input-field col s2">
                             <i class="material-icons prefix">monetization_on</i>
-                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <input id="amount" type="number" min="0.00" step="0.01" class="validate" required />
                             <label for="amount">Importe</label>
                         </div>
 
                         <div class="input-field col s2">
                             <i class="material-icons prefix">monetization_on</i>
-                            <input id="totalAmount" name="totalAmount" type="text" class="validate" value="$ <%=data.unidentifiedDeposit.collection.amountSecurities%>" readonly />
+                            <input id="totalAmount" type="text" class="validate" value="$ <%=data.unidentifiedDeposit.collection.amountSecurities%>" readonly />
                             <label for="totalAmount">Importe Total</label>
                         </div>
                         
-                       <div class="input-field col s1 center-align">
+                        <div class="input-field col s1 center-align">
                             <button id="buttonProperties" class="waves-effect waves-light btn-floating btn-large teal" onclick="addNewProperty()" ; style="margin-right: 10px;">
                             <i class="material-icons right">playlist_add</i>Agregar</button>
                         </div>
@@ -88,6 +88,9 @@
                         </div>
                     </div>
                 </div>
+
+                <input type="hidden" name="tables" id="tables" value="" />
+                <input type="hidden" name="depositId" id="depositId" value="<%=data.unidentifiedDeposit.id%>" />
 
                 <div class="card-action right-align">
                     <button id="add_button" type='submit' class="waves-effect waves-light btn green" disabled><i class="material-icons right">save</i>Guardar</button>
@@ -149,7 +152,6 @@
         document.getElementById("identifyDepositForm").addEventListener("submit", validateForm, true);
     });
 
-    
     var formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',

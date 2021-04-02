@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
             UnidentifiedDeposit.hasOne(models.collection, { foreignKey: 'id', sourceKey: 'collectionId' })
             UnidentifiedDeposit.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            UnidentifiedDeposit.hasMany(models.unidentifiedDepositNote, { foreignKey: 'depositId', sourceKey: 'id' })
         }
     };
     UnidentifiedDeposit.init({
