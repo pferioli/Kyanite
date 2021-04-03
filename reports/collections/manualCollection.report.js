@@ -1,8 +1,9 @@
 const PDFDocument = require("pdfkit");
 const path = require("path");
-const dateFormat = require("dateformat");
 
 const image_folder = path.join(__dirname, "..", "..", "public", "images")
+
+const common = require('../common.report');
 
 function createReport(collection, res) {
 
@@ -10,9 +11,19 @@ function createReport(collection, res) {
 
     generateHeader(doc);
     generateCustomerInformation(doc, collection);
-    const tableConceptsHeight = generateConceptsTable(doc, collection, 240);
+
+    let tableConceptsVerticalOffset = 0;
+
+    if (collection.Properties.length > 1) {
+        const tablePropertiesHeight = generatePropertiesTable(doc, collection, 240); tableConceptsVerticalOffset = tablePropertiesHeight + 45;
+    } else {
+        tableConceptsVerticalOffset = 240;
+    }
+
+    const tableConceptsHeight = generateConceptsTable(doc, collection, tableConceptsVerticalOffset);
     const tableSecuritiesHeight = generateSecuritiesTable(doc, collection, tableConceptsHeight + 45);
-    generateSignature(doc, collection.user);
+
+    common.generateSignature(doc, collection.user, { linesize: 174, startLine: 80, signatureHeight: 735 });
     generateFooter(doc);
 
     const reportName = "cobranza_" + collection.client.internalCode + "_" + collection.Properties[0].homeOwner.property + "_" + collection.receiptNumber + ".pdf"
@@ -25,7 +36,7 @@ function createReport(collection, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
 
     // Header to force download
-    res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
+    //res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
 
     doc.pipe(res).on('finish', function () {
         console.log('PDF closed');
@@ -59,12 +70,12 @@ function generateCustomerInformation(doc, collection) {
     doc
         .fillColor("#444444")
         .fontSize(20)
-        .text("Recibo de cobranza provisoria", 50, 125, { width: 500, align: 'center' });
+        .text("Recibo provisorio de cobranza", 50, 125, { width: 500, align: 'center' });
 
 
     const customerInformationTop = 170;
 
-    generateHr(doc, customerInformationTop);
+    common.generateHr(doc, customerInformationTop);
 
     doc
         .fontSize(10)
@@ -75,15 +86,82 @@ function generateCustomerInformation(doc, collection) {
 
         .font("Helvetica")
         .text("Fecha:", 450, customerInformationTop + 10)
-        .text(collection.receiptDate, 490, customerInformationTop + 10)
-        .text("Propiedad:", 50, customerInformationTop + 25)
-        .text(`${collection.Properties[0].homeOwner.property} - ${collection.Properties[0].homeOwner.name}`, 110, customerInformationTop + 25)
+        .text(collection.receiptDate, 490, customerInformationTop + 10);
+
+    if (collection.Properties.length === 1) {
+        doc
+            .text("Propiedad:", 50, customerInformationTop + 25)
+            .text(`${collection.Properties[0].homeOwner.property} - ${collection.Properties[0].homeOwner.name}`, 110, customerInformationTop + 25);
+    }
+
+    doc
         .text("Recibo:", 450, customerInformationTop + 25)
         .text(("00000000" + collection.receiptNumber).slice(-8), 490, customerInformationTop + 25)
 
         .moveDown();
 
-    generateHr(doc, 215);
+    common.generateHr(doc, 215);
+}
+
+// <----- PROPIEDADES ----->
+
+function generatePropertiesTable(doc, collection, y) {
+    let i;
+    const invoiceTableTop = y; let subTotal = 0;
+
+    doc
+        .fontSize(10)
+        .font("Helvetica-Bold");
+
+    generateTableRowProperties(
+        doc,
+        invoiceTableTop,
+        ["Propiedad", "Propietario", "Recibo Parcial", "Importe"]
+    );
+
+    common.generateHr(doc, invoiceTableTop + 20);
+
+    doc.font("Helvetica");
+
+    for (i = 0; i < collection.Properties.length; i++) {
+        const item = collection.Properties[i];
+        const position = invoiceTableTop + (i + 1) * 30;
+        subTotal += parseFloat(item.amount);
+
+        generateTableRowProperties(
+            doc,
+            position,
+            [
+                item.homeOwner.property,
+                item.homeOwner.name,
+                item.receiptNumber != null ? receiptNumber = ("00000000" + collection.receiptNumber).slice(-8) + "-" + ("0000" + item.receiptNumber).slice(-4) : "",
+                common.formatCurrency(item.amount)]
+        );
+
+        common.generateHr(doc, position + 20);
+    }
+
+    const subtotalPosition = invoiceTableTop + (i + 1) * 30;
+
+    doc
+        .fontSize(10)
+        .font("Helvetica-Bold")
+        .text("Subtotal: " + common.formatCurrency(subTotal), 400, subtotalPosition, { align: "right" });
+
+    return subtotalPosition;
+}
+
+function generateTableRowProperties(
+    doc,
+    y,
+    rowItem
+) {
+    doc
+        .fontSize(10)
+        .text(rowItem[0], 50, y)
+        .text(rowItem[1], 130, y)
+        .text(rowItem[2], 390, y)
+        .text(rowItem[3], 450, y, { width: 90, align: "right" })
 }
 
 // <----- CONCEPTOS ----->
@@ -101,7 +179,9 @@ function generateConceptsTable(doc, collection, y) {
         invoiceTableTop,
         ["Concepto", "Importe"]
     );
-    generateHr(doc, invoiceTableTop + 20);
+
+    common.generateHr(doc, invoiceTableTop + 20);
+
     doc.font("Helvetica");
 
     for (i = 0; i < collection.Concepts.length; i++) {
@@ -111,17 +191,17 @@ function generateConceptsTable(doc, collection, y) {
         generateTableRowConcepts(
             doc,
             position,
-            [item.description, formatCurrency(item.amount)]
+            [item.description, common.formatCurrency(item.amount)]
         );
 
-        generateHr(doc, position + 20);
+        common.generateHr(doc, position + 20);
     }
 
     const subtotalPosition = invoiceTableTop + (i + 1) * 30;
     doc
         .fontSize(10)
         .font("Helvetica-Bold")
-        .text("Subtotal: " + formatCurrency(collection.amountConcepts), 400, subtotalPosition, { align: "right" });
+        .text("Subtotal: " + common.formatCurrency(collection.amountConcepts), 400, subtotalPosition, { align: "right" });
 
     doc.font("Helvetica");
 
@@ -154,7 +234,9 @@ function generateSecuritiesTable(doc, collection, y) {
         invoiceTableTop,
         ["Valor", "Cuenta", "Detalle", "Importe"]
     );
-    generateHr(doc, invoiceTableTop + 20);
+
+    common.generateHr(doc, invoiceTableTop + 20);
+
     doc.font("Helvetica");
 
     for (i = 0; i < collection.Securities.length; i++) {
@@ -166,23 +248,24 @@ function generateSecuritiesTable(doc, collection, y) {
         switch (collection.Securities[i].type) {
             case 'EF': { valueDesc = "Efectivo"; description = description = `${item.account.accountType.description}`; } break;
             case 'DC': { valueDesc = "Depósito en Cuenta"; description = `CBU: ${item.account.cbu}`; } break;
-            case 'CH': { valueDesc = "Cheque"; description = `Nº ${item.checkSplitted.check.number} ($${item.checkSplitted.check.amount}) ${formatDate(new Date(item.checkSplitted.check.paymentDate))}`; } break;
+            case 'CH': { valueDesc = "Cheque"; description = `Nº ${item.checkSplitted.check.number} ($${item.checkSplitted.check.amount}) ${common.formatDate(new Date(item.checkSplitted.check.paymentDate))}`; } break;
         }
 
         generateTableRowValues(
             doc,
             position,
-            [valueDesc, item.account.accountType.account, description, formatCurrency(item.amount)]
+            [valueDesc, item.account.accountType.account, description, common.formatCurrency(item.amount)]
         );
 
-        generateHr(doc, position + 20);
+        common.generateHr(doc, position + 20);
     }
 
     const subtotalPosition = invoiceTableTop + (i + 1) * 30;
+
     doc
         .fontSize(10)
         .font("Helvetica-Bold")
-        .text("Subtotal: " + formatCurrency(collection.amountSecurities), 400, subtotalPosition, { align: "right" });
+        .text("Subtotal: " + common.formatCurrency(collection.amountSecurities), 400, subtotalPosition, { align: "right" });
 
     doc.font("Helvetica");
 
@@ -201,15 +284,16 @@ function generateTableRowValues(
         .text(rowItem[2], 220, y)
         .text(rowItem[3], 450, y, { width: 90, align: "right" })
 }
+
 // <----- PIE DE PAGINA ----->
 
 function generateFooter(doc) {
 
-    generateHr(doc, doc.page.height - 60)
+    common.generateHr(doc, doc.page.height - 60)
 
     doc
         .fontSize(10)
-        .text(formatDateTime(new Date)
+        .text(common.formatDateTime(new Date)
             , doc.page.margins.left + 10, doc.page.height - 50, {
             lineBreak: false
         });
@@ -225,91 +309,6 @@ function generateFooter(doc) {
         );
 }
 
-// ----------------------------------
-// <----- FUNCIONES AUXILIARES ----->
-// ----------------------------------
-
-function generateHr(doc, y) {
-    doc
-        .opacity(1)
-        .strokeColor("#aaaaaa")
-        .lineWidth(1)
-        .moveTo(50, y)
-        .lineTo(550, y)
-        .stroke();
-}
-
-function formatCurrency(number) {
-    return new Intl.NumberFormat('es',
-        { currency: 'ARS', style: 'currency', currencyDisplay: 'narrowSymbol', /*currencyDisplay: "symbol"*/ }).format(number);
-}
-
-function formatDateTime(date) {
-    return dateFormat(date, "HH:MM:ss dd/mm/yyyy");;
-}
-
-function formatDate(date) {
-    return dateFormat(date, "dd/mm/yyyy");
-}
-
-function generateSignature(doc, user) {
-
-    const lineSize = 174;
-    const startLine1 = 350;
-    const endLine1 = startLine1 + lineSize;
-    const signatureHeight = 735;
-
-    if (user.userSignature)
-        doc.image(user.userSignature.image, (startLine1 + (lineSize / 2) - (150 / 2)), signatureHeight - 60, { width: 150 })
-
-    doc
-        .lineWidth(1)
-        .dash(5, { space: 5 })
-        .fillAndStroke('#021c27')
-        .strokeOpacity(0.2);
-
-    // Creates a line
-    doc
-        .moveTo(startLine1, signatureHeight)
-        .lineTo(endLine1, signatureHeight)
-        .stroke();
-
-    doc.undash();
-
-    // Evaluator info
-    doc
-        .font('fonts/NotoSansJP-Bold.otf')
-        .fontSize(8)
-        .fill('#021c27')
-        .text(
-            user.name,
-            startLine1,
-            signatureHeight + 5,
-            {
-                columns: 1,
-                columnGap: 0,
-                height: 40,
-                width: lineSize,
-                align: 'center',
-            }
-        );
-    doc
-        .font('fonts/NotoSansJP-Light.otf')
-        .fontSize(8)
-        .fill('#021c27')
-        .text(
-            user.email,
-            startLine1,
-            signatureHeight + 20,
-            {
-                columns: 1,
-                columnGap: 0,
-                height: 40,
-                width: lineSize,
-                align: 'center',
-            }
-        );
-}
 module.exports = {
     createReport: createReport
 };

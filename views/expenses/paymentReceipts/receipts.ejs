@@ -24,11 +24,11 @@
                 </div>
             </div>
             <div class="actions">
-                <div class="switch">
+                <div class="switch" style="margin-top: 3px;">
                     <label> Mostrar todos los estados <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
                         <span class="lever"></span></label>
                 </div>
-                <div class="switch">
+                <div class="switch" style="margin-top: 3px;">
                     <label> Refrescar automáticamente <input id="swRefresh" type="checkbox" onchange="autoRefresh(this);" <% if(params.autoRefresh===true){%> checked <%}%>>
                         <span class="lever"></span></label>
                 </div>

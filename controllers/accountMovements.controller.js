@@ -200,3 +200,22 @@ module.exports.addMovement = async function (clientId, accountId, periodId, amou
     //     throw err;
     // });
 }
+
+module.exports.deleteMovement = async function (clientId, accountId, periodId, category, refId) {
+
+    return AccountMovement.findOne(
+        {
+            where: {
+                clientId: clientId,
+                periodId: periodId,
+                accountId: accountId,
+                category: String.fromCharCode(category),
+                movementId: refId
+            }
+        })
+        .then((accountMovement) => {
+            return accountMovement.destroy()
+                .then((result) => { return result })
+        })
+
+}

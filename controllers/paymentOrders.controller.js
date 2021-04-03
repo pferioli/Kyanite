@@ -51,7 +51,7 @@ module.exports.listAll = async function (req, res) {
     const autoRefresh = (req.query.refresh === undefined || req.query.refresh.toLowerCase() === 'false' ? false : true);
     const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
 
-    const status = (showAll === true) ? [0, 1, 2, 3, 4, 5] : [1, 2, 3];
+    const status = (showAll === true) ? [0, 1, 2, 3, 4] : [1, 2, 3];
 
     let options = {
         where: {
@@ -78,23 +78,6 @@ module.exports.listAll = async function (req, res) {
             params: { showAll: showAll, autoRefresh: autoRefresh }
         });
 };
-
-module.exports.calculateRemainingBalance = async function (paymentReceiptId) {
-
-    const paymentReceipt = await PaymentReceipt.findByPk(paymentReceiptId)
-
-    const paymentOrdersTotal = await PaymentOrder.sum('amount',
-        {
-            where: {
-                paymentReceiptId: paymentReceiptId,
-                statusId: {
-                    [Op.in]: [PaymentOrderStatus.eStatus.get('pending').value, PaymentOrderStatus.eStatus.get('inprogress').value, PaymentOrderStatus.eStatus.get('processed').value]
-                }
-            }
-        });
-
-    return parseFloat(paymentReceipt.amount - paymentOrdersTotal);
-}
 
 module.exports.createInvoice = function (req, res) {
 
@@ -144,7 +127,7 @@ module.exports.createPO = async function (req, res) {
             //-----------------------------------------------------------------
             // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
             //-----------------------------------------------------------------
-            
+
             const AccountMovement = require('./accountMovements.controller');
 
             const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
@@ -192,6 +175,7 @@ module.exports.createPO = async function (req, res) {
                             if ((remainingBalance - Number.parseFloat(paymentOrder.amount)) <= 0) {
                                 prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
                             }
+
                             paymentReceipt.update({ statusId: prStatus })
                                 .then(() => {
                                     req.flash("success", `La OP #${poNumber} se genero correctamente en la base de datos`);
@@ -217,4 +201,74 @@ module.exports.createPO = async function (req, res) {
             winston.error(`An error ocurred while user #${req.user.id} tryed to create a new PO ${JSON.stringify(req.body)} - ${err}`);
             res.redirect('/expenses/paymentReceipts/client/' + clientId);
         })
+}
+
+module.exports.deletePO = async function (req, res) {
+
+    const paymentOrderId = req.body.paymentOrderId;
+
+    const clientId = req.body.clientId;
+
+    try {
+
+        //anulamos la OP
+
+        const paymentOrder = await PaymentOrder.findByPk(paymentOrderId);
+
+        await paymentOrder.update({
+            statusId: PaymentOrderStatus.eStatus.get('deleted').value
+        });
+
+        //cambiamos el estado del comprobante a pending o inprogress segun el saldo
+
+        const paymentReceipt = await PaymentReceipt.findByPk(paymentOrder.paymentReceiptId);
+
+        const remainingBalance = await this.calculateRemainingBalance(paymentOrder.paymentReceiptId);
+
+        let paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('pending').value;
+
+        if (paymentReceipt.amount > remainingBalance) {
+            paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('inprogress').value;
+        }
+
+        await paymentReceipt.update({ statusId: paymentReceiptStatusId });
+
+        //eliminamos el movimiento de la CC del barrio
+
+        const AccountMovement = require('./accountMovements.controller');
+
+        const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+        const accountMovement = await AccountMovement.deleteMovement(clientId, paymentOrder.accountId, paymentOrder.periodId,
+            accountMovementCategory.eStatus.get('PAGO_PROVEEDOR').value, paymentOrder.id);
+
+
+        req.flash("success", `La OP #${paymentOrder.poNumber} fue anulada correctamente`);
+
+    } catch (err) {
+
+        req.flash("error", "Ocurrio un error y no se pudo anular correctamente el registro de la OP en la base de datos");
+
+        winston.error(`An error ocurred while user #${req.user.id} deleted the PO ${paymentOrderId}  - ${err}`);
+
+    } finally {
+        res.redirect('/expenses/paymentOrders/client/' + clientId);
+    }
+}
+
+module.exports.calculateRemainingBalance = async function (paymentReceiptId) {
+
+    const paymentReceipt = await PaymentReceipt.findByPk(paymentReceiptId)
+
+    const paymentOrdersTotal = await PaymentOrder.sum('amount',
+        {
+            where: {
+                paymentReceiptId: paymentReceiptId,
+                statusId: {
+                    [Op.in]: [PaymentOrderStatus.eStatus.get('pending').value, PaymentOrderStatus.eStatus.get('inprogress').value, PaymentOrderStatus.eStatus.get('processed').value]
+                }
+            }
+        });
+
+    return parseFloat(paymentReceipt.amount - paymentOrdersTotal);
 }

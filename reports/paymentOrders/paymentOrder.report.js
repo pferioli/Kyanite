@@ -1,6 +1,9 @@
 const PDFDocument = require("pdfkit");
 const path = require("path");
-const dateFormat = require("dateformat");
+
+const common = require('../common.report');
+
+const PaymentOrderStatus = require('../../utils/statusMessages.util').PaymentOrder;
 
 // const fs = require('fs');
 
@@ -16,9 +19,14 @@ function createReport(paymentOrder, res) {
     paymentReceiptSection(doc, paymentOrder, 280);
     accountingImputationSection(doc, paymentOrder, 400);
     paymentSection(doc, paymentOrder, 470);
-    generateSignature(doc, paymentOrder.user);
-    generateSupplierSignature(doc);
+
+    common.generateSignature(doc, paymentOrder.user, { linesize: 174, startLine: 80, signatureHeight: 735 });
+    common.generateGenericSignature(doc, { linesize: 174, startLine: 350, signatureHeight: 735 });
+
     generateFooter(doc);
+
+    if (paymentOrder.statusId === PaymentOrderStatus.eStatus.get('deleted').value)
+        common.addWaterMark(doc, [{ text: "ANULADA", x: 100, y: 500, rotation: 315, size: 100 }]);
 
     const reportName = "op_" + paymentOrder.paymentReceipt.client.internalCode + "_" + paymentOrder.poNumberFormatted + ".pdf"
     // doc.end();
@@ -30,7 +38,7 @@ function createReport(paymentOrder, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
 
     // Header to force download
-    res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
+    //res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
 
     doc.pipe(res).on('finish', function () {
         console.log('PDF closed');
@@ -77,7 +85,7 @@ function paymentOrderSection(doc, paymentOrder, y) {
         .font("Helvetica-Bold")
         .text("Orden de pago", 50, sectionTopOffset);
 
-    generateHr(doc, sectionTopOffset + 20);
+    common.generateHr(doc, sectionTopOffset + 20);
 
     doc
         .fontSize(10)
@@ -88,9 +96,13 @@ function paymentOrderSection(doc, paymentOrder, y) {
         .font("Helvetica-Bold")
         .text("Orden de Pago Nº: " + paymentOrder.poNumberFormatted, 50, sectionTopOffset + 85)
         .font("Helvetica")
-        .text("Cód. Interno: " + ("00000000" + paymentOrder.id).slice(-8), 200, sectionTopOffset + 85)
-        .text("Fecha de Pago: " + formatDate(paymentOrder.paymentDate), 320, sectionTopOffset + 85)
-        .text("Estado: " + paymentOrder.status, 460, sectionTopOffset + 85)
+        .text("Cód. Interno: " + ("00000000" + paymentOrder.id).slice(-8), 195, sectionTopOffset + 85)
+        .text("Fecha de Pago: " + common.formatDate(paymentOrder.paymentDate), 310, sectionTopOffset + 85)
+
+        .font("Helvetica-Bold")
+        .text("Estado: " + paymentOrder.status, 440, sectionTopOffset + 85)
+        .font("Helvetica")
+
 }
 
 function paymentReceiptSection(doc, paymentOrder, y) {
@@ -102,7 +114,7 @@ function paymentReceiptSection(doc, paymentOrder, y) {
         .font("Helvetica-Bold")
         .text("Factura o comprobante", 50, sectionTopOffset);
 
-    generateHr(doc, sectionTopOffset + 20);
+    common.generateHr(doc, sectionTopOffset + 20);
 
     doc
         .fontSize(10)
@@ -111,10 +123,10 @@ function paymentReceiptSection(doc, paymentOrder, y) {
         .text("Número de Factura: " + "[" + paymentOrder.paymentReceipt.receiptType.receiptType + "] " + paymentOrder.paymentReceipt.receiptNumber, 50, sectionTopOffset + 35)
 
         .font("Helvetica-Bold")
-        .text("Importe: " + formatCurrency(paymentOrder.paymentReceipt.amount), 340, sectionTopOffset + 35)
-        .font("Helvetica")
+        .text("Importe: " + common.formatCurrency(paymentOrder.paymentReceipt.amount), 340, sectionTopOffset + 35)
 
-        .text("Fecha de emisión: " + formatDate(paymentOrder.paymentReceipt.emissionDate), 50, sectionTopOffset + 60)
+        .font("Helvetica")
+        .text("Fecha de emisión: " + common.formatDate(paymentOrder.paymentReceipt.emissionDate), 50, sectionTopOffset + 60)
         .text("Estado: " + paymentOrder.paymentReceipt.status, 340, sectionTopOffset + 60)
         .text("Descripción del servicio: " + paymentOrder.paymentReceipt.description, 50, sectionTopOffset + 85);
 }
@@ -128,7 +140,7 @@ function accountingImputationSection(doc, paymentOrder, y) {
         .font("Helvetica-Bold")
         .text("Imputación contable", 50, sectionTopOffset);
 
-    generateHr(doc, sectionTopOffset + 20);
+    common.generateHr(doc, sectionTopOffset + 20);
 
     doc
         .fontSize(10)
@@ -146,7 +158,7 @@ function paymentSection(doc, paymentOrder, y) {
         .font("Helvetica-Bold")
         .text("Pago", 50, sectionTopOffset);
 
-    generateHr(doc, sectionTopOffset + 20);
+    common.generateHr(doc, sectionTopOffset + 20);
 
     doc
         .fontSize(10)
@@ -159,13 +171,13 @@ function paymentSection(doc, paymentOrder, y) {
         .text("CBU: " + (paymentOrder.account.cbu != null ? paymentOrder.account.cbu : ""), 340, sectionTopOffset + 60)
 
         .text("Número de cheque: " + (paymentOrder.checkSplitted != null ? paymentOrder.checkSplitted.check.number : ""), 50, sectionTopOffset + 85)
-        .text("Fecha de pago: " + (paymentOrder.checkSplitted != null ? formatDate(paymentOrder.checkSplitted.check.paymentDate) : ""), 340, sectionTopOffset + 85)
+        .text("Fecha de pago: " + (paymentOrder.checkSplitted != null ? common.formatDate(paymentOrder.checkSplitted.check.paymentDate) : ""), 340, sectionTopOffset + 85)
 
-        .text("Importe del cheque: " + (paymentOrder.checkSplitted != null ? formatCurrency(paymentOrder.checkSplitted.check.amount) : ""), 50, sectionTopOffset + 110)
+        .text("Importe del cheque: " + (paymentOrder.checkSplitted != null ? common.formatCurrency(paymentOrder.checkSplitted.check.amount) : ""), 50, sectionTopOffset + 110)
 
         .fontSize(14)
         .font("Helvetica-Bold")
-        .text("Total abonado: " + formatCurrency(paymentOrder.amount), 50, sectionTopOffset + 150, { align: "center" })
+        .text("Total abonado: " + common.formatCurrency(paymentOrder.amount), 50, sectionTopOffset + 150, { align: "center" })
 
         .fontSize(10)
         .font("Helvetica")
@@ -175,12 +187,12 @@ function paymentSection(doc, paymentOrder, y) {
 
 function generateFooter(doc) {
 
-    generateHr(doc, doc.page.height - 60)
+    common.generateHr(doc, doc.page.height - 60)
 
     doc
         .font("Helvetica")
         .fontSize(10)
-        .text(formatDateTime(new Date)
+        .text(common.formatDateTime(new Date)
             , doc.page.margins.left + 10, doc.page.height - 50, {
             lineBreak: false
         });
@@ -195,148 +207,6 @@ function generateFooter(doc) {
                 lineBreak: false
             }
         );
-}
-
-// ----------------------------------
-// <----- FUNCIONES AUXILIARES ----->
-// ----------------------------------
-
-function generateHr(doc, y) {
-    doc
-        .opacity(1)
-        .strokeColor("#aaaaaa")
-        .lineWidth(1)
-        .moveTo(50, y)
-        .lineTo(550, y)
-        .stroke();
-}
-
-function formatCurrency(number) {
-    return new Intl.NumberFormat('es',
-        { currency: 'ARS', style: 'currency', currencyDisplay: 'narrowSymbol', /*currencyDisplay: "symbol"*/ }).format(number);
-}
-
-function formatDateTime(date) {
-    return dateFormat(date, "HH:MM:ss dd/mm/yyyy");;
-}
-
-function formatDate(date) {
-    return dateFormat(date, "dd/mm/yyyy");
-}
-
-function generateSignature(doc, user) {
-
-    const lineSize = 174;
-    const startLine1 = 80;
-    const endLine1 = startLine1 + lineSize;
-    const signatureHeight = 735;
-
-    if (user.userSignature)
-        doc.image(user.userSignature.image, (startLine1 + (lineSize / 2) - (150 / 2)), signatureHeight - 60, { width: 150 })
-
-    doc
-        .lineWidth(1)
-        .dash(5, { space: 5 })
-        .fillAndStroke('#021c27')
-        .strokeOpacity(0.2);
-
-    // Creates a line
-    doc
-        .moveTo(startLine1, signatureHeight)
-        .lineTo(endLine1, signatureHeight)
-        .stroke();
-
-    doc.undash();
-
-    // Evaluator info
-    doc
-        .font('fonts/NotoSansJP-Bold.otf')
-        .fontSize(8)
-        .fill('#021c27')
-        .text(
-            user.name,
-            startLine1,
-            signatureHeight + 5,
-            {
-                columns: 1,
-                columnGap: 0,
-                height: 40,
-                width: lineSize,
-                align: 'center',
-            }
-        );
-    doc
-        .font('fonts/NotoSansJP-Light.otf')
-        .fontSize(8)
-        .fill('#021c27')
-        .text(
-            user.email,
-            startLine1,
-            signatureHeight + 20,
-            {
-                columns: 1,
-                columnGap: 0,
-                height: 40,
-                width: lineSize,
-                align: 'center',
-            }
-        );
-}
-
-function generateSupplierSignature(doc) {
-
-    const lineSize = 174;
-    const startLine1 = 350;
-    const endLine1 = startLine1 + lineSize;
-    const signatureHeight = 735;
-
-    doc
-        .lineWidth(1)
-        .dash(5, { space: 5 })
-        .fillAndStroke('#021c27')
-        .strokeOpacity(0.2);
-
-    // Creates a line
-    doc
-        .moveTo(startLine1, signatureHeight)
-        .lineTo(endLine1, signatureHeight)
-        .stroke();
-
-    doc.undash();
-
-    // Evaluator info
-    doc
-        .font('fonts/NotoSansJP-Bold.otf')
-        .fontSize(8)
-        .fill('#021c27')
-        .text(
-            "firma del proveedor",
-            startLine1,
-            signatureHeight + 5,
-            {
-                columns: 1,
-                columnGap: 0,
-                height: 40,
-                width: lineSize,
-                align: 'center',
-            }
-        );
-    // doc
-    //     .font('fonts/NotoSansJP-Light.otf')
-    //     .fontSize(8)
-    //     .fill('#021c27')
-    //     .text(
-    //         user.email,
-    //         startLine1,
-    //         signatureHeight + 20,
-    //         {
-    //             columns: 1,
-    //             columnGap: 0,
-    //             height: 40,
-    //             width: lineSize,
-    //             align: 'center',
-    //         }
-    //     );
 }
 
 module.exports = {

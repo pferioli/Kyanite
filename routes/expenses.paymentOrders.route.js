@@ -21,6 +21,10 @@ router.get('/client/:clientId', function (req, res, next) {
     paymentOrdersController.listAll(req, res);
 })
 
+router.post('/delete', function (req, res, next) {
+    paymentOrdersController.deletePO(req, res);
+})
+
 //REPORTS...
 
 router.get("/client/:clientId/invoice/:paymentOrderId", function (req, res, next) {

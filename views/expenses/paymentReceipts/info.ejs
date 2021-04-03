@@ -25,7 +25,7 @@
                         <div class="input-field col s9">
                             <i class="material-icons prefix">storefront</i>
                             <select id="supplierSelect">
-                             
+                                <option value="<%=data.paymentReceipt.supplier.id%>" selected><%= data.paymentReceipt.supplier.name %></option>
                             </select>
                             <label>Nombre del Proveedor</label>
                             <input type="hidden" name="supplierId" id="supplierId" value="<%=data.paymentReceipt.supplierId%>"/>

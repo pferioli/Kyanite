@@ -44,7 +44,7 @@ module.exports.PaymentOrder = class {
     constructor() { }
 
     static get Status() {
-        return ["Deshabilitado", "Pendiente", "En Proceso", "Procesado", "Anulado"];
+        return ["Deshabilitada", "Pendiente", "En Proceso", "Procesada", "Anulada"];
     }
 
     static get eStatus() {

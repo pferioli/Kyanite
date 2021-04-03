@@ -24,6 +24,11 @@
                 </div>
             </div>
             <div class="actions">
+                <div class="switch" style="margin-top: 3px;">
+                    <label> Mostrar OP anuladas <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
+                        <span class="lever"></span></label>
+                </div>
+
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
                 <a href="/expenses/paymentReceipts/client/<%=data.client.id%>" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment</i></a>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
@@ -121,12 +126,13 @@
                                 
                             <td>
                                 <a id="button-edit" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">edit</i></a>
-                                <a id="button-preview" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">preview</i></a>
-                                <a id="button-print" href="/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">print</i></a>                            
                                 
-                                <!--<a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%#=data.paymentOrders[i].id%>"><i class="material-icons">cloud_download</i></a>-->
+                                <a id="button-preview" onclick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>')"
+                                    class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">receipt</i></a>                            
 
-                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
+                                    data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" data-clientId="<%=data.client.id%>" onclick="deleteDialog(this)">
+                                    <i class="material-icons">delete</i></a>
                             </td>
 
                         </tr>
@@ -160,11 +166,17 @@
         document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
     });
 
+    function openInNewTab(url) {
+       var redirectWindow = window.open(url, '_blank');
+        redirectWindow.location;
+    };
+    
     function reloadPage() {
+        const swStatus = document.getElementById('swStatus').checked;
         const clientId = document.getElementById('clientId').value;
         const periodId = document.getElementById('periodId').value;
 
-        const redirectUrl = '/expenses/paymentOrders?refresh=' + swRefresh + '&' + 'showAll=' + swStatus;
+        const redirectUrl = '/expenses/paymentOrders?showAll=' + swStatus;
 
         var form = $('<form action="' + redirectUrl + '" method="post">' +
             '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
@@ -180,7 +192,8 @@
         var modal = M.Modal.getInstance(_elem);
         const message = `[ID: ${button.dataset.id}] - OP #${button.dataset.value}`
         document.getElementById('modalDeleteMessage').textContent = message;
-        document.getElementById('modalDeleteClientId').value = button.dataset.id;
+        document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
+        document.getElementById('modalDeletePoId').value = button.dataset.id;   
         modal.open();
     };
 
