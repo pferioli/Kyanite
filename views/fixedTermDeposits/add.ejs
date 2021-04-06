@@ -1,0 +1,241 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" method="post" action='/fixedTermDeposits/new/<%=data.client.id%>'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Ingrese un nuevo plazo fijo</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="sourceAccountSelect" required disabled>
+                                <option value="" disabled selected>Seleccione la cuenta de Origen</option>
+                                <% for(var i=0; i < data.clientAccounts.length; i++) { %>
+                                    <% if (data.clientAccounts[i].accountType.account.includes("CC$") || data.clientAccounts[i].accountType.account.includes("CA$") || data.clientAccounts[i].accountType.account.includes("CCU$") || data.clientAccounts[i].accountType.account.includes("CAU$")) { %>
+                                        <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                    <% } %>
+                                <% } %>
+                            </select>
+                            <label>Cuenta de Origen</label>
+                            <input type="hidden" name="sourceAccountId" id="sourceAccountId" />
+                        </div>
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="destinationAccountSelect" required disabled>
+                                <option value="" disabled selected>Seleccione la cuenta de Origen primero</option>
+                            </select>
+                            <label>Cuenta de Destino</label>
+                            <input type="hidden" name="destinationAccountId" id="destinationAccountId" />
+                        </div>
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="sourceAccountInfo" name="sourceAccountInfo" type="text" value="" readonly />
+                            <label for="sourceAccountInfo">Detalles de la cuenta de Origen</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="destinationAccountInfo" name="destinationAccountInfo" type="text" value="" readonly />
+                            <label for="destinationAccountInfo">Detalles de la cuenta de destino</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s4">
+                            <i class="material-icons prefix">category</i>
+                            <select id="categorySelect" required>
+                                <option value="" disabled selected>Seleccione el tipo de plazo fijo</option>
+                                <% for(var i=0; i < data.categories.length; i++) { %>
+                                    <option value="<%=data.categories[i].id%>"><%=data.categories[i].description%></option>
+                                <% } %>
+                            </select>
+                            <label>Tipo de plazo fijo</label>
+                            <input type="hidden" name="categoryId" id="categoryId" />
+                        </div>
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <label for="amount">Importe</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpCreationDate" name="dtpCreationDate" required>
+                            <label for="dtpTransferDate">Fecha de creación</label>
+                            <input type="hidden" name="creationDate" id="creationDate" />
+                        </div>
+                         <div class="input-field col s3">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpExpirationDate" name="dtpExpirationDate" required>
+                            <label for="dtpExpirationDate">Fecha de vencimiento</label>
+                            <input type="hidden" name="expirationDate" id="expirationDate" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">comment</i>
+                            <textarea id="comments" name="comments" class="materialize-textarea" required></textarea>
+                            <label for="comments">Descripcion del plazo fijo</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-action right-align">
+                    <a href="/accounts/<%=data.client.id%>" class="waves-effect waves-light btn" style="margin-right: 30px;"><i class="material-icons right">fact_check</i>Ver Cuentas</a>
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
+</main>
+
+<%- include ("../partials/modals/billingPeriod.ejs") %>
+
+<%- include ("../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const clientId = document.getElementById('clientId').value
+
+        const billingPeriodId = document.getElementById('billingPeriodId').value;
+
+        if (billingPeriodId) {
+            document.getElementById('sourceAccountSelect').disabled = false;
+            document.getElementById('destinationAccountSelect').disabled = false;
+        }
+
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        elems = document.querySelectorAll('.datepicker');
+        instances = M.Datepicker.init(elems, {
+            format: 'dd/mm/yyyy',
+            autoClose: true,
+            onOpen: function (e) {
+                var that = this;
+                that.hasEvent = false;
+                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                this.doneBtn.addEventListener('click', Done.bind(that))
+            },
+            onClose: function (e) {
+                var that = this;
+                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                this.doneBtn.removeEventListener('click', Done.bind(that))
+            },
+            onSelect: function (selectedDate) {
+                if (this.el.id === 'dtpCreationDate') {
+                    document.getElementById('creationDate').value = this.date.toISOString();
+                };
+                if (this.el.id === 'dtpExpirationDate') {
+                    document.getElementById('expirationDate').value = this.date.toISOString();
+                }
+            }
+        });
+
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});
+
+        //getActiveBillingPeriod(clientId);
+
+        document.getElementById('categorySelect').onchange = async function () {
+            document.getElementById('categoryId').value = this.value;
+        }
+
+        document.getElementById('sourceAccountSelect').onchange = async function () {
+            
+            getSelectedAccountDetails(this.value, 'sourceAccountInfo');
+
+            const accounts = await getClientAccounts(clientId); //, 'destinationAccountSelect', this.value);
+
+            let destinationAccountSelect = document.getElementById('destinationAccountSelect');
+            destinationAccountSelect.options.length = 0;
+            destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione la cuenta de Destino" + "</option>"
+
+            for (i = 0; i < accounts.length; i++) {
+                if ((this.value != accounts[i].id)&&(accounts[i].accountType.account.toUpperCase().startsWith("PF")===true)) {
+                    destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"" + accounts[i].id + "\">" +
+                        "[" + accounts[i].accountType.account + "] " + accounts[i].accountType.description + " (ID:" + accounts[i].id + ")" + "</option>"
+                }
+            }
+            M.FormSelect.init(destinationAccountSelect, {});
+
+            document.getElementById('sourceAccountId').value = this.value;
+            document.getElementById('destinationAccountInfo').value = "";
+            M.updateTextFields();
+
+            document.getElementById('add_button').disabled = true;
+            document.getElementById('add_next_button').disabled = true;
+        }
+
+        document.getElementById('destinationAccountSelect').onchange = async function () {
+            getSelectedAccountDetails(this.value, 'destinationAccountInfo');
+            document.getElementById('destinationAccountId').value = this.value;
+            document.getElementById('add_button').disabled = false;
+            document.getElementById('add_next_button').disabled = false;
+        };
+    });
+
+    async function getSelectedAccountDetails(accountId, infoField) {
+
+        const account = await getClientAccountsInfo(accountId);
+
+        let message = "[" + account.accountType.account + "] " + account.accountType.description;
+
+        if (account.accountType.account.includes("CC$") || account.accountType.account.includes("CA$") || account.accountType.account.includes("CCU$") || account.accountType.account.includes("CAU$")) {
+            message = "[" + account.accountType.account + "]" + " - " + account.bank.name;
+            if (account.cbu) { message = message + " / CBU: " + account.cbu };
+            if (account.accountNumber) { message = message + " / CUENTA: " + account.accountNumber };
+            if (account.accountAlias) { message = message + " / ALIAS: " + account.accountAlias };
+        }
+
+        if (account.comments) { message = message + " - " + account.comments; }
+
+        document.getElementById(infoField).value = message; M.updateTextFields();
+    }
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpCreationDate') { document.getElementById('creationDate').value = this.date; }
+                if (this.el.id === 'dtpExpirationDate') { document.getElementById('expirationDate').value = this.date; }
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        $('textarea#comments').characterCounter();
+    });  
+</script>

@@ -34,7 +34,7 @@ module.exports.AccountMovementsCategories = class {
             'TRANSFERENCIA': "T".charCodeAt(0),
             'PAGO_PROVEEDOR': "P".charCodeAt(0),
             'AJUSTE_SALDO': "J".charCodeAt(0),
-            'INTERES_PF': "F".charCodeAt(0),
+            'PLAZO_FIJO': "F".charCodeAt(0),
             'NOTA_DE_CREDITO': "N".charCodeAt(0),
             'SALDO_PERIODO_ANTERIOR': "S".charCodeAt(0)
         })
@@ -90,9 +90,7 @@ module.exports.listAll = async function (req, res, next) {
                 [Op.in]: accountIds
             }
         },
-        include: [{ model: BillingPeriod }, {
-            model: Account, include: [{ model: AccountType }], include: [{ model: AccountType }]
-        }, { model: User }],
+        include: [{ model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
     };
 
     AccountMovement.findAll(options).then(function (movements) {

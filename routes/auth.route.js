@@ -4,7 +4,7 @@ const router = express.Router();
 const passport = require('../helpers/passport.helper');
 const connectEnsureLogin = require('connect-ensure-login');
 
-const authController = require('../controllers/authcontroller');
+const authController = require('../controllers/auth.controller');
 
 //---------------------------------------------------------------------------//
 // LOGIN & LOGOUT //

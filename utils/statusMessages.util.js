@@ -104,7 +104,7 @@ module.exports.ImportCollection = class {
     }
 }
 
-module.exports.UnidentifiedDepositStatus = class {
+module.exports.UnidentifiedDeposit = class {
 
     constructor() { }
 
@@ -114,6 +114,19 @@ module.exports.UnidentifiedDepositStatus = class {
 
     static get eStatus() {
         return new Enum({ 'pending': 0, 'assigned': 1, 'cancelled': 2 })
+    }
+}
+
+module.exports.FixedTermDeposits = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["Pendiente", "Creado", "Renovado", "Expirado", "Acreditado", "Anulado"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'pending': 0, 'created': 1, 'renewed': 2, 'expired': 3, 'accredited': 4, 'cancelled': 5 })
     }
 }
 

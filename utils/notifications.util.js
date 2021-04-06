@@ -5,7 +5,7 @@ module.exports = class Notifications {
 
     constructor() {
         this.enumSeverity = new Enum({ 'clear': 0, 'fatal': 1, 'critical': 2, 'minor': 3, 'warning': 4 });
-        this.enumType = new Enum({ 'general': 0, 'homeOwners': 1, 'collections': 2 });
+        this.enumType = new Enum({ 'general': 0, 'homeOwners': 1, 'collections': 2, 'fixedTermDeposits': 3 });
     }
 
     get Severity() {
@@ -17,7 +17,7 @@ module.exports = class Notifications {
     }
 
     get Type() {
-        return ["General", "Propietarios", "Cobranzas"];
+        return ["General", "Propietarios", "Cobranzas", "Plazo Fijos"];
     }
 
     get eType() {

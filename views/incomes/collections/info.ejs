@@ -171,7 +171,8 @@
         <div class="card">        
             <div class="card-action right-align">
                 
-                <a href="/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collection.id%>" class="waves-effect waves-light btn"><i class="material-icons right">receipt</i>Ver Recibo</a>
+                <a onclick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collection.id%>')"
+                    class="waves-effect waves-light btn"><i class="material-icons right">receipt</i>Ver Recibo</a>
 
                 <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel"
                     class="waves-effect waves-light btn red" style="margin-left: 20px;"><i class="material-icons right">cancel</i>Volver</button>
@@ -181,3 +182,10 @@
 </main>
 
 <%- include ("../../partials/footer") %>
+
+<script>
+     function openInNewTab(url) {
+       var redirectWindow = window.open(url, '_blank');
+        redirectWindow.location;
+    };
+</script>

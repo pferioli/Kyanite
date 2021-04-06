@@ -37,7 +37,7 @@ const CollectionStatus = require('../utils/statusMessages.util').Collection;
 const ImportCollectionStatus = require('../utils/statusMessages.util').ImportCollection;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
-const UnidentifiedDepositStatus = require('../utils/statusMessages.util').UnidentifiedDepositStatus;
+const UnidentifiedDepositStatus = require('../utils/statusMessages.util').UnidentifiedDeposit;
 
 const Notifications = require('../utils/notifications.util');
 

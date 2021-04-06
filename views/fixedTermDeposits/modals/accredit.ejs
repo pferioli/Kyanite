@@ -1,0 +1,38 @@
+<div id="modalAccreditFixedTermDeposit" class="modal">
+    <form action="/fixedTermDeposits/accredit" method="post">
+        <div class="modal-content">
+            <div class="row black-text">
+                <h5>Acreditación de intereses de plazo fijo</h5>
+            </div>
+
+            <div class="row black-text">
+                <p>Se acreditaran los intereses para el plazo fijo seleccionado, esta acción generará movimientos en las cuentas y no se puede deshacer. Desea continuar ?                
+                </p>
+            </div>
+
+        </div>
+        <div class="row">         
+            <div class="input-field col s12">
+                <i class="material-icons prefix grey-text">monetization_on</i>
+                <input id="interests" name="interests" type="number" min="0.00" step="0.01" class="validate" required placeholder="Ingrese sólamente los intereses"/>
+                <label for="interests">Intereses Ganados</label>
+            </div>
+
+            <input type="hidden" name="clientId" id="modalClientId" value="" />
+            <input type="hidden" name="periodId" id="modalPeriodId" value="" />
+            <input type="hidden" name="depositId" id="modalDepositId" value=""/>
+
+        </div>
+       
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {});
+</script>
+
+
