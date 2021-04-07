@@ -1,0 +1,281 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
+    <div class="table-container">
+
+        <div class="table-header">
+
+            <span class="table-title">Emision de Recibos - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+
+            <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <div class="switch" style="margin-top: 3px;">
+                    <label> Seleccionar todas las propiedades <input id="swAllProperties" type="checkbox" onchange="selectAllRows(this.checked);">
+                        <span class="lever"></span></label>
+                </div>              
+
+                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <button id="button-print" onClick='confirmDialog(this);' class="waves-effect btn-flat nopadding"><i class="material-icons">print</i></button>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
+        </div>
+
+        <div id="hide-dt" style="display:none">
+            <table id="datatable" class="table display">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>ID</th>
+                        <th>Recibo</th>
+                        <th>Propiedad</th>
+                        <th>Propietario</th>
+                        <th>Fecha</th>
+                        <th>Periodo</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < data.collections.length; i++) { %>
+                        <tr data-id="<%= data.collections[i].id %>">
+                            <td></td>                                                        
+                            <td><%= data.collections[i].id %></td>
+                            <td>
+                                <% if(data.collections[i].receiptNumber === null) { %>
+                                    <% const mainReceiptNumber = ("0000000000" + data.collections[i].collection.receiptNumber).slice(-8) %>
+                                    <%= mainReceiptNumber %>
+                                <% } else { %>
+                                    <% const mainReceiptNumber = ("0000000000" + data.collections[i].collection.receiptNumber).slice(-8) %>
+                                    <% const subReceiptNumber = ("0000" + data.collections[i].receiptNumber).slice(-4) %>                                            
+                                    <%=mainReceiptNumber%>-<%=subReceiptNumber%>
+                                <% } %>
+                            </td>
+                            <td><%= data.collections[i].homeOwner.property %></td>                        
+                            <td><%= data.collections[i].homeOwner.name %></td>
+                            <td><%= data.collections[i].collection.receiptDate %></td>
+
+                            <td>
+                                <% if(data.collections[i].collection.billingPeriod.statusId === 0) { %>
+                                <i class="material-icons">calendar_today</i>
+                                <% } %>
+                                <% if(data.collections[i].collection.billingPeriod.statusId=== 1) { %>
+                                <i class="material-icons">lock_open</i>
+                                <% } %>
+                                <% if(data.collections[i].collection.billingPeriod.statusId === 2) { %>
+                                <i class="material-icons">lock</i>
+                                <% } %>
+                                <% if(data.collections[i].collection.billingPeriod.statusId === 3) { %>
+                                <i class="material-icons">cancel</i>
+                                <% } %>
+
+                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.collections[i].collection.billingPeriod.name %></span></a>
+                            </td>
+
+                            <td><%= data.collections[i].user.name %></td>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>        
+    </div>
+
+    <div class="container">
+        <div class="row center-align" style="font-size:small" id="lastUpdate"></div>
+    </div>
+
+    <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+    <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
+    
+</main>
+
+<%- include ("./modals/confirm") %>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {})
+    });
+
+    $(document).ready(function () {
+
+        $('.search-toggle').click(function () {
+            if ($('.hiddensearch').css('display') == 'none')
+                $('.hiddensearch').slideDown();
+            else
+                $('.hiddensearch').slideUp();
+        });
+
+        $('#datatable').dataTable({
+            dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+            oLanguage: {
+                sSearch: '',
+                sSearchPlaceholder: 'Escriba aqui su búsqueda',
+                sInfo: '_START_ -_END_ de _TOTAL_',
+                sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+                    '<option value="200">200</option>' +
+                    '<option value="500">500</option>' +
+                    '<option value="1000">1000</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select></div>'
+            },
+            columnDefs: [
+                {
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets: 0
+                },
+                {
+                    className: "center-align",
+                    targets: [1,2,3]
+                }
+            ],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            },            
+            colReorder: true,
+            pageLength: 200,
+            order: [[2, 'asc']],
+            autowidth: true,
+            paging: true,
+            buttons: [
+                {
+                    extend: 'colvis',
+                    text: 'Columnas',
+                },
+                {
+                    extend: 'print',
+                    className: '',
+                    title: '',
+                    // autoPrint: false,
+                    customize: function (win) {
+                        $(win.document.body)
+                            .css('font-size', '10pt')
+                            .prepend(
+                                '<h4>Title Test</h4>',
+                            );
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit',);
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                        columns: ':visible(th:not(:last-child))',
+                        search: 'applied',
+                        order: 'applied'
+                    },
+                    customize: function (xlsx) {
+                        var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+                        source.setAttribute('name', 'Proveedores');
+                    }
+                },
+                { extend: 'csvHtml5' },
+                { extend: 'copyHtml5' },
+                {
+                    text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+                    extend: 'pdfHtml5',
+                    filename: 'proveedores',
+                    orientation: 'landscape',     //portrait
+                    pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+                    exportOptions: {
+                        columns: ':visible',
+                        search: 'applied',
+                        order: 'applied'
+                    }
+                }
+            ],
+            fnInitComplete: function () {
+                $('#hide-dt').show();
+                $('#progress').hide();
+            },
+        });
+
+        var table = $('#datatable').DataTable();
+
+        table
+        .on( 'select', function ( e, dt, type, indexes ) {
+            var rowData = table.rows( indexes ).data().toArray();
+        } )
+        .on( 'deselect', function ( e, dt, type, indexes ) {
+            var rowData = table.rows( indexes ).data().toArray();
+        } );
+
+    });
+
+    function selectAllRows(e){
+        var table = $('#datatable').DataTable();
+
+        if(e === true) {
+            table.rows().select();
+        } else {
+            table.rows().deselect();
+        }
+    };
+
+    function confirmDialog(button) {
+        var _elem = document.getElementById('modalConfirm');
+        var modal = M.Modal.getInstance(_elem);
+        modal.open();
+    };
+
+    document.getElementById('modalButtonAccept').addEventListener('click', event => {
+        
+        const clientId = document.getElementById('clientId').value;
+
+        printSelectedReceipts(clientId);
+
+    });
+
+    function printSelectedReceipts(clientId){
+        
+        var table = $('#datatable').DataTable();
+        
+        var rows = table.rows( { selected: true } );
+
+        let list = [];
+
+        for(i=0; i<rows.count(); i++){
+            list.push(rows.data()[i][1]);
+        }
+
+        var postData = { clientId: clientId, collections: list }; 
+    
+        $.ajax({ 
+            type: "POST", 
+            url: '/incomes/receiptsIssuance/printReceipts',
+            data: postData, 
+            success: function (data) { 
+                alert(JSON.stringify(data)); 
+            }, 
+            error: function (xhr, error) {
+                console.debug(xhr); 
+                console.debug(error);
+            },
+            dataType: "json", 
+            traditional: true 
+        });                
+    }
+
+</script>

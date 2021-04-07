@@ -4,7 +4,7 @@ const {
     Model
 } = require('sequelize');
 
-const UnidentifiedDepositStatus = require('../utils/statusMessages.util').UnidentifiedDepositStatus;
+const UnidentifiedDepositStatus = require('../utils/statusMessages.util').UnidentifiedDeposit;
 
 module.exports = (sequelize, DataTypes) => {
     class UnidentifiedDeposit extends Model {

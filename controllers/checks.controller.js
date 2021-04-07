@@ -224,3 +224,24 @@ module.exports.delete = async function (req, res, next) {
         }
     });
 };
+
+//---------------------------------------------------------------------------//
+// CRONES
+//---------------------------------------------------------------------------//
+
+const schedule = require('node-schedule');
+
+/**
+* @function 
+* @summary this function is called by a scheduler to find 
+* @param {*} fireDate 
+* @returns {Array} key-value pair array with mapped field_name / field_id
+*/
+function searchExpiredChecks(fireDate) {
+
+    winston.info('Executing crontab for searching checks close to due date');
+}
+
+const job1 = schedule.scheduleJob('* */1 * * *', function (fireDate) {
+    searchExpiredChecks(fireDate);
+})

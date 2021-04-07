@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
             CollectionProperty.belongsTo(models.collection, { foreignKey: 'id', sourceKey: 'collectionId' })
             CollectionProperty.hasOne(models.homeOwner, { foreignKey: 'id', sourceKey: 'propertyId' })
-
+            CollectionProperty.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
         }
     };
     CollectionProperty.init({

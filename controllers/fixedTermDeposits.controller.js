@@ -194,7 +194,6 @@ module.exports.accredit = async function (req, res) {
 
             winston.info(`Fixed-Term desposit ${fixedTermDeposit.id}updated succesfully`)
             req.flash("success", `Los intereses del plazo fijo ha sido acreditados correctamente`)
-
         })
         .catch(err => {
             winston.error(`An error ocurred while user #${req.user.id} tryed to update a new FTD interests ${JSON.stringify(req.body)} - ${err} `)

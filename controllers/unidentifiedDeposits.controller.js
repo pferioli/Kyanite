@@ -23,7 +23,7 @@ const winston = require('../helpers/winston.helper');
 const CURRENT_MENU = 'unidentifiedDeposits'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 const CollectionStatus = require('../utils/statusMessages.util').Collection;
-const UnidentifiedDepositStatus = require('../utils/statusMessages.util').UnidentifiedDepositStatus;
+const UnidentifiedDepositStatus = require('../utils/statusMessages.util').UnidentifiedDeposit;
 const Notifications = require('../utils/notifications.util');
 
 module.exports.listAll = async function (req, res) {
@@ -82,7 +82,7 @@ module.exports.identifyDeposit = async function (req, res) {
         req.flash("error", "El saldo remanente debe ser 0 para completar el proceso de identificación");
         res.redirect("/incomes/unidentifiedDeposits/client/" + clientId);
     }
-    
+
     try {
 
         const unidentifiedDeposit = await UnidentifiedDeposit.findByPk(depositId);

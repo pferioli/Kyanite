@@ -81,6 +81,8 @@
 
 <%- include ("./modals/delete.ejs") %>
 
+<%- include ("../partials/footer") %>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll(".modal");
@@ -188,9 +190,6 @@
                 $('#progress').hide();
             },
         });
-        table.columns.adjust().draw();
     });
 
 </script>
-
-<%- include ("../partials/footer") %>

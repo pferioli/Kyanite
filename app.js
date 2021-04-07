@@ -161,6 +161,8 @@ app.use('/incomes/collections', require('./routes/incomes.collections.route'));
 
 app.use('/incomes/unidentifiedDeposits', require('./routes/incomes.unidentifiedDeposits.route'));
 
+app.use('/incomes/receiptsIssuance', require('./routes/incomes.receiptsIssuance.route'));
+
 app.use('/expenses/paymentReceipts', require('./routes/expenses.paymentReceipts.route'));
 
 app.use('/expenses/paymentOrders', require('./routes/expenses.paymentOrders.route'));
@@ -184,8 +186,6 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
-
-const scheduledTasks = require('./helpers/scheduledTasks.helper');
 
 const hasFullICU = (() => {
   try {
