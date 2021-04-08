@@ -793,41 +793,6 @@ module.exports.createInvoice = function (req, res) {
         })
 };
 
-module.exports.printCollectionReceipts = async function (req, res) {
-
-    const { createReport } = require("../reports/collections/finalCollection.report");
-
-    const clientId = req.params.clientId;
-
-    const billingPeriodId = req.params.periodId;
-
-    const client = await Client.findByPk(clientId);
-
-    Collection.findAll({ where: { statusId: CollectionStatus.eStatus.get('processed').value, periodId: billingPeriodId } }, {
-        include: [{ model: Client }, { model: BillingPeriod },
-        { model: User, include: [{ model: Model.userSignature }] },
-        { model: User, include: [{ model: Model.userSignature }] },
-        { model: CollectionConcept, as: "Concepts", },
-        {
-            model: CollectionSecurity, as: "Securities", include: [
-                {
-                    model: CheckSplitted, include: [{ model: Model.check }]
-                    //where: { checkId: { [Op.ne]: null } }
-                },
-                {
-                    model: Account, include: [{ model: AccountType }, { model: Model.bank }]
-                    //where: { accountId: { [Op.ne]: null } }
-                }]
-        }],
-    })
-        .then(collections => {
-            //createReport(collections, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
-        })
-        .catch(err => {
-            console.error(err);
-        });
-}
-
 //-----------------------------------------------------------------
 // AJAX
 //-----------------------------------------------------------------

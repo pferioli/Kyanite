@@ -5,14 +5,16 @@ const Model = require('../models')
 
 const Client = Model.client;
 const Collection = Model.collection;
+const CollectionConcept = Model.collectionConcept;
+const CollectionSecurity = Model.collectionSecurity;
 const CollectionProperty = Model.collectionProperty;
 const BillingPeriod = Model.billingPeriod;
 const HomeOwner = Model.homeOwner;
 const Account = Model.account;
 const AccountType = Model.accountType;
 const User = Model.user;
-const UnidentifiedDeposit = Model.unidentifiedDeposit;
-const UnidentifiedDepositNote = Model.unidentifiedDepositNote;
+const Check = Model.check;
+const CheckSplitted = Model.checkSplitted;
 
 const db = require('../models/index');
 
@@ -55,7 +57,7 @@ module.exports.listAll = async function (req, res) {
                     },
                     statusId: CollectionStatus.eStatus.get('processed').value
                 },
-                include: [{ model: Client }, { model: BillingPeriod }]
+                include: [{ model: Client }, { model: BillingPeriod }, { model: User }]
             }
         ]
     };
@@ -77,9 +79,64 @@ module.exports.printReceipts = async function (req, res) {
 
     const clientId = req.body.clientId;
 
-    const response = { result: true };
+    Object.setPrototypeOf(req.body, {});
 
-    //res.redirect("/incomes/receiptsIssuance/client/" + clientId);
-    res.status(200).send(response);
+    let periods = [];
 
+    if (typeof req.body.periodId != 'undefined') {
+        periods = req.body.periodId.split(',');
+    } else {
+
+        const activePeriod = await BillingPeriod.findOne({
+            where: { clientId: clientId, statusId: 1 },
+            attributes: ['id']
+        });
+
+        if (activePeriod) { periods.push(activePeriod.id) }
+    }
+
+    let options = {
+        include: [
+            { model: HomeOwner }, { model: User },
+            {
+                model: Collection,
+                where: {
+                    clientId: clientId,
+                    periodId: {
+                        [Op.in]: periods
+                    },
+                    statusId: CollectionStatus.eStatus.get('processed').value
+                },
+
+                include: [
+                    { model: Client }, { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] },
+                    { model: CollectionConcept, as: "Concepts", },
+                    {
+                        model: CollectionSecurity, as: "Securities", include: [
+                            {
+                                model: CheckSplitted, include: [{ model: Model.check }]
+                            },
+                            {
+                                model: Account, include: [{ model: AccountType }, { model: Model.bank }]
+                            }]
+                    }]
+            }
+        ]
+    };
+
+    if (req.body.hasOwnProperty('collections') === true) {
+        options.where = {
+            id: { [Op.in]: req.body.collections }
+        }
+    }
+
+    const collections = await CollectionProperty.findAll(options);
+
+    const { createReport } = require("../reports/collections/finalCollection.report");
+
+    createReport(collections, res)
+
+    //const response = { result: true };
+
+    //res.status(200).send(response);
 }
