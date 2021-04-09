@@ -124,13 +124,19 @@
                         <td>
                             <a href="/checks/split/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">content_cut</i></a>
 
-                            <!--EN CARTERA, DEPOSITADO, ACREDITADO, ENTREGADO-->
-                            <% if((data.checks[i].statusId === 0)||(data.checks[i].statusId === 1)||(data.checks[i].statusId === 2)||(data.checks[i].statusId === 3)) { %>
-                            <a href="/checks/edit/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                            <% if(data.checks[i].statusId != 4){ %>                            
+                                <a id="button-status" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.client.id%>" 
+                                onclick="updateCheckStatus(this)"><i class="material-icons">move_to_inbox</i></a>
                             <% } %>
 
-                            <% if((data.checks[i].statusId === 0)||(data.checks[i].statusId === 1)||(data.checks[i].statusId === 2)||(data.checks[i].statusId === 3)||(data.checks[i].statusId === 4)) { %>
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-check="<%=data.checks[i].bank.name%> <%=data.checks[i].number%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.checks[i].amount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            <!--EN CARTERA, DEPOSITADO-->
+                            <% if((data.checks[i].statusId === 0)||(data.checks[i].statusId === 1)) { %>
+                                <a href="/checks/edit/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                            <% } %>
+
+                            <!--EN CARTERA-->
+                            <% if(data.checks[i].statusId === 0) { %>
+                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-check="<%=data.checks[i].bank.name%> <%=data.checks[i].number%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.checks[i].amount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                             <% } %>
                         </td>
                     </tr>
@@ -142,11 +148,11 @@
     </div>
 
     <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
-    <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
 
 </main>
 
 <%- include ("./modals/delete.ejs") %>
+<%- include ("./modals/updateStatus.ejs") %>
 
 <%- include ("../partials/footer") %>
 
@@ -164,6 +170,19 @@
         document.getElementById('modalDeleteMessage').textContent = message;
         document.getElementById('modalDeleteCheckId').value = button.dataset.id;
         document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
+        modal.open();
+    };
+
+    function updateCheckStatus(button){
+        const checkId = button.dataset.id; 
+        const clientId = button.dataset.clientid
+        
+        document.getElementById('modalUpdateStatusClientId').value = clientId;
+        document.getElementById('modalUpdateStatusCheckId').value = checkId;
+ 
+        var _elem = document.getElementById('modalUpdateStatus');
+        var modal = M.Modal.getInstance(_elem);
+
         modal.open();
     };
 

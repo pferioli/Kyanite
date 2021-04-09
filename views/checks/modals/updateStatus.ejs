@@ -1,0 +1,131 @@
+<div id="modalUpdateStatus" class="modal" style="width: 50% !important;">
+    <form action="/checks/status" method="post">
+        <div class="modal-content">
+            <div class="row">
+                <h5>Desea actualizar el estado del cheque ?</h5>
+            </div>
+            
+            <input type="hidden" name="clientId" id="modalUpdateStatusClientId" value="" />
+            <input type="hidden" name="checkId" id="modalUpdateStatusCheckId" value="" />
+
+            <!-- 'wallet': 0, 'deposited': 1, 'accredited': 2, 'delivered': 3, 'rejected': 4, 'cancelled': 5  -->
+
+            <div class="row">
+                <div class="input-field col s4">
+                    <i class="material-icons prefix">category</i>
+                    <select id="statusSelect" required>
+                        <option value="" disabled selected>Seleccione un estado</option>
+                        <option value=0>En cartera</option>
+                        <option value=1>Depositado</option>
+                        <option value=2>Acreditado</option>
+                        <option value=3>Entregado</option>
+                        <option value=4>Rechazado</option>
+                    </select>
+                    <label>Estado</label>
+                    <input type="hidden" name="statusId" id="statusId" />
+                </div>
+                <div class="input-field col s8">
+                    <i class="material-icons prefix">account_balance</i>
+                        <select id="accountSelect" required></select>
+                        <label>Cuenta de acreditación</label>
+                        <input type="hidden" name="accountId" id="accountId" />
+                </div>
+
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">info</i>
+                    <input id="accountInfo" type="text" value="" readonly />
+                    <label for="accountInfo">Detalles de la cuenta de Acreditación</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", async function () {
+
+        const clientId = document.getElementById('clientId').value
+
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        let statusSelect = document.getElementById('statusSelect');
+        let accountSelect = document.getElementById('accountSelect');
+
+        // accountSelect.disabled = true;
+        
+        getClientAccounts(clientId).then(accounts => {
+            
+            accountSelect.options.length = 0;
+            accountSelect.innerHTML = accountSelect.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione la cuenta de acreditación" + "</option>"
+
+            for (i = 0; i < accounts.length; i++) {
+                if (accounts[i].accountType.account.includes("CC$") || accounts[i].accountType.account.includes("CA$") || accounts[i].accountType.account.includes("CCU$") || accounts[i].accountType.account.includes("CAU$")) {
+                    accountSelect.innerHTML = accountSelect.innerHTML + "<option value=\"" + accounts[i].id + "\">" +
+                        "[" + accounts[i].accountType.account + "] " + accounts[i].accountType.description + " (ID:" + accounts[i].id + ")" + "</option>"
+                }
+            }
+
+            M.FormSelect.init(accountSelect, {});
+        });
+
+        statusSelect.onchange = async function () {
+            
+            document.getElementById('statusId').value = this.value;
+
+            let accountSelect = document.getElementById('accountSelect');
+
+            // accountSelect.disable = true;
+
+            switch(this.value) {
+                case 0: {} break;
+                case 1: {} break;
+                case 2: { 
+                    accountSelect.disable = false; 
+                } break;
+                case 3: {} break;
+                case 4: {} break;
+                default: { return} break;
+            }
+            
+            M.FormSelect.init(accountSelect, {});
+        };
+
+        accountSelect.onchange = async function () {
+        
+            getSelectedAccountDetails(this.value, 'accountInfo');
+        
+            document.getElementById('accountId').value = this.value;
+        }
+
+    });
+    
+    async function getSelectedAccountDetails(accountId, infoField) {
+
+        const account = await getClientAccountsInfo(accountId);
+
+        let message = "[" + account.accountType.account + "] " + account.accountType.description;
+
+        if (account.accountType.account.includes("CC$") || account.accountType.account.includes("CA$") || account.accountType.account.includes("CCU$") || account.accountType.account.includes("CAU$")) {
+            message = "[" + account.accountType.account + "]" + " - " + account.bank.name;
+            if (account.cbu) { message = message + " / CBU: " + account.cbu };
+            if (account.accountNumber) { message = message + " / CUENTA: " + account.accountNumber };
+            if (account.accountAlias) { message = message + " / ALIAS: " + account.accountAlias };
+        }
+
+        if (account.comments) { message = message + " - " + account.comments; }
+
+        document.getElementById(infoField).value = message; M.updateTextFields();
+    }
+
+</script>
+

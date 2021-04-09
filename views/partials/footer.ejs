@@ -5,8 +5,9 @@
                     style="vertical-align: -8px; margin-right: 5px;">copyright</i>AAII Administraciones Integrales</a>
         </div>
         <div class="col s6 center-align">
-            <a class="grey-text text-lighten-4" href="#!"><i class="material-icons"
-                    style="vertical-align: -8px; margin-right: 5px;">support</i>Kyanite Tool Powered by DTronix
+            <a class="grey-text text-lighten-4" href="#!">
+                <i class="material-icons" style="vertical-align: -8px; margin-right: 5px;">support</i>
+                    <span id="version">Kyanite Tool Powered by DTronix</span></a>
         </div>
     </div>
 </footer>
@@ -14,3 +15,25 @@
 </body>
 
 </html>
+
+<script type="text/javascript" src="/javascripts/version.js"></script>
+
+<script>
+
+    var version_info;
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        
+        if(version_info === undefined){
+            
+            version_info = await getCurrentVersion();
+
+            const versionObject = document.getElementById('version');
+            
+            versionObject.textContent = `Kyanite Tool Powered by DTronix (version actual ${version_info.backend.version} / DB: ${version_info.database})`;
+
+        }
+    });
+
+</script>
+  

@@ -197,33 +197,129 @@ module.exports.delete = async function (req, res, next) {
     const checkId = req.body.checkId;
     const clientId = req.body.clientId;
 
-    Check.findByPk(checkId).then(function (check) {
+    req.flash(
+        "error",
+        "la función de eliminar cheques no se encuentra disponible en esta versión"
+    )
+    res.redirect("/checks/client/" + clientId);
 
-        if (check) {
-            check.destroy()
-                .then(numAffectedRows => {
+    // Check.findByPk(checkId).then(function (check) {
 
-                    //TODO: aca deberia hacer el cascade de los splitted checks si los hay...
+    //     if (check) {
+    //         check.destroy()
+    //             .then(numAffectedRows => {
 
-                    req.flash(
-                        "success",
-                        "El cheque fue eliminado exitosamente a la base de datos"
-                    )
-                    winston.info(`check #${checkId} was deleted by user #${req.user.id} `);
-                })
-                .catch(err => {
-                    req.flash(
-                        "error",
-                        "Ocurrio un error y no se pudo eliminar el cheque de la base de datos"
-                    )
-                    winston.error(`an error ocurred when user "${req.user.id} tryed to delete check #${checkId} - ${err}`);
-                })
-                .finally(function () {
-                    res.redirect("/checks/client/" + clientId);
-                })
-        }
-    });
+    //                 //TODO: aca deberia hacer el cascade de los splitted checks si los hay...
+
+    //                 req.flash(
+    //                     "success",
+    //                     "El cheque fue eliminado exitosamente a la base de datos"
+    //                 )
+    //                 winston.info(`check #${checkId} was deleted by user #${req.user.id} `);
+    //             })
+    //             .catch(err => {
+    //                 req.flash(
+    //                     "error",
+    //                     "Ocurrio un error y no se pudo eliminar el cheque de la base de datos"
+    //                 )
+    //                 winston.error(`an error ocurred when user "${req.user.id} tryed to delete check #${checkId} - ${err}`);
+    //             })
+    //             .finally(function () {
+    //                 res.redirect("/checks/client/" + clientId);
+    //             })
+    //     }
+    // });
 };
+
+module.exports.updateStatus = async function (req, res, next) {
+
+    const clientId = req.body.clientId;
+
+    try {
+
+        const statusId = parseInt(req.body.statusId);
+
+        const checkId = req.body.checkId;
+
+        const accountId = req.body.accountId;
+
+        const activePeriod = await BillingPeriod.findOne({
+            where: { clientId: clientId, statusId: 1 },
+            attributes: ['id']
+        });
+
+        const periodId = activePeriod.id;
+
+        Check.findByPk(checkId)
+            .then(async function (check) {
+
+                if (check.statusId === CheckStatus.eStatus.get('rejected').value) {
+                    req.flash("warning", "No es posible cambiar el estado de un cheque que se encuentra en estado RECHAZADO"); return;
+                }
+
+                if ((statusId === CheckStatus.eStatus.get('wallet').value) ||
+                    (statusId === CheckStatus.eStatus.get('deposited').value) ||
+                    (statusId === CheckStatus.eStatus.get('delivered').value)) {
+
+                    if (check.statusId === CheckStatus.eStatus.get('accredited').value) {
+                        req.flash("warning", "No es posible volver a un estado previo luego de haber sido acreditado"); return;
+                    }
+                }
+
+                //-----------------------------------------------------------------
+                // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
+                //-----------------------------------------------------------------
+
+                const AccountMovement = require('./accountMovements.controller');
+
+                const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                if (statusId === CheckStatus.eStatus.get('accredited').value) {
+
+                    const accountMovementSource = await AccountMovement.addMovement(clientId, check.accountId, periodId, (-1) * check.amount,
+                        accountMovementCategory.eStatus.get('CHEQUE_ACREDITADO').value, check.id, req.user.id);
+
+                    const accountMovementDestination = await AccountMovement.addMovement(clientId, accountId, periodId, check.amount,
+                        accountMovementCategory.eStatus.get('CHEQUE_ACREDITADO').value, check.id, req.user.id);
+
+                    if ((accountMovementDestination === null) || (accountMovementSource === null)) {
+                        winston.error(`It was not possible to add an accredit account movement record for check #${check.id}`);
+                        throw new Error("It was not possible to add an accredit account movement record for check #${check.id}");
+                    }
+
+                };
+
+                if (statusId === CheckStatus.eStatus.get('rejected').value) {
+
+                    //TODO: hay que buscar para ese cheque los splittedChecks y las cobranzas y OPs que se asociaron y pasarlas a ANULADO.
+
+                    // const accountMovement = await AccountMovement.addMovement(clientId, check.accountId, periodId, (-1) * check.amount,
+                    //     accountMovementCategory.eStatus.get('CHEQUE_ACREDITADO').value, check.id, req.userId);
+
+                };
+
+                check.update({ statusId: statusId })
+                    .then((check) => {
+                        winston.info(`the status of check #${checkId} changed to ${statusId} by userId ${req.user.id} request`);
+                        req.flash("success", "El estado del cheque fue actualizado exitosamente");
+                    });
+
+            })
+            .catch(err => {
+                req.flash("error", "Ocurrio un error y no se pudo cambiar el estado del cheque en la base de datos");
+                winston.error(`an error ocurred when user "${req.user.id} tryed to update check status #${checkId} - ${err}`);
+            })
+            .finally(() => {
+                res.redirect("/checks/client/" + clientId);
+            });
+
+    } catch (err) {
+        req.flash("error", "Ocurrio un error y no se pudo cambiar el estado del cheque en la base de datos");
+        winston.error(`an error ocurred when user "${req.user.id} tryed to update check status #${checkId} - ${err}`);
+        res.redirect("/checks/client/" + clientId);
+    }
+
+}
 
 //---------------------------------------------------------------------------//
 // CRONES

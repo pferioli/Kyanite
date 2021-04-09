@@ -53,6 +53,10 @@ router.post('/delete', function (req, res, next) {
     checksController.delete(req, res);
 });
 
+router.post('/status', function (req, res, next) {
+    checksController.updateStatus(req, res);
+});
+
 router.get("/client/:clientId", function (req, res, next) {
     checksController.listAll(req, res);
 });

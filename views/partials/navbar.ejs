@@ -1,7 +1,3 @@
-<script>
-    var pendingNotifications = {};
-</script>
-
 <ul id="Expenses" class="dropdown-content black">
     <li><a class="white-text" href="/expenses/paymentReceipts"><i class="material-icons">assignment</i>Comprobantes</a></li>
     <li><a class="white-text" href="/expenses/paymentOrders"><i class="material-icons">assignment_turned_in</i>Ordenes de Pago</a></li>
@@ -93,6 +89,8 @@
 </nav>
 
 <script>
+
+    var pendingNotifications = {};
 
     var userid = htmlDecode("<%= locals.user.id %>");
 

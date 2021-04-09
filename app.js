@@ -120,24 +120,6 @@ app.use(function (req, res, next) {
 // ROUTES
 //---------------------------------------------------------------------------//
 
-app.get("/check_version", function (req, res) {
-
-  const env = process.env.NODE_ENV || 'development';
-
-  const config = require(__dirname + '/config/config.json')[env];
-
-  const pkgJson = require(__dirname + '/package.json');
-
-  res.send({
-    "env": env,
-    "database": config.database,
-    "backend": {
-      "name": pkgJson.name,
-      "version": pkgJson.version
-    }
-  })
-});
-
 app.use('/auth', require('./routes/auth.route'));
 
 //--- from here, all routes require an authenticated user...
@@ -189,6 +171,17 @@ app.use('/notifications', require('./routes/notifications.route'));
 
 app.use('/accountingImputations', require('./routes/accountingImputations.route'));
 
+
+app.get("/check_version", function (req, res) {
+
+  const env = process.env.NODE_ENV || 'development';
+
+  const config = require(__dirname + '/config/config.json')[env];
+
+  const pkgJson = require(__dirname + '/package.json');
+
+  res.send({ "env": env, "database": config.database, "backend": { "name": pkgJson.name, "version": pkgJson.version } })
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

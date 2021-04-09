@@ -61,6 +61,8 @@ module.exports = (sequelize, DataTypes) => {
                     case 'P': return ('Pago a Proveedor');
                     case 'C': return ('Cobranza');
                     case 'Q': return ('Cheque');
+                    case 'A': return ('Cheque Acreditado');
+                    case 'R': return ('Cheque Rechazado');
                     case 'F': return ('Plazo Fijo');
                     case 'T': return ('Transferencia');
                     case 'S': return ('Saldo Período Anterior');
