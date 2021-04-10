@@ -63,16 +63,26 @@
                             <td><%= data.movements[i].id %></td>
                             <td><%= data.movements[i].categoryName%> [<%= data.movements[i].category%>]</td>
                              <td>
-                                <% if(Math.sign(data.movements[i].amount) === 1) { %>
-                                <i class="material-icons">add_circle_outline</i>
+                                <%if(data.movements[i].deletedAt === null){ %>
+                                    <% if(Math.sign(data.movements[i].amount) === 1) { %>
+                                        <i class="material-icons">add_circle_outline</i>
+                                    <% } %>
+                                    <% if(Math.sign(data.movements[i].amount) === -1) { %>
+                                        <i class="material-icons">remove_circle_outline</i>
+                                    <% } %>                                
+                                <% } else { %>
+                                    <i class="material-icons">highlight_off</i>
                                 <% } %>
-                                <% if(Math.sign(data.movements[i].amount) === -1) { %>
-                                <i class="material-icons">remove_circle_outline</i>
-                                <% } %>                                
                             </td>
                             <td>$ <%= data.movements[i].amount %></td>
                             <td><%= data.movements[i].account.accountType.account %> (ID: <%= data.movements[i].accountId %>)</td>
-                            <td><%= data.movements[i].createdAt %></td>
+                            
+                            <%if(data.movements[i].deletedAt === null){ %>
+                                <td><%= data.movements[i].createdAt %></td>
+                            <% } else { %>
+                                <td><%= data.movements[i].deletedAt %></td>
+                            <% } %>
+                            
                             <td></td>
 
                             <td>
@@ -219,7 +229,7 @@
                 leftColumns: 1
             },
             pageLength: 200,
-            order: [[0, 'asc']],
+            order: [[0, 'desc']],
             autowidth: true,
             scrollY: '500px',
             scrollX: true,

@@ -9,11 +9,20 @@ const Bank = Model.bank;
 const Check = Model.check;
 const BillingPeriod = Model.billingPeriod;
 const CheckSplitted = Model.checkSplitted;
+const AccreditedCheck = Model.accreditedCheck;
+const PaymentOrder = Model.paymentOrder;
+const Collection = Model.collection;
+const CollectionConcept = Model.collectionConcept;
+const CollectionSecurity = Model.collectionSecurity;
+const CollectionProperty = Model.collectionProperty;
 
 const winston = require('../helpers/winston.helper');
 
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 const CheckStatus = require('../utils/statusMessages.util').Check;
+const AccreditedCheckStatus = require('../utils/statusMessages.util').AccreditedCheck;
+const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
+const CollectionStatus = require('../utils/statusMessages.util').Collection;
 
 const moment = require('moment');
 
@@ -26,6 +35,7 @@ module.exports.listAll = async function (req, res, next) {
     const client = await Client.findByPk(clientId);
 
     let options = {
+        subQuery: false,
         where: { clientId: clientId },
         include: [
             { model: User }, { model: Account, include: [{ model: AccountType }] },
@@ -33,18 +43,9 @@ module.exports.listAll = async function (req, res, next) {
             {
                 model: CheckSplitted,
                 required: false,
-                // where: {
-                //     [Op.or]: [
-                //         { splitType: 'I' },
-                //         { splitType: 'O' }
-                //     ],
-                // },
                 attributes: ['id']
             },
-        ],
-        // attributes: {
-        //     include: [[Sequelize.fn("COUNT", Sequelize.col("checkSplitteds.id")), "CheckSplittedCount"]]
-        // },
+        ]
     };
 
     Check.findAll(options).then(function (checks) {
@@ -205,6 +206,10 @@ module.exports.delete = async function (req, res, next) {
 
     // Check.findByPk(checkId).then(function (check) {
 
+    // CheckSplitted.findAll({ where: { checkId: checkId } })
+    //     .then(splittedChecks => {}
+
+
     //     if (check) {
     //         check.destroy()
     //             .then(numAffectedRows => {
@@ -241,7 +246,9 @@ module.exports.updateStatus = async function (req, res, next) {
 
         const checkId = req.body.checkId;
 
-        const accountId = req.body.accountId;
+        let accountId = req.body.accountId;
+
+        const comments = req.body.comments;
 
         const activePeriod = await BillingPeriod.findOne({
             where: { clientId: clientId, statusId: 1 },
@@ -276,42 +283,135 @@ module.exports.updateStatus = async function (req, res, next) {
 
                 if (statusId === CheckStatus.eStatus.get('accredited').value) {
 
-                    const accountMovementSource = await AccountMovement.addMovement(clientId, check.accountId, periodId, (-1) * check.amount,
-                        accountMovementCategory.eStatus.get('CHEQUE_ACREDITADO').value, check.id, req.user.id);
+                    const accreditedCheck = await AccreditedCheck.create({
+                        clientId: check.clientId,
+                        checkId: check.id,
+                        accountId: accountId,
+                        periodId: periodId,
+                        statusId: AccreditedCheckStatus.eStatus.get('accredited').value,
+                        userId: req.user.id
+                    });
 
-                    const accountMovementDestination = await AccountMovement.addMovement(clientId, accountId, periodId, check.amount,
-                        accountMovementCategory.eStatus.get('CHEQUE_ACREDITADO').value, check.id, req.user.id);
+                    if (accreditedCheck !== null) {
 
-                    if ((accountMovementDestination === null) || (accountMovementSource === null)) {
-                        winston.error(`It was not possible to add an accredit account movement record for check #${check.id}`);
-                        throw new Error("It was not possible to add an accredit account movement record for check #${check.id}");
+                        const accountMovementSource = await AccountMovement.addMovement(clientId, check.accountId, periodId, (-1) * check.amount,
+                            accountMovementCategory.eStatus.get('CHEQUE_ACREDITADO').value, check.id, req.user.id);
+
+                        const accountMovementDestination = await AccountMovement.addMovement(clientId, accountId, periodId, check.amount,
+                            accountMovementCategory.eStatus.get('CHEQUE_ACREDITADO').value, check.id, req.user.id);
+
+                        if ((accountMovementDestination === null) || (accountMovementSource === null)) {
+                            winston.error(`It was not possible to add an accredit account movement record for check #${check.id}`);
+                            throw new Error("It was not possible to add an accredit account movement record for check #${check.id}");
+                        }
+
                     }
-
                 };
 
                 if (statusId === CheckStatus.eStatus.get('rejected').value) {
 
-                    //TODO: hay que buscar para ese cheque los splittedChecks y las cobranzas y OPs que se asociaron y pasarlas a ANULADO.
+                    if (check.statusId === CheckStatus.eStatus.get('accredited').value) {
 
-                    // const accountMovement = await AccountMovement.addMovement(clientId, check.accountId, periodId, (-1) * check.amount,
-                    //     accountMovementCategory.eStatus.get('CHEQUE_ACREDITADO').value, check.id, req.userId);
+                        const accreditedCheck = await AccreditedCheck.findOne({ where: { checkId: check.id } });
+
+                        await accreditedCheck.update({
+                            statusId: AccreditedCheckStatus.eStatus.get('rejected').value,
+                            comments: comments
+                        });
+
+                        accountId = accreditedCheck.accountId;
+
+                    } else {
+
+                        accountId = check.accountId;
+
+                        const accreditedCheck = await AccreditedCheck.create({
+                            clientId: check.clientId,
+                            checkId: check.id,
+                            accountId: accountId,
+                            periodId: periodId,
+                            statusId: AccreditedCheckStatus.eStatus.get('rejected').value,
+                            comments: comments,
+                            userId: req.user.id
+                        });
+                    }
+
+                    const accountMovement = await AccountMovement.addMovement(clientId, accountId, periodId, (-1) * check.amount,
+                        accountMovementCategory.eStatus.get('CHEQUE_RECHAZADO').value, check.id, req.user.id);
+
+                    if (accountMovement === null) {
+                        winston.error(`It was not possible to add an accredit account movement record for check #${check.id}`);
+                        throw new Error("It was not possible to add an accredit account movement record for check #${check.id}");
+                    }
+
+                    //hay que buscar para cada tipo de cheque las cobranzas o las OPs y pasarlos a "cancelled"
+
+                    let splittedChecksCollections = await CheckSplitted.findAll({ where: { checkId: checkId, splitType: 'I' } });
+
+                    //para cada UF hay que pasarla a "deleted"
+
+                    for (let splittedCheck of splittedChecksCollections) {
+
+                        try {
+                            if (splittedCheck.statusId === SplitCheckStatus.eStatus.get('assigned').value) {
+
+                                const collectionSecurity = await CollectionSecurity.findOne({ where: { checkId: splittedCheck.id } });
+
+                                await Collection.update({ statusId: CollectionStatus.eStatus.get('deleted').value },
+                                    { where: { id: collectionSecurity.collectionId } });
+                            }
+
+                            await splittedCheck.update({ statusId: SplitCheckStatus.eStatus.get('deleted').value });
+
+                        } catch (error) {
+                            winston.error(`It was not possible to delete the collection #${collectionSecurity.collectionId} associated to splitted check #${splittedCheck.id} from check #${check.id}`);
+                        }
+                    }
+
+                    //para cada OP hay que pasarla a "deleted"
+
+                    let splittedChecksPaymentOrders = await CheckSplitted.findAll({ where: { checkId: checkId, splitType: 'O' } });
+
+                    for (let splittedCheck of splittedChecksPaymentOrders) {
+
+                        try {
+
+                            if (splittedCheck.statusId === SplitCheckStatus.eStatus.get('assigned').value) {
+
+                                const paymentOrder = await PaymentOrder.findOne({ where: { checkId: splittedCheck.id } })
+
+                                const paymentOrderController = require('./paymentOrders.controller');
+
+                                if (periodId === paymentOrder.periodId) {
+                                    paymentOrderController.deletePaymentOrder(clientId, paymentOrder.id);
+                                } else {
+                                    //TODO: verificar si en el caso que el periodo de la OP sea anterior se debe eliminar el movimiento !!!
+                                    //validar como es el proceso de anulacion
+                                }
+                            }
+
+                            await splittedCheck.update({ statusId: SplitCheckStatus.eStatus.get('deleted').value });
+
+                        } catch (error) {
+                            winston.error(`It was not possible to delete the payment order #${paymentOrder.id} associated to splitted check #${splittedCheck.id} from check #${check.id}`);
+                        }
+
+                    }
 
                 };
 
-                check.update({ statusId: statusId })
-                    .then((check) => {
-                        winston.info(`the status of check #${checkId} changed to ${statusId} by userId ${req.user.id} request`);
-                        req.flash("success", "El estado del cheque fue actualizado exitosamente");
-                    });
+                check = await check.update({ statusId: statusId });
+
+                winston.info(`the status of check #${checkId} changed to ${statusId} by userId ${req.user.id} request`);
+                req.flash("success", "El estado del cheque fue actualizado exitosamente");
+                res.redirect("/checks/client/" + clientId);
 
             })
             .catch(err => {
                 req.flash("error", "Ocurrio un error y no se pudo cambiar el estado del cheque en la base de datos");
                 winston.error(`an error ocurred when user "${req.user.id} tryed to update check status #${checkId} - ${err}`);
-            })
-            .finally(() => {
                 res.redirect("/checks/client/" + clientId);
-            });
+            })
 
     } catch (err) {
         req.flash("error", "Ocurrio un error y no se pudo cambiar el estado del cheque en la base de datos");

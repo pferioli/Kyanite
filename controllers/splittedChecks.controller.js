@@ -196,7 +196,7 @@ module.exports.getSplittedChecks = async function (req, res, next) {
     const splitType = req.query.splitType;
 
     const statusId = (req.query.statusId || req.body.statusId).split(",") ||
-        [SplitCheckStatus.eStatus.get('pending').value, SplitCheckStatus.eStatus.get('assigned').value, SplitCheckStatus.eStatus.get('cancelled').value]
+        [SplitCheckStatus.eStatus.get('pending').value, SplitCheckStatus.eStatus.get('assigned').value, SplitCheckStatus.eStatus.get('deleted').value]
 
     let options = {}
 
@@ -261,5 +261,5 @@ module.exports.getSplittedCheckByPaymentReceiptId = async function (req, res, ne
 }
 
 module.exports.checkIsFullyAsigned = async function () {
-    
+
 }

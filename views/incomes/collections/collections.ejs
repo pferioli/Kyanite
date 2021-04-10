@@ -27,7 +27,7 @@
             </div>
 
             <div class="actions">
-                <div class="switch">
+                <div class="switch" style="margin-top: 3px;">
                     <label> Mostrar todos los estados <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
                         <span class="lever"></span></label>
                 </div>              
@@ -232,7 +232,7 @@
         const clientId = document.getElementById('clientId').value;
         const periodId = document.getElementById('periodId').value;
 
-        const redirectUrl = '/expenses/paymentReceipts?refresh=' + swRefresh + '&' + 'showAll=' + swStatus;
+        const redirectUrl = '/incomes/collections/?showAll=' + swStatus;
 
         var form = $('<form action="' + redirectUrl + '" method="post">' +
             '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +

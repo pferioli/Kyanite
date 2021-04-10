@@ -3,6 +3,8 @@ const {
     Model
 } = require('sequelize');
 
+const AccreditedCheckStatus = require('../utils/statusMessages.util').AccreditedCheck;
+
 module.exports = (sequelize, DataTypes) => {
     class AccreditedCheck extends Model {
         /**
@@ -16,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
             AccreditedCheck.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
             AccreditedCheck.hasOne(models.account, { foreignKey: 'id', sourceKey: 'accountId' })
             AccreditedCheck.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
-            AccreditedCheck.hasOne(models.check, { foreignKey: 'id', sourceKey: 'checkId' })
         }
     };
     AccreditedCheck.init({
@@ -46,10 +47,15 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
+        comments: {
+            allowNull: true,
+            defaultValue: null,
+            type: DataTypes.STRING
+        },
         status: {
             type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
             get: function () {
-                return CheckStatus.Status[this.get('statusId')];
+                return AccreditedCheckStatus.Status[this.get('statusId')];
             }
         },
         userId: {
@@ -58,8 +64,8 @@ module.exports = (sequelize, DataTypes) => {
         },
     }, {
         sequelize,
-        modelName: 'check',
-        tableName: 'checks',
+        modelName: 'accreditedCheck',
+        tableName: 'checks_accredited',
         timestamps: true,
         paranoid: true,
 

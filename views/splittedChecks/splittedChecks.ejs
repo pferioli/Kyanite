@@ -55,9 +55,9 @@
                             <td>$<%= data.checks[i].amount %></td>
                           
                             <% if(data.checks[i].splitType==='I' ) { %>
-                                <td>Cobranza</td>
+                                <td><i class="material-icons">home</i><span style="padding-left: 10px; vertical-align: 8px;">Cobranza</span></td>
                             <% } else { %>
-                                <td>Orden de Pago</td>
+                                <td><i class="material-icons">receipt</i><span style="padding-left: 10px; vertical-align: 8px;">Orden de Pago</span></td>
                             <% } %>
                     
                             <td>
@@ -72,7 +72,7 @@
                                 <% } %>
 
                                 <!--ANULADO-->
-                                <% if(data.checks[i].statusId===3) { %>
+                                <% if(data.checks[i].statusId===2) { %>
                                     <i class="material-icons">delete_outline</i>
                                 <% } %>
 

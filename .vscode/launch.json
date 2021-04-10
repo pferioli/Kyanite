@@ -5,6 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Attach to Chrome, with sourcemaps",
+            "type": "chrome",
+            "request": "attach",
+            "port": 9222,
+            "sourceMaps": true,
+            "webRoot": "${workspaceFolder}",
+            "url": "https://localhost:3001/",
+            "sourceMapPathOverrides": {
+                "webpack:///*": "/*"
+            }
+            // /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=remote-profile
+        },
+        {
             "name": "Launch Program",
             "program": "${workspaceFolder}/bin/server.js",
             "request": "launch",

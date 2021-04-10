@@ -203,6 +203,41 @@ module.exports.createPO = async function (req, res) {
         })
 }
 
+module.exports.deletePaymentOrder = async function (clientId, paymentOrderId) {
+
+    //anulamos la OP
+
+    const paymentOrder = await PaymentOrder.findByPk(paymentOrderId);
+
+    await paymentOrder.update({
+        statusId: PaymentOrderStatus.eStatus.get('deleted').value
+    });
+
+    //cambiamos el estado del comprobante a pending o inprogress segun el saldo
+
+    const paymentReceipt = await PaymentReceipt.findByPk(paymentOrder.paymentReceiptId);
+
+    const remainingBalance = await this.calculateRemainingBalance(paymentOrder.paymentReceiptId);
+
+    let paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('pending').value;
+
+    if (paymentReceipt.amount > remainingBalance) {
+        paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('inprogress').value;
+    }
+
+    await paymentReceipt.update({ statusId: paymentReceiptStatusId });
+
+    //eliminamos el movimiento de la CC del barrio
+
+    const AccountMovement = require('./accountMovements.controller');
+
+    const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+    const accountMovement = await AccountMovement.deleteMovement(clientId, paymentOrder.accountId, paymentOrder.periodId,
+        accountMovementCategory.eStatus.get('PAGO_PROVEEDOR').value, paymentOrder.id);
+
+};
+
 module.exports.deletePO = async function (req, res) {
 
     const paymentOrderId = req.body.paymentOrderId;
@@ -211,37 +246,7 @@ module.exports.deletePO = async function (req, res) {
 
     try {
 
-        //anulamos la OP
-
-        const paymentOrder = await PaymentOrder.findByPk(paymentOrderId);
-
-        await paymentOrder.update({
-            statusId: PaymentOrderStatus.eStatus.get('deleted').value
-        });
-
-        //cambiamos el estado del comprobante a pending o inprogress segun el saldo
-
-        const paymentReceipt = await PaymentReceipt.findByPk(paymentOrder.paymentReceiptId);
-
-        const remainingBalance = await this.calculateRemainingBalance(paymentOrder.paymentReceiptId);
-
-        let paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('pending').value;
-
-        if (paymentReceipt.amount > remainingBalance) {
-            paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('inprogress').value;
-        }
-
-        await paymentReceipt.update({ statusId: paymentReceiptStatusId });
-
-        //eliminamos el movimiento de la CC del barrio
-
-        const AccountMovement = require('./accountMovements.controller');
-
-        const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
-
-        const accountMovement = await AccountMovement.deleteMovement(clientId, paymentOrder.accountId, paymentOrder.periodId,
-            accountMovementCategory.eStatus.get('PAGO_PROVEEDOR').value, paymentOrder.id);
-
+        deletePaymentOrder(clientId, paymentOrderId);
 
         req.flash("success", `La OP #${paymentOrder.poNumber} fue anulada correctamente`);
 

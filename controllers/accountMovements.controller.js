@@ -91,6 +91,7 @@ module.exports.listAll = async function (req, res, next) {
             }
         },
         include: [{ model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
+        paranoid: false
     };
 
     AccountMovement.findAll(options).then(function (movements) {

@@ -122,18 +122,23 @@
                         <td><%= data.checks[i].user.name %></td>
 
                         <td>
-                            <a href="/checks/split/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">content_cut</i></a>
+                            
+                            <!--EN CARTERA-->
+                            <% if(data.checks[i].statusId === 0) { %>
+                                <a href="/checks/edit/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                            <% } %>
 
+                            <!--EN CARTERA, DEPOSITADO, ACREDITADO-->
+                            <% if((data.checks[i].statusId === 0)||(data.checks[i].statusId === 1)||(data.checks[i].statusId === 2)) { %>
+                                <a href="/checks/split/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">content_cut</i></a>
+                            <% } %>
+
+                            <!-- TODOS MENOS RECHAZADO-->
                             <% if(data.checks[i].statusId != 4){ %>                            
                                 <a id="button-status" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.client.id%>" 
                                 onclick="updateCheckStatus(this)"><i class="material-icons">move_to_inbox</i></a>
                             <% } %>
-
-                            <!--EN CARTERA, DEPOSITADO-->
-                            <% if((data.checks[i].statusId === 0)||(data.checks[i].statusId === 1)) { %>
-                                <a href="/checks/edit/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
-                            <% } %>
-
+                        
                             <!--EN CARTERA-->
                             <% if(data.checks[i].statusId === 0) { %>
                                 <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-check="<%=data.checks[i].bank.name%> <%=data.checks[i].number%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.checks[i].amount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>

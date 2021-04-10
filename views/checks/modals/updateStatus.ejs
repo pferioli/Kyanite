@@ -1,5 +1,5 @@
 <div id="modalUpdateStatus" class="modal" style="width: 50% !important;">
-    <form action="/checks/status" method="post">
+    <form id="modalUpdateStatusForm" action="/checks/status" method="post">
         <div class="modal-content">
             <div class="row">
                 <h5>Desea actualizar el estado del cheque ?</h5>
@@ -24,23 +24,32 @@
                     <label>Estado</label>
                     <input type="hidden" name="statusId" id="statusId" />
                 </div>
+
                 <div class="input-field col s8">
                     <i class="material-icons prefix">account_balance</i>
-                        <select id="accountSelect" required></select>
+                        <select id="accountSelect"></select>
                         <label>Cuenta de acreditación</label>
                         <input type="hidden" name="accountId" id="accountId" />
                 </div>
 
                 <div class="input-field col s12">
                     <i class="material-icons prefix">info</i>
-                    <input id="accountInfo" type="text" value="" readonly />
+                    <input id="accountInfo" type="text" value="" readonly disabled/>
                     <label for="accountInfo">Detalles de la cuenta de Acreditación</label>
                 </div>
+
+                <div class="input-field col s12"> 
+                    <i class="material-icons prefix">comments</i>
+                    <textarea id="comments" name="comments" class="materialize-textarea" placeholder="detalle el motivo del rechazo" disabled ></textarea>
+                    <label for="comments">Comentarios</label>
+                </div>
+
             </div>
+                
         </div>
 
         <div class="modal-footer">
-            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <button class="waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
             <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
         </div>
     </form>
@@ -51,7 +60,11 @@
 
 <script>
 
+    var statusId = undefined;
+
     document.addEventListener("DOMContentLoaded", async function () {
+
+        document.getElementById("modalUpdateStatusForm").addEventListener("submit", validateForm, true);
 
         const clientId = document.getElementById('clientId').value
 
@@ -61,7 +74,7 @@
         let statusSelect = document.getElementById('statusSelect');
         let accountSelect = document.getElementById('accountSelect');
 
-        // accountSelect.disabled = true;
+        accountSelect.setAttribute("disabled", "disabled");
         
         getClientAccounts(clientId).then(accounts => {
             
@@ -80,20 +93,34 @@
 
         statusSelect.onchange = async function () {
             
-            document.getElementById('statusId').value = this.value;
+            statusId = parseInt(this.value);
+            
+            document.getElementById('statusId').value = statusId;
+
+            let accountInfo = document.getElementById('accountInfo');
+            accountInfo.setAttribute("disabled", "disabled");
+            accountInfo.value = "";
 
             let accountSelect = document.getElementById('accountSelect');
+            accountSelect.setAttribute("disabled", "disabled");
+            accountSelect.selectedIndex = 0;
+            
+            document.getElementById('accountId').value = "";
 
-            // accountSelect.disable = true;
+            let comments = document.getElementById('comments');
+            comments.setAttribute("disabled", "disabled");
+            comments.value = "";
 
-            switch(this.value) {
+            switch(parseInt(this.value)) {
                 case 0: {} break;
                 case 1: {} break;
-                case 2: { 
-                    accountSelect.disable = false; 
-                } break;
+                case 2: { accountSelect.removeAttribute("disabled"); } break;
                 case 3: {} break;
-                case 4: {} break;
+                case 4: { 
+                    comments.removeAttribute("disabled"); 
+                    comments.focus(); 
+                    M.updateTextFields(); 
+                } break;
                 default: { return} break;
             }
             
@@ -102,6 +129,9 @@
 
         accountSelect.onchange = async function () {
         
+            let accountInfo = document.getElementById('accountInfo');
+            accountInfo.removeAttribute("disabled");
+
             getSelectedAccountDetails(this.value, 'accountInfo');
         
             document.getElementById('accountId').value = this.value;
@@ -127,5 +157,22 @@
         document.getElementById(infoField).value = message; M.updateTextFields();
     }
 
+    function validateForm(event) {
+        
+        if(statusId === 2) { //ACREDITADO
+            if(document.getElementById('accountId').value === "" ) { 
+                alert("No hay seleccionada una cuenta de acreditación"); event.preventDefault(); return; }
+        };
+        
+        if(statusId === 4) { //RECHAZADO
+            if(document.getElementById('comments').value === "" ) { 
+                alert("Por favor indique el motivo del rechazo y vuelva a intentarlo para poder continuar"); event.preventDefault(); return; }
+        };
+
+        var _elem = document.getElementById('modalUpdateStatus');
+        var modal = M.Modal.getInstance(_elem);
+
+        modal.close();        
+    };
 </script>
 

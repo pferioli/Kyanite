@@ -14,8 +14,13 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
-    const clientId = req.body.clientId;
-    res.redirect("/incomes/collections/client/" + clientId);
+
+    let redirectUrl = '/incomes/collections/client/' + req.body.clientId + '?periodId=' + req.body.periodId
+
+    if (req.query.refresh) redirectUrl = redirectUrl + '&refresh=' + req.query.refresh;
+    if (req.query.showAll) redirectUrl = redirectUrl + '&showAll=' + req.query.showAll;
+
+    res.redirect(redirectUrl);
 });
 
 router.get("/client/:clientId", function (req, res, next) {

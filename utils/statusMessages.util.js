@@ -65,6 +65,19 @@ module.exports.Check = class {
     }
 }
 
+module.exports.AccreditedCheck = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["Pendiente", "Acreditado", "Rechazado"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'pending': 0, 'accredited': 1, 'rejected': 2, })
+    }
+}
+
 module.exports.SplitCheck = class {
 
     constructor() { }
@@ -74,7 +87,7 @@ module.exports.SplitCheck = class {
     }
 
     static get eStatus() {
-        return new Enum({ 'pending': 0, 'assigned': 1, 'cancelled': 2 })
+        return new Enum({ 'pending': 0, 'assigned': 1, 'deleted': 2 })
     }
 }
 
