@@ -134,7 +134,7 @@
                             <% } %>
 
                             <!-- TODOS MENOS RECHAZADO-->
-                            <% if(data.checks[i].statusId != 4){ %>                            
+                            <% if((data.checks[i].statusId != 4)&&(data.checks[i].statusId != 5)){ %>                            
                                 <a id="button-status" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.client.id%>" 
                                 onclick="updateCheckStatus(this)"><i class="material-icons">move_to_inbox</i></a>
                             <% } %>

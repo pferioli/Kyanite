@@ -1,6 +1,8 @@
 const PDFDocument = require("pdfkit");
 const path = require("path");
 
+const CollectionStatus = require('../../utils/statusMessages.util').Collection;
+
 const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
 const common = require('../common.report');
@@ -25,6 +27,9 @@ function createReport(collection, res) {
 
     common.generateSignature(doc, collection.user, { linesize: 174, startLine: 80, signatureHeight: 735 });
     generateFooter(doc);
+
+    if (collection.statusId === CollectionStatus.eStatus.get('deleted').value)
+        common.addWaterMark(doc, [{ text: "ANULADA", x: 100, y: 500, rotation: 315, size: 100 }]);
 
     const reportName = "cobranza_" + collection.client.internalCode + "_" + collection.Properties[0].homeOwner.property + "_" + collection.receiptNumber + ".pdf"
     //doc.end();

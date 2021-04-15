@@ -13,6 +13,7 @@ const CheckSplitted = Model.checkSplitted;
 const winston = require('../helpers/winston.helper');
 
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
+const CheckStatus = require('../utils/statusMessages.util').Check;
 
 const CURRENT_MENU = 'splittedChecks'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
@@ -47,6 +48,13 @@ module.exports.listAll = async function (req, res, next) {
 module.exports.showNewForm = async function (req, res, next) {
     const checkId = req.params.checkId;
     const check = await Check.findByPk(checkId, { include: [{ model: Client }, { model: Bank }, { model: BillingPeriod }] });
+
+    if (check.statusId === CheckStatus.eStatus.get("cancelled").value) {
+        req.flash("warning", `el cheque seleccionado se encuentra cancelado y no es posible agregar subdivisiones`);
+        res.redirect("/checks/split/" + checkId);
+        return;
+    }
+
     res.render("splittedChecks/add.ejs", { menu: CURRENT_MENU, data: { check } });
 };
 
@@ -158,7 +166,11 @@ module.exports.edit = async function (req, res, next) {
 }
 
 module.exports.delete = async function (req, res, next) {
+
     const checkId = req.params.checkId;
+
+    const splittedCheck = await CheckSplitted.findByPk(checkId, { include: [{ model: Check, include: [{ model: Client }, { model: BillingPeriod }] }] });
+
     res.redirect('/checks/split/' + checkId)
 }
 

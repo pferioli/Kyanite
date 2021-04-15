@@ -57,6 +57,7 @@ module.exports.listAll = async function (req, res, next) {
 };
 
 module.exports.showNewForm = async function (req, res, next) {
+
     const clientId = req.params.clientId;
 
     const account = await Account.findOne({
@@ -198,42 +199,46 @@ module.exports.delete = async function (req, res, next) {
     const checkId = req.body.checkId;
     const clientId = req.body.clientId;
 
-    req.flash(
-        "error",
-        "la función de eliminar cheques no se encuentra disponible en esta versión"
-    )
-    res.redirect("/checks/client/" + clientId);
+    Check.findByPk(checkId,
+        {
+            include: [
+                {
+                    model: CheckSplitted,
+                    required: false,
+                    where: {
+                        statusId:
+                            { [Op.eq]: SplitCheckStatus.eStatus.get('assigned').value }
+                    }
+                }
+            ]
+        })
+        .then(async function (check) {
 
-    // Check.findByPk(checkId).then(function (check) {
+            if (check.statusId !== CheckStatus.eStatus.get('wallet').value) {
+                req.flash("warning", "El cheque solo puede ser eliminado cuando esta EN CARTERA"); return;
+            }
 
-    // CheckSplitted.findAll({ where: { checkId: checkId } })
-    //     .then(splittedChecks => {}
+            if (check.checkSplitteds.length > 0) {
+                req.flash("warning", "Hay cheques parciales previamente asignados, no es posible eliminar el cheque"); return;
+            }
 
+            await CheckSplitted.update(
+                { statusId: SplitCheckStatus.eStatus.get('deleted').value, userId: req.user.id },
+                { where: { checkId: check.id } })
 
-    //     if (check) {
-    //         check.destroy()
-    //             .then(numAffectedRows => {
+            await check.update({ statusId: CheckStatus.eStatus.get('cancelled').value });
 
-    //                 //TODO: aca deberia hacer el cascade de los splitted checks si los hay...
+            req.flash("success", "El cheque fue eliminado exitosamente a la base de datos");
+            winston.info(`check #${checkId} was deleted by user #${req.user.id} `);
+        })
+        .catch(err => {
+            req.flash("error", "Ocurrio un error y no se pudo eliminar el cheque de la base de datos");
+            winston.error(`an error ocurred when user "${req.user.id} tryed to delete check #${checkId} - ${err}`);
+        })
+        .finally(function () {
+            res.redirect("/checks/client/" + clientId);
+        })
 
-    //                 req.flash(
-    //                     "success",
-    //                     "El cheque fue eliminado exitosamente a la base de datos"
-    //                 )
-    //                 winston.info(`check #${checkId} was deleted by user #${req.user.id} `);
-    //             })
-    //             .catch(err => {
-    //                 req.flash(
-    //                     "error",
-    //                     "Ocurrio un error y no se pudo eliminar el cheque de la base de datos"
-    //                 )
-    //                 winston.error(`an error ocurred when user "${req.user.id} tryed to delete check #${checkId} - ${err}`);
-    //             })
-    //             .finally(function () {
-    //                 res.redirect("/checks/client/" + clientId);
-    //             })
-    //     }
-    // });
 };
 
 module.exports.updateStatus = async function (req, res, next) {
