@@ -23,6 +23,7 @@ const CheckStatus = require('../utils/statusMessages.util').Check;
 const AccreditedCheckStatus = require('../utils/statusMessages.util').AccreditedCheck;
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 const CollectionStatus = require('../utils/statusMessages.util').Collection;
+const PaymentOrderStatus = require('../utils/statusMessages.util').PaymentOrder;
 
 const moment = require('moment');
 
@@ -390,8 +391,7 @@ module.exports.updateStatus = async function (req, res, next) {
                                 if (periodId === paymentOrder.periodId) {
                                     paymentOrderController.deletePaymentOrder(clientId, paymentOrder.id);
                                 } else {
-                                    //TODO: verificar si en el caso que el periodo de la OP sea anterior se debe eliminar el movimiento !!!
-                                    //validar como es el proceso de anulacion
+                                    paymentOrder.update({ statusId: PaymentOrderStatus.eStatus.get('deleted').value })
                                 }
                             }
 
@@ -399,10 +399,8 @@ module.exports.updateStatus = async function (req, res, next) {
 
                         } catch (error) {
                             winston.error(`It was not possible to delete the payment order #${paymentOrder.id} associated to splitted check #${splittedCheck.id} from check #${check.id}`);
-                        }
-
-                    }
-
+                        };
+                    };
                 };
 
                 check = await check.update({ statusId: statusId });

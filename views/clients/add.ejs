@@ -6,7 +6,7 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12 m6" method="post" action='/clients/new'>
+        <form id="newClientForm" class="col s12 m6" method="post" action='/clients/new'>
             <div class="card">
                 <div class="card-content">
                     <span class="card-title">Alta de un nuevo cliente</span>
@@ -41,15 +41,15 @@
                             <select id="taxCategorySelect">
                                 <option value="" disabled selected>Seleccione una categoria impositiva</option>
                                 <% for(var i=0; i < data.taxCategories.length; i++) { %>
-                                    <option value="<%=data.taxCategories[i].id%>"><%= data.taxCategories[i].name %></option>
+                                    <option value=<%=data.taxCategories[i].id%>><%= data.taxCategories[i].name %></option>
                                 <% } %>
                             </select>
                             <label>Categoria Impositiva</label>
-                            <input type="hidden" name="taxCategory" id="taxCategory" />
+                            <input type="hidden" name="taxCategoryId" id="taxCategoryId" />
                         </div>
                         <div class="input-field col s2">
                             <i class="material-icons prefix">home</i>
-                            <input id="functionalUnitsCount" name="functionalUnitsCount" type="number" min="0" step="1" class="validate"
+                            <input id="functionalUnitsCount" name="functionalUnitsCount" type="number" min="0" step="1" class="validate" required
                                 <% if(locals.metadata && locals.metadata.length>0) { %> 
                                     value="<%=metadata[0].functionalUnitsCount%>"
                                 <% } %> />
@@ -132,9 +132,22 @@
     M.CharacterCounter.init(document.getElementById("comments"));
     M.CharacterCounter.init(document.getElementById("name"));
 
-    var taxCategorySelect = document.getElementById("taxCategorySelect").onchange = function (evt) {
-      document.getElementById("taxCategory").value = evt.target.value;
+    document.getElementById("taxCategorySelect").onchange = function (evt) {
+      document.getElementById("taxCategoryId").value = evt.target.value;
     };
+
+    document.getElementById("newClientForm").addEventListener("submit", validateForm, true);
+
   });
+
+    function validateForm(event) {
+
+        const taxCategoryId = document.getElementById("taxCategoryId").value;
+
+        if(taxCategoryId === "") { 
+            alert("No ha seleccionada ninguna categoría impositiva válida")
+            event.preventDefault(); return; 
+        };        
+    };
 
 </script>

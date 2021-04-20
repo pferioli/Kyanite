@@ -68,7 +68,7 @@ module.exports.addNew = async function (req, res, next) {
 
     try {
 
-        const remainingBalance = await calcRemainingBalance(checkId, splitType);
+        const remainingBalance = await this.calcRemainingBalance(checkId, splitType);
 
         if (remainingBalance <= 0) {
             req.flash("warning", `al cheque no le queda saldo disponible para la opción seleccionada [$${remainingBalance.toFixed(2)}]`);
@@ -158,18 +158,24 @@ module.exports.showEditForm = async function (req, res, next) {
 
 module.exports.edit = async function (req, res, next) {
 
+    //TODO: implementar edit de un splittedCheck
+    
     const clientId = req.body.clientId;
 
-    req.flash("warning", "La funcion de editar una subdivision aun no esta implementada");
+    req.flash("warning", "La funcion editar una subdivision aun no esta implementada");
 
     res.redirect('/checks/client/' + clientId)
 }
 
 module.exports.delete = async function (req, res, next) {
 
+    //TODO: implementar delete de un splittedCheck
+
     const checkId = req.params.checkId;
 
     const splittedCheck = await CheckSplitted.findByPk(checkId, { include: [{ model: Check, include: [{ model: Client }, { model: BillingPeriod }] }] });
+
+    req.flash("warning", "La funcion eliminar una subdivision aun no esta implementada");
 
     res.redirect('/checks/split/' + checkId)
 }
@@ -180,12 +186,12 @@ module.exports.getRemainingBalance = async function (req, res, next) {
 
     const checkId = req.params.checkId; const splitType = req.query.splitType;
 
-    const remainingBalance = await calcRemainingBalance(checkId, splitType);
+    const remainingBalance = await this.calcRemainingBalance(checkId, splitType);
 
     res.send(JSON.parse(`{ "remainingBalance" : "${remainingBalance}" }`));
 }
 
-async function calcRemainingBalance(checkId, splitType) {
+module.exports.calcRemainingBalance = async function(checkId, splitType) {
 
     const check = await Check.findByPk(checkId);
 

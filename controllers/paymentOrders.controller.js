@@ -28,6 +28,7 @@ const CURRENT_MENU = 'paymentOrders'; module.exports.CURRENT_MENU = CURRENT_MENU
 const PaymentOrderStatus = require('../utils/statusMessages.util').PaymentOrder;
 const PaymentReceiptStatus = require('../utils/statusMessages.util').PaymentReceipt;
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
+const CheckStatus = require('../utils/statusMessages.util').Check;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
 module.exports.listAll = async function (req, res) {
@@ -156,15 +157,27 @@ module.exports.createPO = async function (req, res) {
 
                     if (checkId) {
 
-                        CheckSplitted.findByPk(checkId).then((check) => {
-                            check.update(
-                                { statusId: SplitCheckStatus.eStatus.get('assigned').value })
-                                .then((checkUpdate) => {
-                                    console.log(checkUpdate)
-                                })
-                        })
+                        const splittedCheck = await CheckSplitted.findByPk(checkId);
 
-                        //TODO: si se completo la utilizacion del cheque hay que pasarlo a ENTREGADO_PAGO_PROVEEDORES
+                        splittedCheck.update({ statusId: SplitCheckStatus.eStatus.get('assigned').value })
+                            .then((checkUpdate) => {
+                                console.log(checkUpdate)
+                            })
+
+                        //Si se completo la utilizacion del cheque hay que pasarlo a ENTREGADO_PAGO_PROVEEDORES
+
+                        const calculateCheckRemainingBalance = require('./splittedChecks.controller').calcRemainingBalance;
+
+                        const remainingBalance = await calculateCheckRemainingBalance(checkId, 'O');
+
+                        if (remainingBalance === 0) {
+                            Check.findByPk(splittedCheck.checkId).then(check => {
+                                check.update({ statusId: CheckStatus.eStatus.get('delivered').value })
+                                    .then(() => {
+                                        winston.info(`when processing PO ${paymentOrder.id} the check #${checkId} status changed to "Delivered"`);
+                                    })
+                            });
+                        };
                     }
 
                     PaymentReceipt.findByPk(receiptId)

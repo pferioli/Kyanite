@@ -52,13 +52,17 @@ module.exports.addNew = async function (req, res, next) {
             return;
         }
 
+        const lotSize = req.body.lotSize === '' ? null : req.body.lotSize;
+
+        const functionalUnitsCount = req.body.functionalUnitsCount === '' ? null : req.body.functionalUnitsCount;
+
         const client = {
             internalCode: req.body.internalCode,
             name: req.body.name,
             cuit: req.body.cuit,
-            taxCategoryId: req.body.taxCategory,
-            functionalUnitsCount: req.body.functionalUnitsCount,
-            lotSize: req.body.lotSize,
+            taxCategoryId: req.body.taxCategoryId,
+            functionalUnitsCount: (req.body.functionalUnitsCount === '' ? null : req.body.functionalUnitsCount),
+            lotSize: (req.body.lotSize === '' ? null : req.body.lotSize),
             address: req.body.address,
             city: req.body.city,
             zipCode: req.body.zipCode,
@@ -71,33 +75,21 @@ module.exports.addNew = async function (req, res, next) {
         Client.create(client).
             then(function (result) {
                 winston.info(`User #${req.user.id} created succesfully a new client ${JSON.stringify(client)} - ${result.id}`)
-                req.flash(
-                    "success",
-                    "El cliente fue agregado exitosamente a la base de datos"
-                )
+                req.flash("success", "El cliente fue agregado exitosamente a la base de datos")
             })
             .catch(function (err) {
                 winston.error(`An error ocurred while user #${req.user.id} tryed to create a new client ${JSON.stringify(client)} - ${err}`)
-                req.flash(
-                    "error",
-                    "Ocurrio un error y no se pudo agregar al nuevo cliente en la base de datos"
-                )
+                req.flash("error", "Ocurrio un error y no se pudo agregar al nuevo cliente en la base de datos")
             })
             .finally(() => {
                 res.redirect("/clients");
             })
 
-    } catch (error) {
-        req.flash(
-            "error",
-            "Ocurrio un error y no se pudo modificar el cliente en la base de datos"
-        );
-
+    } catch (err) {
+        req.flash("error", "Ocurrio un error y no se pudo modificar el cliente en la base de datos");
         winston.error(`An error ocurred while creating new client ${JSON.stringify(req.body)} - ${err}`);
-
         res.redirect("/clients");
     }
-
 };
 
 module.exports.showEditForm = async function (req, res, next) {
