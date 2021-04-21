@@ -25,7 +25,7 @@
 <% if (locals.menu==='accounts' ) { %>
     <a href="/accounts" class="breadcrumb">Cuentas</a>
     <% if(locals.data) { %>
-        <a href="/accounts/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+        <a href="/accounts/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
     <% } %>
 <%}%>
 

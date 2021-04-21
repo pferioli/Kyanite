@@ -73,4 +73,8 @@ router.get("/ajax/pending/client/:clientId/bySupplierId/:supplierId", function (
     paymentReceiptsController.pendingBySupplierId(req, res);
 });
 
+router.get("/ajax/pending/client/:clientId/billingPeriods", function (req, res, next) {
+    paymentReceiptsController.listBillingPeriodsWithPendingPaymentReceipts(req, res);
+});
+
 module.exports = router;

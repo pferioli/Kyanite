@@ -354,7 +354,7 @@ module.exports.importHomeOwners = async function (req, res) {
                             regCounter++;
 
                         } catch (error) {
-                            winston.error(`An error ocurred while inserting the record #${index} into homeOwners table - ${err}`)
+                            winston.error(`An error ocurred while inserting the record #${index} into homeOwners table - ${error}`)
                         }
                     }
 

@@ -1,3 +1,4 @@
+const Sequelize = require('sequelize');
 const { QueryTypes } = require('sequelize');
 const Op = require('sequelize').Op
 const Model = require('../models')
@@ -431,4 +432,26 @@ module.exports.pendingBySupplierId = async function (req, res) {
     ).then((paymentReceipts) => {
         res.send(paymentReceipts);
     });
+};
+
+module.exports.listBillingPeriodsWithPendingPaymentReceipts = async function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    const activePeriod = await BillingPeriod.findOne({
+        where: { clientId: clientId, statusId: 1 },
+        attributes: ['id']
+    });
+
+    const previousPeriods = await PaymentReceipt.findAll(
+        {
+            where: {
+                clientId: clientId,
+                statusId: { [Op.in]: [1, 2] },
+                periodId: { [Op.ne]: activePeriod }
+            },
+            attributes: [Sequelize.fn('DISTINCT', Sequelize.col('periodId')), 'periodId'],
+        });
+
+    res.send({ active: activePeriod, previous: previousPeriods });
 };

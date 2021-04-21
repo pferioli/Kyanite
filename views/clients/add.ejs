@@ -20,7 +20,7 @@
                         </div>
                         <div class="input-field col s2">
                             <i class="material-icons prefix">label</i>
-                            <input id="internalCode" name="internalCode" type="text" class="validate" maxlength="3" minlength="2" pattern="[A-Z]{2}[0-9]{0,1}" 
+                            <input id="internalCode" name="internalCode" type="text" class="validate" maxlength="4" minlength="2" pattern="[A-Z]{3}[0-9]{0,1}" 
                                 onkeyup="this.value = this.value.toUpperCase();" 
                                 title="El código de barrio deben ser una combinación de 2 a 3 digitos compuesto por letras mayusculas y números" 
                                 <% if(locals.metadata && locals.metadata.length>0) { %> value="<%=metadata[0].internalCode%>" <% } %> required />

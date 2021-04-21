@@ -25,7 +25,7 @@
                 </div>
             </div>
             <div class="actions">
-                <div class="switch">
+                <div class="switch" style="margin-top: 3px;">
                     <label> Mostrar cuentas eliminadas
                         <input id="swShowDeleted" type="checkbox" onchange="showDeletedAccounts();" <% if(params.showAll===true){ %> checked <% } %>>
                         <span class="lever"></span>
@@ -68,7 +68,7 @@
                         <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bank.name %> <% } %></td>
                         <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankBranch %> <% } %></td>
                         <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].accountNumber %> <% } %></td>
-                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].bankAlias %> <% } %></td>
+                        <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].accountAlias %> <% } %></td>
                         <td><% if(data.accounts[i].bank){%> <%= data.accounts[i].cbu %> <% } %></td>
                         <td><%= data.accounts[i].comments %></td>
                         <% if(params.showAll===true){ %>
@@ -132,7 +132,7 @@
         const swShowDeleted = document.getElementById('swShowDeleted').checked;
         const clientId = document.getElementById('clientId').value;
 
-        const redirectUrl = '/accounts?showAll=' + swShowDeleted;
+        const redirectUrl = `/accounts?showAll=${swShowDeleted}`;
 
         var form = $('<form action="' + redirectUrl + '" method="post">' +
             '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +

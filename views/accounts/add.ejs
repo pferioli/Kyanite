@@ -106,7 +106,9 @@
             let cbu = document.getElementById("cbu");
             let bankId = document.getElementById("bankId");
 
-            if ((new RegExp('\[.{1,3}\$\]')).test(accountType)) {
+            //if ((new RegExp('\[.{1,3}\$\]')).test(accountType)) {
+            
+            if (accountType.includes("CC$") || accountType.includes("CA$") || accountType.includes("CCU$") || accountType.includes("CAU$")) {
                 bankSelect.disabled = false; bankId.disabled = false; document.getElementById("add_button").disabled = true;
             } else {
                 accountNumber.value = ""; accountNumber.classList.remove("valid"); accountNumber.disabled = true;

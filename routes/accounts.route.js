@@ -8,6 +8,15 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
+
+    let redirectUrl = '/accounts/client/' + req.body.clientId
+
+    if (req.query.showAll) redirectUrl = redirectUrl + '?showAll=' + req.query.showAll;
+
+    res.redirect(redirectUrl);
+});
+
+router.get("/client/:clientId", function (req, res, next) {
     accountsController.listAll(req, res);
 });
 
@@ -35,10 +44,7 @@ router.post('/delete', function (req, res, next) {
     accountsController.delete(req, res);
 })
 
-router.get("/:clientId", function (req, res, next) {
-    accountsController.listAll(req, res);
-});
-
+//AJAX Calls
 
 router.get('/ajax/getByCustomerID/:clientId', function (req, res, next) {
     accountsController.getCustomerAccounts(req, res);

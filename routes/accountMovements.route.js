@@ -8,10 +8,10 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
-    const clientId = req.body.clientId;
+
     const accountsIds = req.body.accountId;
 
-    let redirectUrl = "/movements/client/" + clientId;
+    let redirectUrl = `/movements/client/${req.body.clientId}?periodId=${req.body.periodId}`;
 
     if (accountsIds != undefined) {
         redirectUrl += "?accountId=" + accountsIds
@@ -30,6 +30,17 @@ router.get("/new/:clientId", function (req, res, next) {
 
 router.post("/new/:clientId", function (req, res, next) {
     accountMovementsController.addNew(req, res);
+});
+
+// AJAX CAlls
+
+router.get("/ajax/calculateMonthlyBalance", async function (req, res, next) {
+    const clientId = req.body.clientId || 1;
+    const periodId = req.body.periodId || 155;
+
+    const balance = await accountMovementsController.calculateMonthlyBalance(clientId, periodId);
+
+    res.send(balance);
 });
 
 module.exports = router;

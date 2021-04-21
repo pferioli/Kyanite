@@ -75,7 +75,7 @@ module.exports.addNew = async function (req, res, next) {
                 )
             })
             .finally(() => {
-                res.redirect("/accounts/" + clientId);
+                res.redirect('/accounts/client/' + clientId);
             })
 
     } catch (error) {
@@ -86,7 +86,7 @@ module.exports.addNew = async function (req, res, next) {
 
         winston.error(`An error ocurred while creating new client account ${JSON.stringify(req.body)} - ${err}`);
 
-        res.redirect("/accounts/" + clientId);
+        res.redirect('/accounts/client/' + clientId);
     }
 
 };
@@ -120,7 +120,7 @@ module.exports.delete = async function (req, res, next) {
         }
 
     } finally {
-        res.redirect("/accounts/" + clientId);
+        res.redirect('/accounts/client/' + clientId);
     };
 };
 
@@ -167,11 +167,11 @@ module.exports.edit = async function (req, res, next) {
                 winston.error(`An error ocurred while updating client account ${JSON.stringify(req.body)} - ${err}`);
                 req.flash("error", "Ocurrio un error y no se pudo modificar la cuenta seleccionada en la base de datos");
             })
-            .finally(() => { res.redirect("/accounts/" + clientId); })
+            .finally(() => { res.redirect('/accounts/client/' + clientId); })
     } else {
         req.flash("error", "Ocurrio un error y no se encontro la cuenta seleccionada en la base de datos");
         winston.error(`Client account not found for updating ${JSON.stringify(req.body)} - ${err}`);
-        res.redirect("/accounts/" + clientId);
+        res.redirect('/accounts/client/' + clientId);
     }
 };
 
@@ -215,7 +215,7 @@ module.exports.newAccountType = async function (req, res, next) {
     AccountType.findOne({ where: { account: account } })
         .then(accountType => {
             if (accountType) {
-                req.flash("warning", "Ya existe en la base de datos una cuenta con el mismo alias"); res.redirect('/accounts/' + clientId);
+                req.flash("warning", "Ya existe en la base de datos una cuenta con el mismo alias"); res.redirect('/accounts/client/' + clientId);
             } else {
                 AccountType.create({ account: account, description: description, enabled: true, userId: req.user.id })
                     .then(result => {
@@ -226,14 +226,16 @@ module.exports.newAccountType = async function (req, res, next) {
                         req.flash("error", "Ocurrio un error y no se pudo agregar el nuevo tipo de cuenta la base de datos");
                         winston.error(`New account type could not be added to database ${JSON.stringify(req.body)} - ${err}`);
                     })
-                    .finally(() => { res.redirect('/accounts/' + clientId); });
+                    .finally(() => { res.redirect('/accounts/client/' + clientId); });
             }
 
         })
         .catch(err => {
             req.flash("error", "Ocurrio un error y no se pudo agregar el nuevo tipo de cuenta la base de datos");
             winston.error(`New account type could not be added to database ${JSON.stringify(req.body)} - ${err}`);
-            res.redirect('/accounts/' + clientId);
+            res.redirect('/accounts/client/' + clientId);
         })
 
 }
+
+Date.prototype.toJSON = function () { return this.toLocaleString(); }

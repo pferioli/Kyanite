@@ -1,0 +1,93 @@
+<div class="container">
+    <div class="row box-white" style="margin-top: 50px; height: fit-content;">
+
+        <div class="row">
+            <div class="input-field col s12">
+                <select id="clientsSelect" onchange="clientSelected(this)"></select>
+                <label>Seleccione el Cliente <span class="red-text">*</span></label>
+                <input type="hidden" name="clientId" id="clientId" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s11">
+                <select multiple id="billingPeriodSelect"></select>
+                <label>Seleccione los Periodos de Liquidacion <span class="red-text">*</span></label>
+                <input type="hidden" name="periodId" id="periodId" />
+            </div>
+            <div class="input-field col s1">
+                <button type='submit' action="submit" class="waves-effect waves-light btn-floating btn-large teal"
+                    style="margin-right: 10px;"><i class="material-icons right">send</i>Continuar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/clients.js"></script>
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/paymentReceipts.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        elems = document.querySelectorAll('select');
+        instances = M.FormSelect.init(elems, {});
+
+        populateClients('clientsSelect');
+
+        const clientsSelect = document.getElementById("clientsSelect");
+
+        clientsSelect.addEventListener('change', (event) => {
+            const clientId = document.getElementById("clientId");
+            clientId.value = event.target.value;
+        });
+
+        const billingPeriodSelect = document.getElementById("billingPeriodSelect");
+        billingPeriodSelect.addEventListener('change', (event) => {
+            $('#periodId').val($('#billingPeriodSelect').val());
+        });
+    });
+
+    async function clientSelected(e) {
+        
+        getBillingPeriodsByClient(e.value)
+        
+        getPendingBillingPeriodsByClient(e.value);
+    }
+
+    async function getPendingBillingPeriodsByClient(clientId) {
+
+        let selectField = document.getElementById('billingPeriodSelect');
+        selectField.options.length = 0;
+
+        let periodId = document.getElementById('periodId');
+        periodId.value = ""
+
+        try {
+        
+            const response = await listBillingPeriodsWithPendingPaymentReceipts(clientId)
+
+            const activePeriod = response.active.id;
+
+            const previous = response.previous;
+
+            for (i = 0; i<selectField.options.length; i++) {
+                for (j=0; j<previous.length; j++){
+                    if(previous[j].periodId === Number.parseInt(selectField.options[i].value)){
+                        selectField.options[i].selected = true;
+                    }
+                }
+            }
+
+            $('#periodId').val($('#billingPeriodSelect').val());
+
+            console.log(periodId.value);
+
+        } catch (error) {
+            console.error(error);        
+        }
+        
+        M.FormSelect.init(selectField, {});
+    }
+
+</script>

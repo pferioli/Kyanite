@@ -1,3 +1,5 @@
+const Sequelize = require('sequelize');
+const { QueryTypes } = require('sequelize');
 const Op = require('sequelize').Op
 const Model = require('../models')
 const User = Model.user;
@@ -49,8 +51,8 @@ module.exports.listAll = async function (req, res, next) {
 
     let periods = [];
 
-    if (typeof req.body.periodId != 'undefined') {
-        periods = req.body.periodId.split(',');
+    if (req.query.periodId != undefined) {
+        periods = req.query.periodId.split(',');
     } else {
 
         const activePeriod = await BillingPeriod.findOne({
@@ -217,4 +219,19 @@ module.exports.deleteMovement = async function (clientId, accountId, periodId, c
                 .then((result) => { return result })
         })
 
+}
+
+module.exports.calculateMonthlyBalance = async function (clientId, periodId) {
+
+    return AccountMovement.findAll(
+        {
+            where: { clientId: clientId, periodId: periodId },
+            attributes: ['accountId', [Sequelize.fn('SUM', Sequelize.col('amount')), 'totalAmount'], [Sequelize.fn('COUNT', Sequelize.col('id')), 'movements']],
+            group: ['accountId'],
+            raw: true,
+            order: [['accountId', 'DESC']]
+        })
+        .then(balance => {
+            return balance;
+        });
 }

@@ -56,7 +56,7 @@
                         <td><%= data.homeOwners[i].email %></td>
                         <td><%= data.homeOwners[i].phone %></td>
                         <td><%= data.homeOwners[i].comments %></td>
-                        <td><%= (data.homeOwners[i].coefficient * 100).toFixed(4)%>%</td>
+                        <td><%= Number.parseFloat(data.homeOwners[i].coefficient).toFixed(6)%></td>
                         <td>
                             <a href="/homeOwners/edit/<%=data.homeOwners[i].id%>?mode=update" class="btn-flat btn-small waves-effect waves-light">
                                 <i class="material-icons">edit</i></a>

@@ -161,7 +161,7 @@ module.exports.getActive = async function (req, res, next) {
 
 module.exports.getAllByClientID = async function (req, res, next) {
     BillingPeriod.findAll({
-        where: { clientId: req.params.clientId }, order: [['name', 'DESC']],
+        where: { clientId: req.params.clientId }, order: [['id', 'DESC']],
     }).then(function (periods) {
         res.send(periods)
     });
