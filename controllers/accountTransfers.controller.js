@@ -20,8 +20,8 @@ module.exports.listAll = async function (req, res, next) {
 
     let periods = [];
 
-    if (typeof req.body.periodId != 'undefined') {
-        periods = req.body.periodId.split(',');
+    if (typeof req.params.periodId != 'undefined') {
+        periods = req.params.periodId.split(',');
     } else {
 
         const activePeriod = await BillingPeriod.findOne({
@@ -129,7 +129,7 @@ module.exports.addNew = async function (req, res, next) {
                 )
             })
             .finally(() => {
-                res.redirect("/transfers/" + clientId);
+                res.redirect("/transfers/client/" + clientId);
             })
 
     } catch (error) {
@@ -140,7 +140,7 @@ module.exports.addNew = async function (req, res, next) {
 
         winston.error(`An error ocurred while creating new account transfer ${JSON.stringify(req.body)} - ${err}`);
 
-        res.redirect("/transfers/" + clientId);
+        res.redirect("/transfers/client" + clientId);
     }
 
 };
@@ -162,7 +162,7 @@ module.exports.delete = async function (req, res, next) {
 
             if ((!activePeriod) || (activePeriod.id != accountTransfer.periodId)) {
                 req.flash("warning", "Solo se puede eliminar una transferencia si pertenece al período activo");
-                res.redirect('/transfers/' + clientId); return;
+                res.redirect('/transfers/client/' + clientId); return;
             }
 
             accountTransfer.statusId = AccountTransferStatus.eStatus.get('deleted').value;
@@ -185,7 +185,7 @@ module.exports.delete = async function (req, res, next) {
         }
 
     } finally {
-        res.redirect("/transfers/" + clientId);
+        res.redirect("/transfers/client/" + clientId);
     };
 };
 
@@ -207,13 +207,13 @@ module.exports.showEditForm = async function (req, res, next) {
         if (transfer === null) {
             req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
             winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
-            res.redirect("/transfers/" + clientId);
+            res.redirect("/transfers/client/" + clientId);
         }
 
         if ((transfer.statusId != AccountTransferStatus.eStatus.get('pending').value) &&
             (transfer.statusId != AccountTransferStatus.eStatus.get('inprogress').value)) {
             req.flash("warning", "El estado actual de la transferencia no permite que sea modificada");
-            res.redirect("/transfers/" + clientId);
+            res.redirect("/transfers/client/" + clientId);
             return;
         }
 
@@ -225,7 +225,7 @@ module.exports.showEditForm = async function (req, res, next) {
     } catch (err) {
         req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
         winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
-        res.redirect("/transfers/" + clientId);
+        res.redirect("/transfers/client/" + clientId);
     }
 };
 
@@ -286,6 +286,6 @@ module.exports.info = async function (req, res, next) {
         .catch(err => {
             req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
             winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
-            res.redirect("/transfers/" + clientId);
+            res.redirect("/transfers/client" + clientId);
         })
 }

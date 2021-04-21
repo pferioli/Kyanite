@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
             MonthlyBalance.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
             MonthlyBalance.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
             MonthlyBalance.hasOne(models.account, { foreignKey: 'id', sourceKey: 'accountId' })
-            MonthlyBalance.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            // MonthlyBalance.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
         }
     };
     MonthlyBalance.init({
@@ -46,14 +46,14 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
-        userId: {
-            allowNull: false,
-            type: DataTypes.INTEGER
-        },       
+        // userId: {
+        //     allowNull: false,
+        //     type: DataTypes.INTEGER
+        // },       
     }, {
         sequelize,
-        modelName: 'montlyBalance',
-        tableName: 'montly_balance',
+        modelName: 'monthlyBalance',
+        tableName: 'monthly_balance',
         timestamps: true,
         paranoid: true,
 

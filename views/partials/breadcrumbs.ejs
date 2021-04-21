@@ -31,6 +31,9 @@
 
 <% if (locals.menu==='accountTransfers' ) { %>
     <a href="/transfers" class="breadcrumb">Transferencias</a>
+    <% if(locals.data) { %>
+        <a href="/transfers/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+    <% } %>
 <%}%>
 
 <% if (locals.menu==='checks' ) { %>

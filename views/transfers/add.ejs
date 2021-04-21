@@ -15,9 +15,9 @@
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">calendar_today</i>
-                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
                             <label for="billingPeriod">Período de Liquidación</label>
-                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
                         </div>
                     </div>
 
@@ -99,17 +99,28 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const clientId = document.getElementById('clientId').value
-
-        const billingPeriodId = document.getElementById('billingPeriodId').value;
-
-        if (billingPeriodId) {
-            document.getElementById('sourceAccountSelect').disabled = false;
-            document.getElementById('destinationAccountSelect').disabled = false;
-        }
-
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
+
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});
+
+        const clientId = document.getElementById('clientId').value
+
+        getActiveBillingPeriod(clientId, false).then((periodId)=>{
+
+            const billingPeriodId = document.getElementById('billingPeriodId').value;
+
+            if (periodId) {
+                const sourceAccountSelect = document.getElementById('sourceAccountSelect')
+                sourceAccountSelect.disabled = false;
+                M.FormSelect.init(sourceAccountSelect, {});
+                
+                const destinationAccountSelect = document.getElementById('destinationAccountSelect')
+                destinationAccountSelect.disabled = false;
+                M.FormSelect.init(destinationAccountSelect, {});
+            }
+        });
 
         elems = document.querySelectorAll('.datepicker');
         instances = M.Datepicker.init(elems, {
@@ -133,10 +144,7 @@
             }
         });
 
-        elems = document.querySelectorAll('.modal');
-        instances = M.Modal.init(elems, {});
 
-        //getActiveBillingPeriod(clientId);
 
         document.getElementById('sourceAccountSelect').onchange = async function () {
             

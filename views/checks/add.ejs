@@ -15,9 +15,9 @@
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">calendar_today</i>
-                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
                             <label for="billingPeriod">Período de Liquidación</label>
-                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
                         </div>
                     </div>
 
@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="card-action right-align">
-                    <button id="add_button" type='submit' class="waves-effect waves-light btn green"><i class="material-icons right">save</i>Guardar</button>
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" disabled><i class="material-icons right">save</i>Guardar</button>
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px;"><i class="material-icons right">cancel</i>Cancelar</button>
                 </div>
             </div>
@@ -78,12 +78,19 @@
 
 <%- include ("../partials/footer") %>
 
+<%- include ("../partials/modals/billingPeriod.ejs") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+
 <script>
 
     document.addEventListener("DOMContentLoaded", function () {
+        
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
-        M.CharacterCounter.init(document.getElementById("comments"));
+        
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});
 
         document.getElementById("bankSelect").addEventListener('change', (event) => {
             document.getElementById("bankId").value = event.target.value;
@@ -114,6 +121,10 @@
                 }
             }
         });
+
+        M.CharacterCounter.init(document.getElementById("comments"));
+
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
     });
 
     function Cancel() {

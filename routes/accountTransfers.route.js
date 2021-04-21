@@ -8,7 +8,12 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
-    accountTransfersController.listAll(req, res);
+
+    let redirectUrl = '/transfers/client/' + req.body.clientId + '?periodId=' + req.body.periodId
+
+    if (req.query.showAll) redirectUrl = redirectUrl + '&showAll=' + req.query.showAll;
+
+    res.redirect(redirectUrl);
 });
 
 router.get("/new/:clientId", function (req, res, next) {
@@ -35,7 +40,7 @@ router.post('/delete', function (req, res, next) {
     accountTransfersController.delete(req, res);
 })
 
-router.get("/:clientId", function (req, res, next) {
+router.get("/client/:clientId", function (req, res, next) {
     accountTransfersController.listAll(req, res);
 });
 

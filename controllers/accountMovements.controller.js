@@ -220,18 +220,3 @@ module.exports.deleteMovement = async function (clientId, accountId, periodId, c
         })
 
 }
-
-module.exports.calculateMonthlyBalance = async function (clientId, periodId) {
-
-    return AccountMovement.findAll(
-        {
-            where: { clientId: clientId, periodId: periodId },
-            attributes: ['accountId', [Sequelize.fn('SUM', Sequelize.col('amount')), 'totalAmount'], [Sequelize.fn('COUNT', Sequelize.col('id')), 'movements']],
-            group: ['accountId'],
-            raw: true,
-            order: [['accountId', 'DESC']]
-        })
-        .then(balance => {
-            return balance;
-        });
-}

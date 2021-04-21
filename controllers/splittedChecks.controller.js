@@ -55,7 +55,7 @@ module.exports.showNewForm = async function (req, res, next) {
         return;
     }
 
-    res.render("splittedChecks/add.ejs", { menu: CURRENT_MENU, data: { check } });
+    res.render("splittedChecks/add.ejs", { menu: CURRENT_MENU, data: { check, client: check.client } });
 };
 
 module.exports.addNew = async function (req, res, next) {

@@ -62,9 +62,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
-        lastPeriodId: {
+        lastPeriod: {
             allowNull: false,
-            type: DataTypes.INTEGER
+            type: DataTypes.BOOLEAN
         },
         previousPeriodId: {
             allowNull: true,

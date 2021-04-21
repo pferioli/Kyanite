@@ -16,15 +16,15 @@
                         <div class="row" style="margin-top: 20px;">
                             <div class="input-field col s9">
                                 <i class="material-icons prefix">home</i>
-                                <input id="client" name="client" type="text" value="<%=data.check.client.name%> [<%=data.check.client.internalCode%>]" disabled />
+                                <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
                                 <label for="name">Nombre del Barrio</label>
-                                <input type="hidden" name="clientId" id="clientId" value="<%=data.check.client.id%>" />
+                                <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
                             </div>
                             <div class="input-field col s3">
                                 <i class="material-icons prefix">calendar_today</i>
-                                <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.check.billingPeriod.name%>" disabled />
+                                <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
                                 <label for="billingPeriod">Período de Liquidación</label>
-                                <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.check.billingPeriod.id%>" />
+                                <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
                             </div>
                         </div>
 
@@ -131,7 +131,7 @@
                         <input type="hidden" name="receiptId" id="receiptId" value="" />
 
                         <div class="card-action right-align">
-                            <button id="add_button" type='submit' class="waves-effect waves-light btn green"><i class="material-icons right">save</i>Guardar</button>
+                            <button id="add_button" type='submit' class="waves-effect waves-light btn green" disabled><i class="material-icons right">save</i>Guardar</button>
                             <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px">
                                 <i class="material-icons right">cancel</i>Cancelar</button>
                         </div>
@@ -142,8 +142,11 @@
 
     </main>
 
-    <%- include ("../partials/footer") %>
+<%- include ("../partials/footer") %>
 
+<%- include ("../partials/modals/billingPeriod.ejs") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
 <script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
 <script type="text/javascript" src="/javascripts/homeOwners.js"></script>
 <script type="text/javascript" src="/javascripts/paymentReceipts.js"></script>
@@ -165,10 +168,15 @@
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
 
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});
+
         M.CharacterCounter.init(document.getElementById("comments"));
 
         const remainingamount = document.getElementById("remainingamount");
         const partialamount = document.getElementById("partialamount");
+
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
 
         initializeAutocompleteComponents();
     

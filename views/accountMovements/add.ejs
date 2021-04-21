@@ -1,8 +1,3 @@
-<style>
-    .© {
-      display: inline;
-    }
-</style>
 <%- include ("../partials/header") %>
 
 <main class="site-content">
@@ -20,9 +15,10 @@
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">calendar_today</i>
-                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
                             <label for="billingPeriod">Período de Liquidación</label>
-                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
+
                         </div>
                     </div>
 
@@ -75,13 +71,15 @@
                 </div>
 
                 <div class="card-action right-align">
-                    <button id="add_button" type='submit' class="waves-effect waves-light btn green"><i class="material-icons right">save</i>Guardar</button>
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" disabled><i class="material-icons right">save</i>Guardar</button>
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px;"><i class="material-icons right">cancel</i>Cancelar</button>
                 </div>
             </div>
         </form>
     </div>
 </main>
+
+<%- include ("../partials/modals/billingPeriod.ejs") %>
 
 <%- include ("../partials/footer") %>
 
@@ -95,14 +93,22 @@
 
         const clientId = document.getElementById('clientId').value
 
-        const billingPeriodId = document.getElementById('billingPeriodId').value;
+        getActiveBillingPeriod(clientId).then((periodId)=>{
 
-        if (billingPeriodId) {
-            document.getElementById('accountSelect').disabled = false;
-        }
+            const billingPeriodId = document.getElementById('billingPeriodId').value;
+
+            if (periodId) {
+                const accountSelect = document.getElementById('accountSelect')
+                accountSelect.disabled = false;
+                M.FormSelect.init(accountSelect, {});
+            }
+        });     
 
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
+        
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});
 
         M.CharacterCounter.init(document.getElementById("comments"));
 
@@ -114,6 +120,9 @@
 
             M.updateTextFields();
         }
+
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+
     });
 
      async function getSelectedAccountDetails(accountId, infoField) {

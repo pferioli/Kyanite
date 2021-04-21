@@ -12,10 +12,11 @@
                             <i class="material-icons prefix">location_city</i>
                             <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
                             <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">calendar_today</i>
-                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
                             <label for="billingPeriod">Período de Liquidación</label>
                             <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
                         </div>
@@ -43,11 +44,11 @@
                 <div class="card-action right-align">
                 
                     <% if(data.active) { %>
-                        <button id="button-kill" onclick="javascript:killSessions()" class="waves-effect waves-light btn blue" style="margin-right: 10px;">
+                        <button id="kill_button" onclick="javascript:killSessions()" class="waves-effect waves-light btn blue" style="margin-right: 10px;">
                             <i class="material-icons right">save</i>Finalizar Sesiones</button>
                     <% } %>
 
-                    <button id="button-submit" class="waves-effect waves-light btn green" style="margin-right: 10px;">
+                    <button id="add_button" class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled>
                         <i class="material-icons right">save</i>Guardar</button>
                    
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
@@ -65,11 +66,22 @@
 
 <%- include ("../../../partials/footer") %>
 
+<%- include ("../../../partials/modals/billingPeriod.ejs") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+
 <script>
         
         document.addEventListener("DOMContentLoaded", function () {
         
-            document.getElementById('button-submit').onclick = function(event) {
+            elems = document.querySelectorAll('.modal');
+            instances = M.Modal.init(elems, {});
+
+            const clientId = document.getElementById('clientId').value
+
+            getActiveBillingPeriod(clientId);
+
+            document.getElementById('add_button').onclick = function(event) {
                 const clientId = document.getElementById('clientId').value;
                 const url = '/incomes/collections/import/new/' + clientId;
                 const form = document.getElementById('my_form')

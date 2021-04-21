@@ -31,6 +31,7 @@ module.exports.listAll = async function (req, res, next) {
 };
 
 module.exports.create = async function (req, res, next) {
+
     const clientId = req.body.clientId;
     const userId = req.user.id;
     const yearValue = req.body.yearValue;
@@ -49,7 +50,7 @@ module.exports.create = async function (req, res, next) {
             endDate: endDate,
             userId: userId,
             statusId: BillingPeriodStatus.eStatus.get('created').value,
-            lastPeriodId: 0
+            lastPeriod: false
         }
     )
         .then(period => {
@@ -67,7 +68,6 @@ module.exports.create = async function (req, res, next) {
 module.exports.open = async function (req, res) {
 
     const userId = req.user.id;
-
     const clientId = req.body.modalClientId;
     const id = req.body.modalPeriodId;
 
@@ -93,24 +93,45 @@ module.exports.open = async function (req, res) {
         return;
     }
 
-    period.statusId = BillingPeriodStatus.eStatus.get('opened').value;
-    period.openedAt = new Date();
+    try {
 
-    period.save()
-        .then(() => {
-            winston.info(`user #${userId} opened period #${id} for customer #${clientId}`);
+        //buscamos el periodo de liquidacion anterior
 
-            //TODO:falta agregar el saldo del periodo anterior a la CC del barrio...
-        })
-        .catch(error => {
-            winston.error(`an error ocurred when user #${userId} was trying to open the billing period #${id} - ${error}`);
-            req.flash("error", "Ocurrio un error grave y no se pudo abrir el período de liquidación");
+        let previousPeriod = await BillingPeriod.findOne({ where: { clientId: clientId, lastPeriod: true } });
 
-        })
-        .finally(() => {
-            res.redirect('/periods/' + clientId);
-        });
-}
+        //Actualizamos los saldos de cada una de las cuentas...
+
+        const { openMonthlyBalance } = require('./monthlyBalance.controller');
+
+        const monthlyBalance = await openMonthlyBalance(clientId, period.id, previousPeriod !== null ? previousPeriod.id : null, userId);
+
+        if (monthlyBalance === undefined) {
+            winston.error(`an error ocurred when user #${userId} was trying to close the billing period #${id} - check monthly_balance calculation`);
+            req.flash("error", "Ocurrio un error grave al calcular el saldo de las cuentas, no se pudo cerrar el período de liquidación");
+            res.redirect('/periods/' + clientId); return;
+        }
+
+        winston.info(`period #${id} total balance for customer #${clientId} is ${monthlyBalance}`);
+
+        if (previousPeriod) {
+            previousPeriod.update({ lastPeriod: false });
+        };
+
+        period.statusId = BillingPeriodStatus.eStatus.get('opened').value;
+        period.openedAt = new Date();
+        period.previousPeriodId = previousPeriod !== null ? previousPeriod.id : null;
+
+        const openedPeriod = await period.save()
+
+        winston.info(`user #${userId} opened period #${id} for customer #${clientId}`);
+
+    } catch (error) {
+        winston.error(`an error ocurred when user #${userId} was trying to open the billing period #${id} - ${error}`);
+        req.flash("error", "Ocurrio un error grave y no se pudo abrir el período de liquidación");
+    } finally {
+        res.redirect('/periods/' + clientId);
+    }
+};
 
 module.exports.close = async function (req, res, next) {
 
@@ -130,14 +151,29 @@ module.exports.close = async function (req, res, next) {
         return;
     }
 
+    //Actualizamos los saldos de cada una de las cuentas...
+
+    const { closeMonthlyBalance } = require('./monthlyBalance.controller');
+
+    const monthlyBalance = await closeMonthlyBalance(clientId, period.id);
+
+    if (monthlyBalance === undefined) {
+        winston.error(`an error ocurred when user #${userId} was trying to close the billing period #${id} - check monthly_balance calculation`);
+        req.flash("error", "Ocurrio un error grave al calcular el saldo de las cuentas, no se pudo cerrar el período de liquidación");
+        res.redirect('/periods/' + clientId); return;
+    }
+
+    winston.info(`period #${id} total balance for customer #${clientId} is ${monthlyBalance}`);
+
+    //Pasamos el periodo a Closed, marcamos el flag de que fue el ultimo periodo cursado...
+
     period.statusId = BillingPeriodStatus.eStatus.get('closed').value;
     period.closedAt = new Date();
+    period.lastPeriod = true;
 
     period.save()
         .then(() => {
             winston.info(`user #${userId} closed period #${id} for customer #${clientId}`);
-
-            //TODO:falta actualizar el saldo del barrio al cierre del periodo...
         })
         .catch(error => {
             winston.error(`an error ocurred when user #${userId} was trying to close the billing period #${id} - ${error}`);
@@ -147,7 +183,7 @@ module.exports.close = async function (req, res, next) {
         .finally(() => {
             res.redirect('/periods/' + clientId);
         });
-}
+};
 
 //------------------ AJAX CALLS ------------------//
 

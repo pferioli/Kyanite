@@ -1,5 +1,5 @@
 
-function getActiveBillingPeriod(clientId) {
+function getActiveBillingPeriod(clientId, enableButtons = true) {
 
     let billingPeriod = document.getElementById('billingPeriod');
     let billingPeriodId = document.getElementById('billingPeriodId');
@@ -7,7 +7,7 @@ function getActiveBillingPeriod(clientId) {
     billingPeriodId.value = '';
     billingPeriod.value = '';
 
-    fetch('/periods/active/' + clientId)
+    return fetch('/periods/active/' + clientId)
         .then(response => {
             if (response.status == 200) {
                 return response.text();
@@ -26,12 +26,14 @@ function getActiveBillingPeriod(clientId) {
                 billingPeriodId.value = period.id;
                 billingPeriod.value = period.name
                 M.updateTextFields();
-                if (period.id) {
 
+                if ((period.id) && (enableButtons)) {
                     document.getElementById('add_button').disabled = false;
                     const add_next_button = document.getElementById('add_next_button')
                     if (add_next_button) add_next_button.disabled = false;
                 }
+
+                return period.id;
             }
         })
         .catch(err => {
