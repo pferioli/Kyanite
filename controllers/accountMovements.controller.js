@@ -180,8 +180,45 @@ module.exports.addNew = async function (req, res, next) {
         })
 };
 
+module.exports.fixBalanceMovements = async function (clientId, periodId, accountId) {
+
+    let balance = 0.00
+
+    const movements = await AccountMovement.findAll({
+        where: {
+            clientId: clientId,
+            periodId: periodId,
+            accountId: accountId,
+        },
+        order: [['id', 'ASC']]
+    })
+
+    for (const movement of movements) {
+
+        balance += Number.parseFloat(movement.amount);
+
+        await movement.update({ balance: balance });
+    }
+
+    return totalBalance = balance;
+}
 
 module.exports.addMovement = async function (clientId, accountId, periodId, amount, category, refId, userId) {
+
+    let balance = 0.00
+
+    const lastMovement = await AccountMovement.findOne({
+        where: {
+            clientId: clientId,
+            periodId: periodId,
+            accountId: accountId,
+        },
+        order: [['id', 'DESC']]
+    })
+
+    if (lastMovement !== null) {
+        balance = lastMovement.balance;
+    }
 
     return AccountMovement.create({
         clientId: clientId,
@@ -189,6 +226,7 @@ module.exports.addMovement = async function (clientId, accountId, periodId, amou
         accountId: accountId,
         category: String.fromCharCode(category),
         amount: amount,
+        balance: Number.parseFloat(balance) + Number.parseFloat(amount),
         movementId: refId,
         userId: userId
     })

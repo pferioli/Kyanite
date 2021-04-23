@@ -2,6 +2,7 @@ const Op = require('sequelize').Op
 const Model = require('../models');
 const Client = Model.client;
 const TaxCategory = Model.taxCategory;
+const Sequence = Model.sequence;
 
 const winston = require('../helpers/winston.helper');
 
@@ -52,11 +53,7 @@ module.exports.addNew = async function (req, res, next) {
             return;
         }
 
-        const lotSize = req.body.lotSize === '' ? null : req.body.lotSize;
-
-        const functionalUnitsCount = req.body.functionalUnitsCount === '' ? null : req.body.functionalUnitsCount;
-
-        const client = {
+        Client.create({
             internalCode: req.body.internalCode,
             name: req.body.name,
             cuit: req.body.cuit,
@@ -70,11 +67,19 @@ module.exports.addNew = async function (req, res, next) {
             email: req.body.email,
             comments: req.body.comments,
             userId: req.user.id
-        }
+        })
+            .then(async function (client) {
 
-        Client.create(client).
-            then(function (result) {
-                winston.info(`User #${req.user.id} created succesfully a new client ${JSON.stringify(client)} - ${result.id}`)
+                //agregamos automaticamente las secuencias para el numero de OP y de cobranza
+
+                await Sequence.create({ clientId: client.id, type: 'C', currentValue: 0, increment: 1 });
+
+                await Sequence.create({ clientId: client.id, type: 'P', currentValue: 0, increment: 1 });
+
+                return client;
+            })
+            .then(async function (client) {
+                winston.info(`User #${req.user.id} created succesfully a new client ${JSON.stringify(client)} - ${client.id}`)
                 req.flash("success", "El cliente fue agregado exitosamente a la base de datos")
             })
             .catch(function (err) {

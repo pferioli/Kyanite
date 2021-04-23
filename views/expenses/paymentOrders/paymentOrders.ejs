@@ -28,7 +28,13 @@
                     <label> Mostrar OP anuladas <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
                         <span class="lever"></span></label>
                 </div>
-
+                
+                <div class="switch" style="margin-top: 3px;">
+                    <label> Seleccionar todo <input id="swAllProperties" type="checkbox" onchange="selectAllRows(this.checked);">
+                        <span class="lever"></span></label>
+                </div>        
+                
+                <button id="button-print" onClick='confirmDialog(this);' class="waves-effect btn-flat nopadding"><i class="material-icons">print</i></button>
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
                 <a href="/expenses/paymentReceipts/client/<%=data.client.id%>" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment</i></a>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
@@ -38,6 +44,7 @@
                 <table id="datatable" class="table display">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>ID</th>
                             <th>OP</th>
                             <th>Proveedor</th>
@@ -56,6 +63,7 @@
                     <tbody>
                         <% for(var i=0; i < data.paymentOrders.length; i++) { %>
                         <tr data-id="<%= data.paymentOrders[i].id %>">
+                            <td></td>
                             <td><%= data.paymentOrders[i].id %></td>
                             <td><%= data.paymentOrders[i].poNumberFormatted %></td>
                             <td><%= data.paymentOrders[i].paymentReceipt.supplier.name %></td>
@@ -127,7 +135,7 @@
                             <td>
                                 <a id="button-edit" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">edit</i></a>
                                 
-                                <a id="button-preview" onclick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>')"
+                                <a id="button-print" onclick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>')"
                                     class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">receipt</i></a>                            
 
                                 <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
@@ -152,6 +160,7 @@
 </main>
 
 <%- include ("./modals/delete") %>
+<%- include ("./modals/confirm") %>
 
 <%- include ("../../partials/footer") %>
 
@@ -197,6 +206,63 @@
         modal.open();
     };
 
+    function confirmDialog(button) {
+        var _elem = document.getElementById('modalConfirm');
+        var modal = M.Modal.getInstance(_elem);
+        modal.open();
+    };
+
+    document.getElementById('modalButtonAccept').addEventListener('click', event => {
+        
+        const clientId = document.getElementById('clientId').value;
+        const periodId = document.getElementById('periodId').value;
+
+        printSelectedprintPaymentOrders(clientId, periodId);
+    });
+
+    function printSelectedprintPaymentOrders(clientId, periodId){
+        
+        var table = $('#datatable').DataTable();
+        
+        var rows = table.rows( { selected: true } );
+
+        let list = [];
+
+        for(i=0; i<rows.count(); i++){
+            list.push(rows.data()[i][1]);
+        }
+
+        var postData = { "clientId": clientId, "periodId": periodId, "paymentOrders": list }; 
+    
+        fetch('/expenses/paymentOrders/printPaymentOrders', {
+            body: JSON.stringify(postData),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+        })
+        .then(response => response.blob())
+        .then(response => {
+            const blob = new Blob([response], {type: 'application/pdf'});
+            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = "file.pdf";
+            document.body.appendChild(a);
+            a.click();
+        })
+    }
+
+    function selectAllRows(e){
+        var table = $('#datatable').DataTable();
+
+        if(e === true) {
+            table.rows().select();
+        } else {
+            table.rows().deselect();
+        }
+    };
+
     $(document).ready(function () {
 
         $('.search-toggle').click(function () {
@@ -226,17 +292,21 @@
                     sortable: false,
                     className: "left-align",
                 },
-                
                 {
-                    className: "center-align",
+                    orderable: false,
+                    className: 'select-checkbox',
                     targets: 0
                 },
                 {
-                    className: "left-align",
-                    targets: 2
+                    className: "center-align",
+                    targets: 1
                 },
                 {
-                    targets: 7,
+                    className: "left-align",
+                    targets: 3
+                },
+                {
+                    targets: 8,
                     type: 'currency',
                 },
             //     {
@@ -249,13 +319,16 @@
             //         // }
             //     }
             ],
-
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            },   
             colReorder: true,
             fixedColumns: {
-                leftColumns: 3
+                leftColumns: 4
             },
             pageLength: 200,
-            order: [[0, 'asc']],
+            order: [[1, 'asc']],
             autowidth: true,
             scrollY: '500px',
             scrollX: true,

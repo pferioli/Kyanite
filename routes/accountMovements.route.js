@@ -32,4 +32,13 @@ router.post("/new/:clientId", function (req, res, next) {
     accountMovementsController.addNew(req, res);
 });
 
+router.get("/fixBalance", async function (req, res, next) {
+    const clientId = req.query.clientId;
+    const periodId = req.query.periodId;
+    const accountId = req.query.accountId;
+
+    const totalBalance = await accountMovementsController.fixBalanceMovements(clientId, periodId, accountId);
+
+    res.send({ totalBalance: totalBalance });
+})
 module.exports = router;

@@ -82,7 +82,7 @@ module.exports.listAll = async function (req, res) {
 
 module.exports.createInvoice = function (req, res) {
 
-    const { createReport } = require("../reports/paymentOrders/paymentOrder.report");
+    const { createSingleReport } = require("../reports/paymentOrders/paymentOrder.report");
 
     const clientId = req.params.clientId;
     const paymentOrderId = req.params.paymentOrderId;
@@ -97,7 +97,32 @@ module.exports.createInvoice = function (req, res) {
         ]
     })
         .then(paymentOrder => {
-            createReport(paymentOrder, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+            createSingleReport(paymentOrder, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+        })
+        .catch(err => {
+            console.error(err);
+        })
+};
+
+module.exports.printPaymentOrders = function (req, res) {
+
+    const { createMultipleReport } = require("../reports/paymentOrders/paymentOrder.report");
+
+    const paymentOrderIds = req.body.paymentOrders;
+
+    PaymentOrder.findAll(
+        {
+            where: { id: { [Op.in]: paymentOrderIds } },
+            include: [
+                {
+                    model: PaymentReceipt, include: [{ model: Client }, { model: Supplier }, { model: ReceiptType }, { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
+                },
+                { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] }, { model: Account, include: [{ model: AccountType }, { model: Bank }] },
+                { model: CheckSplitted, include: [{ model: Check }] }
+            ]
+        })
+        .then(paymentOrder => {
+            createMultipleReport(paymentOrder, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
         })
         .catch(err => {
             console.error(err);

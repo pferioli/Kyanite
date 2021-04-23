@@ -9,9 +9,7 @@ const PaymentOrderStatus = require('../../utils/statusMessages.util').PaymentOrd
 
 const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
-function createReport(paymentOrder, res) {
-
-    let doc = new PDFDocument({ size: "A4", margin: 50, bufferPages: true });
+function createReport(doc, paymentOrder) {
 
     generateHeader(doc);
     generateCustomerInformation(doc, paymentOrder);
@@ -27,6 +25,26 @@ function createReport(paymentOrder, res) {
 
     if (paymentOrder.statusId === PaymentOrderStatus.eStatus.get('deleted').value)
         common.addWaterMark(doc, [{ text: "ANULADA", x: 100, y: 500, rotation: 315, size: 100 }]);
+};
+
+function createSingleReport(paymentOrder, res) {
+
+    let doc = new PDFDocument(
+        {
+            size: "A4",
+            margin: 50,
+            layout: 'portrait', // can be 'landscape'
+            info: {
+                Title: 'Orden de Pago',
+                Author: 'AAII Administraciones Integrales', // the name of the author
+                Subject: '', // the subject of the document
+                Keywords: 'pdf;javascript', // keywords associated with the document
+            },
+            bufferPages: true,
+            autoFirstPage: true
+        });
+
+    createReport(doc, paymentOrder);
 
     const reportName = "op_" + paymentOrder.paymentReceipt.client.internalCode + "_" + paymentOrder.poNumberFormatted + ".pdf"
     // doc.end();
@@ -47,6 +65,57 @@ function createReport(paymentOrder, res) {
     doc.end();
 
     return true;
+
+}
+
+function createMultipleReport(paymentOrders, res) {
+
+    let doc = new PDFDocument(
+        {
+            size: "A4",
+            margin: 50,
+            layout: 'portrait', // can be 'landscape'
+            info: {
+                Title: 'Orden de Pago',
+                Author: 'AAII Administraciones Integrales', // the name of the author
+                Subject: '', // the subject of the document
+                Keywords: 'pdf;javascript', // keywords associated with the document
+            },
+            bufferPages: true,
+            autoFirstPage: false
+        });
+
+    for (i = 0; i < paymentOrders.length; i++) {
+
+        const paymentOrder = paymentOrders[i];
+
+        doc.addPage();
+
+        createReport(doc, paymentOrder);
+    }
+
+    const reportName = "recibos_ordenes_de_pago.pdf"
+
+    // doc.end();
+    // doc.pipe(fs.createWriteStream(path));
+
+    // Set some headers
+    res.statusCode = 200;
+    res.setHeader('Content-type', 'application/pdf');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // Header to force download
+    //res.setHeader('Content-disposition', 'attachment; filename=' + reportName);
+
+    doc.pipe(res).on('finish', function () {
+        console.log('PDF closed');
+    });
+
+    doc.end();
+
+    return true;
+
+
 }
 
 // <----- HEADER ----->
@@ -210,5 +279,6 @@ function generateFooter(doc) {
 }
 
 module.exports = {
-    createReport: createReport
+    createSingleReport: createSingleReport,
+    createMultipleReport: createMultipleReport
 };

@@ -31,6 +31,10 @@ router.get("/client/:clientId/invoice/:paymentOrderId", function (req, res, next
     paymentOrdersController.createInvoice(req, res);
 });
 
+router.post("/printPaymentOrders", function (req, res, next) {
+    paymentOrdersController.printPaymentOrders(req, res);
+});
+
 // AJAX CALLS
 
 router.get('/ajax/calculateRemainingBalance/:receiptId', function (req, res, next) {
