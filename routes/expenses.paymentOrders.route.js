@@ -27,6 +27,10 @@ router.post('/delete', function (req, res, next) {
 
 //REPORTS...
 
+router.get("/client/:clientId/report", function (req, res, next) {
+    paymentOrdersController.createExpensesReport(req, res);
+});
+
 router.get("/client/:clientId/invoice/:paymentOrderId", function (req, res, next) {
     paymentOrdersController.createInvoice(req, res);
 });

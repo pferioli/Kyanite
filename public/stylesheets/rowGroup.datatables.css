@@ -1,17 +1,51 @@
-table.dataTable tr.dtrg-group td {
+/*GROUP START*/
+
+table.dataTable tr.dtrg-group.dtrg-start td {
     background-color:#e0e0e0;
-    text-align: left;
+    text-align: center;
 }
-table.dataTable tr.dtrg-group.dtrg-level-0 td {
-    font-weight:bold
+
+table.dataTable tr.dtrg-group.dtrg-start.dtrg-level-0 td {
+    font-weight: bold;
+    text-align: center;
 }
-table.dataTable tr.dtrg-group.dtrg-level-1 td, table.dataTable tr.dtrg-group.dtrg-level-2 td {
+
+table.dataTable tr.dtrg-group.dtrg-start.dtrg-level-1 td, table.dataTable tr.dtrg-group.dtrg-start.dtrg-level-2 td {
     background-color:#f0f0f0;
     padding-top:0.25em;
     padding-bottom:0.25em;
     padding-left:2em;
     font-size:0.9em
 }
-table.dataTable tr.dtrg-group.dtrg-level-2 td {
+
+table.dataTable tr.dtrg-group.dtrg-start.dtrg-level-2 td {
     background-color:#f3f3f3
+}
+
+/*GROUP END*/
+
+table.dataTable tr.dtrg-group.dtrg-end.dtrg-level-1 td {
+    font-weight: normal;
+    text-align: right;
+}
+
+
+/*table.dataTable tr.dtrg-group.dtrg-end.dtrg-level-0 tr {
+    border-color:#9fc6fc;
+    border: 1px solid white;  
+}*/
+
+table.dataTable tr.dtrg-group.dtrg-end.dtrg-level-0 td {
+    font-weight: bold;
+    text-align: right;
+    padding-right: 5px;
+}
+
+table.dataTable tr.dtrg-group.dtrg-end.dtrg-level-0 td.amount {
+    font-size: larger !important;
+}
+
+.amount {
+    text-align: center !important;
+    padding-right: 0px !important;
 }

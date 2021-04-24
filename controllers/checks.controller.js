@@ -441,6 +441,6 @@ function searchExpiredChecks(fireDate) {
     winston.info('Executing crontab for searching checks close to due date');
 }
 
-const job1 = schedule.scheduleJob('* */1 * * *', function (fireDate) {
+const job1 = schedule.scheduleJob('* * 1 * *', function (fireDate) {
     searchExpiredChecks(fireDate);
 })

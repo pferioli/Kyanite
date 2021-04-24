@@ -1,0 +1,256 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+
+    <div class="table-container">
+        <div class="table-header">
+
+            <span class="table-title">Reporte de Liquidación - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+            <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+                <div class="spinner-layer spinner-green-only">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">                
+                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+            </div>
+            </div>
+            <div id="hide-dt" style="display:none">
+                <table id="datatable" class="table display">
+                    <thead>
+                        <tr>
+                            <th>Grupo</th>
+                            <th>ImpContable</th>
+                            <th>OP</th>
+                            <th>Proveedor</th>
+                            <th>Factura</th>
+                            <th>Fecha</th>
+                            <th>Descripcion</th>
+                            <th>Cuenta</th>
+                            <th>Cheque</th>
+                            <th>Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < data.paymentOrders.length; i++) { %>
+                        <tr data-id="<%= data.paymentOrders[i].id %>">
+                            <td><%= data.paymentOrders[i].paymentReceipt.accountingImputation.accountingGroup.name %></td>
+                            <td><%= data.paymentOrders[i].paymentReceipt.accountingImputation.name %></td>
+                            <td><%= data.paymentOrders[i].poNumberFormatted %></td>
+                            <td><%= data.paymentOrders[i].paymentReceipt.supplier.name %></td>
+                            <td><a class="blue-text" href="/expenses/paymentReceipts/info/<%= data.paymentOrders[i].paymentReceipt.id %>">[<%= data.paymentOrders[i].paymentReceipt.receiptType.receiptType %>] <%= data.paymentOrders[i].paymentReceipt.receiptNumber %></a></td>
+                            <td><%= data.paymentOrders[i].paymentReceipt.emissionDate %></td>
+                            <td><%= data.paymentOrders[i].paymentReceipt.description%></td>
+                            <td><%= data.paymentOrders[i].account.accountType.account %> (ID: <%= data.paymentOrders[i].accountId %>)</td>
+                            <td>
+                                <% if(data.paymentOrders[i].checkId){ %>
+                                    <%= data.paymentOrders[i].checkSplitted.check.number %> (ID: <%= data.paymentOrders[i].checkSplitted.check.id %>-><%= data.paymentOrders[i].checkSplitted.id %>)
+                                <% } %>
+                            </td>
+                            <td>$<%= data.paymentOrders[i].amount %></td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="7" style="text-align: right;">Total:</th>
+                            <th style="text-align: center; font-size: medium; font-weight: bold;"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row center-align" style="font-size:small; color:whitesmoke" id="lastUpdate"></div>
+        </div>
+
+        <input type="hidden" name="clientId" id="clientId" value=<%=data.client.id%> />
+        <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
+
+</main>
+
+<%- include ("./modals/delete") %>
+<%- include ("./modals/confirm") %>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+    var handler = 0;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {})
+
+        document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
+    });
+
+    $(document).ready(function () {
+
+        $('.search-toggle').click(function () {
+            if ($('.hiddensearch').css('display') == 'none')
+                $('.hiddensearch').slideDown();
+            else
+                $('.hiddensearch').slideUp();
+        });
+
+        var table = $('#datatable').dataTable({
+            dom: "<'hiddensearch'f'>tr<'table-footer'B'>",
+            oLanguage: {
+                sSearch: '',
+                sSearchPlaceholder: 'Escriba aqui su búsqueda',
+                sInfo: '_START_ -_END_ de _TOTAL_',
+                sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+                    '<option value="200">200</option>' +
+                    '<option value="500">500</option>' +
+                    '<option value="1000">1000</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select></div>'
+            },
+            columnDefs: [
+                {
+                    targets:[0,1],
+                    visible: false,
+                    searchable: false
+                },
+                {
+                    targets: 2,
+                    className: "center-align",
+                },
+                {
+                    targets: 3,
+                    render: $.fn.dataTable.render.ellipsis( 80 )
+                },
+                {   targets: 5,
+                    render: function (data) {
+                        if (data)
+                            return moment(data).format('DD/MM/YYYY');
+                        else return "";
+                    }, 
+                },
+                {
+                    targets: 6,
+                    render: $.fn.dataTable.render.ellipsis( 80 )
+                },
+                {
+                    targets: 9,
+                    type: 'currency',
+                },
+                
+            ],
+            colReorder: true,
+            rowGroup: {
+                dataSrc: [0,1],
+                endRender: function ( rows, group ) {
+                
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function ( i ) { 
+                        return typeof i === 'string' ? i.replace(/[\$,]/g, '')*1 : typeof i === 'number' ? i : 0; 
+                    };
+ 
+                    var amountAgreggate = rows.data().pluck(9).reduce(function (a, b) { 
+                        return intVal(a) + intVal(b); }, 0 );
+                
+                    amountAgreggate = $.fn.dataTable.render.number('.', ',', 2, '$').display( amountAgreggate );
+ 
+                    return $('<tr/>')
+                        .append( '<td colspan="7">Subtotal para '+group+'</td>' )
+                        .append( '<td class="amount">'+amountAgreggate+'</td>' );
+                },
+            },
+            fixedColumns: { leftColumns: 1 },
+            pageLength: 200,
+            order: [[0, 'asc'],[1, 'asc']],
+            autowidth: true,
+            // scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
+            paging: true,
+            buttons: [
+                {
+                    extend: 'colvis',
+                    text: 'Columnas',
+                },
+                {
+                    extend: 'print',
+                    className: '',
+                    title: '',
+                    // autoPrint: false,
+                    customize: function (win) {
+                        $(win.document.body)
+                            .css('font-size', '10pt')
+                            .prepend(
+                                '<h4>Title Test</h4>',
+                            );
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit',);
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    exportOptions: {
+                    //    columns: ':visible(th:not(:last-child))',
+                        columns: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ],
+                        search: 'applied',
+                        order: 'applied'
+                    },
+
+                    customize: function (xlsx) {
+                        var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+                        source.setAttribute('name', 'Clientes');
+                    }
+                },
+                { extend: 'csvHtml5' },
+                { extend: 'copyHtml5' },
+                {
+                    text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+                    extend: 'pdfHtml5',
+                    filename: 'clients',
+                    orientation: 'landscape',     //portrait
+                    pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+                    exportOptions: {
+                        columns: ':visible',
+                        search: 'applied',
+                        order: 'applied'
+                    }
+                }
+            ],
+            fnInitComplete: function () {
+                $('#hide-dt').show();
+                $('#progress').hide();
+            },
+            
+            "footerCallback": function ( row, data, start, end, display ) {
+            
+                var api = this.api(), data;
+ 
+                // Remove the formatting to get integer data for summation
+                var intVal = function ( i ) { return typeof i === 'string' ? i.replace(/[\$,]/g, '')*1 : typeof i === 'number' ? i : 0; };
+ 
+                // Total over all pages
+                total = api.column(9).data().reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+ 
+                // Total over this page
+                // pageTotal = api.column(8, { page: 'current'}).data().reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+    
+                // Update footer
+                $(api.column(7).footer()).html($.fn.dataTable.render.number('.', ',', 2, '$').display( total )); //     Number.parseFloat(total).toFixed(2));
+            }
+        });
+    });
+</script>

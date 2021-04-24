@@ -324,7 +324,7 @@ module.exports.importCollections = async function (req, res) {
 
     const moment = require('moment'); let bErrors = false;
 
-    const clientId = req.body.clientId || req.params.clientId;
+    const clientId = req.params.clientId; //req.body.clientId
 
     if (!req.file) {
         req.flash("warning", "No se encontro ningun archivo con datos para hacer la importación");

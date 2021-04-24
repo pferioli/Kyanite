@@ -33,9 +33,9 @@
                     <label> Seleccionar todo <input id="swAllProperties" type="checkbox" onchange="selectAllRows(this.checked);">
                         <span class="lever"></span></label>
                 </div>        
-                
                 <button id="button-print" onClick='confirmDialog(this);' class="waves-effect btn-flat nopadding"><i class="material-icons">print</i></button>
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/expenses/paymentOrders/client/<%=data.client.id%>/report" class="waves-effect btn-flat nopadding"><i class="material-icons">analytics</i></a>
                 <a href="/expenses/paymentReceipts/client/<%=data.client.id%>" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment</i></a>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
