@@ -1,6 +1,6 @@
 {
   "name": "kyanite",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "config": {
     "entrypoint": "./bin/server.js"
@@ -28,6 +28,7 @@
     "dotenv": "^8.2.0",
     "ejs": "^3.0.1",
     "enum": "^3.0.4",
+    "excel4node": "^1.7.2",
     "express": "^4.17.1",
     "express-flash": "0.0.2",
     "express-mysql-session": "^2.1.4",

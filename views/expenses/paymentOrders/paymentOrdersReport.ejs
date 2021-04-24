@@ -25,6 +25,7 @@
             </div>
             <div class="actions">                
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <button id="button-report" onClick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/report/download');" class="waves-effect btn-flat nopadding"><i class="material-icons">file_download</i></button>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             </div>
@@ -98,6 +99,11 @@
 
         document.getElementById('lastUpdate').textContent = 'Ultima actualizacion ' + Date();
     });
+
+    function openInNewTab(url) {
+        var redirectWindow = window.open(url, '_blank');
+        redirectWindow.location;
+    };
 
     $(document).ready(function () {
 

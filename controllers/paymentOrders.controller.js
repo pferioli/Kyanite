@@ -80,9 +80,37 @@ module.exports.listAll = async function (req, res) {
         });
 };
 
-module.exports.createExpensesReport = async function (req, res) {
+async function getExpensesReportRecords(clientId, periods) {
+
+    return PaymentOrder.findAll({
+        where: {
+            periodId: { [Op.in]: periods },
+            statusId: PaymentOrderStatus.eStatus.get('processed').value
+        },
+        include: [
+            { model: CheckSplitted, include: [{ model: Check }] },
+            {
+                model: PaymentReceipt,
+                where: { clientId: clientId },
+                include: [{ model: ReceiptType }, { model: Supplier }, { model: AccountingImputation, include: [{ model: AccountingGroup }] }],
+            },
+            { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }
+        ],
+        order: [
+            [{ model: PaymentReceipt }, { model: AccountingImputation }, 'groupId', 'ASC'],
+            [{ model: PaymentReceipt }, { model: AccountingImputation }, 'id', 'ASC']
+        ]
+    })
+        .then(paymentOrders => {
+            return paymentOrders;
+        })
+};
+
+module.exports.expensesReport = async function (req, res) {
 
     const clientId = req.params.clientId;
+
+    const client = await Client.findByPk(clientId);
 
     let periods = [];
 
@@ -98,33 +126,42 @@ module.exports.createExpensesReport = async function (req, res) {
         periods = req.query.periodId.split(',');
     }
 
-    const paymentOrders = await PaymentOrder.findAll({
-        where: {
-            periodId: { [Op.in]: periods },
-            statusId: PaymentOrderStatus.eStatus.get('processed').value
-        },
-        include: [{ model: CheckSplitted, include: [{ model: Check }] },
-        {
-            model: PaymentReceipt,
-            where: { clientId: clientId },
-            include: [{ model: ReceiptType }, { model: Supplier }, { model: AccountingImputation, include: [{ model: AccountingGroup }] }],
-        },
-        { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }],
-        // group: ['PaymentReceipt.accountingImputationId'],
-        order: [
-            [{ model: PaymentReceipt }, { model: AccountingImputation }, 'groupId', 'ASC'],
-            [{ model: PaymentReceipt }, { model: AccountingImputation }, 'id', 'ASC']
-        ]
-    });
-
-    const client = await Client.findByPk(clientId);
+    const paymentOrders = await getExpensesReportRecords(clientId, periods);
 
     res.render('expenses/paymentOrders/paymentOrdersReport',
         {
             menu: CURRENT_MENU,
             data: { client: client, paymentOrders: paymentOrders },
         });
-}
+};
+
+module.exports.downloadExpensesReport = async function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    const client = await Client.findByPk(clientId);
+
+    const activePeriod = await BillingPeriod.findOne({
+        where: { clientId: clientId, statusId: 1 }
+    });
+
+    if (activePeriod === null) {
+        req.flash("warning", "No hay ningún período de liquidación activo"); res.redirect(`/expenses/paymentOrders/client/${clientId}/report`); return;
+    }
+
+    const periods = []; periods.push(activePeriod.id);
+
+    const paymentOrders = await getExpensesReportRecords(clientId, periods);
+
+    const { generateExcel } = require("../reports/paymentOrders/expensesExcel.report");
+
+    try {
+        generateExcel(client, paymentOrders, activePeriod, req.user, res);
+    } catch (error) {
+        winston.error(`An error ocurred creating the excel expenses report file - ${error}`);
+    }
+};
+
 module.exports.createInvoice = function (req, res) {
 
     const { createSingleReport } = require("../reports/paymentOrders/paymentOrder.report");
