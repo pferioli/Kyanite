@@ -275,7 +275,14 @@
                     // render: function (data, type, full, meta) {
                     //     return type === 'display' ? '<div title="' + full.description + '">' + data : data;
                     // }
-                }
+                },
+                {   targets: 5,
+                    render: function (data) {
+                        if (data)
+                            return moment(data).format('DD/MM/YYYY');
+                        else return "";
+                    }, 
+                },
             ],
 
             colReorder: true,

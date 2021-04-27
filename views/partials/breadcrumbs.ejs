@@ -85,10 +85,10 @@
     <% } %>
 <% } %>
 
-<% if (locals.menu==='fixedTermDeposits' ) { %>
-    <a href="/fixedTermDeposits" class="breadcrumb">Plazos Fijos</a>
+<% if (locals.menu==='investments' ) { %>
+    <a href="/investments" class="breadcrumb">Inversiones</a>
     <% if(locals.data) { %>
-        <a href="/fixedTermDeposits/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+        <a href="/investments/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
     <% } %>
 <% } %>
 

@@ -5,7 +5,7 @@ const {
 } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class FixedTermDepositsCategory extends Model {
+    class InvestmentCategory extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
@@ -13,10 +13,10 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            FixedTermDepositsCategory.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            InvestmentCategory.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
         }
     };
-    FixedTermDepositsCategory.init({
+    InvestmentCategory.init({
         id: {
             allowNull: false,
             autoIncrement: true,
@@ -37,11 +37,11 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         sequelize,
-        modelName: 'fixedTermDepositsCategory',
-        tableName: 'fixed_term_deposits_categories',
+        modelName: 'investmentCategory',
+        tableName: 'investments_categories',
         timestamps: false,
         paranoid: false,
 
     });
-    return FixedTermDepositsCategory;
+    return InvestmentCategory;
 };

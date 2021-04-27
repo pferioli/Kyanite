@@ -24,7 +24,7 @@
             </div>
             <div class="actions">
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a id="button-add" href="/fixedTermDeposits/new/<%=data.client.id%>"  class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a id="button-add" href="/investments/new/<%=data.client.id%>"  class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
@@ -49,77 +49,77 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% for(var i=0; i < data.fixedTermDeposit.length; i++) { %>
-                        <tr data-id="<%= data.fixedTermDeposit[i].id %>">
-                            <td><%= data.fixedTermDeposit[i].id %></td>
-                            <td><%= data.fixedTermDeposit[i].depositType.description %></td>
-                            <td>$ <%= data.fixedTermDeposit[i].amount %></td>
-                            <td>$ <%= data.fixedTermDeposit[i].interests %></td>
+                    <% for(var i=0; i < data.investment.length; i++) { %>
+                        <tr data-id="<%= data.investment[i].id %>">
+                            <td><%= data.investment[i].id %></td>
+                            <td><%= data.investment[i].depositType.description %></td>
+                            <td>$ <%= data.investment[i].amount %></td>
+                            <td>$ <%= data.investment[i].interests %></td>
 
-                            <td><%= data.fixedTermDeposit[i].sourceAccount.accountType.account %> (ID: <%= data.fixedTermDeposit[i].sourceAccountId%>)</td>
-                            <td><%= data.fixedTermDeposit[i].destinationAccount.accountType.account %> (ID: <%= data.fixedTermDeposit[i].destinationAccountId%>)</td>
+                            <td><%= data.investment[i].sourceAccount.accountType.account %> (ID: <%= data.investment[i].sourceAccountId%>)</td>
+                            <td><%= data.investment[i].destinationAccount.accountType.account %> (ID: <%= data.investment[i].destinationAccountId%>)</td>
 
-                            <td>$ <%= data.fixedTermDeposit[i].creationDate %></td>
-                            <td>$ <%= data.fixedTermDeposit[i].expirationDate %></td>
+                            <td>$ <%= data.investment[i].creationDate %></td>
+                            <td>$ <%= data.investment[i].expirationDate %></td>
 
                             <td>
-                                <% if(data.fixedTermDeposit[i].billingPeriod.statusId === 0) { %>
+                                <% if(data.investment[i].billingPeriod.statusId === 0) { %>
                                 <i class="material-icons">calendar_today</i>
                                 <% } %>
-                                <% if(data.fixedTermDeposit[i].billingPeriod.statusId=== 1) { %>
+                                <% if(data.investment[i].billingPeriod.statusId=== 1) { %>
                                 <i class="material-icons">lock_open</i>
                                 <% } %>
-                                <% if(data.fixedTermDeposit[i].billingPeriod.statusId === 2) { %>
+                                <% if(data.investment[i].billingPeriod.statusId === 2) { %>
                                 <i class="material-icons">lock</i>
                                 <% } %>
-                                <% if(data.fixedTermDeposit[i].billingPeriod.statusId === 3) { %>
+                                <% if(data.investment[i].billingPeriod.statusId === 3) { %>
                                 <i class="material-icons">cancel</i>
                                 <% } %>
 
-                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.fixedTermDeposit[i].billingPeriod.name %></span></a>
+                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.investment[i].billingPeriod.name %></span></a>
                             </td>
 
                             <td>
                                 <!--PENDIENTE-->
-                                <% if(data.fixedTermDeposit[i].statusId===0) { %>
+                                <% if(data.investment[i].statusId===0) { %>
                                     <i class="material-icons">pending</i>
                                 <% } %>
 
                                 <!--CREADO-->
-                                <% if(data.fixedTermDeposit[i].statusId===1) { %>
+                                <% if(data.investment[i].statusId===1) { %>
                                     <i class="material-icons">trending_up</i>
                                 <% } %>
 
                                 <!--RENOVADO-->
-                                <% if(data.fixedTermDeposit[i].statusId===2) { %>
+                                <% if(data.investment[i].statusId===2) { %>
                                     <i class="material-icons">update</i>
                                 <% } %>
 
                                 <!--EXPIRADO-->
-                                <% if(data.fixedTermDeposit[i].statusId===3) { %>
+                                <% if(data.investment[i].statusId===3) { %>
                                     <i class="material-icons">free_cancellation</i>
                                 <% } %>
 
                                 <!--COMPLETADO-->
-                                <% if(data.fixedTermDeposit[i].statusId===4) { %>
+                                <% if(data.investment[i].statusId===4) { %>
                                     <i class="material-icons">savings</i>
                                 <% } %>
 
                                 <!--CANCELADO-->
-                                <% if(data.fixedTermDeposit[i].statusId===5) { %>
+                                <% if(data.investment[i].statusId===5) { %>
                                     <i class="material-icons">delete_outline</i>
                                 <% } %>
 
-                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.fixedTermDeposit[i].status %></span>
+                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.investment[i].status %></span>
 
-                                <td><%= data.fixedTermDeposit[i].comments %></td>
+                                <td><%= data.investment[i].comments %></td>
                                 
-                                <td><%= data.fixedTermDeposit[i].user.name %></td>
+                                <td><%= data.investment[i].user.name %></td>
                                 
                                 <td>
-                                    <% if(data.fixedTermDeposit[i].statusId===1) { %>
+                                    <% if(data.investment[i].statusId===1) { %>
                                         <a onclick="accreditDialog(this)" class="btn-flat btn-small waves-effect waves-light"
-                                            data-id="<%=data.fixedTermDeposit[i].id%>" data-clientid="<%=data.client.id%>" data-periodid="<%=data.fixedTermDeposit[i].billingPeriod.id%>">
+                                            data-id="<%=data.investment[i].id%>" data-clientid="<%=data.client.id%>" data-periodid="<%=data.investment[i].billingPeriod.id%>">
                                             <i class="material-icons">check_circle</i></a>                                                                            
                                     <% } %>
                                 </td>
@@ -147,7 +147,7 @@
     });
 
     function accreditDialog(button) {
-        var _elem = document.getElementById('modalAccreditFixedTermDeposit');
+        var _elem = document.getElementById('modalAccreditInvestment');
         var modal = M.Modal.getInstance(_elem);
         document.getElementById('modalClientId').value = button.dataset.clientid;
         document.getElementById('modalPeriodId').value = button.dataset.periodid;

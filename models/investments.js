@@ -4,10 +4,10 @@ const {
     Model
 } = require('sequelize');
 
-const FixedTermDepositsStatus = require('../utils/statusMessages.util').FixedTermDeposits;
+const InvestmentsStatus = require('../utils/statusMessages.util').Investments;
 
 module.exports = (sequelize, DataTypes) => {
-    class FixedTermDeposit extends Model {
+    class Investments extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
@@ -15,15 +15,15 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            FixedTermDeposit.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
-            FixedTermDeposit.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
-            FixedTermDeposit.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
-            FixedTermDeposit.hasOne(models.fixedTermDepositsCategory, { foreignKey: 'id', sourceKey: 'categoryId', as: 'depositType' })
-            FixedTermDeposit.hasOne(models.account, { foreignKey: 'id', sourceKey: 'sourceAccountId', as: 'sourceAccount' })
-            FixedTermDeposit.hasOne(models.account, { foreignKey: 'id', sourceKey: 'destinationAccountId', as: 'destinationAccount' })
+            Investments.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
+            Investments.hasOne(models.billingPeriod, { foreignKey: 'id', sourceKey: 'periodId' })
+            Investments.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            Investments.hasOne(models.investmentCategory, { foreignKey: 'id', sourceKey: 'categoryId', as: 'depositType' })
+            Investments.hasOne(models.account, { foreignKey: 'id', sourceKey: 'sourceAccountId', as: 'sourceAccount' })
+            Investments.hasOne(models.account, { foreignKey: 'id', sourceKey: 'destinationAccountId', as: 'destinationAccount' })
         }
     };
-    FixedTermDeposit.init({
+    Investments.init({
         id: {
             allowNull: false,
             autoIncrement: true,
@@ -77,7 +77,7 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
             get: function () {
-                return FixedTermDepositsStatus.Status[this.get('statusId')];
+                return InvestmentsStatus.Status[this.get('statusId')];
             }
         },
         userId: {
@@ -87,11 +87,11 @@ module.exports = (sequelize, DataTypes) => {
 
     }, {
         sequelize,
-        modelName: 'fixedTermDeposit',
-        tableName: 'fixed_term_deposits',
+        modelName: 'investment',
+        tableName: 'investments',
         timestamps: true,
         paranoid: true,
 
     });
-    return FixedTermDeposit;
+    return Investments;
 };

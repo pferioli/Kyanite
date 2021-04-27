@@ -37,7 +37,8 @@
                         <th>Cobranza</th>
                         <th>Importe Conceptos</th>
                         <th>Importe Valores</th>
-                        <th>Fecha</th>
+                        <th>Fecha Cobranza</th>
+                        <th>Fecha Importacion</th>
                         <th>Período</th>
                         <th>Estado</th>
                         <th>Comentarios</th>
@@ -54,6 +55,8 @@
                             </td>
                             <td>$ <%= data.unidentifiedDeposits[i].collection.amountConcepts %></td>
                             <td>$ <%= data.unidentifiedDeposits[i].collection.amountSecurities %></td>
+                            
+                            <td><%= data.unidentifiedDeposits[i].collection.receiptDate %></td>
                             <td><%= data.unidentifiedDeposits[i].createdAt %></td>
                            
                             <td>
@@ -213,12 +216,19 @@
                 {   targets: 4,
                     render: function (data) {
                         if (data)
+                            return moment(data).format('DD/MM/YYYY');
+                        else return "";
+                    }, 
+                },
+                {   targets: 5,
+                    render: function (data) {
+                        if (data)
                             return moment(data).format('DD/MM/YYYY HH:mm:ss');
                         else return "";
                     }, 
                 },
                 {
-                    targets: 7,
+                    targets: 8,
                     visible: true,
                     searchable: false,
                     render: $.fn.dataTable.render.ellipsis(32, true)

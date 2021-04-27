@@ -2,10 +2,10 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12" method="post" action='/fixedTermDeposits/new/<%=data.client.id%>'>
+        <form class="col s12" method="post" action='/investments/new/<%=data.client.id%>'>
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title">Ingrese un nuevo plazo fijo</span>
+                    <span class="card-title">Ingrese una nueva inversión</span>
                     <div class="row" style="margin-top: 20px;">
                         <div class="input-field col s9">
                             <i class="material-icons prefix">location_city</i>
@@ -59,7 +59,7 @@
                         <div class="input-field col s4">
                             <i class="material-icons prefix">category</i>
                             <select id="categorySelect" required>
-                                <option value="" disabled selected>Seleccione el tipo de plazo fijo</option>
+                                <option value="" disabled selected>Seleccione el tipo de inversión</option>
                                 <% for(var i=0; i < data.categories.length; i++) { %>
                                     <option value="<%=data.categories[i].id%>"><%=data.categories[i].description%></option>
                                 <% } %>
@@ -90,7 +90,7 @@
                         <div class="input-field col s12">
                             <i class="material-icons prefix">comment</i>
                             <textarea id="comments" name="comments" class="materialize-textarea" required></textarea>
-                            <label for="comments">Descripcion del plazo fijo</label>
+                            <label for="comments">Comentarios</label>
                         </div>
                     </div>
                 </div>
@@ -183,9 +183,11 @@
             destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione la cuenta de Destino" + "</option>"
 
             for (i = 0; i < accounts.length; i++) {
-                if ((this.value != accounts[i].id)&&(accounts[i].accountType.account.toUpperCase().startsWith("PF")===true)) {
-                    destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"" + accounts[i].id + "\">" +
-                        "[" + accounts[i].accountType.account + "] " + accounts[i].accountType.description + " (ID:" + accounts[i].id + ")" + "</option>"
+                if (this.value != accounts[i].id){
+                    if((accounts[i].accountType.account.toUpperCase().startsWith("PF")===true)||(accounts[i].accountType.account.toUpperCase().startsWith("FI")===true)) {
+                        destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"" + accounts[i].id + "\">" +
+                            "[" + accounts[i].accountType.account + "] " + accounts[i].accountType.description + " (ID:" + accounts[i].id + ")" + "</option>"
+                    }
                 }
             }
             M.FormSelect.init(destinationAccountSelect, {});

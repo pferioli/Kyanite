@@ -85,6 +85,7 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
     });
 
     var styleRowGroupLevel2SubTotal = workbook.createStyle({
+        numberFormat: '$#,##0.00; -$#,##0.00; 0',
         font: {
             color: 'black',
             size: 12,
@@ -103,9 +104,22 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
         }
     });
 
-    let rowIndex = 1; rowOffset = 0; let subTotal = 0.0; let total = 0.0;
-    let lastGroupId = 0; group = ""; let lastAccountImputationId = 0; accountingImputation = ""
+    var styleCurrencyFormat = workbook.createStyle({
+        numberFormat: '$#,##0.00; -$#,##0.00; 0',
+        alignment: {
+            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center'
+        },
+        font: {
+            color: 'black',
+            size: 12,
+        },
+    })
 
+    let rowIndex = 1; rowOffset = 0; let subTotal = 0.0; let total = 0.0;
+
+    let lastGroupId = 0; group = ""; let lastAccountImputationId = 0; accountingImputation = ""; isGroupOpen = false;
 
     //Headers
 
@@ -177,15 +191,15 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
                 rowIndex += 1;
 
                 worksheet.cell(rowIndex, 1, rowIndex, 7, true).string("subtotal para " + group + ":").style(styleRowGroupLevel2End);
-                worksheet.cell(rowIndex, HEADER_COL_AMOUNT).string(`$ ${Number.parseFloat(subTotal).toFixed(2)}`).style(styleRowGroupLevel2SubTotal);
+                worksheet.cell(rowIndex, HEADER_COL_AMOUNT).number(Number.parseFloat(subTotal)).style(styleRowGroupLevel2SubTotal);
                 rowIndex += 1;
 
-                subTotal = 0.0;
+                subTotal = 0.0; isGroupOpen = false;
 
                 worksheet.cell(rowIndex, 1, rowIndex, 8, true).string("");
             }
 
-            rowIndex += 1;
+            rowIndex += 1; isGroupOpen = true;
 
             lastGroupId = paymentOrder.paymentReceipt.accountingImputation.accountingGroup.id;
 
@@ -229,12 +243,13 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
             }
         });
 
-        worksheet.cell(rowIndex, HEADER_COL_DATE).string(paymentOrder.paymentReceipt.emissionDate).style({
+        worksheet.cell(rowIndex, HEADER_COL_DATE).date(paymentOrder.paymentReceipt.emissionDate).style({
             alignment: {
                 wrapText: false,
                 horizontal: 'center',
                 vertical: 'center'
-            }
+            },
+            numberFormat: 'dd/mm/yyyy'
         });
 
         worksheet.cell(rowIndex, HEADER_COL_DESCRIPTION).string(paymentOrder.paymentReceipt.description).style({
@@ -261,13 +276,15 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
             }
         });
 
-        worksheet.cell(rowIndex, HEADER_COL_AMOUNT).string("$" + paymentOrder.amount).style({
-            alignment: {
-                wrapText: false,
-                horizontal: 'center',
-                vertical: 'center'
-            }
-        });
+        worksheet.cell(rowIndex, HEADER_COL_AMOUNT).number(Number.parseFloat(paymentOrder.amount)).style(styleCurrencyFormat);
+    }
+
+    //Cerramos el ultimo grupo
+
+    if (isGroupOpen === true) {
+        rowIndex += 1;
+        worksheet.cell(rowIndex, 1, rowIndex, 7, true).string("subtotal para " + group + ":").style(styleRowGroupLevel2End);
+        worksheet.cell(rowIndex, HEADER_COL_AMOUNT).number(Number.parseFloat(subTotal)).style(styleRowGroupLevel2SubTotal);
     }
 
     rowIndex += 1; worksheet.cell(rowIndex, 1, rowIndex, 8, true).string("");
@@ -292,8 +309,9 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
             }
         });
 
-    worksheet.cell(rowIndex, 8).string(Number.parseFloat(total).toFixed(2)).style(
+    worksheet.cell(rowIndex, 8).number(Number.parseFloat(total)).style(
         {
+            numberFormat: '$#,##0.00; -$#,##0.00; 0',
             font: {
                 color: 'black',
                 size: 12,

@@ -36,7 +36,7 @@ module.exports.AccountMovementsCategories = class {
             'TRANSFERENCIA': "T".charCodeAt(0),
             'PAGO_PROVEEDOR': "P".charCodeAt(0),
             'AJUSTE_SALDO': "J".charCodeAt(0),
-            'PLAZO_FIJO': "F".charCodeAt(0),
+            'INVERSION': "V".charCodeAt(0),
             'NOTA_DE_CREDITO': "N".charCodeAt(0),
             'SALDO_PERIODO_ANTERIOR': "S".charCodeAt(0)
         })

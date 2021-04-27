@@ -208,8 +208,15 @@
                     targets: 3,
                     type: 'currency',
                 },
+                {   targets: 4,
+                    render: function (data) {
+                        if (data)
+                            return moment(data).format('DD/MM/YYYY HH:mm:ss');
+                        else return "";
+                    }, 
+                },
                 {
-                    targets: 4,
+                    targets: 5,
                     visible: true,
                     searchable: false,
                     render: $.fn.dataTable.render.ellipsis(32, true)

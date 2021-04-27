@@ -130,7 +130,7 @@ module.exports.UnidentifiedDeposit = class {
     }
 }
 
-module.exports.FixedTermDeposits = class {
+module.exports.Investments = class {
 
     constructor() { }
 

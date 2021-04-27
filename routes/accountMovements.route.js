@@ -14,7 +14,7 @@ router.post("/", function (req, res, next) {
     let redirectUrl = `/movements/client/${req.body.clientId}?periodId=${req.body.periodId}`;
 
     if (accountsIds != undefined) {
-        redirectUrl += "?accountId=" + accountsIds
+        redirectUrl += "&accountId=" + accountsIds
     }
 
     res.redirect(redirectUrl);

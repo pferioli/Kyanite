@@ -151,7 +151,7 @@ app.use('/accounts', require('./routes/accounts.route'));
 
 app.use('/transfers', require('./routes/accountTransfers.route'));
 
-app.use('/fixedTermDeposits', require('./routes/fixedTermDeposits.route'));
+app.use('/investments', require('./routes/investments.route'));
 
 app.use('/checks', require('./routes/checks.route'));
 
