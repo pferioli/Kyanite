@@ -3,7 +3,8 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const TotpStrategy = require('passport-totp').Strategy;
 
-const User = require('../models').user;
+const Model = require('../models')
+const User = Model.user;
 
 // =========================================================================
 // passport session setup ==================================================
@@ -52,35 +53,36 @@ module.exports = function (app) {
 
                 // callback with email and password from our form
 
-                const user = await User.findOne({ where: { email: email, enabled: true } }).then(function (user) {
+                const user = await User.findOne({ where: { email: email, enabled: true }, /*include: [{ model: Model.userAvatar }]*/ })
+                    .then(function (user) {
 
-                    if (user === null) {
-                        return done(
-                            null,
-                            false,
-                            req.flash(
-                                "warning",
-                                "No se encontró el usuario en la base de datos"
-                            )
-                        ); // req.flash is the way to set flashdata using connect-flash
-                    };
-
-                    bcrypt.compare(password, user.password, function (err, result) {
-
-                        if (err) return done(err);
-
-                        if (result === false) {
-                            // if the user is found but the password is wrong
+                        if (user === null) {
                             return done(
                                 null,
                                 false,
-                                req.flash("warning", "La contraseña ingresada es incorrecta")
-                            ); // create the loginMessage and save it to session as flashdata
-                        } else {
-                            return done(null, user); // all is well, return successful user
-                        }
+                                req.flash(
+                                    "warning",
+                                    "No se encontró el usuario en la base de datos"
+                                )
+                            ); // req.flash is the way to set flashdata using connect-flash
+                        };
+
+                        bcrypt.compare(password, user.password, function (err, result) {
+
+                            if (err) return done(err);
+
+                            if (result === false) {
+                                // if the user is found but the password is wrong
+                                return done(
+                                    null,
+                                    false,
+                                    req.flash("warning", "La contraseña ingresada es incorrecta")
+                                ); // create the loginMessage and save it to session as flashdata
+                            } else {
+                                return done(null, user); // all is well, return successful user
+                            }
+                        });
                     });
-                });
             }));
 
     passport.use('local-topt', new TotpStrategy({ codeField: 'otpToken', window: 30 },

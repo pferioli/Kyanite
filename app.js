@@ -171,6 +171,7 @@ app.use('/notifications', require('./routes/notifications.route'));
 
 app.use('/accountingImputations', require('./routes/accountingImputations.route'));
 
+app.use('/users', require('./routes/users.route'));
 
 app.get("/check_version", function (req, res) {
 
