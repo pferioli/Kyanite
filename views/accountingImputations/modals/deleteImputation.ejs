@@ -1,0 +1,22 @@
+<div id="modalDeleteImputation" class="modal">
+    <form action="/accountingImputations/delete" method="post">
+        <div class="modal-content">
+            <div class="row black-text">
+                <h5>Deshabilitar una imputacion contable</h5>
+            </div>
+            <input type="text" id="modalDeleteImputationName" value="" readonly />
+            <input type="hidden" id="modalDeleteImputationId" name="accountingImputationId"  value="" />
+        
+            <div class="row red-text center-align">
+                <p>Esta tarea no puede ser cancelada, esta seguro que desea continuar ?</p>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+

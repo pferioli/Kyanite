@@ -1,0 +1,22 @@
+<div id="modalNewGroup" class="modal">
+    <form action="/accountingImputations/groups/new" method="post">
+        <div class="modal-content">
+            <div class="row black-text">
+                <h5>Alta de nuevo grupo de cuentas</h5>
+            </div>
+            <div class="row">         
+                <div class="input-field col s12">
+                    <i class="material-icons prefix grey-text">description</i>
+                    <input id="modalNewGroupName" name="groupName" type="text" class="validate" required placeholder="Ingrese el nombre del nuevo grupo"/>
+                    <label for="modalNewGroupName">Nombre del nuevo grupo</label>
+                </div>
+            </div>
+       </div>
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+

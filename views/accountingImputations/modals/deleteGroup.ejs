@@ -1,0 +1,22 @@
+<div id="modalDeleteGroup" class="modal">
+    <form action="/accountingImputations/groups/delete" method="post">
+        <div class="modal-content">
+            <div class="row black-text">
+                <h5>Deshabilitar un grupo de cuentas</h5>
+            </div>
+            <input type="text" id="modalDeleteGroupName" value="" readonly />
+            <input type="hidden" id="modalDeleteGroupId" name="groupId"  value="" />
+        
+            <div class="row red-text center-align">
+                <p>Esta tarea no puede ser cancelada, esta seguro que desea continuar ?</p>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+

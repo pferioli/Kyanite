@@ -21,10 +21,6 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             type: DataTypes.INTEGER,
         },
-        group: {
-            allowNull: false,
-            type: DataTypes.INTEGER
-        },
         name: {
             allowNull: false,
             type: DataTypes.STRING

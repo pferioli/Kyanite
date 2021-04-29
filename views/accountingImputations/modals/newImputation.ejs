@@ -1,0 +1,23 @@
+<div id="modalNewImputation" class="modal">
+    <form action="/accountingImputations/new" method="post">
+        <div class="modal-content">
+            <div class="row black-text">
+                <h5>Agregar una nueva imputacion contable al grupo de cuentas</h5>
+            </div>
+            <div class="row">         
+                <div class="input-field col s12">
+                    <i class="material-icons prefix grey-text">description</i>
+                    <input id="modalNewImputationName" name="imputationAccountName" type="text" class="validate" required placeholder="Ingrese el nombre de la nueva imputación contable"/>
+                    <label for="modalNewImputationName">Nombre de la nueva imputación contable</label>
+                    <input type="hidden" id="modalNewImputationGroupId" name="groupId" value="" />
+                </div>
+            </div>
+       </div>
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+

@@ -1,9 +1,9 @@
 <ul id="slide-out" class="sidenav">
     <li>
         <div class="user-view">
-            <div class="background"><img src="images/background.jpg"/></div>
+            <div class="background"><img src="/images/background.jpg"/></div>
             
-            <a><img id="avatar" class="circle" src="images/aaii.png"/></a>
+            <a><img id="avatar" class="circle" src="/images/aaii.png"/></a>
             
             <a><span class="white-text name">
                 <% if (locals.user) { %> 
@@ -59,12 +59,14 @@
         .then(response => response.blob())
         .then(response => {
             const blob = new Blob([response], {type: 'image/png'});
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = function () {
-                var base64String = reader.result;
-                avatar.src=/*"data:image/png;base64," + */ base64String;
-            };
+            if(blob.size > 0){
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = function () {
+                    const base64String = reader.result;
+                    avatar.src=/*"data:image/png;base64," + */ base64String;
+                };
+            }
         })
         .catch(err => {console.error(err);})
     }

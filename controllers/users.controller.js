@@ -15,7 +15,10 @@ module.exports.getAvatar = function (req, res) {
 
     User.findOne({ where: { id: req.user.id }, include: [{ model: Model.userAvatar }] })
         .then(user => {
-            res.send(user.userAvatar.image);
+            if (user.userAvatar)
+                res.send(user.userAvatar.image);
+            else
+                res.send();
         })
 
 }

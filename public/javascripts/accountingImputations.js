@@ -65,3 +65,18 @@ function populateImputations(fieldID, groupId, selectedId) {
             console.log(err);
         });
 }
+
+async function getaccountingImputationsbyGroup(groupId) {
+
+    try {
+        const response = await fetch('/accountingImputations/byGroup/' + groupId)
+        if (response.status == 200) {
+            var data = await response.json();
+            return data;
+        } else {
+            throw "Respuesta incorrecta del servidor"
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}
