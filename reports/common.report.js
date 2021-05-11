@@ -31,15 +31,21 @@ module.exports.addWaterMark = function (doc, text) {
     drawTexts(doc, text);
 }
 
-module.exports.generateSignature = function(doc, user, config) {
+module.exports.generateSignature = function (doc, user, config) {
 
     const lineSize = config.linesize; //174;
     const startLine1 = config.startLine; //80;
     const endLine1 = startLine1 + lineSize;
     const signatureHeight = config.signatureHeight; //735;
 
-    if (user.userSignature)
-        doc.image(user.userSignature.image, (startLine1 + (lineSize / 2) - (150 / 2)), signatureHeight - 60, { width: 150 })
+    try {
+
+        if (user.userSignature)
+            doc.image(user.userSignature.image, (startLine1 + (lineSize / 2) - (150 / 2)), signatureHeight - 60, { width: 150 })
+
+    } catch (error) {
+        console.log(error);
+    }
 
     doc
         .lineWidth(1)
@@ -90,7 +96,7 @@ module.exports.generateSignature = function(doc, user, config) {
         );
 }
 
-module.exports.generateGenericSignature = function(doc, config) {
+module.exports.generateGenericSignature = function (doc, config) {
 
     const lineSize = config.linesize; //174;
     const startLine1 = config.startLine; //350;

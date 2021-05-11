@@ -280,5 +280,4 @@ module.exports.exportToFile = async function (req, res) {
     };
 
     workbook.write(`Imputaciones Contables.xlsx`, res);
-
 }

@@ -305,7 +305,7 @@
             const downloadUrl = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = downloadUrl;
-            a.download = "file.pdf";
+            a.download = `recibo_cobranzas_${clientId}_${periodId}.pdf`;
             document.body.appendChild(a);
             a.click();
         })

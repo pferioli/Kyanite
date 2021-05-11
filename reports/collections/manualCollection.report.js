@@ -25,7 +25,17 @@ function createReport(collection, res) {
     const tableConceptsHeight = generateConceptsTable(doc, collection, tableConceptsVerticalOffset);
     const tableSecuritiesHeight = generateSecuritiesTable(doc, collection, tableConceptsHeight + 45);
 
-    common.generateSignature(doc, collection.user, { linesize: 174, startLine: 80, signatureHeight: 735 });
+    doc.fontSize(7)
+        .font("Helvetica")
+
+        .text("1 - En el caso de abonar con cheques quedará sujeto la imputación a la acreditación efectiva de fondos en cuenta.",
+            60, 740, { width: 500, align: "left" })
+
+        .text("2- De existir deudas de períodos anteriores, la imputación de este monto será aplicada a la cancelación de intereses y capitales mas antigüos.",
+            60, 760, { width: 500, align: "left" });
+
+    common.generateSignature(doc, collection.user, { linesize: 174, startLine: 350, signatureHeight: 680 });
+
     generateFooter(doc);
 
     if (collection.statusId === CollectionStatus.eStatus.get('deleted').value)

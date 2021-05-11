@@ -53,6 +53,8 @@ async function createReport(collections, res) {
         generateConceptsTable(doc, collection, 185);
 
         generateSecuritiesTable(doc, collection, 185);
+
+        generateFooter(doc);
     };
 
     const reportName = "recibos_cobranzas.pdf"
@@ -299,24 +301,14 @@ function generateTableRowValues(doc, x, y, rowItem) {
 
 function generateFooter(doc) {
 
-    common.generateHr(doc, doc.page.height - 60)
+    doc.fontSize(7)
+        .font("Helvetica")
 
-    doc
-        .fontSize(10)
-        .text(common.formatDateTime(new Date)
-            , doc.page.margins.left + 10, doc.page.height - 50, {
-            lineBreak: false
-        });
+        .text("1 - En el caso de abonar con cheques quedará sujeto la imputación a la acreditación efectiva de fondos en cuenta.",
+            250, 325, { width: 300, align: "left" })
 
-    doc
-        .fontSize(10)
-        .text("pagina 1 de " + doc.bufferedPageRange().count
-            , doc.page.width - doc.page.margins.right - 50, doc.page.height - 50,
-            {
-                align: "right",
-                lineBreak: false
-            }
-        );
+        .text("2- De existir deudas de períodos anteriores, la imputación de este monto será aplicada a la cancelación de intereses y capitales mas antigüos.",
+            250, 350, { width: 300, align: "left" });
 }
 
 module.exports = {
