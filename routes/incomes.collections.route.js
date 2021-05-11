@@ -41,6 +41,10 @@ router.post("/new/:clientId", function (req, res, next) {
     collectionsController.addNew(req, res);
 });
 
+router.post("/delete", function (req, res, next) {
+    collectionsController.deleteCollection(req, res);
+});
+
 //IMPORT...
 
 router.get("/import/new/:clientId", function (req, res, next) {

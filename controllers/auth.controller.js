@@ -42,13 +42,13 @@ module.exports.encodeJWT = async function (req, res) {
 
         mailgun.sendEmailPasswordReset(user.name, user.email, `${process.env.KYANITE_URL}/auth/password/reset/${user.id}/${token}`)
             .then(mail => {
-                winston.info(`se envio correctamente el mail de reset al usuario ${user.email}`);
+                winston.info(`reset mail succesfully sent to user ${user.email}`);
                 req.flash("success", `un correo le ha sido enviado a la direccion ${user.email} para completar el proceso`);
                 res.redirect('/auth/login');
 
             })
             .catch(err => {
-                winston.info(`se envio correctamente el mail de reset al usuario ${user.email}`);
+                winston.info(`it was not possible to send the mail for password reset to user ${user.email} - ${err}`);
                 req.flash("error", `no se pudo enviar el correo a la direccion ${user.email}`);
                 res.redirect('/auth/password/forgot');
             })

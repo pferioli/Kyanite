@@ -423,6 +423,18 @@ module.exports.updateStatus = async function (req, res, next) {
     }
 
 }
+//---------------------------------------------------------------------------//
+// AJAX
+//---------------------------------------------------------------------------//
+
+module.exports.getBanks = async function (req, res) {
+
+    Bank.findAll({ where: { enabled: true } })
+        .then(banks => {
+            res.send(banks);
+        })
+        .catch(err => { res.send(err).status(500) })
+}
 
 //---------------------------------------------------------------------------//
 // CRONES

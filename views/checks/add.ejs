@@ -22,17 +22,24 @@
                     </div>
 
                     <div class="row">
-                        <div class="input-field col s6">
+                        <!-- <div class="input-field col s6">
                             <i class="material-icons prefix">account_balance</i>
                             <select id="bankSelect" required>
                                 <option value="0" disabled selected>Seleccione un banco</option>
-                                <% for(var i=0; i < data.banks.length; i++) { %>
-                                <option value="<%=data.banks[i].id%>"><%= data.banks[i].name%> [<%=data.banks[i].code%>]</option>
-                                <% } %>
+                                <%# for(var i=0; i < data.banks.length; i++) { %>
+                                <option value="<%#=data.banks[i].id%>"><%#= data.banks[i].name%> [<%#=data.banks[i].code%>]</option>
+                                <%# } %>
                             </select>
                             <label>Banco</label>
                             <input type="hidden" name="bankId" id="bankId" />
+                        </div> -->
+                        <div id="autocompleteInput" class="input-field col s6" autocomplete="off">
+                            <i class="material-icons prefix">account_balance</i>
+                            <input type="text" id="autocomplete-input" class="autocomplete" required placeholder="puede buscar por nombre o por codigo, mínimo 3 letras">
+                            <label for="autocomplete-input">Seleccione un banco</label>
+                            <input type="hidden" name="bankId" id="bankId" value="" />
                         </div>
+
                         <div class="input-field col s4">
                             <i class="material-icons prefix">money</i>
                             <input id="checkNumber" name="checkNumber" type="text" value="" required />
@@ -81,10 +88,11 @@
 <%- include ("../partials/modals/billingPeriod.ejs") %>
 
 <script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/checks.js"></script>
 
 <script>
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", async function () {
         
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
@@ -92,9 +100,9 @@
         elems = document.querySelectorAll('.modal');
         instances = M.Modal.init(elems, {});
 
-        document.getElementById("bankSelect").addEventListener('change', (event) => {
-            document.getElementById("bankId").value = event.target.value;
-        });
+        // document.getElementById("bankSelect").addEventListener('change', (event) => {
+        //     document.getElementById("bankId").value = event.target.value;
+        // });
 
         M.Datepicker.init(document.querySelectorAll('.datepicker'), {
             format: 'dd/mm/yyyy',
@@ -125,6 +133,35 @@
         M.CharacterCounter.init(document.getElementById("comments"));
 
         getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+
+        //Autocomplete para los bancos...
+
+        let data = {};
+
+        const banks = await getBanks();
+
+        for (i = 0; i < banks.length; i++) {
+            data[`${banks[i].name} (${banks[i].code}) [${banks[i].id}]`] = null;
+        }
+        elems = document.querySelectorAll('.autocomplete');
+
+        var instances = M.Autocomplete.init(elems, {
+            minLength: 3, data: data,
+            onAutocomplete: function (e) {
+                var matches = e.match(/\[(.*?)\]/);
+                if (matches)
+                    document.getElementById('bankId').value = matches[1];
+                else
+                    document.getElementById('bankId').value = '';
+
+                M.toast({ html: 'se ha seleccionado el banco con ID #' + matches[1] });
+            }
+        });
+
+        document.getElementById("autocompleteInput").addEventListener('input', function (e) {
+            document.getElementById('bankId').value = '';
+        });
+
     });
 
     function Cancel() {
@@ -147,4 +184,6 @@
             }
         }
     }
+
+
 </script>

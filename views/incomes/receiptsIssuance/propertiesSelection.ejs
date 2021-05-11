@@ -262,36 +262,6 @@
 
         var postData = { "clientId": clientId, "periodId": periodId, "collections": list }; 
     
-        // $.ajax({ 
-        //     type: "POST", 
-        //     url: '/incomes/receiptsIssuance/printReceipts',
-        //     data: JSON.stringify(postData),
-        //     contentType:"application/json; charset=utf-8",
-        //     dataType:"json",
-        //     //dataType: 'native',
-        //     xhrFields: {
-        //         responseType: 'blob'
-        //     },
-        //     // contentType: true,
-        //     // processData: true,
-        //     success: function(response, status, xhr){
-                
-        //         var blob = new Blob([response], { type: 'application/octet-stream' });                        
-        //         console.log(blob.size);
-                
-        //         var link=document.createElement('a');
-        //         link.href=window.URL.createObjectURL(blob);
-        //         link.download="Dossier_" + new Date() + ".pdf";
-        //         link.click();
-        //     },
-        //     error: function (xhr, error) {
-        //         console.debug(xhr); 
-        //         console.debug(error);
-        //     },
-        //     //dataType: "json", 
-        //     traditional: true 
-        // });                
-
         fetch('/incomes/receiptsIssuance/printReceipts', {
             body: JSON.stringify(postData),
             method: 'POST',

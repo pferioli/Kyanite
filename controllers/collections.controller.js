@@ -226,7 +226,7 @@ module.exports.addNew = async function (req, res, next) {
                         accountMovementCategory.eStatus.get('INGRESO_COBRANZA').value, collectionSecurity.id, collection.userId)
 
                     if (accountMovement === null) {
-                        winston.error(`It was not possible to add account movement record for the PO (ID: ${paymentOrder.id})  - ${err}`);
+                        winston.error(`It was not possible to add account movement record for the Collection (ID: ${collection.id})  - ${err}`);
                         throw new Error("It was not possible to add the collection into the account movements table");
                     }
                 }
@@ -266,7 +266,66 @@ module.exports.addNew = async function (req, res, next) {
 
 };
 
+module.exports.deleteCollection = async function (req, res) {
+
+    const clientId = req.body.clientId;
+
+    const collectionId = req.body.collectionId;
+
+    try {
+
+        const client = await Client.findByPk(clientId);
+
+        const collection = await Collection.findByPk(collectionId, {
+            include: [
+                { model: BillingPeriod }, { model: User },
+                { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
+                { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
+        })
+
+        if (collection.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
+            req.flash("warning", "Solo pueden ser anuladas cobranzas dentro del periodo en curso");
+            res.redirect('/incomes/collections/client/' + clientId); return;
+        }
+
+        if (collection !== null) {
+
+            await collection.update({ statusId: CollectionStatus.eStatus.get('deleted').value });
+
+            for (const collectionSecurity of collection.Securities) {
+
+                if (collectionSecurity.type != 'CH') {
+
+                    const AccountMovement = require('./accountMovements.controller');
+
+                    const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                    const accountMovement = await AccountMovement.deleteMovement(clientId, collectionSecurity.accountId,
+                        collection.periodId, accountMovementCategory.eStatus.get('INGRESO_COBRANZA').value, collectionSecurity.id)
+
+                    if (accountMovement === null) {
+                        winston.error(`It was not possible to delete account movement record for the Collection (ID: ${paymentOrder.id})  - ${err}`);
+                        throw new Error("It was not possible to add the collection into the account movements table");
+                    }
+
+                    AccountMovement.fixBalanceMovements(clientId, collection.periodId, collectionSecurity.accountId);
+                }
+            }
+        }
+
+    } catch (error) {
+
+        winston.error(`An error ocurred while user #${req.user.id} tryed to delete collection ${collectionId} - ${err} `)
+
+        req.flash("error", "Ocurrio un error y no se pudo anular la cobranza en la base de datos");
+
+    } finally {
+        res.redirect('/incomes/collections/client/' + clientId);
+    }
+}
+
 module.exports.info = async function (req, res) {
+
     const clientId = req.params.clientId;
     const collectionId = req.params.collectionId;
 
@@ -751,6 +810,7 @@ module.exports.addNewImportedCollections = async function (req, res) {
 
     res.redirect(`/incomes/collections/import/wait/${clientId}?controlId=${controlId}`);
 }
+
 
 //-----------------------------------------------------------------
 // INVOICES & REPORTS

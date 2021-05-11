@@ -182,7 +182,13 @@
                                     <a id="button-receipt" class="btn-flat btn-small waves-effect waves-light" onclick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collections[i].id%>')"><i class="material-icons">receipt</i></a>
                                 <% } %>
                                 
-                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.collections[i].id%>" data-value="<%= data.collections[i].receiptNumber %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                <a href="/incomes/collections/reassign/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">holiday_village</i></a>
+
+                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
+                                    data-id="<%=data.collections[i].id%>" 
+                                    data-value="<%= data.collections[i].receiptNumber %>" 
+                                    data-clientId="<%=data.client.id%>"
+                                    onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                             </td>
                         </tr>
                         <% } %>
@@ -199,6 +205,8 @@
     <input type="hidden" name="periodId" id="periodId" value=<%=data.periods%> />
 
 </main>
+
+<%- include ("./modals/delete.ejs") %>
 
 <%- include ("../../partials/footer") %>
 
@@ -224,7 +232,12 @@
     });
 
     function deleteDialog(button) {
-        alert("Esta funcion no se encuentra habilitada")
+        var _elem = document.getElementById('modalDelete');
+        var modal = M.Modal.getInstance(_elem);
+        // document.getElementById('modalDeleteMessage').textContent = message;
+        document.getElementById('modalDeleteCollectionId').value = button.dataset.id;
+        document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
+        modal.open();    
     };
 
     function reloadPage() {

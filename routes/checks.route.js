@@ -63,6 +63,10 @@ router.get("/client/:clientId", function (req, res, next) {
 
 //AJAX
 
+router.get("/ajax/getBanks", function (req, res, next) {
+    checksController.getBanks(req, res);
+});
+
 router.get("/split/ajax/getAvailableChecks/:id", function (req, res, next) {
     splittedChecksController.getSplittedChecks(req, res);
 });
