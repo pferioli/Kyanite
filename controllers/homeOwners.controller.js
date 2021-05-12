@@ -387,3 +387,10 @@ module.exports.getHomeOwnersByClient = async function (req, res, next) {
         res.send(homeOwners)
     });
 }
+
+module.exports.getHomeOwnerById = async function (req, res, next) {
+    const homeOwnerId = req.params.homeOwnerId;
+    HomeOwner.findByPk(homeOwnerId).then(function (homeOwner) {
+        res.send(homeOwner)
+    });
+}

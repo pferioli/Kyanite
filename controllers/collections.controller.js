@@ -290,7 +290,14 @@ module.exports.deleteCollection = async function (req, res) {
 
         if (collection !== null) {
 
-            await collection.update({ statusId: CollectionStatus.eStatus.get('deleted').value });
+            await collection.update({ statusId: CollectionStatus.eStatus.get('deleted').value });   //cambiamos el estado de la cobranza como "anulada"
+
+            UnidentifiedDeposit.findOne({ where: { collectionId: collectionId } })  //buscamos si hay DNIs para esa cobranza y lo ponemos "pendiente"
+                .then(unidentifiedDeposit => {
+                    unidentifiedDeposit.update({ statusId: UnidentifiedDepositStatus.eStatus.get('pending').value })
+                })
+
+            //Para cada uno de los valores ingresados corregimos el movimiento en la CC
 
             for (const collectionSecurity of collection.Securities) {
 
@@ -311,6 +318,13 @@ module.exports.deleteCollection = async function (req, res) {
                     AccountMovement.fixBalanceMovements(clientId, collection.periodId, collectionSecurity.accountId);
                 }
             }
+
+            winston.info(`collection ${collectionId} deleted succesfully by user #${req.user.id}`)
+
+            req.flash("success", "la cobranza fue anulada exitosamente en la base de datos");
+
+        } else {
+            throw new error("no record found for collectionId " + collectionId);
         }
 
     } catch (error) {
@@ -323,6 +337,55 @@ module.exports.deleteCollection = async function (req, res) {
         res.redirect('/incomes/collections/client/' + clientId);
     }
 }
+
+module.exports.showReassignForm = async function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    const collectionId = req.params.collectionId;
+
+    const client = await Client.findByPk(clientId);
+
+    const period = await BillingPeriod.findOne({
+        where: { clientId: clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
+    });
+
+    const collection = await Collection.findByPk(collectionId,
+        { include: [{ model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] }] });
+
+    res.render("incomes/collections/reassign", { menu: CURRENT_MENU, data: { client, period, collection } });
+};
+
+module.exports.reassingCollection = async function (req, res) {
+
+    const clientId = req.body.clientId;
+
+    try {
+
+        const properties = JSON.parse(req.body.tables).properties;
+
+        for (const property of properties) {
+
+            const collectionProperty = await CollectionProperty.findByPk(property.propertyId);
+
+            await collectionProperty.update({ propertyId: property.homeOwnerId })
+        }
+
+        winston.info(`properties reassigned successfully for collection ${collectionId} by user #${req.user.id}`)
+
+        req.flash("success", "las propiedades fueron actualizadas exitosamente");
+
+    } catch (error) {
+
+        winston.error(`An error ocurred while user #${req.user.id} tryed to reassign properties for collection ${collectionId} - ${err} `)
+
+        req.flash("error", "Ocurrio un error y no se pudo reasignar las propiedades de la cobranza en la base de datos");
+
+    } finally {
+        res.redirect('/incomes/collections/client/' + clientId);
+    }
+
+};
 
 module.exports.info = async function (req, res) {
 

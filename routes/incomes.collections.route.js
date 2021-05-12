@@ -31,6 +31,14 @@ router.get("/client/:clientId/details/:collectionId", function (req, res, next) 
     collectionsController.info(req, res);
 });
 
+router.get("/client/:clientId/reassign/:collectionId", function (req, res, next) {
+    collectionsController.showReassignForm(req, res);
+});
+
+router.post("/reassign", function (req, res, next) {
+    collectionsController.reassingCollection(req, res);
+});
+
 //MANUAL...
 
 router.get("/new/:clientId", function (req, res, next) {
@@ -44,6 +52,7 @@ router.post("/new/:clientId", function (req, res, next) {
 router.post("/delete", function (req, res, next) {
     collectionsController.deleteCollection(req, res);
 });
+
 
 //IMPORT...
 

@@ -38,3 +38,16 @@ async function getHomeOwnersByClient(clientId) {
 
     return homeOwners;
 }
+
+async function getHomeOwnersById(homeOwnerId) {
+
+    const response = await fetch('/homeOwners/ajax/getById/' + homeOwnerId);
+
+    if (!response.ok) {
+        const message = `An error has occured: ${response.status}`;
+        throw new Error(message);
+    }
+    const homeOwner = await response.json();
+
+    return homeOwner;
+}

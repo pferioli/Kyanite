@@ -1,0 +1,173 @@
+<style>
+    table {
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" id="reassignForm" method="post" action='/incomes/collections/reassign'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Reasignar la cobranza a otra propiedad</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.period.name%>" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.period.id%>" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" type="date" id="receiptDate" name="receiptDate" readonly value="<%=data.collection.receiptDate%>">
+                            <label for="receiptDate">Fecha de la cobranza</label>
+                        </div>
+
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" type="text" id="receiptNumber" name="receiptNumber" readonly value="<%=data.collection.receiptNumber%>">
+                            <label for="receiptNumber">Número de Recibo</label>
+                        </div>
+                        
+                        <div class="input-field col s6">
+                            <i class="material-icons-outlined prefix">comments</i>
+                            <textarea id="comments" name="comments" class="materialize-textarea" required><%=data.collection.comments%></textarea>
+                            <label for="comments">Comentarios</label>
+                        </div>
+                    </div>                    
+
+                    <div class="row" style="margin-top: 30px;">
+                        <div class="col s12">
+                            <table id="tableProperties" class="table centered_table" style="width: 90% !important;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 10%;" data-id="propertyId">ID</th>
+                                        <th style="width: 15%;" data-id="homeOwnerId">ID Propietario</th>
+                                        <th style="width: 55%;" data-id="homeOwnerName">Propietario</th>
+                                        <th style="width: 10%;" data-id="PartialReceipt">Recibo</th>
+                                        <th style="width: 10%; text-align:center">Modificar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% for(var i=0; i < data.collection.Properties.length; i++) { %>
+                                        <tr data-id="<%= data.collection.Properties[i].id %>">
+                                            <td><%= data.collection.Properties[i].id %></td>
+                                            <td><%= data.collection.Properties[i].homeOwner.id %></td>
+                                            <td><%= data.collection.Properties[i].homeOwner.property %> - <%= data.collection.Properties[i].homeOwner.name %></td>
+                                            <td>
+                                                <% if(data.collection.Properties[i].receiptNumber) { %>
+                                                    <%= ("0000" + data.collection.Properties[i].receiptNumber).slice(-4) %></td>                                    
+                                                <% } %>
+                                            <td>
+                                                <a id="buttonEdit" class="btn-flat btn-small waves-effect waves-light" style="display: block; margin: auto;" 
+                                                    data-id="<%=i%>" onClick='changeProperty(this)'><i class="material-icons">edit</i></a>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="tables" id="tables" value="" />
+
+                <div class="card-action right-align">
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green"><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red" style="margin-left: 10px;"><i class="material-icons right">cancel</i>Cancelar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+
+<%- include ("./modals/selectProperty") %>
+
+<%- include ("../../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/homeOwners.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", async function () {
+
+        var elems = document.querySelectorAll(".modal");
+        var instances = M.Modal.init(elems, {
+            onOpenStart: function(e) { 
+                if(e.id ==="modalSelectProperty") {
+                    document.getElementById('autocomplete-input').value = ""; M.updateTextFields();
+                }
+            } 
+        }) 
+
+        document.getElementById("reassignForm").addEventListener("submit", validateForm, true);
+
+        document.getElementById("AcceptBtn").onclick = async function(){
+            
+            const homeOwnerId = document.getElementById('homeOwnerId').value;
+            const rowIndex = Number.parseInt(document.getElementById('modalRowIndex').value) + 1;
+
+            const homeOwner = await getHomeOwnersById(homeOwnerId);
+
+            var tableRef = document.getElementById('tableProperties');
+            tableRef.rows[rowIndex].cells[1].innerHTML = homeOwner.id;
+            tableRef.rows[rowIndex].cells[2].innerHTML = `${homeOwner.property} - ${homeOwner.name}`;
+        }        
+    });
+
+    function changeProperty(button) {
+    
+        var row = button.closest("TR");
+        const homeOwnerName = row.cells[2].textContent;
+
+        document.getElementById('modalMessage').textContent = "se va a remplazar al propietario " + homeOwnerName
+        document.getElementById('modalRowIndex').value = button.dataset.id;
+
+        var _elem = document.getElementById('modalSelectProperty');
+        var modal = M.Modal.getInstance(_elem);
+    
+        modal.open();        
+    }
+
+    function validateForm(event) {
+        
+        if(event.submitter.id === 'buttonProperties') { event.preventDefault(); return; };
+        
+        const tProperties = convertTableToJson("tableProperties");
+
+        const tables = {properties: tProperties};
+
+        document.getElementById('tables').value = JSON.stringify(tables);
+        
+        //event.preventDefault(); return;
+    };
+
+    function convertTableToJson(table){
+        let myRows = [];
+        const $headers = $("#" + table + " th");
+        const $rows = $("#" + table + " tbody tr");
+        for(index = 0; index <$rows.length; index++){
+            $cells = $($rows[index]).find("td");
+            myRows[index] = {};
+            for(cellIndex = 0; cellIndex < $cells.length - 1 ; cellIndex++){            
+                hdr=$($headers[cellIndex]).data("id"); //$($headers[cellIndex]).html()                
+                myRows[index][hdr] = $($cells[cellIndex]).html();
+            };
+        };
+        return myRows;
+    };
+
+</script>

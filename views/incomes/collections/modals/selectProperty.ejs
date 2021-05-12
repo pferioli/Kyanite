@@ -1,0 +1,62 @@
+<div id="modalSelectProperty" class="modal">
+    <div class="modal-content black-text">
+        <div class="row">
+            <h5>Seleccione el nuevo propietario</h5>
+        </div>
+        <div id="modalMessage" class="center-left"></div>
+        <!-- <p>Esta tarea no puede ser cancelada, esta seguro que desea continuar ?</p> -->
+        <div class="row" style="margin-top: 20px;">
+            <div id="autocompleteInput" class="input-field col s11" autocomplete="off">
+                <i class="material-icons prefix">home</i>
+                <input type="text" id="autocomplete-input" class="autocomplete" required>
+                <label for="autocomplete-input">Ingrese el nombre del propietario o la propiedad</label>
+                <input type="hidden" id="homeOwnerId" value="" />
+                <input type="hidden" id="homeOwner" value="" />
+            </div>
+        </div>
+        <input type="hidden" id="modalRowIndex" value="" />
+    </div>
+
+    <div class="modal-footer">
+        <a id="AcceptBtn" class="modal-close waves-effect waves-red btn green primary" data-id="modal-account" style="margin-left: 10px; margin-right: 20px;">Aceptar</a>
+        <a id="CancelBtn" class="modal-close waves-effect waves-red btn red secondary" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+    </div>
+</div>
+
+<script>
+
+     document.addEventListener("DOMContentLoaded", async function () {
+       
+        let homeOwners = await getHomeOwnersByClient("<%=data.client.id%>");
+        
+        let data = {};
+
+        for (i = 0; i < homeOwners.length; i++) {
+            data[`${homeOwners[i].property} - ${homeOwners[i].name} [${homeOwners[i].id}]`] = null;
+        }
+
+        var elems = document.querySelectorAll('.autocomplete');
+
+        var instances = M.Autocomplete.init(elems, {
+            minLength: 1, data: data,
+            onAutocomplete: function (e) {
+                var matches = e.match(/\[(.*?)\]/);
+                if (matches) {
+                    document.getElementById('homeOwnerId').value = matches[1];
+                    document.getElementById('homeOwner').value = e;
+                }
+                else {
+                    document.getElementById('homeOwnerId').value = '';
+                    document.getElementById('homeOwner').value = '';
+                }
+
+                M.toast({ html: 'se ha seleccionado la propiedad con ID #' + matches[1] });
+            }
+        });
+
+        document.getElementById("autocompleteInput").addEventListener('input', function (e) {
+            document.getElementById('homeOwnerId').value = '';
+        });
+    });
+
+</script>

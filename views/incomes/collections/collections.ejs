@@ -176,13 +176,17 @@
                             <td><%= data.collections[i].user.name %></td>
 
                             <td>
-                                <a href="/incomes/collections/client/<%=data.client.id%>/details/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">more</i></a>
+                                <a href="/incomes/collections/client/<%=data.client.id%>/details/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> 
+                                    <i class="material-icons">more</i></a>
                                 
                                 <% if (data.collections[i].Properties.length != 0) { %>
-                                    <a id="button-receipt" class="btn-flat btn-small waves-effect waves-light" onclick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collections[i].id%>')"><i class="material-icons">receipt</i></a>
+                                    <a id="button-receipt" class="btn-flat btn-small waves-effect waves-light" 
+                                        onclick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collections[i].id%>')">
+                                        <i class="material-icons">receipt</i></a>
                                 <% } %>
                                 
-                                <a href="/incomes/collections/reassign/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">holiday_village</i></a>
+                                <a href="/incomes/collections/client/<%=data.client.id%>/reassign/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> 
+                                    <i class="material-icons">holiday_village</i></a>
 
                                 <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
                                     data-id="<%=data.collections[i].id%>" 

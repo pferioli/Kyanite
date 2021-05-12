@@ -61,5 +61,8 @@ router.get("/ajax/getByClient/:clientId", function (req, res, next) {
     homeOwnersController.getHomeOwnersByClient(req, res);
 });
 
+router.get("/ajax/getById/:homeOwnerId", function (req, res, next) {
+    homeOwnersController.getHomeOwnerById(req, res);
+});
 
 module.exports = router;
