@@ -202,3 +202,9 @@ module.exports.getAllByClientID = async function (req, res, next) {
         res.send(periods)
     });
 }
+
+module.exports.getPeriodById = async function (req, res, next) {
+    BillingPeriod.findByPk(req.params.periodId).then(function (period) {
+        res.send(period)
+    });
+}

@@ -106,7 +106,6 @@ module.exports.showEditForm = async function (req, res) {
     }
 };
 
-
 module.exports.edit = async function (req, res, next) {
 
     const receiptId = req.params.receiptId;

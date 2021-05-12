@@ -128,35 +128,50 @@
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
 
-        elems = document.querySelectorAll('.datepicker');
-        instances = M.Datepicker.init(elems, {
-            format: 'dd/mm/yyyy',
-            autoClose: true,
-            onOpen: function (e) {
-                var that = this;
-                that.hasEvent = false;
-                this.cancelBtn.addEventListener('click', Cancel.bind(that))
-                this.doneBtn.addEventListener('click', Done.bind(that))
-            },
-            onClose: function (e) {
-                var that = this;
-                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
-                this.doneBtn.removeEventListener('click', Done.bind(that))
-            },
-            onSelect: function (selectedDate) {
-                if (this.el.id === 'dtpEmissionDate') {
-                    document.getElementById('emissionDate').value = this.date.toISOString();
-                }
-            }
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"))
+        .then(periodId => {
+            
+            if(periodId) { 
+                
+                getBillingPeriodsById(periodId)
+                    .then(period => {
+                
+                        elems = document.querySelectorAll('.datepicker');
+
+                        const maxDate = new Date(period.endDate + " 00:00:00");
+
+                        instances = M.Datepicker.init(elems, {
+                            format: 'dd/mm/yyyy',
+                            autoClose: true,
+                            maxDate: maxDate,
+                            onOpen: function (e) {
+                                var that = this;
+                                that.hasEvent = false;
+                                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                                this.doneBtn.addEventListener('click', Done.bind(that))
+                            },
+                            onClose: function (e) {
+                                var that = this;
+                                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                                this.doneBtn.removeEventListener('click', Done.bind(that))
+                            },
+                            onSelect: function (selectedDate) {
+                                if (this.el.id === 'dtpEmissionDate') {
+                                    document.getElementById('emissionDate').value = this.date.toISOString();
+                                }
+                            }
+                        });
+                    });
+                };
         });
+
+        
 
         elems = document.querySelectorAll('.modal');
         instances = M.Modal.init(elems, {});
 
         populateAccountingGroups('accountingGroupSelect');
         populateReceiptTypes('receiptTypeSelect');
-
-        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
 
         document.getElementById("paymentReceiptForm").addEventListener("submit", validateForm, true);
 

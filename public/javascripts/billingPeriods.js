@@ -20,7 +20,7 @@ function getActiveBillingPeriod(clientId, enableButtons = true) {
             if (response === '') {
                 var _elem = document.getElementById('modalBillingPeriod');
                 var modal = M.Modal.getInstance(_elem);
-                modal.open();
+                modal.open(); return undefined;
             } else {
                 const period = JSON.parse(response);
                 billingPeriodId.value = period.id;
@@ -79,4 +79,17 @@ function getBillingPeriodsByClient(clientId) {
         .catch(err => {
             console.log(err);
         });
+}
+
+async function getBillingPeriodsById(periodId) {
+
+    const response = await fetch('/periods/byId/' + periodId);
+
+    if (!response.ok) {
+        const message = `An error has occured: ${response.status}`;
+        throw new Error(message);
+    }
+    const period = await response.json();
+
+    return period;
 }

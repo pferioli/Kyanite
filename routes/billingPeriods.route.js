@@ -20,6 +20,10 @@ router.get("/byCustomer/:clientId", function (req, res, next) {
     billingPeriodsController.getAllByClientID(req, res);
 });
 
+router.get("/byId/:periodId", function (req, res, next) {
+    billingPeriodsController.getPeriodById(req, res);
+});
+
 router.get("/:clientId", function (req, res, next) {
     billingPeriodsController.listAll(req, res);
 });
