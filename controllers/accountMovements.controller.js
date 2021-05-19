@@ -10,6 +10,30 @@ const AccountMovement = Model.accountMovement;
 const AccountAdjustment = Model.accountAdjustment;
 const BillingPeriod = Model.billingPeriod;
 
+//modelos para el detalle de OP
+const PaymentReceipt = Model.paymentReceipt;
+const PaymentOrder = Model.paymentOrder;
+const CheckSplitted = Model.checkSplitted;
+const Check = Model.check;
+const ReceiptType = Model.receiptType;
+const Supplier = Model.supplier;
+
+//modelos para cobranzas
+const Collection = Model.collection;
+const CollectionSecurity = Model.collectionSecurity;
+const CollectionProperty = Model.collectionProperty;
+const HomeOwner = Model.homeOwner;
+
+//modelos para inversiones
+const Investment = Model.investment;
+const InvestmentCategory = Model.investmentCategory;
+
+//modelos para transferencias
+const AccountTransfer = Model.accountTransfer;
+
+//modelos saldo periodo anterior
+const MonthlyBalance = Model.monthlyBalance;
+
 const Enum = require('enum');
 
 const winston = require('../helpers/winston.helper');
@@ -102,6 +126,111 @@ module.exports.listAll = async function (req, res, next) {
             data: { movements: movements, client: client, periods: periods, accountId: accountIds, isFiltered: isFiltered },
         });
     });
+};
+
+module.exports.showDetails = async function (req, res) {
+
+    const clientId = req.params.clientId;
+    const movementId = req.params.movementId;
+
+    const client = await Client.findByPk(clientId);
+
+    const movement = await AccountMovement.findByPk(movementId, {
+        include: [
+            { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }
+        ]
+    });
+
+    if (movement === null) {
+        res.send({}); return;
+    }
+
+    switch (movement.category) {
+        case 'P': {
+
+            const paymentOrder = await PaymentOrder.findByPk(movement.movementId,
+                {
+                    include: [
+                        { model: CheckSplitted, include: [{ model: Check }] }, { model: PaymentReceipt, include: [{ model: ReceiptType }, { model: Supplier }] },
+                    ]
+                }
+            );
+
+            res.send({ client, movement, paymentOrder });
+
+        } break;
+
+        case 'I': //'Importación de Cobranza'
+
+        case 'C': { //'Cobranza'
+
+            const collectionSecurity = await CollectionSecurity.findByPk(movement.movementId);
+
+            const collection = await Collection.findByPk(collectionSecurity.collectionId,
+                { include: [{ model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] }] }
+            );
+
+            res.send({ client, movement, collection });
+
+        } break;
+
+        case 'V': { //'Inversión'
+
+            const investment = await Investment.findByPk(movement.movementId, {
+                include: [
+                    { model: InvestmentCategory, as: "depositType" },
+                    { model: Account, as: "sourceAccount", include: [{ model: AccountType }] },
+                    { model: Account, as: "destinationAccount", include: [{ model: AccountType }] },
+                ]
+            });
+
+            res.send({ client, movement, investment });
+
+        } break;
+
+        case 'T': { //'Transferencia'
+
+            const accountTransfer = await AccountTransfer.findByPk(movement.movementId, {
+                include: [
+                    { model: Account, required: false, include: [{ model: AccountType }], as: 'sourceAccount' },
+                    { model: Account, required: false, include: [{ model: AccountType }], as: 'destinationAccount' }
+                ]
+            });
+
+            res.send({ client, movement, accountTransfer });
+
+        } break;
+
+        case 'S': { //'Saldo Período Anterior'
+
+            const monthlyBalance = await MonthlyBalance.findByPk(movement.movementId);
+
+            res.send({ client, movement, monthlyBalance });
+
+        } break;
+
+        case 'J': { //'Ajuste de Saldo Manual'
+
+            const accountAdjustment = await AccountAdjustment.findByPk(movement.movementId);
+
+            res.send({ client, movement, accountAdjustment });
+
+        } break;
+
+
+        case 'Q': { //'Cheque'
+        } break;
+
+        case 'A': { //'Cheque Acreditado'
+        } break;
+
+        case 'R': { //'Cheque Rechazado'
+        } break;
+
+        default: {
+            res.send({ client, movement });
+        } break;
+    }
 };
 
 module.exports.showNewForm = async function (req, res) {

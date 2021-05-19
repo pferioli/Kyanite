@@ -170,7 +170,9 @@ module.exports.accredit = async function (req, res) {
 
             const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
 
-            let accountMovementDestination = await AccountMovement.addMovement(clientId, investment.destinationAccountId, investment.periodId, (-1) * amount,
+            //en el movimiento saliente de la cuenta de PF, solo se contempla el valor original del mismo sin los intereses
+
+            let accountMovementDestination = await AccountMovement.addMovement(clientId, investment.destinationAccountId, investment.periodId, (-1) * investment.amount,
                 accountMovementCategory.eStatus.get('INVERSION').value, investment.id, investment.userId);
 
             if (accountMovementDestination === null) {

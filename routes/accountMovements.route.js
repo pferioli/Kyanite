@@ -24,6 +24,10 @@ router.get("/client/:clientId", function (req, res, next) {
     accountMovementsController.listAll(req, res);
 });
 
+router.get("/client/:clientId/details/:movementId", function (req, res, next) {
+    accountMovementsController.showDetails(req, res);
+});
+
 router.get("/new/:clientId", function (req, res, next) {
     accountMovementsController.showNewForm(req, res);
 });
@@ -31,6 +35,8 @@ router.get("/new/:clientId", function (req, res, next) {
 router.post("/new/:clientId", function (req, res, next) {
     accountMovementsController.addNew(req, res);
 });
+
+//https://kyanite-281502.rj.r.appspot.com/movements/fixBalance?clientId=1&periodId=5&accountId=1
 
 router.get("/fixBalance", async function (req, res, next) {
     const clientId = req.query.clientId;

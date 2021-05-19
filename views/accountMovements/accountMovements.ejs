@@ -63,7 +63,7 @@
                         <tr data-id="<%= data.movements[i].id %>">
                             <td><%= data.movements[i].id %></td>
                             <td><%= data.movements[i].categoryName%> [<%= data.movements[i].category%>]</td>
-                             <td>
+                            <td>
                                 <%if(data.movements[i].deletedAt === null){ %>
                                     <% if(Math.sign(data.movements[i].amount) === 1) { %>
                                         <i class="material-icons">add_circle_outline</i>
@@ -104,13 +104,13 @@
 
                                 <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.movements[i].billingPeriod.name %></span></a>
 
-                                 <td><%= data.movements[i].user.name %></td>
-
-                                <td>
-                                    <a href="/movements/client/<%=data.client.id%>/details/<%= data.movements[i].id%>" class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">more</i></a>
-                                </td>
                             </td>
+                            
+                            <td><%= data.movements[i].user.name %></td>
 
+                            <td>
+                                <button id="button-details" onclick='movementDetail("<%=data.client.id%>","<%= data.movements[i].id%>")' class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">more</i></a>
+                            </td>
                         </tr>
                     <% } %>
                 </tbody>
@@ -135,9 +135,12 @@
 
 <%- include ("./modals/accountSelection.ejs") %>
 
+<%- include ("./modals/movementDetails.ejs") %>
+
 <%- include ("../partials/footer") %>
 
 <script type="text/javascript" src="/javascripts/accounts.js"></script>
+<script type="text/javascript" src="/javascripts/accountMovements.js"></script>
 
 <script>
 
@@ -350,4 +353,57 @@
             }
         });
     });
+
+    async function movementDetail(clientId, movementId){
+    
+        var _elem = document.getElementById('modalMovementDetails');
+        
+        var instances = M.Modal.init(_elem, 
+            {   
+                onCloseEnd: function () { $("#tb").empty(); },
+                
+                onOpenStart: async function(){ 
+
+                    const url =`/movements/client/${clientId}/details/${movementId}`
+
+                    const details = await getMovementDetail(url);
+
+                    var tableRef = document.getElementById('tableMovementsDetails').getElementsByTagName('tbody')[0];
+
+                    defaultHeader(tableRef, details);
+
+                    if(details === undefined) return;
+
+                    if(details.movement.category.toUpperCase() === 'P'){
+                        paymentOrderDetails(tableRef, details);
+                    }
+
+                    if((details.movement.category.toUpperCase() === 'C')||(details.movement.category.toUpperCase() === 'I')){
+                        collectionDetails(tableRef, details);
+                    }
+
+                    if(details.movement.category.toUpperCase() === 'V'){
+                        investmentDetails(tableRef, details);
+                    }
+
+                    if(details.movement.category.toUpperCase() === 'T'){
+                        accountTransferDetails(tableRef, details);
+                    }       
+                    
+                    if(details.movement.category.toUpperCase() === 'S'){
+                        monthlyBalanceDetails(tableRef, details);
+                    }
+
+                    if(details.movement.category.toUpperCase() === 'J'){
+                        manualAccountAdjustmentDetails(tableRef, details);
+                    }
+                }
+            })
+
+        var modal = M.Modal.getInstance(_elem);
+
+        modal.open();
+    };
+
+    
 </script>
