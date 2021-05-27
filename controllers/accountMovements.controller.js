@@ -387,3 +387,37 @@ module.exports.deleteMovement = async function (clientId, accountId, periodId, c
         })
 
 }
+
+
+//-----------------------------------------------------------------
+// INVOICES & REPORTS
+//-----------------------------------------------------------------
+
+module.exports.createInvoice = async function (req, res) {
+
+    const { createReport } = require("../reports/accountMovements/accountMovements.report");
+
+    const clientId = req.params.clientId;
+
+    const periodId = req.query.periodId;
+
+    const client = await Client.findByPk(clientId);
+
+    const billingPeriod = await BillingPeriod.findByPk(periodId)
+
+    AccountMovement.findAll({
+        where: {
+            clientId: clientId, periodId: periodId
+        },
+        include: [{ model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
+        order: [
+            ['accountId', 'ASC'], ['id', 'ASC'],
+        ]
+    })
+        .then(movements => {
+            createReport(movements, client, billingPeriod, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+        })
+        .catch(err => {
+            console.error(err);
+        })
+};

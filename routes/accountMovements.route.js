@@ -36,6 +36,13 @@ router.post("/new/:clientId", function (req, res, next) {
     accountMovementsController.addNew(req, res);
 });
 
+
+//REPORTS...
+
+router.get("/client/:clientId/report", function (req, res, next) {
+    accountMovementsController.createInvoice(req, res);
+});
+
 //https://kyanite-281502.rj.r.appspot.com/movements/fixBalance?clientId=1&periodId=5&accountId=1
 
 router.get("/fixBalance", async function (req, res, next) {
@@ -47,4 +54,5 @@ router.get("/fixBalance", async function (req, res, next) {
 
     res.send({ totalBalance: totalBalance });
 })
+
 module.exports = router;
