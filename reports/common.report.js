@@ -9,9 +9,23 @@ module.exports.generateHr = function (doc, y) {
         .opacity(1)
         .strokeColor("#aaaaaa")
         .lineWidth(1)
-        .moveTo(50, y)
-        .lineTo(550, y)
+        .moveTo(doc.page.margins.left, y)
+        .lineTo((doc.page.width - doc.page.margins.right), y)
         .stroke();
+}
+
+module.exports.heightMeassure = function (doc, text, options) {
+
+    const cellHeight = doc.heightOfString(text, options);
+
+    return cellHeight;
+}
+
+module.exports.widthMeassure = function (doc, text, options) {
+
+    const cellWidth = doc.widthOfString(text, options);
+
+    return cellWidth;
 }
 
 module.exports.formatCurrency = function (number) {

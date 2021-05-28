@@ -1,15 +1,18 @@
 const PDFDocument = require("pdfkit");
 const path = require("path");
 
-const CollectionStatus = require('../../utils/statusMessages.util').Collection;
-
 const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
 const common = require('../common.report');
+const { header } = require("express-validator");
 
-var pageCounter = 0;
+var pageCounter = 0; var maxY = 0; var rowBottomY = 0; var startX, startY;
 
-function createReport(movements, client, billingPeriod, res) {
+var totalAmount = 0.00; var accountsCounter = 0; var totalMovementsCounter = 0;
+
+function createReport(movements, client, billingPeriod, user, res) {
+
+    totalAmount = 0.00; accountsCounter = 0; totalMovementsCounter = 0; pageCounter = 0;
 
     let doc = new PDFDocument({
         size: "A4", margin: 50, bufferPages: true, autoFirstPage: false,
@@ -21,51 +24,32 @@ function createReport(movements, client, billingPeriod, res) {
         },
     });
 
-    doc.on('pageAdded', () => { pageCounter++; generateFooter(doc, pageCounter) });
+    doc.on('pageAdded', () => {
+
+        maxY = doc.page.height - doc.page.margins.bottom;
+
+        startX = doc.page.margins.left;
+
+        startY = doc.page.margins.top; rowBottomY = 0;
+
+        doc.y = startY; doc.x = startX;
+    });
 
     doc.addPage();
 
     generateHeader(doc);
+
     generateCustomerInformation(doc, movements, client, billingPeriod);
 
     doc.moveDown();
 
-    let table0 = {
-        headers: ['Fecha', 'Tipo', 'Importe'],
-        rows: [
-        ]
-    };
+    populateTable(doc, movements);
 
-    let accountId = undefined;
+    finalInformation(doc, user);
 
-    let index = 0;
+    generateFooter(doc)
 
-    do {
-
-        const movement = movements[index];
-
-        if (accountId === undefined) {
-
-            accountId = movement.accountId; index++;
-
-            console.log("inicio del grupo : " + accountId + " - fila : " + index);
-        }
-
-        if (movement.accountId === accountId) {
-            table0.rows.push([movement.createdAt, movement.categoryName, movement.amount]); index++;
-        }
-
-        if (movement.accountId !== accountId) {
-
-            accountId = undefined;
-
-            console.log("fin del grupo - fila : " + index)
-
-            createTable(doc, table0);
-        }
-
-
-    } while (index < movements.length);
+    //-----------------------------------------------------------------------//
 
     const reportName = "movimientos_" + client.internalCode + "_" + billingPeriod.name + ".pdf"
     //doc.end();
@@ -133,51 +117,172 @@ function generateCustomerInformation(doc, movements, client, billingPeriod) {
 
 // <----- PIE DE PAGINA ----->
 
-function generateFooter(doc, pageCounter) {
+async function generateFooter(doc) {
 
-    common.generateHr(doc, doc.page.height - 60)
+    const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
 
-    doc
-        .fontSize(10)
-        .text(common.formatDateTime(new Date)
-            , doc.page.margins.left + 10, doc.page.height - 50, {
-            lineBreak: false
-        });
+    const reportDate = new Date;
 
-    doc
-        .fontSize(10)
-        .text(`pagina ${pageCounter}` // de ${doc.bufferedPageRange().count
-            , doc.page.width - doc.page.margins.right - 50, doc.page.height - 50,
-            {
-                align: "right",
-                lineBreak: false
+    for (i = range.start, end = range.start + range.count, range.start <= end; i < end; i++) {
+        doc.switchToPage(i);
+
+        common.generateHr(doc, doc.page.height - 60)
+
+        doc
+            .fontSize(10)
+            .text(common.formatDateTime(reportDate),
+                doc.page.margins.left + 10,
+                doc.page.height - 50,
+                {
+                    align: "left",
+                    lineBreak: false
+                }
+            );
+
+        const textWidth = doc.widthOfString(`página ${i + 1} de ${range.count}`, { align: "right" });
+
+        doc
+            .fontSize(10)
+            .text(`página ${i + 1} de ${range.count}`,
+                doc.page.width - doc.page.margins.right - Number.parseFloat(textWidth * 1.1),
+                doc.page.height - 50,
+                {
+                    align: "right", lineBreak: false
+                }
+            );
+    }
+}
+
+// <----- TABLA DE MOVIMIENTOS ----->
+
+function populateTable(doc, movements) {
+
+    let table0 = {
+        headers: [
+            { name: 'ID', width: '10%', align: 'left' },
+            { name: 'Fecha', width: '20%', align: 'left' },
+            { name: 'Tipo', width: '30%', align: 'left' },
+            { name: 'Importe', width: '20%', align: 'left' },
+            { name: 'Usuario', width: '25%', align: 'left' }
+        ],
+        rows: []
+    };
+
+    let accountId = undefined; let subTotalAmount = 0.00, movementsCounter = 0;
+
+    let index = 0; let groupName = "";
+
+    do {
+
+        const movement = movements[index];
+
+        if (accountId === undefined) {
+
+            accountId = movement.accountId; table0.rows = []; subTotalAmount = 0.00; accountsCounter++; movementsCounter = 0;
+
+            groupName = `CUENTA: ${movement.account.accountType.account}`
+
+            if (movement.account.cbu === null) {
+                groupName += ` (${movement.account.accountType.description})`
+            } else {
+                groupName += ` (CBU: ${movement.account.cbu})`
             }
-        );
+
+            groupName += ` [ID:${movement.account.id}]`
+
+            doc
+                .fontSize(12)
+                .font("Helvetica-Bold");
+
+            if (doc.y + 10 * common.heightMeassure(doc, groupName, { align: "left" }) > maxY)
+                doc.addPage();
+
+            doc.text(groupName, doc.page.margins.left, doc.y, { align: 'left' });
+            doc.moveDown(1);
+        }
+
+        if (movement.accountId === accountId) {
+            table0.rows.push([movement.id, common.formatDateTime(movement.createdAt), movement.categoryName, "$" + movement.amount, movement.user.name]);
+
+            index++; movementsCounter++; totalMovementsCounter++;
+
+            subTotalAmount += Number.parseFloat(movement.amount);
+            totalAmount += Number.parseFloat(movement.amount);
+        }
+
+        if ((movement.accountId !== accountId) || (index === movements.length)) {
+
+            accountId = undefined;
+
+            createTable(doc, table0);
+
+            doc
+                .fontSize(8)
+                .font("Helvetica-Bold");
+
+            const subTotal = `Cantidad de movimientos: ${movementsCounter}, Subtotal para ${groupName}: ${common.formatCurrency(subTotalAmount)}`;
+
+            if (doc.y + 10 * common.heightMeassure(doc, doc.page.margins.left, doc.y, subTotal, { align: "center" }) > maxY)
+                doc.addPage();
+
+            doc
+                .moveDown()
+                .fontSize(8)
+                .font("Helvetica-Bold"); doc.text(subTotal, { align: 'center' });
+
+            doc.moveDown();
+            common.generateHr(doc, doc.y);
+            doc.moveDown(2);
+
+        }
+
+    } while (index < movements.length);
 }
 
 function createTable(doc, table) {
 
-    let startX = doc.page.margins.left, startY = doc.y;
-
     const usableWidth = (doc.page.width - doc.page.margins.left - doc.page.margins.right);
 
-    const columnCount = table.headers.length, columnSpacing = 15, rowSpacing = 5;
+    const rowSpacing = 5;
 
-    const columnContainerWidth = usableWidth / columnCount;
+    //const columnCount = table.headers.length, columnSpacing = 15,
 
-    const columnWidth = columnContainerWidth - columnSpacing;
+    // const columnContainerWidth = usableWidth / columnCount;
 
-    const maxY = doc.page.height - doc.page.margins.bottom;
+    // const columnWidth = columnContainerWidth - columnSpacing;
 
-    let rowBottomY = 0;
+    var columnWidth = [];
+
+    const prepareHeader = () => doc.font('Helvetica-Bold').fontSize(10);
+
+    const prepareRow = (row, i) => doc.font('Helvetica').fontSize(8);
+
+    const prepareColWidth = () => {
+
+        columnWidth = [];
+
+        table.headers.forEach((header, i) => {
+
+            const colWidth = usableWidth * Number.parseFloat(header.width.replace("%", "") / 100)
+
+            columnWidth.push(colWidth)
+        })
+    }
+
+    const computeColumnOffset = (index) => {
+        let offset = startX;
+        for (i = 0; i < index; i++)
+            offset = offset + Number.parseFloat(columnWidth[i]);
+        return offset;
+    };
 
     const computeRowHeight = (row) => {
         let result = 0;
 
-        row.forEach((cell) => {
+        row.forEach((cell, i) => {
             const cellHeight = doc.heightOfString(cell, {
-                width: columnWidth,
-                align: 'left'
+                width: columnWidth[i], //columnWidth,
+                align: table.headers[i].align //'left'
             });
             result = Math.max(result, cellHeight);
         });
@@ -185,14 +290,22 @@ function createTable(doc, table) {
         return result + rowSpacing;
     };
 
+    startY = doc.y;
+
+    prepareColWidth();
+
+    // Allow the user to override style for headers
+    prepareHeader();
+
     // Check to have enough room for header and first rows
-    if (startY + 3 * computeRowHeight(table.headers) > maxY)
-        this.addPage();
+    if (startY + 5 * computeRowHeight(table.headers) > maxY)
+        doc.addPage();
 
     // Print all headers
     table.headers.forEach((header, i) => {
-        doc.text(header, startX + i * columnContainerWidth, startY, {
-            width: columnWidth,
+        const offset = computeColumnOffset(i);
+        doc.text(header.name, offset, startY, { //i * columnContainerWidth
+            width: columnWidth[i], //columnWidth,
             align: 'left'
         });
     });
@@ -206,6 +319,68 @@ function createTable(doc, table) {
         .lineWidth(2)
         .stroke();
 
+    table.rows.forEach((row, i) => {
+
+        const rowHeight = computeRowHeight(row);
+
+        // Switch to next page if we cannot go any further because the space is over.
+        // For safety, consider 3 rows margin instead of just one
+        if (startY + 5 * rowHeight < maxY)
+            startY = rowBottomY + rowSpacing;
+        else
+            doc.addPage();
+
+        // Allow the user to override style for rows
+        prepareRow(row, i);
+
+        // Print all cells of the current row
+        row.forEach((cell, i) => {
+            const offset = computeColumnOffset(i);
+
+            doc.text(cell, offset, startY, {
+                width: columnWidth[i], //columnWidth,
+                align: table.headers[i].align //'left'
+            });
+        });
+
+        // Refresh the y coordinate of the bottom of this row
+        rowBottomY = Math.max(startY + rowHeight, rowBottomY);
+
+        // Separation line between rows
+        doc.moveTo(startX, rowBottomY - rowSpacing * 0.5)
+            .lineTo(startX + usableWidth, rowBottomY - rowSpacing * 0.5)
+            .lineWidth(1)
+            .opacity(0.7)
+            .stroke()
+            .opacity(1); // Reset opacity after drawing the line
+    });
+
+    doc.x = startX;
+    doc.moveDown();
+}
+
+// <----- RESUMEN FINAL ----->
+
+function finalInformation(doc, user) {
+
+    if (doc.y + 200 > maxY) //verificamos que queda espacio para el resumen y la firma
+        doc.addPage();
+
+    doc
+        .moveDown(2)
+        .font("Helvetica-Bold")
+        .fontSize(12)
+        .text('Resumen general:', { align: 'left' })
+        .moveDown()
+        .fontSize(10);
+
+    doc.text(`Cantidad de cuentas analizadas: ${accountsCounter}`, 80, doc.y, { align: 'left' });
+    doc.text(`Cantidad total de movimientos: ${totalMovementsCounter}`, 80, doc.y, { align: 'left' });
+    doc.text(`Importe total ${common.formatCurrency(totalAmount)}`, 80, doc.y, { align: 'left' });
+
+    doc.moveDown(2);
+
+    common.generateSignature(doc, user, { linesize: 174, startLine: 350, signatureHeight: doc.y });
 }
 
 module.exports = {

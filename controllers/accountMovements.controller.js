@@ -411,11 +411,11 @@ module.exports.createInvoice = async function (req, res) {
         },
         include: [{ model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
         order: [
-            ['accountId', 'ASC'], ['id', 'ASC'],
+            ['accountId', 'ASC'], ['createdAt', 'ASC'], ['id', 'ASC'],
         ]
     })
         .then(movements => {
-            createReport(movements, client, billingPeriod, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+            createReport(movements, client, billingPeriod, req.user, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
         })
         .catch(err => {
             console.error(err);
