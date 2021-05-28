@@ -21,7 +21,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="input-field col s9">
+                        <div class="input-field col s8">
                             <i class="material-icons prefix">storefront</i>
                             <select id="supplierSelect">
                                 <option value="" disabled selected>Seleccione un proveedor</option>
@@ -32,7 +32,7 @@
                             <label>Nombre del Proveedor</label>
                             <input type="hidden" name="supplierId" id="supplierId" />
                         </div>
-                        <div class="input-field col s3">
+                        <div class="input-field col s4">
                             <i class="material-icons prefix">category</i>
                             <input id="supplierCategory" name="supplierCategory" type="text" />
                             <label for="name">Rubro</label>
@@ -164,8 +164,6 @@
                     });
                 };
         });
-
-        
 
         elems = document.querySelectorAll('.modal');
         instances = M.Modal.init(elems, {});

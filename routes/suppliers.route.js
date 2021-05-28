@@ -19,17 +19,17 @@ router.post('/delete', function (req, res, next) {
   suppliersController.delete(req, res);
 })
 
-router.post("/categories", function (req, res, next) {
-  suppliersController.newCategory(req, res);
-});
-
 router.post("/categories/new", function (req, res, next) {
   suppliersController.newCategory(req, res);
 });
 
-router.post("/categories/:id", function (req, res, next) {
-  suppliersController.newCategory(req, res);
-});
+// router.post("/categories", function (req, res, next) {
+//   suppliersController.newCategory(req, res);
+// });
+
+// router.post("/categories/:id", function (req, res, next) {
+//   suppliersController.newCategory(req, res);
+// });
 
 router.get("/info/:id", function (req, res, next) {
   suppliersController.info(req, res);

@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Supplier.hasOne(models.taxCategory, { foreignKey: 'id', sourceKey: 'taxCategoryId' })
-      Supplier.hasOne(models.supplierCategory, { foreignKey: 'id', sourceKey: 'categoryId' })
+      // Supplier.hasOne(models.supplierCategory, { foreignKey: 'id', sourceKey: 'categoryId' })
+      Supplier.hasOne(models.accountingImputation, { foreignKey: 'id', sourceKey: 'categoryId' })
       Supplier.hasOne(models.bank, { foreignKey: 'id', sourceKey: 'bankId' })
     }
   };

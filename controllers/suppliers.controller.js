@@ -3,8 +3,12 @@ const Op = require('sequelize').Op
 const Model = require('../models')
 const Supplier = Model.supplier;
 const TaxCategory = Model.taxCategory;
-const SupplierCategory = Model.supplierCategory;
 const Bank = Model.bank;
+
+const AccountingGroup = Model.accountingGroup;
+const AccountingImputation = Model.accountingImputation;
+
+const SupplierCategory = Model.supplierCategory;
 
 const winston = require('../helpers/winston.helper');
 
@@ -12,7 +16,21 @@ const CURRENT_MENU = 'suppliers'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = function (req, res, next) {
     Supplier.findAll({
-        include: [{ model: TaxCategory }, { model: SupplierCategory }, { model: Bank }]
+        include: [
+            { model: TaxCategory }, { model: Bank },
+            {
+                model: AccountingImputation,
+                include: [
+                    {
+                        model: AccountingGroup,
+                        as: 'accountingGroup',
+                        attributes: [['name', 'name']],
+                        where: { enabled: true }
+                    }
+                ]
+            },
+            //{ model: SupplierCategory },
+        ]
     }).then(function (suppliers) {
         res.render("suppliers/suppliers.ejs", {
             menu: CURRENT_MENU, data: { suppliers: suppliers },
@@ -22,8 +40,22 @@ module.exports.listAll = function (req, res, next) {
 
 module.exports.showNewForm = async function (req, res, next) {
     const taxCategories = await TaxCategory.findAll();
-    const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
     const banks = await Bank.findAll({ where: { enabled: true } });
+    // const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
+
+    const supplierCategories = await AccountingImputation.findAll(
+        {
+            where: { enabled: true },
+            include: [
+                {
+                    model: AccountingGroup,
+                    as: 'accountingGroup',
+                    attributes: [['name', 'name']],
+                    where: { enabled: true }
+                }
+            ]
+        });
+
     res.render("suppliers/add.ejs", { menu: CURRENT_MENU, data: { taxCategories, supplierCategories, banks } });
 };
 
@@ -86,7 +118,19 @@ module.exports.info = async function (req, res) {
     const supplierid = req.params.id;
     const supplier = await Supplier.findByPk(supplierid, {
         include: [
-            { model: SupplierCategory }, { model: TaxCategory }, { model: Bank }
+            //{ model: SupplierCategory },
+            {
+                model: AccountingImputation,
+                include: [
+                    {
+                        model: AccountingGroup,
+                        as: 'accountingGroup',
+                        attributes: [['name', 'name']],
+                        where: { enabled: true }
+                    }
+                ]
+            },
+            { model: TaxCategory }, { model: Bank }
         ]
     });
 
@@ -130,7 +174,20 @@ module.exports.showEditForm = async function (req, res, next) {
 
     const taxCategories = await TaxCategory.findAll({ where: { enabled: true } });
 
-    const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
+    // const supplierCategories = await SupplierCategory.findAll({ where: { enabled: true } });
+
+    const supplierCategories = await AccountingImputation.findAll(
+        {
+            where: { enabled: true },
+            include: [
+                {
+                    model: AccountingGroup,
+                    as: 'accountingGroup',
+                    attributes: [['name', 'name']],
+                    where: { enabled: true }
+                }
+            ]
+        });
 
     const banks = await Bank.findAll({ where: { enabled: true } });
 
@@ -138,7 +195,19 @@ module.exports.showEditForm = async function (req, res, next) {
 
     const supplier = await Supplier.findByPk(supplierid, {
         include: [
-            { model: SupplierCategory }, { model: TaxCategory }
+            {
+                model: AccountingImputation,
+                include: [
+                    {
+                        model: AccountingGroup,
+                        as: 'accountingGroup',
+                        attributes: [['id', 'id'], ['name', 'name']],
+                        where: { enabled: true }
+                    }
+                ]
+            },
+            //{ model: SupplierCategory }, 
+            { model: TaxCategory }
         ]
     });
 
@@ -201,8 +270,23 @@ module.exports.edit = async function (req, res, next) {
 //------------------ AJAX CALLS ------------------//
 
 module.exports.newCategory = async function (req, res) {
-    const supplierCategory = await SupplierCategory.create({ name: req.body.category, enabled: true });
-    res.send(supplierCategory);
+
+    SupplierCategory.create({ name: req.body.category, enabled: true })
+        .then(supplierCategory => {
+            winston.info(`A new supplier category ${supplierCategory.name} was created succesfully on user ${req.user.id} request`);
+            req.flash("success", "Se ha creado existosamente una nueva categoría de proveedor");
+
+        })
+        .catch(err => {
+            winston.error(`An error ocurred while creating new category for supplier ${JSON.stringify(req.body)} - ${err}`);
+            req.flash("error", "Ocurrio un error y no se pudo modificar el cliente en la base de datos");
+
+        })
+        .finally(() => {
+            res.redirect("/suppliers");
+        })
+
+    //res.send(supplierCategory);
 };
 
 module.exports.allCategories = async function (req, res) {
@@ -222,7 +306,16 @@ module.exports.findSupplierById = async function (req, res) {
         {
             where: { enabled: true },
             include: [{
-                model: SupplierCategory
+                // model: SupplierCategory
+                model: AccountingImputation,
+                include: [
+                    {
+                        model: AccountingGroup,
+                        as: 'accountingGroup',
+                        attributes: [['id', 'id'], ['name', 'name']],
+                        where: { enabled: true }
+                    }
+                ]
             }]
         });
     res.send(supplier);

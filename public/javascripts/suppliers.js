@@ -12,7 +12,7 @@ function getSupplierCategory(supplierId) {
         })
         .then(response => {
             const supplier = JSON.parse(response);
-            supplierCategory.value = supplier.supplierCategory.name
+            supplierCategory.value = supplier.accountingImputation.name
             M.updateTextFields();
         })
         .catch(err => {

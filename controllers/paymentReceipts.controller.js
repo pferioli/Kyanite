@@ -72,6 +72,7 @@ module.exports.listAll = async function (req, res) {
     const paymentReceipts = await PaymentReceipt.findAll(options);
 
     //const paymentReceiptImage = await PaymentReceiptImage.findByPk
+
     res.render('expenses/paymentReceipts/receipts',
         {
             menu: CURRENT_MENU,
@@ -86,8 +87,27 @@ module.exports.showEditForm = async function (req, res) {
 
     const paymentReceipt = await PaymentReceipt.findByPk(receiptId,
         {
-            include: [{ model: Client }, { model: Supplier, include: [{ model: SupplierCategory }] }, { model: BillingPeriod }, { model: ReceiptType },
-            { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
+            include: [
+                { model: Client },
+                {
+                    model: Supplier,
+                    // include: [{ model: SupplierCategory }]
+                    include: [
+                        {
+                            model: AccountingImputation,
+                            include: [
+                                {
+                                    model: AccountingGroup,
+                                    as: 'accountingGroup',
+                                    attributes: [['id', 'id'], ['name', 'name']],
+                                    where: { enabled: true }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                { model: BillingPeriod }, { model: ReceiptType },
+                { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
         });
 
     const suppliers = await Supplier.findAll(
@@ -203,8 +223,26 @@ module.exports.info = async function (req, res) {
     const receiptId = req.params.receiptId;
 
     const paymentReceipt = await PaymentReceipt.findByPk(receiptId, {
-        include: [{ model: Client }, { model: Supplier, include: [{ model: SupplierCategory }] }, { model: BillingPeriod }, { model: ReceiptType },
-        { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
+        include: [
+            { model: Client },
+            {
+                model: Supplier,
+                // include: [{ model: SupplierCategory }]
+                include: [{
+                    model: AccountingImputation,
+                    include: [
+                        {
+                            model: AccountingGroup,
+                            as: 'accountingGroup',
+                            attributes: [['id', 'id'], ['name', 'name']],
+                            where: { enabled: true }
+                        }
+                    ]
+                }],
+            },
+            { model: BillingPeriod }, { model: ReceiptType },
+            { model: AccountingImputation, include: [{ model: AccountingGroup }] }
+        ]
     });
 
     res.render('expenses/paymentReceipts/info', { menu: CURRENT_MENU, data: { client: paymentReceipt.client, paymentReceipt } });

@@ -20,7 +20,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="input-field col s6">
+                        <div class="input-field col s8">
                             <i class="material-icons prefix">point_of_sale</i>
                             <select id="taxCategorySelect">
                                 <% for(var i=0; i<data.taxCategories.length; i++) { %>
@@ -33,36 +33,22 @@
                             </select>
                             <label>Categoria Impositiva</label>
                             <input type="hidden" name="taxCategoryId" id="taxCategory" value=<%=data.supplier.taxCategoryId%> />
-                        </div>
-                        <div class="input-field col s6">
-                            <i class="material-icons prefix">account_balance</i>
-                            <select id="supplierCategorySelect">
-                                <% for(var i=0; i<data.supplierCategories.length; i++) { %>
-                                    <% if(data.supplierCategories[i].id===data.supplier.categoryId) { %>
-                                        <option value="<%=data.supplierCategories[i].id%>" selected><%= data.supplierCategories[i].name%></option>
-                                    <% } else { %>
-                                        <option value="<%=data.supplierCategories[i].id%>"><%= data.supplierCategories[i].name %></option>
-                                    <% } %>
-                                <% } %>
-                            </select>
-                            <label>Rubro</label>
-                            <input type="hidden" name="categoryId" id="supplierCategory" value="<%=data.supplier.categoryId%>" />
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="input-field col s4">
+                        </div>                       
+                          <div class="input-field col s4">
                             <i class="material-icons prefix">info</i>
                             <input id="cuit" name="cuit" type="text" class="validate" maxlength="13" minlength="13" 
                                 pattern="^(20|23|27|30|33)([0-9]{9}|-[0-9]{8}-[0-9{1})$" required value="<%=data.supplier.cuit%>" />
                             <label for=" cuit">C.U.I.T. o C.U.I.L.</label>
-                        </div>
-                        <div class="input-field col s4">
+                        </div>              
+                    </div>
+
+                    <div class="row">                        
+                        <div class="input-field col s6">
                             <i class="material-icons prefix">account_balance</i>
                             <input id="bankAccount" name="bankAccount" type="text" class="validate" value="<%=data.supplier.bankAccount%>" />
                             <label for=" bankAccount">Número de Cuenta o CBU</label>
                         </div>
-                        <div class="input-field col s4">
+                        <div class="input-field col s6">
                             <select id="bankSelect">
                                 <option value="0" disabled selected>Seleccione un banco</option>
                                 <% for(var i=0; i<data.banks.length; i++) { %>
@@ -76,6 +62,23 @@
                             <label>Banco</label>
                             <input type="hidden" name="bankId" id="bank" value="<%=data.supplier.bankId%>" />
                         </div>
+                    </div>
+     
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">category</i>
+                            <select id="accountingGroupSelect">
+                            </select>
+                            <label>Categorías</label>
+                            <input type="hidden" name="accountingGroupId" id="accountingGroupId" />
+                        </div>
+                        <div class="input-field col s6">
+                            <select id="accountingImputationSelect">
+                                <option value="" selected disabled>Seleccion primero una categoría</option>
+                            </select>
+                            <label>Rubros</label>
+                            <input type="hidden" name="categoryId" id="accountingImputationId" />
+                        </div>                      
                     </div>
 
                     <div class="row">
@@ -139,6 +142,8 @@
 
 <%- include ("../partials/footer") %>
 
+<script type="text/javascript" src="/javascripts/accountingImputations.js"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll("select");
@@ -151,12 +156,32 @@
             document.getElementById("taxCategory").value = evt.target.value;
         };
 
-        document.getElementById("supplierCategorySelect").onchange = function (evt) {
-            document.getElementById("supplierCategory").value = evt.target.value;
-        };
+        // document.getElementById("supplierCategorySelect").onchange = function (evt) {
+        //     document.getElementById("supplierCategory").value = evt.target.value;
+        // };
 
         document.getElementById("bankSelect").onchange = function (evt) {
             document.getElementById("bank").value = evt.target.value;
+        };
+
+        //populateAccountingGroups('accountingGroupSelect');
+        
+        populateAccountingGroups('accountingGroupSelect', '<%= data.supplier.accountingImputation.accountingGroup.id %>');
+
+        populateImputations('accountingImputationSelect', '<%= data.supplier.accountingImputation.accountingGroup.id %>', '<%= data.supplier.accountingImputation.id %>');
+
+        let accountingGroupSelect = document.getElementById("accountingGroupSelect").onchange = function (evt) {
+            
+            document.getElementById("accountingGroupId").value = evt.target.value;
+            
+            populateImputations('accountingImputationSelect', evt.target.value)
+            .then((accountingImputationId)=>{
+                document.getElementById("accountingImputationId").value = accountingImputationId;
+            })            
+        };
+
+        let accountingImputationSelect = document.getElementById("accountingImputationSelect").onchange = function (evt) {
+            document.getElementById("accountingImputationId").value = evt.target.value;
         };
     });
 </script>

@@ -1,6 +1,6 @@
 {
   "name": "kyanite",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": true,
   "config": {
     "entrypoint": "./bin/server.js"

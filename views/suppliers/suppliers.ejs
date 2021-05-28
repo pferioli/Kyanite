@@ -23,14 +23,11 @@
         </div>
       </div>
       <div class="actions">
-        <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i
-            class="material-icons">refresh</i></button>
-        <a href="/suppliers/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i
-            class="material-icons">add_box</i></a>
-        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i
-            class="material-icons">search</i></a>
-        <a id="button-category" class="modal-trigger waves-effect btn-flat nopadding"
-          data-target="modalNewSupplierCategory"><i class="material-icons">playlist_add</i></a>
+        <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+        <a href="/suppliers/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+        <a href="/accountingImputations/settings" id="button-category" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">playlist_add</i></a>
+        <!-- <a id="button-category" class="modal-trigger waves-effect btn-flat nopadding" data-target="modalNewSupplierCategory"><i class="material-icons">playlist_add</i></a> -->
       </div>
     </div>
     <!-- <div class="progress" id="progress" style="margin-top: 30px;">
@@ -62,8 +59,8 @@
               <a class="blue-text" href="/suppliers/info/<%= data.suppliers[i].id %>"><%= data.suppliers[i].name %></a>
             </td>
 
-            <% if(data.suppliers[i].supplierCategory) { %>
-            <td><%= data.suppliers[i].supplierCategory.name %></td>
+            <% if(data.suppliers[i].accountingImputation) { %>
+            <td><%= data.suppliers[i].accountingImputation.name %></td>
             <% } else { %>
             <td></td>
             <% } %>
@@ -104,7 +101,8 @@
 
 </main>
 
-<%- include ("./modals/newCategory.ejs") %>
+<%#- include ("./modals/newCategory.ejs") %>
+
 <%- include ("./modals/delete.ejs") %>
 
 <%- include ("../partials/footer") %>
