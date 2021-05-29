@@ -139,6 +139,8 @@ module.exports.downloadExpensesReport = async function (req, res) {
 
     const clientId = req.params.clientId;
 
+    const reportType = req.query.reportType;
+
     const client = await Client.findByPk(clientId);
 
     const activePeriod = await BillingPeriod.findOne({
@@ -153,13 +155,28 @@ module.exports.downloadExpensesReport = async function (req, res) {
 
     const paymentOrders = await getExpensesReportRecords(clientId, periods);
 
-    const { generateExcel } = require("../reports/paymentOrders/expensesExcel.report");
+    if (reportType.toLowerCase() === 'xls') {
 
-    try {
-        generateExcel(client, paymentOrders, activePeriod, req.user, res);
-    } catch (error) {
-        winston.error(`An error ocurred creating the excel expenses report file - ${error}`);
+        const { generateExcel } = require("../reports/paymentOrders/expensesExcel.report");
+
+        try {
+            generateExcel(client, paymentOrders, activePeriod, req.user, res);
+        } catch (error) {
+            winston.error(`An error ocurred creating the excel expenses report file - ${error}`);
+        }
     }
+
+    if (reportType.toLowerCase() === 'pdf') {
+
+        const { createReport } = require("../reports/paymentOrders/expenses.report");
+
+        try {
+            createReport(paymentOrders, client, activePeriod, req.user, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+        } catch (error) {
+            winston.error(`An error ocurred creating the pdf expenses report file - ${error}`);
+        }
+    }
+
 };
 
 module.exports.createInvoice = function (req, res) {

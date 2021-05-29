@@ -5,18 +5,18 @@ const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
 const common = require('../common.report');
 
-var maxY = 0; var rowBottomY = 0; var startX, startY;
+var pageCounter = 0; var maxY = 0; var rowBottomY = 0; var startX, startY;
 
 var totalAmount = 0.00; var accountsCounter = 0; var totalMovementsCounter = 0;
 
-function createReport(movements, client, period, user, res) {
+function createReport(paymentOrders, client, period, user, res) {
 
-    totalAmount = 0.00; accountsCounter = 0; totalMovementsCounter = 0;
+    totalAmount = 0.00; accountsCounter = 0; totalMovementsCounter = 0; pageCounter = 0;
 
     let doc = new PDFDocument({
         size: "A4", margin: 50, bufferPages: true, autoFirstPage: false,
         info: {
-            Title: 'Detalle de movimientos',
+            Title: 'Detalle de gastos',
             Author: 'AAII Administraciones Integrales', // the name of the author
             Subject: '', // the subject of the document
             Keywords: 'pdf;javascript', // keywords associated with the document
@@ -42,15 +42,13 @@ function createReport(movements, client, period, user, res) {
 
     doc.moveDown();
 
-    populateTable(doc, movements);
-
-    finalInformation(doc, user);
+    populateTable(doc, paymentOrders);
 
     generateFooter(doc)
 
     //-----------------------------------------------------------------------//
 
-    const reportName = "movimientos_" + client.internalCode + "_" + period.name + ".pdf"
+    const reportName = "gastos" + client.internalCode + "_" + period.name + ".pdf"
     //doc.end();
     //doc.pipe(fs.createWriteStream(path));
 
@@ -95,7 +93,7 @@ function generateCustomerInformation(doc, client, period) {
     doc
         .fillColor("#444444")
         .fontSize(20)
-        .text("Detalle de movimientos", 50, 105, { width: 500, align: 'center' });
+        .text("Detalle de gastos", 50, 105, { width: 500, align: 'center' });
 
     common.generateHr(doc, 130);
 
@@ -152,9 +150,9 @@ async function generateFooter(doc) {
     }
 }
 
-// <----- TABLA DE MOVIMIENTOS ----->
+// <----- TABLA DE ORDENES DE PAGO ----->
 
-function populateTable(doc, movements) {
+function populateTable(doc, paymentOrders) {
 
     let table0 = {
         headers: [
@@ -167,90 +165,46 @@ function populateTable(doc, movements) {
         rows: []
     };
 
-    let accountId = undefined; let subTotalAmount = 0.00, movementsCounter = 0;
+    let lastGroupId = 0; group = ""; let lastAccountImputationId = 0; accountingImputation = ""; isGroupOpen = false;
 
     let index = 0; let groupName = "";
 
     do {
 
-        const movement = movements[index];
+        const paymentOrder = paymentOrders[index];
 
-        if (accountId === undefined) {
+        if (lastGroupId !== paymentOrder.paymentReceipt.accountingImputation.accountingGroup.id) {
 
-            accountId = movement.accountId; table0.rows = []; subTotalAmount = 0.00; accountsCounter++; movementsCounter = 0;
-
-            groupName = `CUENTA: ${movement.account.accountType.account}`
-
-            if (movement.account.cbu === null) {
-                groupName += ` (${movement.account.accountType.description})`
-            } else {
-                groupName += ` (CBU: ${movement.account.cbu})`
+            if (lastGroupId !== 0) { //cambio de grupo
+                console.log('------------------');
             }
 
-            groupName += ` [ID:${movement.account.id}]`
+            isGroupOpen = true;
 
-            doc
-                .fontSize(12)
-                .font("Helvetica-Bold");
+            lastGroupId = paymentOrder.paymentReceipt.accountingImputation.accountingGroup.id;
 
-            if (doc.y + 10 * common.heightMeassure(doc, groupName, { align: "left" }) > maxY)
-                doc.addPage();
+            group = paymentOrder.paymentReceipt.accountingImputation.accountingGroup.name;
 
-            doc.text(groupName, doc.page.margins.left, doc.y, { align: 'left' });
-            doc.moveDown(1);
+            console.log(paymentOrder.paymentReceipt.accountingImputation.accountingGroup.name);
         }
 
-        if (movement.accountId === accountId) {
-            table0.rows.push([movement.id, common.formatDateTime(movement.createdAt), movement.categoryName, "$" + movement.amount, movement.user.name]);
+        if (lastAccountImputationId !== paymentOrder.paymentReceipt.accountingImputationId) {
 
-            index++; movementsCounter++; totalMovementsCounter++;
+            lastAccountImputationId = paymentOrder.paymentReceipt.accountingImputation.id;
 
-            subTotalAmount += Number.parseFloat(movement.amount);
-            totalAmount += Number.parseFloat(movement.amount);
+            console.log(`\t${paymentOrder.paymentReceipt.accountingImputation.name}`);
         }
 
-        if ((movement.accountId !== accountId) || (index === movements.length)) {
+        index += 1;
 
-            accountId = undefined;
-
-            createTable(doc, table0);
-
-            doc
-                .fontSize(8)
-                .font("Helvetica-Bold");
-
-            const subTotal = `Cantidad de movimientos: ${movementsCounter}, Subtotal para ${groupName}: ${common.formatCurrency(subTotalAmount)}`;
-
-            if (doc.y + 10 * common.heightMeassure(doc, doc.page.margins.left, doc.y, subTotal, { align: "center" }) > maxY)
-                doc.addPage();
-
-            doc
-                .moveDown()
-                .fontSize(8)
-                .font("Helvetica-Bold"); doc.text(subTotal, { align: 'center' });
-
-            doc.moveDown();
-            common.generateHr(doc, doc.y);
-            doc.moveDown(2);
-
-        }
-
-    } while (index < movements.length);
+    } while (index < paymentOrders.length);
 }
 
 function createTable(doc, table) {
 
     const usableWidth = (doc.page.width - doc.page.margins.left - doc.page.margins.right);
 
-    const rowSpacing = 5;
-
-    //const columnCount = table.headers.length, columnSpacing = 15,
-
-    // const columnContainerWidth = usableWidth / columnCount;
-
-    // const columnWidth = columnContainerWidth - columnSpacing;
-
-    var columnWidth = [];
+    const rowSpacing = 5; var columnWidth = [];
 
     const prepareHeader = () => doc.font('Helvetica-Bold').fontSize(10);
 
@@ -356,30 +310,6 @@ function createTable(doc, table) {
 
     doc.x = startX;
     doc.moveDown();
-}
-
-// <----- RESUMEN FINAL ----->
-
-function finalInformation(doc, user) {
-
-    if (doc.y + 200 > maxY) //verificamos que queda espacio para el resumen y la firma
-        doc.addPage();
-
-    doc
-        .moveDown(2)
-        .font("Helvetica-Bold")
-        .fontSize(12)
-        .text('Resumen general:', { align: 'left' })
-        .moveDown()
-        .fontSize(10);
-
-    doc.text(`Cantidad de cuentas analizadas: ${accountsCounter}`, 80, doc.y, { align: 'left' });
-    doc.text(`Cantidad total de movimientos: ${totalMovementsCounter}`, 80, doc.y, { align: 'left' });
-    doc.text(`Importe total ${common.formatCurrency(totalAmount)}`, 80, doc.y, { align: 'left' });
-
-    doc.moveDown(2);
-
-    common.generateSignature(doc, user, { linesize: 174, startLine: 350, signatureHeight: doc.y });
 }
 
 module.exports = {
