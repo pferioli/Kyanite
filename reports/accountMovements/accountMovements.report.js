@@ -93,7 +93,7 @@ function generateHeader(doc) {
 function generateCustomerInformation(doc, client, period) {
 
     doc
-        .fillColor("#444444")
+        .fillColor("#000000")
         .fontSize(20)
         .text("Detalle de movimientos", 50, 105, { width: 500, align: 'center' });
 
@@ -129,6 +129,7 @@ async function generateFooter(doc) {
 
         doc
             .fontSize(10)
+            .fillColor("#444444")
             .text(common.formatDateTime(reportDate),
                 doc.page.margins.left + 10,
                 doc.page.height - 50,
@@ -142,6 +143,7 @@ async function generateFooter(doc) {
 
         doc
             .fontSize(10)
+            .fillColor("#444444")
             .text(`página ${i + 1} de ${range.count}`,
                 doc.page.width - doc.page.margins.right - Number.parseFloat(textWidth * 1.1),
                 doc.page.height - 50,
@@ -242,19 +244,21 @@ function createTable(doc, table) {
 
     const usableWidth = (doc.page.width - doc.page.margins.left - doc.page.margins.right);
 
-    const rowSpacing = 5;
+    const rowSpacing = 5; const colSpacing = 5; var columnWidth = [];
 
-    //const columnCount = table.headers.length, columnSpacing = 15,
+    const prepareHeader = () => {
+        doc
+            .font('Helvetica-Bold')
+            .fillColor("#000000")
+            .fontSize(10);
 
-    // const columnContainerWidth = usableWidth / columnCount;
-
-    // const columnWidth = columnContainerWidth - columnSpacing;
-
-    var columnWidth = [];
-
-    const prepareHeader = () => doc.font('Helvetica-Bold').fontSize(10);
-
-    const prepareRow = (row, i) => doc.font('Helvetica').fontSize(8);
+    }
+    const prepareRow = (row, i) => {
+        doc
+            .font('Helvetica')
+            .fontSize(8)
+            .fillColor("#000000");
+    };
 
     const prepareColWidth = () => {
 
@@ -262,7 +266,7 @@ function createTable(doc, table) {
 
         table.headers.forEach((header, i) => {
 
-            const colWidth = usableWidth * Number.parseFloat(header.width.replace("%", "") / 100)
+            const colWidth = (usableWidth - (table.headers.length * colSpacing)) * Number.parseFloat(header.width.replace("%", "") / 100)
 
             columnWidth.push(colWidth)
         })
@@ -316,6 +320,7 @@ function createTable(doc, table) {
     doc.moveTo(startX, rowBottomY - rowSpacing * 0.5)
         .lineTo(startX + usableWidth, rowBottomY - rowSpacing * 0.5)
         .lineWidth(2)
+        .strokeColor("#444444")
         .stroke();
 
     table.rows.forEach((row, i) => {
@@ -350,6 +355,7 @@ function createTable(doc, table) {
             .lineTo(startX + usableWidth, rowBottomY - rowSpacing * 0.5)
             .lineWidth(1)
             .opacity(0.7)
+            .strokeColor("#444444")
             .stroke()
             .opacity(1); // Reset opacity after drawing the line
     });

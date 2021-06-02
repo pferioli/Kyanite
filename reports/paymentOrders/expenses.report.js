@@ -5,13 +5,11 @@ const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
 const common = require('../common.report');
 
-var pageCounter = 0; var maxY = 0; var rowBottomY = 0; var startX, startY;
+var maxY = 0; var rowBottomY = 0; var startX, startY;
 
-var totalAmount = 0.00; var accountsCounter = 0; var totalMovementsCounter = 0;
+var amount = { total: 0.00, subTotalGroup: 0.00, subTotal: 0.00 };
 
 function createReport(paymentOrders, client, period, user, res) {
-
-    totalAmount = 0.00; accountsCounter = 0; totalMovementsCounter = 0; pageCounter = 0;
 
     let doc = new PDFDocument({
         size: "A4", margin: 50, bufferPages: true, autoFirstPage: false,
@@ -27,9 +25,9 @@ function createReport(paymentOrders, client, period, user, res) {
 
         maxY = doc.page.height - doc.page.margins.bottom;
 
-        startX = doc.page.margins.left;
-
         startY = doc.page.margins.top; rowBottomY = 0;
+
+        startX = doc.page.margins.left;
 
         doc.y = startY; doc.x = startX;
     });
@@ -43,6 +41,8 @@ function createReport(paymentOrders, client, period, user, res) {
     doc.moveDown();
 
     populateTable(doc, paymentOrders);
+
+    finalInformation(doc, user);
 
     generateFooter(doc)
 
@@ -91,7 +91,7 @@ function generateHeader(doc) {
 function generateCustomerInformation(doc, client, period) {
 
     doc
-        .fillColor("#444444")
+        .fillColor("#000000") //444444
         .fontSize(20)
         .text("Detalle de gastos", 50, 105, { width: 500, align: 'center' });
 
@@ -99,11 +99,13 @@ function generateCustomerInformation(doc, client, period) {
 
     doc
         .fontSize(14)
+        .fillColor("#000000")
         .font("Helvetica-Bold")
         .text(client.name, 50, 140, { width: 500, align: 'center' });
 
     doc
         .fontSize(12)
+        .fillColor("#000000")
         .font("Helvetica")
         .text(`período ${period.name} comprendido entre ${period.startDate} y ${period.endDate}`, 50, 160, { width: 500, align: 'center' });
 
@@ -127,6 +129,7 @@ async function generateFooter(doc) {
 
         doc
             .fontSize(10)
+            .fillColor("#444444")
             .text(common.formatDateTime(reportDate),
                 doc.page.margins.left + 10,
                 doc.page.height - 50,
@@ -140,6 +143,7 @@ async function generateFooter(doc) {
 
         doc
             .fontSize(10)
+            .fillColor("#444444")
             .text(`página ${i + 1} de ${range.count}`,
                 doc.page.width - doc.page.margins.right - Number.parseFloat(textWidth * 1.1),
                 doc.page.height - 50,
@@ -156,18 +160,95 @@ function populateTable(doc, paymentOrders) {
 
     let table0 = {
         headers: [
-            { name: 'ID', width: '10%', align: 'left' },
-            { name: 'Fecha', width: '20%', align: 'left' },
-            { name: 'Tipo', width: '30%', align: 'left' },
-            { name: 'Importe', width: '20%', align: 'left' },
-            { name: 'Usuario', width: '25%', align: 'left' }
+            { name: 'OP', width: '10%', align: 'left' },
+            { name: 'Fecha', width: '10%', align: 'left' },
+            { name: 'Factura', width: '17%', align: 'left' },
+            { name: 'Proveedor', width: '23%', align: 'left' },
+            { name: 'Detalle', width: '25%', align: 'left' },
+            { name: 'Importe', width: '15%', align: 'center' }
         ],
-        rows: []
+        rows: [],
+        primaryGroup: "",
+        secondaryGroup: ""
     };
 
-    let lastGroupId = 0; group = ""; let lastAccountImputationId = 0; accountingImputation = ""; isGroupOpen = false;
+    const new_group = (doc, groupname) => {
 
-    let index = 0; let groupName = "";
+        console.log("opening group " + groupname);
+
+        isGroupOpen = true; isSubgroupOpen = false; amount.subTotalGroup = 0.00;
+
+        table0.primaryGroup = groupname;
+
+        doc
+            .fontSize(12)
+            .font("Helvetica-Bold");
+
+        if (doc.y + 15 * common.heightMeassure(doc, groupname, { align: "left" }) > maxY)
+            doc.addPage();
+
+        doc.text(groupname, doc.page.margins.left, doc.y, { align: 'left' });
+        doc.moveDown(1);
+
+    };
+
+    const new_subgroup = (doc, subgroup) => {
+
+        console.log(`\t${subgroup}`);
+
+        isGroupOpen = true; isSubgroupOpen = true; amount.subTotal = 0.00;
+
+        table0.secondaryGroup = subgroup; table0.rows = [];
+
+
+    }
+
+    const close_subgroup = (doc) => {
+
+        if (isSubgroupOpen === false) return;
+
+        console.log(`closing subgroup ${table0.secondaryGroup}`);
+
+        isSubgroupOpen = false;
+
+        createTable(doc, table0);
+    };
+
+    const close_group = (doc) => {
+
+        if (isGroupOpen === false) return;
+
+        console.log("close group");
+
+        if (isSubgroupOpen === true) close_subgroup(doc); //si hay un subgrupo abierto, primero hay que cerrar la tabla
+
+        isGroupOpen = false; isSubgroupOpen = false;
+
+        doc
+            .moveDown(1)
+            .fontSize(10)
+            .font("Helvetica-Bold")
+            .text(`subtotal para el grupo ${table0.primaryGroup}: ${common.formatCurrency(amount.subTotalGroup)}`, doc.page.margins.left, doc.y, { align: 'center' })
+            .moveDown(1);
+    };
+
+    const add_row = (paymentOrder) => {
+        table0.rows.push(
+            [
+                paymentOrder.poNumberFormatted,
+                paymentOrder.paymentDate,
+                paymentOrder.paymentReceipt.receiptType.receiptType + " " + paymentOrder.paymentReceipt.receiptNumber,
+                paymentOrder.paymentReceipt.supplier.name,
+                paymentOrder.paymentReceipt.description,
+                common.formatCurrency(paymentOrder.amount)
+            ]);
+
+        amount.total += Number.parseFloat(paymentOrder.amount);
+        amount.subTotalGroup += Number.parseFloat(paymentOrder.amount);
+        amount.subTotal += Number.parseFloat(paymentOrder.amount);
+    }
+
+    let lastGroupId = 0, lastAccountImputationId = 0, isGroupOpen = false, isSubgroupOpen = false; let index = 0;
 
     do {
 
@@ -175,40 +256,50 @@ function populateTable(doc, paymentOrders) {
 
         if (lastGroupId !== paymentOrder.paymentReceipt.accountingImputation.accountingGroup.id) {
 
-            if (lastGroupId !== 0) { //cambio de grupo
-                console.log('------------------');
-            }
-
-            isGroupOpen = true;
-
             lastGroupId = paymentOrder.paymentReceipt.accountingImputation.accountingGroup.id;
 
-            group = paymentOrder.paymentReceipt.accountingImputation.accountingGroup.name;
+            close_group(doc); //cerramos cualquier grupo que pudiera estar abierto previamente
 
-            console.log(paymentOrder.paymentReceipt.accountingImputation.accountingGroup.name);
+            new_group(doc, paymentOrder.paymentReceipt.accountingImputation.accountingGroup.name);
         }
 
         if (lastAccountImputationId !== paymentOrder.paymentReceipt.accountingImputationId) {
 
             lastAccountImputationId = paymentOrder.paymentReceipt.accountingImputation.id;
 
-            console.log(`\t${paymentOrder.paymentReceipt.accountingImputation.name}`);
+            close_subgroup(doc);
+
+            new_subgroup(doc, paymentOrder.paymentReceipt.accountingImputation.name);
         }
 
+        add_row(paymentOrder);
+
         index += 1;
+
+        if (index === paymentOrders.length) close_group(doc);
 
     } while (index < paymentOrders.length);
 }
 
-function createTable(doc, table) {
+async function createTable(doc, table) {
 
     const usableWidth = (doc.page.width - doc.page.margins.left - doc.page.margins.right);
 
-    const rowSpacing = 5; var columnWidth = [];
+    const rowSpacing = 5; const colSpacing = 5; var columnWidth = [];
 
-    const prepareHeader = () => doc.font('Helvetica-Bold').fontSize(10);
+    const prepareHeader = () => {
+        doc
+            .font('Helvetica-Bold')
+            .fillColor("#000000")
+            .fontSize(10);
 
-    const prepareRow = (row, i) => doc.font('Helvetica').fontSize(8);
+    }
+    const prepareRow = (row, i) => {
+        doc
+            .font('Helvetica')
+            .fontSize(8)
+            .fillColor("#000000");
+    };
 
     const prepareColWidth = () => {
 
@@ -216,7 +307,7 @@ function createTable(doc, table) {
 
         table.headers.forEach((header, i) => {
 
-            const colWidth = usableWidth * Number.parseFloat(header.width.replace("%", "") / 100)
+            const colWidth = (usableWidth - (table.headers.length * colSpacing)) * Number.parseFloat(header.width.replace("%", "") / 100)
 
             columnWidth.push(colWidth)
         })
@@ -251,8 +342,17 @@ function createTable(doc, table) {
     prepareHeader();
 
     // Check to have enough room for header and first rows
-    if (startY + 5 * computeRowHeight(table.headers) > maxY)
+    if (startY + 3 * computeRowHeight(table.headers) > maxY)
         doc.addPage();
+
+    doc
+        .fontSize(10)
+        .font("Helvetica-Bold")
+        .fillColor("#000000")
+        .text(table.secondaryGroup, doc.page.margins.left, doc.y, { align: 'left' })
+        .moveDown(1);
+
+    startY = doc.y;
 
     // Print all headers
     table.headers.forEach((header, i) => {
@@ -270,6 +370,7 @@ function createTable(doc, table) {
     doc.moveTo(startX, rowBottomY - rowSpacing * 0.5)
         .lineTo(startX + usableWidth, rowBottomY - rowSpacing * 0.5)
         .lineWidth(2)
+        .strokeColor("#444444")
         .stroke();
 
     table.rows.forEach((row, i) => {
@@ -278,7 +379,7 @@ function createTable(doc, table) {
 
         // Switch to next page if we cannot go any further because the space is over.
         // For safety, consider 3 rows margin instead of just one
-        if (startY + 5 * rowHeight < maxY)
+        if (startY + 3 * rowHeight < maxY)
             startY = rowBottomY + rowSpacing;
         else
             doc.addPage();
@@ -290,10 +391,14 @@ function createTable(doc, table) {
         row.forEach((cell, i) => {
             const offset = computeColumnOffset(i);
 
-            doc.text(cell, offset, startY, {
-                width: columnWidth[i], //columnWidth,
-                align: table.headers[i].align //'left'
-            });
+            doc
+                .fillColor("#000000")
+                .text(cell, offset, startY,
+                    {
+                        width: columnWidth[i],
+                        align: table.headers[i].align
+                    }
+                );
         });
 
         // Refresh the y coordinate of the bottom of this row
@@ -304,12 +409,41 @@ function createTable(doc, table) {
             .lineTo(startX + usableWidth, rowBottomY - rowSpacing * 0.5)
             .lineWidth(1)
             .opacity(0.7)
+            .strokeColor("#444444")
             .stroke()
             .opacity(1); // Reset opacity after drawing the line
     });
 
-    doc.x = startX;
-    doc.moveDown();
+    doc.x = startX; doc.y = rowBottomY + rowSpacing
+
+    doc
+        .fontSize(8)
+        .font("Helvetica-Bold")
+        .fillColor("#000000")
+        .text(`subtotal para ${table.secondaryGroup}: ${common.formatCurrency(amount.subTotal)}`, doc.page.margins.left, doc.y, { align: 'right' })
+        .moveDown(1);
+}
+
+// <----- RESUMEN FINAL ----->
+
+function finalInformation(doc, user) {
+
+    if (doc.y + 200 > maxY) //verificamos que queda espacio para el resumen y la firma
+        doc.addPage();
+
+    doc
+        .moveDown(2)
+        .font("Helvetica-Bold")
+        .fontSize(12)
+        .text('Resumen general:', { align: 'left' })
+        .moveDown()
+        .fontSize(10);
+
+    doc.text(`Importe total ${common.formatCurrency(amount.total)}`, 80, doc.y, { align: 'left' });
+
+    doc.moveDown(2);
+
+    common.generateSignature(doc, user, { linesize: 174, startLine: 350, signatureHeight: doc.y });
 }
 
 module.exports = {
