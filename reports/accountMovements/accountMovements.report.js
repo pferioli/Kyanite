@@ -118,21 +118,21 @@ function generateCustomerInformation(doc, client, period) {
 
 async function generateFooter(doc) {
 
-    const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
-
     const reportDate = new Date;
+
+    const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
 
     for (i = range.start, end = range.start + range.count, range.start <= end; i < end; i++) {
         doc.switchToPage(i);
 
-        common.generateHr(doc, doc.page.height - 60)
+        common.generateHr(doc, doc.page.height - 50)
 
         doc
-            .fontSize(10)
+            .fontSize(8)
             .fillColor("#444444")
             .text(common.formatDateTime(reportDate),
                 doc.page.margins.left + 10,
-                doc.page.height - 50,
+                doc.page.height - 45,
                 {
                     align: "left",
                     lineBreak: false
@@ -142,11 +142,11 @@ async function generateFooter(doc) {
         const textWidth = doc.widthOfString(`página ${i + 1} de ${range.count}`, { align: "right" });
 
         doc
-            .fontSize(10)
+            .fontSize(8)
             .fillColor("#444444")
             .text(`página ${i + 1} de ${range.count}`,
                 doc.page.width - doc.page.margins.right - Number.parseFloat(textWidth * 1.1),
-                doc.page.height - 50,
+                doc.page.height - 45,
                 {
                     align: "right", lineBreak: false
                 }

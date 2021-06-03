@@ -243,7 +243,7 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
             }
         });
 
-        worksheet.cell(rowIndex, HEADER_COL_DATE).date(paymentOrder.paymentReceipt.emissionDate).style({
+        worksheet.cell(rowIndex, HEADER_COL_DATE).date(paymentOrder.paymentDate).style({
             alignment: {
                 wrapText: false,
                 horizontal: 'center',
