@@ -12,7 +12,7 @@
 
             <span class="table-title">Emision de Recibos - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
 
-            <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+            <div class="preloader-wrapper small active" id="progressBar1" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
                     <div class="circle-clipper left">
                         <div class="circle"></div>
@@ -36,6 +36,10 @@
                 <button id="button-print" onClick='confirmDialog(this);' class="waves-effect btn-flat nopadding"><i class="material-icons">print</i></button>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
+        </div>
+    
+        <div id="progressBar2" class="progress" style="margin-top: 10px; display:none"> 
+            <div id="determinate" class="determinate" style="width: 0%"></div>
         </div>
 
         <div id="hide-dt" style="display:none">
@@ -109,7 +113,13 @@
 
 <%- include ("../../partials/footer") %>
 
+<!-- <script src="https://cdn.socket.io/4.1.1/socket.io.min.js" integrity="sha384-cdrFIqe3RasCMNE0jeFG9xJHog/tgOVC1E9Lzve8LQN1g5WUHo0Kvk1mawWjxX7a" crossorigin="anonymous"></script> -->
+
+<script src="/socket.io/socket.io.js"></script>
+
 <script>
+
+    var socket = io();
 
     document.addEventListener("DOMContentLoaded", function () {
         var elems = document.querySelectorAll(".modal");
@@ -208,7 +218,7 @@
             ],
             fnInitComplete: function () {
                 $('#hide-dt').show();
-                $('#progress').hide();
+                $('#progressBar1').hide();
             },
         });
 
@@ -250,6 +260,8 @@
 
     function printSelectedReceipts(clientId, periodId){
         
+        $('#progressBar2').show();
+
         var table = $('#datatable').DataTable();
         
         var rows = table.rows( { selected: true } );
@@ -279,6 +291,28 @@
             document.body.appendChild(a);
             a.click();
         })
+        .finally(()=>{
+            $('#progressBar2').hide();
+        })
     }
 
+    socket.on('receiptIssuance', function(msg){
+        
+        let message = JSON.parse(msg)
+        
+        if(message.status==="started"){
+            $('#determinate').css('width', '0%');
+        }
+
+        if(message.status==="inprogress"){
+            const progress = message.progress;
+            $('#determinate').css('width', `${progress}%`);
+        }
+        
+        if(message.status==="finished"){
+            $('#determinate').css('width', '100%');
+        }
+        
+        //console.log(msg);
+    });
 </script>

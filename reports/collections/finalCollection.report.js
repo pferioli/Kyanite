@@ -5,9 +5,13 @@ const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
 const common = require('../common.report');
 
+const { webSocket } = require('../../bin/server');
+
 const _ = require("underscore");
 
 async function createReport(collections, res) {
+
+    webSocket.io.emit("receiptIssuance", JSON.stringify({ status: 'started' }));
 
     let doc = new PDFDocument(
         {
@@ -55,7 +59,14 @@ async function createReport(collections, res) {
         generateSecuritiesTable(doc, collection, 185);
 
         generateFooter(doc);
+
+        let progress = Number.parseInt(Number.parseFloat((i + 1) / collections.length) * 100);
+
+        webSocket.io.emit("receiptIssuance", JSON.stringify({ status: 'inprogress', progress: progress }));
+
     };
+
+    webSocket.io.emit("receiptIssuance", JSON.stringify({ status: 'finished' }));
 
     const reportName = "recibos_cobranzas.pdf"
 

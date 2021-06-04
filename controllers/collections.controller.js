@@ -938,7 +938,7 @@ module.exports.collectionsReport = async function (req, res) {
     Collection.findAll({
         where: {
             clientId: clientId,
-            periodId: period.id
+            [Op.or]: [{ periodId: period.id }, { updatePeriodId: period.id}]
         },
         include: [{ model: Client }, { model: BillingPeriod },
         { model: User, include: [{ model: Model.userSignature }] },

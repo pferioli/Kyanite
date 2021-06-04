@@ -178,7 +178,8 @@
     });
 
     function openInNewTab(url) {
-       var redirectWindow = window.open(url, '_blank');
+        var redirectWindow = window.open(url, '_blank');
+        redirectWindow.document.title = "Orden de pago";
         redirectWindow.location;
     };
     

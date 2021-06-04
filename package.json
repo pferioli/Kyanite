@@ -1,6 +1,6 @@
 {
   "name": "kyanite",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "config": {
     "entrypoint": "./bin/server.js"
@@ -53,6 +53,7 @@
     "request": "^2.88.2",
     "sequelize": "^6.3.4",
     "serve-favicon": "^2.5.0",
+    "socket.io": "^4.1.2",
     "strip-bom-stream": "^4.0.0",
     "thirty-two": "^1.0.2",
     "underscore": "^1.12.1",

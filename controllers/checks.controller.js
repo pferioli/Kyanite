@@ -363,7 +363,11 @@ module.exports.updateStatus = async function (req, res, next) {
 
                                 const collectionSecurity = await CollectionSecurity.findOne({ where: { checkId: splittedCheck.id } });
 
-                                await Collection.update({ statusId: CollectionStatus.eStatus.get('deleted').value },
+                                await Collection.update(
+                                    {
+                                        statusId: CollectionStatus.eStatus.get('deleted').value,
+                                        updatePeriodId: periodId
+                                    },
                                     { where: { id: collectionSecurity.collectionId } });
                             }
 

@@ -128,7 +128,7 @@ module.exports.generateExcel = async function (client, collections, period, user
 
         //Verificamos si es una cobranza unica, un DNI o una cobranza dividida en varias propiedades...
 
-        if (collection.Properties === null) { //Deposito no identificado
+        if ((collection.Properties === null)||(collection.Properties.length === 0)) { //Deposito no identificado
 
             worksheet.cell(rowIndex, HEADER_COL_PAYMENT_RECEIPT).string(collection.receiptNumber).style({
                 alignment: {

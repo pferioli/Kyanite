@@ -19,21 +19,24 @@ app.set("port", port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var httpServer = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
-server.on("error", onError);
-server.on("listening", onListening);
+httpServer.listen(port);
+httpServer.on("error", onError);
+httpServer.on("listening", onListening);
 
 /***
  * Enable HTTPS if running locally
  */
 
+const WebSocketHelper = require('../helpers/websockets.helper'); var webSocket;
+
 if (process.env.LOCAL_HTTPS_PORT) {
+
   var https = require("https");
   var fs = require("fs");
   var path = require("path");
@@ -46,13 +49,18 @@ if (process.env.LOCAL_HTTPS_PORT) {
     ),
   };
 
-  https
-    .createServer(sslOptions, app)
-    .listen(normalizePort(process.env.LOCAL_HTTPS_PORT), function () {
-      console.log(
-        "server starting on https://localhost:" + process.env.LOCAL_HTTPS_PORT
-      );
-    });
+  const httpsServer = https.createServer(sslOptions, app)
+
+  httpsServer.listen(normalizePort(process.env.LOCAL_HTTPS_PORT), function () {
+    console.log(
+      "server starting on https://localhost:" + process.env.LOCAL_HTTPS_PORT
+    );
+  });
+
+  webSocket = new WebSocketHelper(httpsServer);
+
+} else {
+  webSocket = new WebSocketHelper(httpServer);
 };
 
 /**
@@ -106,7 +114,12 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
+  var addr = httpServer.address();
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   console.log("Listening on " + bind);
 }
+
+module.exports = {
+  webSocket,
+  server: httpServer
+};

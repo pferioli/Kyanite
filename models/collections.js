@@ -71,6 +71,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.TEXT('long')
         },
+        updatePeriodId: {
+            allowNull: true,
+            type: DataTypes.INTEGER,
+            defaultValue: null
+        },
         statusId: {
             allowNull: false,
             type: DataTypes.INTEGER
