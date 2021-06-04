@@ -35,6 +35,10 @@ router.get("/client/:clientId/reassign/:collectionId", function (req, res, next)
     collectionsController.showReassignForm(req, res);
 });
 
+router.get("/client/:clientId/report/download", function (req, res, next) {
+    collectionsController.collectionsReport(req, res);
+});
+
 router.post("/reassign", function (req, res, next) {
     collectionsController.reassingCollection(req, res);
 });

@@ -916,6 +916,60 @@ module.exports.createInvoice = function (req, res) {
         })
 };
 
+
+module.exports.collectionsReport = async function (req, res) {
+
+    const { generateExcel } = require("../reports/collections/collectionsExcel.report");
+
+    const clientId = req.params.clientId;
+
+    const client = await Client.findByPk(clientId);
+
+    const period = await BillingPeriod.findOne({
+        where: { clientId: clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value },
+    });
+
+    if (period === null) {
+        req.flash("warning", "No hay ningun período de liquidación activo");
+        res.redirect('/incomes/collections/client/' + clientId);
+        return;
+    }
+
+    Collection.findAll({
+        where: {
+            clientId: clientId,
+            periodId: period.id
+        },
+        include: [{ model: Client }, { model: BillingPeriod },
+        { model: User, include: [{ model: Model.userSignature }] },
+        { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
+        { model: CollectionConcept, as: "Concepts", },
+        {
+            model: CollectionSecurity, as: "Securities", include: [
+                {
+                    model: CheckSplitted, include: [{ model: Model.check }]
+                    //where: { checkId: { [Op.ne]: null } }
+                },
+                {
+                    model: Account, include: [{ model: AccountType }, { model: Model.bank }]
+                    //where: { accountId: { [Op.ne]: null } }
+                }]
+        }],
+        order: [["receiptNumber", "ASC"]]
+    })
+        .then(collections => {
+            if (collections.length > 0) {
+                generateExcel(client, collections, period, req.user, res);
+            } else {
+                req.flash("warning", "El deposito seleccionado corresponde a un depósito no identificado (DNI)");
+                res.redirect('/incomes/collections/client/' + clientId);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        })
+};
+
 //-----------------------------------------------------------------
 // AJAX
 //-----------------------------------------------------------------
