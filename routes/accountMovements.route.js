@@ -36,7 +36,6 @@ router.post("/new/:clientId", function (req, res, next) {
     accountMovementsController.addNew(req, res);
 });
 
-
 //REPORTS...
 
 router.get("/client/:clientId/report", function (req, res, next) {

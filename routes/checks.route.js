@@ -61,6 +61,13 @@ router.get("/client/:clientId", function (req, res, next) {
     checksController.listAll(req, res);
 });
 
+
+//REPORTS...
+
+router.get("/client/:clientId/report", function (req, res, next) {
+    checksController.walletChecksReport(req, res);
+});
+
 //AJAX
 
 router.get("/ajax/getBanks", function (req, res, next) {

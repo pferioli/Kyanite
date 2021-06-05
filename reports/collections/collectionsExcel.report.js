@@ -2,6 +2,8 @@
 
 var Excel = require('excel4node');
 
+const CollectionStatus = require('../../utils/statusMessages.util').Collection;
+
 module.exports.generateExcel = async function (client, collections, period, user, res) {
 
     var workbook = new Excel.Workbook();
@@ -124,7 +126,17 @@ module.exports.generateExcel = async function (client, collections, period, user
             }
         });
 
-        worksheet.cell(rowIndex, HEADER_COL_AMOUNT_SECURITIES).number(Number.parseFloat(collection.amountSecurities)).style(styleCurrencyFormat);
+        let amount = 0.00;
+
+        if (collection.statusId === CollectionStatus.eStatus.get('deleted').value) {
+            amount = (-1) * Number.parseFloat(collection.amountSecurities);
+        } else {
+            amount = Number.parseFloat(collection.amountSecurities);
+        }
+
+        worksheet.cell(rowIndex, HEADER_COL_AMOUNT_SECURITIES).number(amount).style(styleCurrencyFormat);
+
+        total += Number.parseFloat(amount);
 
         //Verificamos si es una cobranza unica, un DNI o una cobranza dividida en varias propiedades...
 
@@ -226,7 +238,6 @@ module.exports.generateExcel = async function (client, collections, period, user
             rowIndex += rowIndexOffset - 1;
         }
 
-        total += Number.parseFloat(collection.amountSecurities);
     }
 
     rowIndex += 1; worksheet.cell(rowIndex, 1, rowIndex, HEADERS_LENGTH - 1, true).string("Total Valores:").style(

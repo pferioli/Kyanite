@@ -156,6 +156,7 @@
     
     function openInNewTab(url) {
         var redirectWindow = window.open(url, '_blank');
+        redirectWindow.document.title = "Detalle de movimientos";
         redirectWindow.location;
     };
     

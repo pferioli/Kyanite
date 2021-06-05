@@ -425,8 +425,38 @@ module.exports.updateStatus = async function (req, res, next) {
         winston.error(`an error ocurred when user "${req.user.id} tryed to update check status #${checkId} - ${err}`);
         res.redirect("/checks/client/" + clientId);
     }
-
 }
+//---------------------------------------------------------------------------//
+// REPORTS
+//---------------------------------------------------------------------------//
+
+module.exports.walletChecksReport = async function (req, res) {
+
+    const { createReport } = require("../reports/checks/walletChecks.report");
+
+    const clientId = req.params.clientId;
+
+    const client = await Client.findByPk(clientId);
+
+    let options = {
+        where: { clientId: clientId, statusId: CheckStatus.eStatus.get('wallet').value},
+        include: [
+            { model: User }, { model: Account, include: [{ model: AccountType }] },
+            { model: Bank }, { model: BillingPeriod },
+        ]
+    };
+
+    Check.findAll(options)
+        .then(function (checks) {
+            createReport(checks, client, req.user, res);            
+        })
+        .catch(err => {
+            req.flash("error", "Ocurrio un error y no se pudo generar el reporte de cheques en cartera");
+            winston.error(`an error ocurred when user "${req.user.id} requested wallet checks report for customer #${clientId} - ${err}`);
+            res.redirect("/checks/client/" + clientId);
+        })
+};
+
 //---------------------------------------------------------------------------//
 // AJAX
 //---------------------------------------------------------------------------//
