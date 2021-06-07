@@ -1,17 +1,19 @@
 const PDFDocument = require("pdfkit");
 const path = require("path");
+const moment = require('moment');
 
 const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
 const common = require('../common.report');
+const { now } = require("moment");
 
-var maxY = 0; var rowBottomY = 0; var startX, startY;
+var maxY = 0; var rowBottomY = 0; var startX, startY; var pageNumber = 0;
 
-var totalAmount = 0.00;
+var amount = { total: 0.00, subTotalGroup: 0.00, subTotal: 0.00 };
 
 function createReport(checks, client, user, res) {
 
-    totalAmount = 0.00;
+    pageNumber = 0; amount = { total: 0.00, subTotal: 0.00 }
 
     let doc = new PDFDocument({
         size: "A4", margin: 50, bufferPages: true, autoFirstPage: false,
@@ -25,11 +27,28 @@ function createReport(checks, client, user, res) {
 
     doc.on('pageAdded', () => {
 
-        maxY = doc.page.height - doc.page.margins.bottom;
+        maxY = doc.page.height - doc.page.margins.bottom - 60; // header y footer
+
+        if (pageNumber > 0) {
+
+            doc
+                .fillColor("#444444")
+                .font("Helvetica")
+                .fontSize(8)
+                .text("Detalle de movimientos (cont...)", doc.page.margins.left, doc.page.margins.top + 5,
+                    {
+                        width: (doc.page.width - doc.page.margins.left - doc.page.margins.right),
+                        align: 'center'
+                    });
+
+            common.generateHr(doc, doc.y + 5);
+        }
+
+        pageNumber++;
+
+        startY = doc.page.margins.top + 35; rowBottomY = 0;
 
         startX = doc.page.margins.left;
-
-        startY = doc.page.margins.top; rowBottomY = 0;
 
         doc.y = startY; doc.x = startX;
     });
@@ -42,7 +61,7 @@ function createReport(checks, client, user, res) {
 
     doc.moveDown();
 
-
+    populateTable(doc, checks)
 
     finalInformation(doc, user);
 
@@ -152,20 +171,19 @@ async function generateFooter(doc) {
 
 // <----- TABLA DE CHEQUES EN CARTERA ----->
 
-function populateTable(doc, paymentOrders) {
+function populateTable(doc, checks) {
 
     let table0 = {
-        headers: ['Número', 'Detalle', 'Cuenta', 'Fecha de Emisión', 'Fecha de Pago', 'Fecha de Vencimiento', 'Importe'],
+        headers: ['Número', 'Detalle', 'Fecha de Emisión', 'Fecha de Pago', 'Fecha de Vencimiento', 'Importe'],
         rows: [],
         primaryGroup: "",
         secondaryGroup: "",
         columns: [
-            { width: '10%', align: 'left' },
+            { width: '15%', align: 'left' },
+            { width: '20%', align: 'left' },
             { width: '15%', align: 'left' },
             { width: '15%', align: 'left' },
-            { width: '15%', align: 'left' },
-            { width: '15%', align: 'left' },
-            { width: '15%', align: 'left' },
+            { width: '20%', align: 'left' },
             { width: '15%', align: 'right' }
         ]
     };
@@ -174,20 +192,13 @@ function populateTable(doc, paymentOrders) {
 
         console.log("opening group " + groupname);
 
-        isGroupOpen = true; amount.subTotalGroup = 0.00;
+        isGroupOpen = true;
+
+        amount.subTotal = 0.00;
+
+        table0.rows = [];
 
         table0.primaryGroup = groupname;
-
-        if (doc.y + common.heightMeassure(doc, groupname, { align: "left" }) + 100 > maxY)
-            doc.addPage();
-
-        doc
-            .fontSize(12)
-            .fillColor("#000000")
-            .font("Helvetica-Bold")
-            .text(groupname, doc.page.margins.left, doc.y, { align: 'left' });
-
-        doc.moveDown(1);
     };
 
     const close_group = (doc) => {
@@ -198,24 +209,34 @@ function populateTable(doc, paymentOrders) {
 
         isGroupOpen = false;
 
-        doc
-            .moveDown(1)
-            .fontSize(10)
-            .fillColor("#000000")
-            .font("Helvetica-Bold")
-            .text(`subtotal para el grupo ${table0.primaryGroup}: ${common.formatCurrency(amount.subTotalGroup)}`, doc.page.margins.left, doc.y, { align: 'center' })
-            .moveDown(1);
+        createTable(doc, table0);
+
+        // doc
+        //     .moveDown(1)
+        //     .fontSize(10)
+        //     .fillColor("#000000")
+        //     .font("Helvetica-Bold")
+        //     .text(`subtotal para el grupo ${table0.primaryGroup}: ${common.formatCurrency(amount.subTotal)}`, doc.page.margins.left, doc.y, { align: 'center' })
+        //     .moveDown(1);
+
     };
 
     const add_row = (check) => {
+
+        var dueDate = moment(check.dueDate);
+
         table0.rows.push(
             [
-                
+                check.number,
+                check.comments,
+                common.formatDate(check.emissionDate),
+                common.formatDate(check.paymentDate),
+                `${common.formatDate(check.dueDate)} (${dueDate.diff(now(), 'days')} días)`,
                 common.formatCurrency(check.amount)
             ]);
 
         amount.total += Number.parseFloat(check.amount);
-        amount.subTotalGroup += Number.parseFloat(check.amount);
+        amount.subTotal += Number.parseFloat(check.amount);
     }
 
     let lastBankId = 0, isGroupOpen = false; let index = 0;
@@ -224,33 +245,196 @@ function populateTable(doc, paymentOrders) {
 
         const check = checks[index];
 
-        if (lastBankId !== checks.bank.id) {
+        if (lastBankId !== check.bank.id) {
 
-            lastBankId = checks.bank.id;
+            lastBankId = check.bank.id;
 
             close_group(doc); //cerramos cualquier grupo que pudiera estar abierto previamente
 
-            new_group(doc, checks.bank.name);
+            new_group(doc, check.bank.name);
         }
 
-        if (lastAccountImputationId !== paymentOrder.paymentReceipt.accountingImputationId) {
-
-            lastAccountImputationId = paymentOrder.paymentReceipt.accountingImputation.id;
-
-            close_subgroup(doc);
-
-            new_subgroup(doc, paymentOrder.paymentReceipt.accountingImputation.name);
-        }
-
-        add_row(paymentOrder);
+        add_row(check);
 
         index += 1;
 
-        if (index === paymentOrders.length) close_group(doc);
+        if (index === checks.length) close_group(doc);
 
-    } while (index < paymentOrders.length);
+    } while (index < checks.length);
 }
 
+
+async function createTable(doc, table) {
+
+    const usableWidth = (doc.page.width - doc.page.margins.left - doc.page.margins.right);
+
+    const rowSpacing = 5; const colSpacing = 10; var columnWidth = [];
+
+    const prepareColWidth = () => {
+
+        columnWidth = [];
+
+        table.columns.forEach((column, i) => {
+
+            const colWidth = (usableWidth - table.columns.length * rowSpacing) * Number.parseFloat(column.width.replace("%", "") / 100); // - colSpacing
+
+            columnWidth.push(colWidth)
+        })
+    }
+
+    const computeColumnOffset = (index) => {
+        let offset = startX;
+        for (i = 0; i < index; i++)
+            offset = offset + Number.parseFloat(columnWidth[i]) + rowSpacing;
+
+        if (index === (table.columns.length - 1))
+            offset -= rowSpacing;
+
+        return offset;
+    };
+
+    const computeRowHeight = (row) => {
+
+        let maxHeight = 0;
+
+        row.forEach((cell, i) => {
+
+            const options = {
+                width: columnWidth[i], //columnWidth,
+                align: table.columns[i].align //'left'
+            };
+
+            const cellHeight = doc.heightOfString(cell, options);
+            const cellWidth = doc.widthOfString(cell, options);
+
+            maxHeight = Math.max(maxHeight, cellHeight);
+        });
+
+        return maxHeight + rowSpacing;
+    };
+
+    startY = doc.y;
+
+    prepareColWidth();
+
+    const printHeaders = () => {
+
+        const prepareHeader = () => {
+            doc
+                .font('Helvetica-Bold')
+                .fillColor("#000000")
+                .fontSize(10);
+        }
+
+        prepareHeader(); // Allow the user to override style for headers
+
+        // Print all headers
+        table.headers.forEach((header, i) => {
+            const offset = computeColumnOffset(i);
+            doc.text(header, offset, startY, { //i * columnContainerWidth
+                width: columnWidth[i], //columnWidth,
+                align: 'left'
+            });
+        });
+
+        // Refresh the y coordinate of the bottom of the headers row
+        rowBottomY = Math.max(startY + computeRowHeight(table.headers), rowBottomY);
+
+        // Separation line between headers and rows
+        doc.moveTo(startX, rowBottomY - rowSpacing * 0.5)
+            .lineTo(startX + usableWidth, rowBottomY - rowSpacing * 0.5)
+            .lineWidth(2)
+            .strokeColor("#444444")
+            .stroke();
+    }
+
+    const printRows = () => {
+
+        const prepareRow = (row, i) => {
+            doc
+                .font('Helvetica')
+                .fontSize(8)
+                .fillColor("#000000");
+        };
+
+        table.rows.forEach((row, i) => {
+
+            prepareRow();
+
+            const rowHeight = computeRowHeight(row);
+
+            // Switch to next page if we cannot go any further because the space is over.
+            // For safety, consider 3 rows margin instead of just one
+            if (startY + 2 * rowHeight < maxY)
+                startY = rowBottomY + rowSpacing;
+            else {
+                doc.addPage();
+
+                printHeaders();
+
+                startY = rowBottomY + rowSpacing;
+            }
+
+            // Allow the user to override style for rows
+            prepareRow(row, i);
+
+            // Print all cells of the current row
+            row.forEach((cell, i) => {
+                const offset = computeColumnOffset(i);
+
+                doc
+                    .fillColor("#000000")
+                    .text(cell, offset, startY,
+                        {
+                            width: columnWidth[i],
+                            align: table.columns[i].align
+                        }
+                    );
+            });
+
+            // Refresh the y coordinate of the bottom of this row
+            rowBottomY = Math.max(startY + rowHeight, rowBottomY);
+
+            // Separation line between rows
+            doc.moveTo(startX, rowBottomY - rowSpacing * 0.5)
+                .lineTo(startX + usableWidth, rowBottomY - rowSpacing * 0.5)
+                .lineWidth(1)
+                .opacity(0.7)
+                .strokeColor("#444444")
+                .stroke()
+                .opacity(1); // Reset opacity after drawing the line
+        });
+
+    }
+
+    // Check to have enough room for header and first rows
+
+    if (doc.y + common.heightMeassure(doc, table.primaryGroup, { align: "left" }) + 100 > maxY)
+        doc.addPage();
+
+    doc
+        .fontSize(12)
+        .fillColor("#000000")
+        .font("Helvetica-Bold")
+        .text(table.primaryGroup, doc.page.margins.left, doc.y, { align: 'left' });
+
+    doc.moveDown(1);
+
+    startY = doc.y;
+
+    printHeaders();
+
+    printRows();
+
+    doc.x = startX; doc.y = rowBottomY + rowSpacing
+
+    doc
+        .fontSize(8)
+        .font("Helvetica-Bold")
+        .fillColor("#000000")
+        .text(`subtotal para ${table.primaryGroup}: ${common.formatCurrency(amount.subTotal)}`, doc.page.margins.left, doc.y, { align: 'right' })
+        .moveDown(1);
+}
 // <----- RESUMEN FINAL ----->
 
 function finalInformation(doc, user) {
@@ -266,7 +450,7 @@ function finalInformation(doc, user) {
         .moveDown()
         .fontSize(10);
 
-    doc.text(`Importe total ${common.formatCurrency(totalAmount)}`, 80, doc.y, { align: 'left' });
+    doc.text(`Importe total ${common.formatCurrency(amount.total)}`, 80, doc.y, { align: 'left' });
 
     doc.moveDown(2);
 

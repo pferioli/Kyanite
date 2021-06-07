@@ -35,9 +35,18 @@ module.exports.listAll = async function (req, res, next) {
 
     const client = await Client.findByPk(clientId);
 
+    const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
+
+    const status = (showAll === true) ?
+        [CheckStatus.eStatus.get('wallet').value, CheckStatus.eStatus.get('deposited').value,
+        CheckStatus.eStatus.get('accredited').value, CheckStatus.eStatus.get('delivered').value,
+        CheckStatus.eStatus.get('rejected').value, CheckStatus.eStatus.get('cancelled').value] : [CheckStatus.eStatus.get('wallet').value];
+
     let options = {
         subQuery: false,
-        where: { clientId: clientId },
+        where: {
+            clientId: clientId, statusId: { [Op.in]: status }
+        },
         include: [
             { model: User }, { model: Account, include: [{ model: AccountType }] },
             { model: Bank }, { model: BillingPeriod },
@@ -52,7 +61,7 @@ module.exports.listAll = async function (req, res, next) {
     Check.findAll(options).then(function (checks) {
         res.render('checks/checks', {
             menu: CURRENT_MENU,
-            data: { checks: checks, client: client },
+            data: { checks: checks, client: client }, params: { showAll: showAll }
         });
     });
 };
@@ -439,7 +448,7 @@ module.exports.walletChecksReport = async function (req, res) {
     const client = await Client.findByPk(clientId);
 
     let options = {
-        where: { clientId: clientId, statusId: CheckStatus.eStatus.get('wallet').value},
+        where: { clientId: clientId, statusId: CheckStatus.eStatus.get('wallet').value },
         include: [
             { model: User }, { model: Account, include: [{ model: AccountType }] },
             { model: Bank }, { model: BillingPeriod },
@@ -448,7 +457,7 @@ module.exports.walletChecksReport = async function (req, res) {
 
     Check.findAll(options)
         .then(function (checks) {
-            createReport(checks, client, req.user, res);            
+            createReport(checks, client, req.user, res);
         })
         .catch(err => {
             req.flash("error", "Ocurrio un error y no se pudo generar el reporte de cheques en cartera");

@@ -9,8 +9,13 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
-    const clientId = req.body.clientId;
-    res.redirect("/checks/client/" + clientId);
+
+    let redirectUrl = '/checks/client/' + req.body.clientId
+
+    if (req.query.showAll) redirectUrl = redirectUrl + '?showAll=' + req.query.showAll;
+
+    res.redirect(redirectUrl);
+
 });
 
 //SPLITTED CHECKS
