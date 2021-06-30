@@ -48,3 +48,24 @@ async function listBillingPeriodsWithPendingPaymentReceipts(clientId) {
         console.log(err);
     }
 }
+
+async function getPaymentReceiptById(paymentReceiptId) {
+
+    try {
+
+        if (paymentReceiptId === undefined) return;
+        
+        let url = '/expenses/paymentReceipts/ajax/getPaymentReceiptById/' + paymentReceiptId;
+
+        const response = await fetch(url);
+
+        if (response.status == 200) {
+            var data = await response.json();
+            return data;
+        } else {
+            throw "Respuesta incorrecta del servidor"
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}

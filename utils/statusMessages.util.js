@@ -52,6 +52,19 @@ module.exports.PaymentOrder = class {
     }
 }
 
+module.exports.CreditNote = class {
+
+    constructor() { }
+
+    static get Status() {
+        return ["Deshabilitada", "Pendiente", "En Proceso", "Procesada", "Anulada"];
+    }
+
+    static get eStatus() {
+        return new Enum({ 'disabled': 0, 'pending': 1, 'inprogress': 2, 'processed': 3, 'deleted': 4 })
+    }
+}
+
 module.exports.Check = class {
 
     constructor() { }

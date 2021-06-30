@@ -65,6 +65,10 @@ router.get("/ajax/types/:id", function (req, res, next) {
     paymentReceiptsController.receiptTypesByID(req, res);
 });
 
+router.get("/ajax/getPaymentReceiptById/:paymentReceipt", function (req, res, next) {
+    paymentReceiptsController.getPaymentReceiptById(req, res);
+});
+
 router.get("/ajax/pending/getSuppliersList/:clientId", function (req, res, next) {
     paymentReceiptsController.getPendingSuppliersList(req, res);
 });

@@ -492,3 +492,19 @@ module.exports.listBillingPeriodsWithPendingPaymentReceipts = async function (re
 
     res.send({ active: activePeriod, previous: previousPeriods });
 };
+
+module.exports.getPaymentReceiptById = async function (req, res) {
+
+    const paymentReceiptId = req.params.paymentReceipt;
+
+    PaymentReceipt.findByPk(paymentReceiptId,
+        {
+            include: [
+                { model: Supplier }, { model: ReceiptType }, { model: BillingPeriod }, { model: User }, { model: PaymentReceiptImage },
+                { model: AccountingImputation, include: [{ model: AccountingGroup }] }
+            ],
+        }
+    ).then((paymentReceipt) => {
+        res.send(paymentReceipt);
+    });
+};

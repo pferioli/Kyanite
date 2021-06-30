@@ -65,6 +65,13 @@
     <% } %>
 <%}%>
 
+<% if (locals.menu==='creditNotes' ) { %>
+    <a href="/creditNotes" class="breadcrumb">Notas de crédito</a>
+     <% if(locals.data) { %>
+        <a href="/creditNotes/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+    <% } %>
+<%}%>
+
 <% if (locals.menu==='collections' ) { %>
     <a href="/incomes" class="breadcrumb">Ingresos</a>
     <a href="/incomes/collections" class="breadcrumb">Cobranzas</a>

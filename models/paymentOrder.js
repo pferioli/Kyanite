@@ -3,7 +3,7 @@ const {
     Model
 } = require('sequelize');
 
-const PaymentOrdertStatus = require('../utils/statusMessages.util').PaymentOrder;
+const PaymentOrderStatus = require('../utils/statusMessages.util').PaymentOrder;
 
 module.exports = (sequelize, DataTypes) => {
 
@@ -70,7 +70,7 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: new DataTypes.VIRTUAL(DataTypes.STRING, ['statusId']),
             get: function () {
-                return PaymentOrdertStatus.Status[this.get('statusId')];
+                return PaymentOrderStatus.Status[this.get('statusId')];
             }
         },
         userId: {

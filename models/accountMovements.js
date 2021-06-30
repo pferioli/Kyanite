@@ -72,6 +72,7 @@ module.exports = (sequelize, DataTypes) => {
                     case 'S': return ('Saldo Período Anterior');
                     case 'I': return ('Importación de Cobranza');
                     case 'J': return ('Ajuste de Saldo Manual');
+                    case 'N': return ('Nota de Crédito');
                     default: return ('Otro');
                 }
             },

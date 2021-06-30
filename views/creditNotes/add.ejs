@@ -1,0 +1,253 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" method="post" action="/creditNotes/client/<%=data.client.id%>/new">
+            <div class="card">
+                <div class="card-content" id="cardContentDiv">
+                    <span class="card-title">Cree una nueva Nota de Crédito para una factura o comprobante</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
+                        </div>
+                    </div>
+
+                     <div class="row">
+                        <div class="input-field col s7">
+                            <i class="material-icons prefix">storefront</i>
+                            <select id="supplierSelect">
+                                <option value="" disabled selected>Seleccione un proveedor</option>
+                                <% for(var i=0; i < data.suppliers.length; i++) { %>
+                                    <option value="<%=data.suppliers[i].id%>"><%= data.suppliers[i].name %></option>
+                                <% } %>
+                            </select>
+                            <label>Nombre del Proveedor</label>
+                            <input type="hidden" name="supplierId" id="supplierId" />
+                        </div>
+                        <div class="input-field col s5">
+                            <i class="material-icons prefix">receipt_long</i>
+                            <select id="paymentReceiptSelect">
+                                <option value="" disabled selected>Seleccione un proveedor primero</option>
+                            </select>
+                            <label for="paymentReceiptSelect">Factura o Comprobante</label>
+                            <input type="hidden" name="receiptId" id="receiptId" />
+                        </div>
+                         <div class="input-field col s9">
+                            <i class="material-icons prefix">info</i>
+                            <input id="paymentReceiptDescription" type="text" value="" readonly />
+                            <label for="paymentReceiptDescription">Detalle del servicio o de la factura</label>
+                        </div>
+                         <div class="input-field col s3">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="paymentReceiptAmount"  type="number" min="0.00" step="0.01" class="validate" readonly />
+                            <label for="amount">Importe de la factura</label>
+                        </div>                      
+                    </div>
+
+                    <div class="row">                        
+                        <div class="input-field col s7">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="accountSelect" required >
+                                <option value="" disabled selected>Seleccione la cuenta</option>
+                                <% for(var i=0; i < data.accounts.length; i++) { %>
+                                    <option value="<%=data.accounts[i].id%>">[<%=data.accounts[i].accountType.account%>] <%=data.accounts[i].accountType.description%> (ID:<%=data.accounts[i].id%>)</option>
+                                <% } %>
+                            </select>
+                            <label>Cuenta para la acreditación de fondos</label>
+                            <input type="hidden" name="accountId" id="accountId" />
+                        </div>
+    
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
+                            <label for="dtpEmissionDate">Fecha</label>
+                            <input type="hidden" name="emissionDate" id="emissionDate" />
+                        </div>
+
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="creditNoteAmount" name="creditNoteAmount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <label for="creditNoteAmount">Importe de la nota de crédito</label>
+                        </div>              
+                        
+                        <div id="accountInfoDiv" class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="accountInfo" name="accountInfo" type="text" value="" readonly />
+                            <label for="accountInfo">Detalles de la cuenta</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">comments</i>
+                            <textarea id="comments" name="comments" class="materialize-textarea" required></textarea>
+                            <label for="description">Comentarios</label>
+                        </div>
+                    </div>
+
+                </div>           
+                
+                <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
+
+                <div class="card-action right-align">
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Crear NC</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
+</main>
+
+<%- include ("../partials/modals/billingPeriod.ejs") %>
+
+<%- include ("../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
+<script type="text/javascript" src="/javascripts/paymentReceipts.js"></script>
+
+<script>
+
+    var remainingBalance = 0;
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});       
+        
+        elems = document.querySelectorAll('.datepicker');
+        instances = M.Datepicker.init(elems, {
+            format: 'dd/mm/yyyy',
+            autoClose: true,
+            onOpen: function (e) {
+                var that = this;
+                that.hasEvent = false;
+                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                this.doneBtn.addEventListener('click', Done.bind(that))
+            },
+            onClose: function (e) {
+                var that = this;
+                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                this.doneBtn.removeEventListener('click', Done.bind(that))
+            },
+            onSelect: function (selectedDate) {
+                if (this.el.id === 'dtpEmissionDate') {
+                    document.getElementById('emissionDate').value = this.date.toISOString();
+                }
+            }
+        });
+
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+
+        document.getElementById('accountSelect').onchange = selectAccount;
+        document.getElementById('supplierSelect').onchange = populatePaymentReceipts;
+        
+        document.getElementById('paymentReceiptSelect').onchange = function() {
+            
+            const paymentId = this.value
+        
+            getPaymentReceiptById(paymentId)
+                .then(paymentReceipt =>{
+                    
+                    document.getElementById('receiptId').value = "";
+
+                    if(paymentReceipt) {
+                        document.getElementById('paymentReceiptDescription').value = paymentReceipt.description;
+                        document.getElementById('paymentReceiptAmount').value = paymentReceipt.amount;
+                        document.getElementById('receiptId').value = paymentReceipt.id;
+                    } else {
+                        document.getElementById('paymentReceiptDescription').value = "";
+                        document.getElementById('paymentReceiptAmount').value = 0.0;
+                    }
+                    
+                    M.updateTextFields();
+                })        
+        };
+        
+        M.updateTextFields();
+
+    });
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpPaymentDate') { document.getElementById('paymentDate').value = this.date.toISOString(); }
+            }
+        }
+    }
+
+
+    async function populatePaymentReceipts(e){
+        
+        const clientId = htmlDecode(document.getElementById('clientId').value)
+        
+        const supplierId = this.value;
+        
+        document.getElementById('paymentReceiptDescription').value = ""; M.updateTextFields();
+
+        const paymentReceiptSelect = document.getElementById('paymentReceiptSelect');
+
+        paymentReceiptSelect.innerHTML = "";
+        
+        paymentReceiptSelect.innerHTML = '<option value="" disabled selected>Seleccione una factura</option>'
+
+        const paymentReceipts = await getPendingPaymentReceiptsBySupplierId(clientId, supplierId);
+
+        (paymentReceipts).forEach(element => {
+            paymentReceiptSelect.innerHTML += "<option value=\"" + element.id + "\">" + `[${element.receiptType.Type}] ${element.receiptNumber}` + "</option>"
+        });
+        
+        M.FormSelect.init(paymentReceiptSelect, {});        
+    }
+
+    async function selectAccount(e){
+            
+        getSelectedAccountDetails(this.value, 'accountInfo');
+
+        const accountId = e.srcElement.options[e.srcElement.selectedIndex].value;
+
+        document.getElementById('accountId').value = accountId;
+            
+        M.updateTextFields();
+    };
+
+    async function getSelectedAccountDetails(accountId, infoField) {
+
+        const account = await getClientAccountsInfo(accountId);
+
+        let message = "[" + account.accountType.account + "] " + account.accountType.description;
+
+        if (account.accountType.account.includes("CC$") || account.accountType.account.includes("CA$") || account.accountType.account.includes("CCU$") || account.accountType.account.includes("CAU$")) {
+            message = "[" + account.accountType.account + "]" + " - " + account.bank.name;
+            if (account.cbu) { message = message + " / CBU: " + account.cbu };
+            if (account.accountNumber) { message = message + " / CUENTA: " + account.accountNumber };
+            if (account.accountAlias) { message = message + " / ALIAS: " + account.accountAlias };
+        }
+
+        if (account.comments) { message = message + " - " + account.comments; }
+
+        document.getElementById(infoField).value = message; M.updateTextFields();        
+    }
+  
+</script>
