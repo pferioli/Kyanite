@@ -430,11 +430,31 @@ module.exports.calculateRemainingBalance = async function (paymentReceiptId) {
         {
             where: {
                 paymentReceiptId: paymentReceiptId,
+                amount: { [Op.gte]: 0 },
                 statusId: {
-                    [Op.in]: [PaymentOrderStatus.eStatus.get('pending').value, PaymentOrderStatus.eStatus.get('inprogress').value, PaymentOrderStatus.eStatus.get('processed').value]
+                    [Op.in]: [
+                        PaymentOrderStatus.eStatus.get('pending').value,
+                        PaymentOrderStatus.eStatus.get('inprogress').value,
+                        PaymentOrderStatus.eStatus.get('processed').value
+                    ]
                 }
             }
         });
 
-    return parseFloat(paymentReceipt.amount - paymentOrdersTotal);
+    const creditNotesTotal = await PaymentOrder.sum('amount',
+        {
+            where: {
+                paymentReceiptId: paymentReceiptId,
+                amount: { [Op.lte]: 0 },
+                statusId: {
+                    [Op.in]: [
+                        PaymentOrderStatus.eStatus.get('pending').value,
+                        PaymentOrderStatus.eStatus.get('inprogress').value,
+                        PaymentOrderStatus.eStatus.get('processed').value
+                    ]
+                }
+            }
+        });
+
+    return parseFloat((paymentReceipt.amount - Math.abs(creditNotesTotal)) - paymentOrdersTotal);
 }

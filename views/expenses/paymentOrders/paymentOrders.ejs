@@ -302,11 +302,7 @@
                 },
                 {
                     className: "center-align",
-                    targets: 1
-                },
-                {
-                    className: "left-align",
-                    targets: 3
+                    targets: [1,2]
                 },
                 {   targets: [5,9],
                     render: function (data) {
@@ -318,16 +314,7 @@
                 {
                     targets: 8,
                     type: 'currency',
-                },
-            //     {
-            //         targets: 4,
-            //         visible: true,
-            //         searchable: false,
-            //         render: $.fn.dataTable.render.ellipsis(32, true)
-            //         // render: function (data, type, full, meta) {
-            //         //     return type === 'display' ? '<div title="' + full.description + '">' + data : data;
-            //         // }
-            //     }
+                },           
             ],
             select: {
                 style: 'os',
