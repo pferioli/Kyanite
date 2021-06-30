@@ -83,7 +83,7 @@
                             <td>
                                 <!--DESHABILITADA-->
                                 <% if(data.creditNotes[i].statusId === 0) { %>
-                                <i class="material-icons">assignment</i>
+                                <i class="material-icons">disabled_by_default</i>
                                 <% } %>
 
                                 <!--PENDIENTE-->
@@ -91,23 +91,18 @@
                                 <i class="material-icons">assignment</i>
                                 <% } %>
 
-                                <!--CREADO-->
-                                <% if(data.creditNotes[i].statusId === 2) { %>
-                                <i class="material-icons">assignment</i>
-                                <% } %>
-
                                 <!--EN_PROCESO-->
-                                <% if(data.creditNotes[i].statusId === 3) { %>
+                                <% if(data.creditNotes[i].statusId === 2) { %>
                                 <i class="material-icons">assignment_ind</i>
                                 <% } %>
 
                                 <!--PROCESADO-->
-                                <% if(data.creditNotes[i].statusId === 4) { %>
+                                <% if(data.creditNotes[i].statusId === 3) { %>
                                 <i class="material-icons">assignment_turned_in</i>
                                 <% } %>
 
                                 <!--ANULADO-->
-                                <% if(data.creditNotes[i].statusId === 5) { %>
+                                <% if(data.creditNotes[i].statusId === 4) { %>
                                 <i class="material-icons">assignment_returned</i>
                                 <% } %>
 

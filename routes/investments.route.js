@@ -8,8 +8,10 @@ router.get("/", function (req, res, next) {
 });
 
 router.post("/", function (req, res, next) {
-    const clientId = req.body.clientId;
-    res.redirect("/investments/client/" + clientId);
+
+    let redirectUrl = '/investments/client/' + req.body.clientId + '?periodId=' + req.body.periodId
+
+    res.redirect(redirectUrl);
 });
 
 router.get("/client/:clientId", function (req, res, next) {

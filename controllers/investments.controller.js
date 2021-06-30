@@ -28,8 +28,8 @@ module.exports.listAll = async function (req, res) {
 
     let periods = [];
 
-    if (typeof req.body.periodId != 'undefined') {
-        periods = req.body.periodId.split(',');
+    if (typeof req.query.periodId != 'undefined') {
+        periods = req.query.periodId.split(',');
     } else {
 
         const activePeriod = await BillingPeriod.findOne({
