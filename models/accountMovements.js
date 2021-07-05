@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DECIMAL(10, 2)
         },
         balance: {
-            allowNull: false,
+            allowNull: true,
             type: DataTypes.DECIMAL(10, 2)
         },
         movementId: {

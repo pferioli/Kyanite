@@ -12,6 +12,7 @@ const Account = Model.account;
 const AccountType = Model.accountType;
 const AccountingImputation = Model.accountingImputation;
 const AccountingGroup = Model.accountingGroup;
+const AccountMovement = Model.accountMovement;
 const CheckSplitted = Model.checkSplitted;
 const Check = Model.check;
 const Supplier = Model.supplier;
@@ -397,6 +398,7 @@ module.exports.deletePaymentOrder = async function (clientId, paymentOrderId) {
     const accountMovement = await AccountMovement.deleteMovement(clientId, paymentOrder.accountId, paymentOrder.periodId,
         accountMovementCategory.eStatus.get('PAGO_PROVEEDOR').value, paymentOrder.id);
 
+    return paymentOrder;
 };
 
 module.exports.deletePO = async function (req, res) {
@@ -407,7 +409,7 @@ module.exports.deletePO = async function (req, res) {
 
     try {
 
-        deletePaymentOrder(clientId, paymentOrderId);
+        const paymentOrder = await this.deletePaymentOrder(clientId, paymentOrderId);
 
         req.flash("success", `La OP #${paymentOrder.poNumber} fue anulada correctamente`);
 
@@ -456,5 +458,142 @@ module.exports.calculateRemainingBalance = async function (paymentReceiptId) {
             }
         });
 
-    return parseFloat((paymentReceipt.amount - Math.abs(creditNotesTotal)) - paymentOrdersTotal);
+    //- Math.abs(creditNotesTotal) //ESTO ES PQ LA OP SE HACE SOBRE EL TOTAL DE LA FC SIN TENER EN CUENTA LAS NCs
+
+    return parseFloat(paymentReceipt.amount - paymentOrdersTotal);
+}
+
+module.exports.showEditForm = async function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    const paymentOrderId = req.params.paymentOrderId;
+
+    const client = await Client.findByPk(clientId);
+
+    const paymentOrder = await PaymentOrder.findByPk(paymentOrderId, {
+        include: [{ model: CheckSplitted, include: [{ model: Check }] },
+        {
+            model: PaymentReceipt, where: { clientId: clientId }, include: [{ model: ReceiptType }, { model: Supplier }, { model: Client }],
+        },
+        { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
+    });
+
+    const clientAccounts = await Account.findAll({ include: [{ model: AccountType }], where: { clientId: paymentOrder.paymentReceipt.client.id } });
+
+    if (paymentOrder.billingPeriod.statusId === BillingPeriodStatus.eStatus.get('opened').value) {
+        res.render('expenses/paymentOrders/edit', { menu: CURRENT_MENU, data: { client: client, paymentOrder, clientAccounts } });
+    } else {
+
+        req.flash("error", "La OP que quiere modificar pertenece a un período finalizado");
+
+        res.redirect('/expenses/paymentOrders/client/' + clientId);
+    }
+};
+
+module.exports.edit = async function (req, res, next) {
+
+    const clientId = req.body.clientId;
+
+    const paymentOrderId = req.body.paymentOrderId;
+
+    //TODO: si se selecciono para pagar con cheque o la cuenta original era un cheque ?????
+
+    try {
+
+        const amount = Number.parseFloat(req.body.paymentOrderAmount);
+
+        //Busco la Orden de Pago...
+
+        let paymentOrder = await PaymentOrder.findByPk(paymentOrderId);
+
+        const activePeriod = await BillingPeriod.findOne({
+            where: { clientId: clientId, statusId: 1 },
+            attributes: ['id']
+        });
+
+        if (activePeriod.id !== paymentOrder.periodId) {
+            req.flash("warning", "El período de liquidación de la OP no coincide con el período activo");
+            res.redirect('/expenses/paymentOrders/client/' + clientId); return;
+        }
+
+        const originalAccountId = paymentOrder.accountId;
+
+        //Busco el Movimiento en la CC...
+
+        const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+        let accountMovement = await AccountMovement.findOne({
+            where: {
+                clientId: clientId,
+                periodId: paymentOrder.periodId,
+                category: String.fromCharCode(accountMovementCategory.eStatus.get('PAGO_PROVEEDOR').value),
+                movementId: paymentOrder.id
+            }
+        });
+
+        //Actualiamos la OP con los nuevos parametros...
+
+        // checkId: ((paymentOrder.checkId === undefined) || (paymentOrder.checkId === '') ? null : paymentOrder.checkId),
+
+        paymentOrder = await paymentOrder.update({
+            accountId: req.body.accountId,
+            paymentDate: req.body.paymentDate,
+            amount: amount,
+            userId: req.user.id
+        });
+
+        winston.info(`user #${req.user.id} update the PO ${paymentOrderId}  - ${paymentOrder}`);
+
+        //Actualizamos el movimiento en la CC...
+
+        accountMovement = await accountMovement.update({
+            accountId: paymentOrder.accountId,
+            amount: amount,
+            userId: req.user.id
+        })
+
+        winston.info(`user #${req.user.id} update the account movement ${accountMovement.id} due to PO #${paymentOrderId} update - ${accountMovement}`);
+
+        if (originalAccountId !== Number(paymentOrder.accountId)) {
+
+            const originalAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, paymentOrder.periodId, originalAccountId);
+
+            const newAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, paymentOrder.periodId, paymentOrder.accountId);
+
+            winston.info(`balance for original account ${originalAccount} and the new account ${newAccount} fixed on user #${req.user.id} PO #${paymentOrderId} update request`);
+        
+        } else {
+
+            const originalAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, paymentOrder.periodId, originalAccountId.accountId);
+
+            winston.info(`balance for original account ${originalAccount} fixed on user #${req.user.id} PO #${paymentOrderId} update request`);
+        }
+
+        //si el saldo remanente de la FC es menor al total, cambiar el estado de la FC a pendiente
+
+        let remainingBalance = await this.calculateRemainingBalance(paymentOrder.paymentReceiptId);
+
+        const paymentReceipt = await PaymentReceipt.findByPk(paymentOrder.paymentReceiptId)
+
+        let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
+
+        if ((remainingBalance - Number.parseFloat(paymentOrder.amount)) <= 0) {
+            prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
+        }
+
+        await paymentReceipt.update({ statusId: prStatus });
+
+        req.flash("success", `La OP ${paymentOrder.poNumber} fue modificada existosamente`);
+
+    } catch (err) {
+
+        req.flash("error", "Ocurrio un error y no se pudo modificar la OP en la base de datos");
+
+        winston.error(`An error ocurred while user #${req.user.id} tryed to update the PO ${paymentOrderId}  - ${err}`);
+
+    } finally {
+        res.redirect('/expenses/paymentOrders/client/' + clientId);
+    }
+
 }

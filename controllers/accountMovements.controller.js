@@ -382,8 +382,12 @@ module.exports.deleteMovement = async function (clientId, accountId, periodId, c
             }
         })
         .then((accountMovement) => {
-            return accountMovement.destroy()
-                .then((result) => { return result })
+
+            return accountMovement.update({ balance: null }).then((result) => {
+                return accountMovement.destroy().then(async (result) => {
+                    return await this.fixBalanceMovements(clientId, periodId, accountId);
+                })
+            })
         })
 
 }

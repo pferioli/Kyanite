@@ -157,10 +157,17 @@ module.exports.accredit = async function (req, res) {
 
     const depositId = req.body.depositId;
 
+    const userId = req.user.id;
+
     Investment.findByPk(depositId)
         .then(async investment => {
 
             let amount = parseFloat(investment.amount) + parseFloat(req.body.interests);
+
+            const activePeriod = await BillingPeriod.findOne({
+                where: { clientId: clientId, statusId: 1 },
+                attributes: ['id']
+            });
 
             //-----------------------------------------------------------------
             // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
@@ -172,16 +179,16 @@ module.exports.accredit = async function (req, res) {
 
             //en el movimiento saliente de la cuenta de PF, solo se contempla el valor original del mismo sin los intereses
 
-            let accountMovementDestination = await AccountMovement.addMovement(clientId, investment.destinationAccountId, investment.periodId, (-1) * investment.amount,
-                accountMovementCategory.eStatus.get('INVERSION').value, investment.id, investment.userId);
+            let accountMovementDestination = await AccountMovement.addMovement(clientId, investment.destinationAccountId, activePeriod, (-1) * investment.amount,
+                accountMovementCategory.eStatus.get('INVERSION').value, investment.id, userId);
 
             if (accountMovementDestination === null) {
                 winston.error(`It was not possible to add account movement record for the investment destination account ID: ${investment.destinationAccountId}`);
                 throw new Error("It was not possible to add the investment into the account movements table");
             }
 
-            const accountMovementSource = await AccountMovement.addMovement(clientId, investment.sourceAccountId, investment.periodId, amount,
-                accountMovementCategory.eStatus.get('INVERSION').value, investment.id, investment.userId);
+            const accountMovementSource = await AccountMovement.addMovement(clientId, investment.sourceAccountId, activePeriod, amount,
+                accountMovementCategory.eStatus.get('INVERSION').value, investment.id, userId);
 
             if (accountMovementSource === null) {
                 winston.error(`It was not possible to add account movement record for the investment source account ID: ${investment.sourceAccountId}`);
@@ -191,6 +198,7 @@ module.exports.accredit = async function (req, res) {
             await investment.update({
                 interests: parseFloat(req.body.interests.replace(/[^0-9\.-]+/g, "")),
                 statusId: InvestmentsStatus.eStatus.get('accredited').value,
+                userId: userId
             });
 
             winston.info(`Fixed-Term desposit ${investment.id}updated succesfully`)

@@ -38,7 +38,7 @@ module.exports.listAll = async function (req, res) {
             include: [
                 { model: User },
                 {
-                    model: Collection,
+                    model: Collection, where: { clientId: clientId },
                     include: [
                         { model: Client }, { model: BillingPeriod },
                         { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },

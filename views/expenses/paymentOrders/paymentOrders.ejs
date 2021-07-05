@@ -131,14 +131,19 @@
                             <td><%= data.paymentOrders[i].user.name %></td>                                
                                 
                             <td>
-                                <a id="button-edit" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">edit</i></a>
+                                <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
+                                    <a id="button-edit" href="/expenses/paymentOrders/client/<%=data.client.id%>/edit/<%=data.paymentOrders[i].id%>" 
+                                        class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                                <% } %>
                                 
                                 <a id="button-print" onclick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>')"
                                     class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">receipt</i></a>                            
 
-                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
-                                    data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" data-clientId="<%=data.client.id%>" onclick="deleteDialog(this)">
-                                    <i class="material-icons">delete</i></a>
+                                <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
+                                    <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
+                                        data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" data-clientId="<%=data.client.id%>" onclick="deleteDialog(this)">
+                                        <i class="material-icons">delete</i></a>
+                                <% } %>
                             </td>
 
                         </tr>

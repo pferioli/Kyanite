@@ -21,6 +21,14 @@ router.get('/client/:clientId', function (req, res, next) {
     paymentOrdersController.listAll(req, res);
 })
 
+router.get('/client/:clientId/edit/:paymentOrderId', function (req, res, next) {
+    paymentOrdersController.showEditForm(req, res);
+})
+
+router.post('/edit/:paymentOrderId', function (req, res, next) {
+    paymentOrdersController.edit(req, res);
+})
+
 router.post('/delete', function (req, res, next) {
     paymentOrdersController.deletePO(req, res);
 })

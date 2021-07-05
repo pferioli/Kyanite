@@ -1,0 +1,305 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" method="post" action='/expenses/paymentOrders/edit/<%=data.paymentOrder.id%>'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Modifique la órden de pago</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">assignment_turned_in</i>
+                            <input id="paymentOrder" type="text" value="<%=data.paymentOrder.poNumberFormatted%>" readonly />
+                            <label for="paymentOrder">Orden de pago</label>
+                        </div>
+
+                        <div class="input-field col s7">
+                            <i class="material-icons prefix">storefront</i>
+                            <input id="supplier" type="text" readonly value="<%=data.paymentOrder.paymentReceipt.supplier.name%>" />
+                            <label for="paymentOrderAmount">Proveedor</label>
+                        </div>
+                        
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">receipt_long</i>
+                            <input id="paymentReceipt" type="text" 
+                                value="[<%=data.paymentOrder.paymentReceipt.receiptType.receiptType%>] <%=data.paymentOrder.paymentReceipt.receiptNumber%>" readonly />
+                            <label for="paymentReceipt">Factura o comprobante</label>
+                        </div>
+ 
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">comments</i>
+                            <textarea id="description" class="materialize-textarea" readonly><%=data.paymentOrder.paymentReceipt.description%></textarea>
+                            <label for="description">Detalle del servicio o de la factura</label>
+                        </div>
+                        
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="accountSelect" required >
+                                <option value="" disabled selected>Seleccione la cuenta</option>
+                                <% for(var i=0; i < data.clientAccounts.length; i++) { %>
+                                    <% if(data.clientAccounts[i].id === data.paymentOrder.accountId) { %>
+                                        <% selectedAccount = true %>
+                                        <option value="<%=data.clientAccounts[i].id%>" selected>[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                    <% } else { %>
+                                        <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                    <% } %>                                    
+                                <% } %>
+                            </select>
+                            <label>Cuenta de Origen de los fondos</label>
+                            <input type="hidden" name="accountId" id="accountId" value="<%=data.paymentOrder.accountId%>"/>
+                        </div>
+
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="paymentOrderAmount" name="paymentOrderAmount" type="number" min="0.00" step="0.01" class="validate" value="<%=data.paymentOrder.amount%>" required/>
+                            <label for="paymentOrderAmount">Importe de la OP</label>
+                        </div>
+
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="pendingAmount" type="text" readonly/>
+                            <label for="pendingAmount">Importe Pendiente</label>
+                        </div>
+                        
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpPaymentDate" name="dtpPaymentDate" required>
+                            <label for="dtpPaymentDate">Fecha</label>
+                            <input type="hidden" name="paymentDate" id="paymentDate" value="<%=data.paymentOrder.paymentDate%>"/>
+                        </div>
+
+                        <div id="accountInfoDiv" class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="accountInfo" type="text" value="" readonly />
+                            <label for="accountInfo">Detalles de la cuenta</label>
+                        </div>
+                    </div>
+             
+                     <div class="row" id="checksSelectDiv" hidden>
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">money</i>
+                            <select id="checksSelect" disabled>
+                                <option value="" disabled selected>Seleccione un cheque</option>                               
+                            </select>
+                            <label>Seleccione un cheque para vincular con la Orden de Pago</label>
+                            <input type="hidden" name="checkId" id="checkId" />
+                        </div>                        
+                    </div>
+
+                    <div id="checkWarningDiv" class="row" hidden>
+                        <p class="red-text center-align" style="font-size: smaller;">Tiene uno o más cheques disponibles para la OP del comprobante seleccionado</p>
+                    </div>
+
+                </div>
+
+                <input type="hidden" name="paymentOrderId" id="paymentOrderId" value="<%=data.paymentOrder.id%>" />
+
+                <div class="card-action right-align">
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+</main>
+
+<%- include ("../../partials/footer") %>
+
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
+<script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
+<script type="text/javascript" src="/javascripts/paymentOrders.js"></script>
+
+<script>
+    
+    const d = htmlDecode("<%=data.paymentOrder.paymentDate%>").split("-");
+
+    const originalPaymentOrderAmount = "<%=data.paymentOrder.amount%>";
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        elems = document.querySelectorAll('.datepicker');
+        instances = M.Datepicker.init(elems, {
+            format: 'dd/mm/yyyy',
+            autoClose: true,
+            onOpen: function (e) {
+                var that = this;
+                that.hasEvent = false;
+                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                this.doneBtn.addEventListener('click', Done.bind(that))
+            },
+            onClose: function (e) {
+                var that = this;
+                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                this.doneBtn.removeEventListener('click', Done.bind(that))
+            },
+            onSelect: function (selectedDate) {
+                if (this.el.id === 'dtpEmissionDate') {
+                    document.getElementById('emissionDate').value = this.date.toISOString();
+                }
+            },
+            defaultDate: new Date(d[0],d[1]-1,d[2]),
+            setDefaultDate: true
+        });
+
+        
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+
+        document.getElementById('accountSelect').onchange = selectAccount;
+    
+        document.getElementById('checksSelect').onchange = selectCheck;
+
+        remainingBalance = await calculateRemainingBalance("<%=data.paymentOrder.paymentReceipt.id%>")
+        document.getElementById('pendingAmount').value = "$" + remainingBalance.value;
+        document.getElementById('paymentOrderAmount').max = Number.parseFloat("<%=data.paymentOrder.amount%>") + remainingBalance.value;
+        document.getElementById('paymentOrderAmount').value = originalPaymentOrderAmount; //remainingBalance.value;
+
+        M.updateTextFields();
+
+        const splittedChecks = await getAvailableSplittedChecks('O', htmlDecode("<%= data.paymentOrder.paymentReceipt.id %>"), '0'); // O = PaymentOrder, '0' = Status(Pending)
+
+        if(splittedChecks.length){
+            document.getElementById('checkWarningDiv').hidden=false;
+        }
+
+        getSelectedAccountDetails("<%=data.paymentOrder.accountId%>", 'accountInfo');
+
+    });
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date.toISOString(); }
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        $('textarea#description').characterCounter();      
+    });  
+
+    async function selectAccount(e){
+            
+        getSelectedAccountDetails(this.value, 'accountInfo');
+
+        const accountId = e.srcElement.options[e.srcElement.selectedIndex].value;
+
+        document.getElementById('accountId').value = accountId;
+            
+        M.updateTextFields();
+    };
+
+
+    async function getSelectedAccountDetails(accountId, infoField) {
+
+        const account = await getClientAccountsInfo(accountId);
+
+        let message = "[" + account.accountType.account + "] " + account.accountType.description;
+
+        if (account.accountType.account.includes("CC$") || account.accountType.account.includes("CA$") || account.accountType.account.includes("CCU$") || account.accountType.account.includes("CAU$")) {
+            message = "[" + account.accountType.account + "]" + " - " + account.bank.name;
+            if (account.cbu) { message = message + " / CBU: " + account.cbu };
+            if (account.accountNumber) { message = message + " / CUENTA: " + account.accountNumber };
+            if (account.accountAlias) { message = message + " / ALIAS: " + account.accountAlias };
+        }
+
+        if (account.comments) { message = message + " - " + account.comments; }
+
+        document.getElementById(infoField).value = message; M.updateTextFields();
+
+        const checksSelectDiv = document.getElementById('checksSelectDiv');
+        
+        const paymentOrderAmount = document.getElementById('paymentOrderAmount');
+
+        if(account.accountType.account === 'VAL') {
+
+            document.getElementById('checkWarningDiv').hidden = true;
+
+            await getSplittedChecks(htmlDecode("<%= data.paymentOrder.paymentReceipt.id %>"));
+        
+            checksSelectDiv.hidden = false;
+
+        } else {
+            checksSelectDiv.hidden = true;
+            paymentOrderAmount.readonly = false;
+            paymentOrderAmount.value = originalPaymentOrderAmount //remainingBalance.value; //0;            
+            paymentOrderAmount.classList.add("validate");
+            paymentOrderAmount.select();
+            paymentOrderAmount.focus();
+        }        
+    }
+
+    async function getSplittedChecks(paymentId) {
+
+        const splittedChecks = await getAvailableSplittedChecks('O', paymentId, '0'); // O = PaymentOrder, '0' = Status(Pending)
+
+        let checksSelect = document.getElementById('checksSelect');
+        checksSelect.disabled = false;        
+        checksSelect.options.length = 0;
+        checksSelect.innerHTML = checksSelect.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione el cheque" + "</option>"
+
+        for (i = 0; i < splittedChecks.length; i++) {
+            checksSelect.innerHTML = checksSelect.innerHTML + "<option value=\"" + splittedChecks[i].id + "\">" + 
+            `${splittedChecks[i].check.bank.name} (Nº ${splittedChecks[i].check.number}) $${splittedChecks[i].amount}` + "</option>"
+        }
+        
+        M.FormSelect.init(checksSelect, {});        
+    }
+
+    async function selectCheck(e){
+
+        const checkId = e.srcElement.options[e.srcElement.selectedIndex].value;
+
+        document.getElementById('checkId').value = checkId;
+
+        const check = await getSplittedCheckInfo(checkId);
+            
+        const paymentOrderAmount = document.getElementById('paymentOrderAmount');
+                        
+        paymentOrderAmount.classList.remove("validate");
+            
+        if(paymentOrderAmount.classList.contains('invalid')) {
+            paymentOrderAmount.classList.remove("invalid");
+        }
+            
+        paymentOrderAmount.readonly = true;            
+        paymentOrderAmount.value = check.amount;
+               
+        M.updateTextFields();
+        
+        const balance = Number.parseFloat(check.amount - remainingBalance.value);
+
+        if(balance>0){
+            alert("El importe del cheque seleccionado es superior al de la factura o comprobante que esta procesando, el saldo a favor del proveedor es de $" + balance.toFixed(2))
+        }
+    }
+</script>
