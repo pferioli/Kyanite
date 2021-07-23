@@ -232,10 +232,14 @@ module.exports.delete = async function (req, res, next) {
                 req.flash("warning", "Hay cheques parciales previamente asignados, no es posible eliminar el cheque"); return;
             }
 
+            //FIXME: esto no se ejecuta por la validacion anterior...
+
             await CheckSplitted.update(
                 { statusId: SplitCheckStatus.eStatus.get('deleted').value, userId: req.user.id },
                 { where: { checkId: check.id } })
 
+            //TODO: eliminar el movimiento generado en la CC por el ingreso del cheque y el update del saldo
+            
             await check.update({ statusId: CheckStatus.eStatus.get('cancelled').value });
 
             req.flash("success", "El cheque fue eliminado exitosamente a la base de datos");

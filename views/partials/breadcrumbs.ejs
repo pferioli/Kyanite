@@ -106,6 +106,13 @@
     <% } %>
 <% } %>
 
+<% if (locals.menu==='compensations' ) { %>
+    <a href="/compensations" class="breadcrumb">Compensaciones</a>
+    <% if(locals.data) { %>
+        <a href="/compensations/client/<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+    <% } %>
+<% } %>
+
 <% if (locals.menu==='accountMovements' ) { %>
     <a href="/movements" class="breadcrumb">Cuenta Corriente</a>
      <% if(locals.data) { %>

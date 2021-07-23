@@ -169,6 +169,8 @@ app.use('/expenses/paymentOrders', require('./routes/expenses.paymentOrders.rout
 
 app.use('/creditNotes', require('./routes/creditNotes.route'));
 
+app.use('/compensations', require('./routes/compensations.route'));
+
 app.use('/notifications', require('./routes/notifications.route'));
 
 app.use('/accountingImputations', require('./routes/accountingImputations.route'));

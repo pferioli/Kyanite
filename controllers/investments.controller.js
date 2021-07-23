@@ -179,7 +179,7 @@ module.exports.accredit = async function (req, res) {
 
             //en el movimiento saliente de la cuenta de PF, solo se contempla el valor original del mismo sin los intereses
 
-            let accountMovementDestination = await AccountMovement.addMovement(clientId, investment.destinationAccountId, activePeriod, (-1) * investment.amount,
+            let accountMovementDestination = await AccountMovement.addMovement(clientId, investment.destinationAccountId, activePeriod.id, (-1) * investment.amount,
                 accountMovementCategory.eStatus.get('INVERSION').value, investment.id, userId);
 
             if (accountMovementDestination === null) {
@@ -187,7 +187,7 @@ module.exports.accredit = async function (req, res) {
                 throw new Error("It was not possible to add the investment into the account movements table");
             }
 
-            const accountMovementSource = await AccountMovement.addMovement(clientId, investment.sourceAccountId, activePeriod, amount,
+            const accountMovementSource = await AccountMovement.addMovement(clientId, investment.sourceAccountId, activePeriod.id, amount,
                 accountMovementCategory.eStatus.get('INVERSION').value, investment.id, userId);
 
             if (accountMovementSource === null) {

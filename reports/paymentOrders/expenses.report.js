@@ -9,7 +9,7 @@ var maxY = 0; var rowBottomY = 0; var startX, startY; var pageNumber = 0;
 
 var amount = { total: 0.00, subTotalGroup: 0.00, subTotal: 0.00 };
 
-function createReport(paymentOrders, client, period, user, res) {
+function createReport(paymentOrders, client, periods, user, res) {
 
     pageNumber = 0;
 
@@ -63,7 +63,7 @@ function createReport(paymentOrders, client, period, user, res) {
 
     generateHeader(doc);
 
-    generateCustomerInformation(doc, client, period);
+    generateCustomerInformation(doc, client, periods);
 
     doc.moveDown();
 
@@ -75,7 +75,7 @@ function createReport(paymentOrders, client, period, user, res) {
 
     //-----------------------------------------------------------------------//
 
-    const reportName = "gastos" + client.internalCode + "_" + period.name + ".pdf"
+    // const reportName = "gastos" + client.internalCode + "_" + period.name + ".pdf"
     //doc.end();
     //doc.pipe(fs.createWriteStream(path));
 
@@ -115,7 +115,7 @@ function generateHeader(doc) {
 
 // <----- CUSTOMER INFORMATION ----->
 
-function generateCustomerInformation(doc, client, period) {
+function generateCustomerInformation(doc, client, periods) {
 
     doc
         .fillColor("#000000") //444444
@@ -130,11 +130,18 @@ function generateCustomerInformation(doc, client, period) {
         .font("Helvetica-Bold")
         .text(client.name, 50, 140, { width: 500, align: 'center' });
 
+
     doc
         .fontSize(12)
         .fillColor("#000000")
-        .font("Helvetica")
-        .text(`período ${period.name} comprendido entre ${period.startDate} y ${period.endDate}`, 50, 160, { width: 500, align: 'center' });
+        .font("Helvetica");
+
+    if (periods.length === 1)
+        doc.text(`período ${periods[0].name} comprendido entre ${periods[0].startDate} y ${periods[0].endDate}`, 50, 160, { width: 500, align: 'center' });
+    else {
+        let periodName = ""; for (const period of periods) { periodName += period.name + " "; }; periodName = periodName.slice(0, -1);
+        doc.text(`períodos ${periodName}`, 50, 160, { width: 500, align: 'center' });
+    }
 
     common.generateHr(doc, 180);
 
@@ -402,7 +409,7 @@ async function createTable(doc, table) {
         };
 
         table.rows.forEach((row, i) => {
-            
+
             prepareRow();
 
             const rowHeight = computeRowHeight(row);

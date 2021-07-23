@@ -2,11 +2,9 @@
 
 var Excel = require('excel4node');
 
-module.exports.generateExcel = async function (client, paymentOrders, period, user, res) {
+module.exports.generateExcel = async function (client, paymentOrders, periods, user, res) {
 
     var workbook = new Excel.Workbook();
-
-    var worksheet = workbook.addWorksheet(`Reporte de gastos ${client.internalCode}`);
 
     var styleRowHeader = workbook.createStyle({
         font: {
@@ -132,9 +130,13 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
     const HEADER_COL_CHECK = 7;
     const HEADER_COL_AMOUNT = 8;
 
+    let periodName = ""; for (const period of periods) { periodName += period.name + " "; }; periodName = periodName.slice(0, -1);
+
+    const worksheet = workbook.addWorksheet(`Reporte de gastos ${client.internalCode}`);
+
     worksheet.row(rowIndex).setHeight(30);
 
-    worksheet.cell(rowIndex, 1, rowIndex, 8, true).string(client.name + ' [' + client.internalCode + '] - Período de Liquidación ' + period.name)
+    worksheet.cell(rowIndex, 1, rowIndex, 8, true).string(client.name + ' [' + client.internalCode + '] - Período de Liquidación ' + periodName)
         .style({
             font: {
                 color: 'white',
@@ -330,5 +332,7 @@ module.exports.generateExcel = async function (client, paymentOrders, period, us
             }
         });
 
-    workbook.write(`Reporte de Gastos ${client.internalCode}-${period.name}.xlsx`, res);
+
+    workbook.write(`Reporte de Gastos ${client.internalCode}.xlsx`, res);
+
 }

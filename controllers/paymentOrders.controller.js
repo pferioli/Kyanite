@@ -132,7 +132,7 @@ module.exports.expensesReport = async function (req, res) {
     res.render('expenses/paymentOrders/paymentOrdersReport',
         {
             menu: CURRENT_MENU,
-            data: { client: client, paymentOrders: paymentOrders },
+            data: { client: client, paymentOrders: paymentOrders, periods },
         });
 };
 
@@ -144,24 +144,51 @@ module.exports.downloadExpensesReport = async function (req, res) {
 
     const client = await Client.findByPk(clientId);
 
-    const activePeriod = await BillingPeriod.findOne({
-        where: { clientId: clientId, statusId: 1 }
-    });
+    let periods = []; let periodIds = [];
 
-    if (activePeriod === null) {
-        req.flash("warning", "No hay ningún período de liquidación activo"); res.redirect(`/expenses/paymentOrders/client/${clientId}/report`); return;
+    if (req.query.periods === undefined) {
+        const activePeriod = await BillingPeriod.findOne({
+            where: { clientId: clientId, statusId: 1 }
+        });
+
+        if (activePeriod === null) {
+            req.flash("warning", "No hay ningún período de liquidación activo"); res.redirect(`/expenses/paymentOrders/client/${clientId}/report`); return;
+        }
+
+        periods.push(activePeriod); periodIds.push(activePeriod.id);
+
+    } else {
+
+        periodIds = req.query.periods.split(',');
+
+        periods = await BillingPeriod.findAll({
+            where: {
+                id: {
+                    [Op.in]: periodIds
+                }
+            }
+        });
+
     }
 
-    const periods = []; periods.push(activePeriod.id);
+    // let paymentOrders = [];
 
-    const paymentOrders = await getExpensesReportRecords(clientId, periods);
+    // if (periodIds.length === 1) {
+    //     paymentOrders.push(await getExpensesReportRecords(clientId, periodIds));
+    // } else {
+    //     for (const period of periods) {
+    //         paymentOrders.push(await getExpensesReportRecords(clientId, [period.id]));
+    //     }
+    // }
+
+    const paymentOrders = await getExpensesReportRecords(clientId, periodIds);
 
     if (reportType.toLowerCase() === 'xls') {
 
         const { generateExcel } = require("../reports/paymentOrders/expensesExcel.report");
 
         try {
-            generateExcel(client, paymentOrders, activePeriod, req.user, res);
+            generateExcel(client, paymentOrders, periods, req.user, res);
         } catch (error) {
             winston.error(`An error ocurred creating the excel expenses report file - ${error}`);
         }
@@ -172,7 +199,7 @@ module.exports.downloadExpensesReport = async function (req, res) {
         const { createReport } = require("../reports/paymentOrders/expenses.report");
 
         try {
-            createReport(paymentOrders, client, activePeriod, req.user, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+            createReport(paymentOrders, client, periods, req.user, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
         } catch (error) {
             winston.error(`An error ocurred creating the pdf expenses report file - ${error}`);
         }
@@ -549,7 +576,7 @@ module.exports.edit = async function (req, res, next) {
 
         accountMovement = await accountMovement.update({
             accountId: paymentOrder.accountId,
-            amount: amount,
+            amount: (-1) * amount,
             userId: req.user.id
         })
 
@@ -562,10 +589,10 @@ module.exports.edit = async function (req, res, next) {
             const newAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, paymentOrder.periodId, paymentOrder.accountId);
 
             winston.info(`balance for original account ${originalAccount} and the new account ${newAccount} fixed on user #${req.user.id} PO #${paymentOrderId} update request`);
-        
+
         } else {
 
-            const originalAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, paymentOrder.periodId, originalAccountId.accountId);
+            const originalAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, paymentOrder.periodId, originalAccountId);
 
             winston.info(`balance for original account ${originalAccount} fixed on user #${req.user.id} PO #${paymentOrderId} update request`);
         }
@@ -578,7 +605,7 @@ module.exports.edit = async function (req, res, next) {
 
         let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
 
-        if ((remainingBalance - Number.parseFloat(paymentOrder.amount)) <= 0) {
+        if ((Number.parseFloat(paymentOrder.amount) - remainingBalance) <= 0) {
             prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
         }
 

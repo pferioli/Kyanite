@@ -64,89 +64,89 @@
                     </thead>
                     <tbody>
                         <% for(var i=0; i < data.paymentOrders.length; i++) { %>
-                        <tr data-id="<%= data.paymentOrders[i].id %>">
-                            <td></td>
-                            <td><%= data.paymentOrders[i].id %></td>
-                            <td><%= data.paymentOrders[i].poNumberFormatted %></td>
-                            <td><%= data.paymentOrders[i].paymentReceipt.supplier.name %></td>
-                            <td><a class="blue-text" href="/expenses/paymentReceipts/info/<%= data.paymentOrders[i].paymentReceipt.id %>">[<%= data.paymentOrders[i].paymentReceipt.receiptType.receiptType %>] <%= data.paymentOrders[i].paymentReceipt.receiptNumber %></a></td>
-                            <td><%= data.paymentOrders[i].paymentReceipt.emissionDate %></td>
-                            <td><%= data.paymentOrders[i].account.accountType.account %> (ID: <%= data.paymentOrders[i].accountId %>)</td>
-                            <td>
-                                <% if(data.paymentOrders[i].checkId){ %>
-                                    <%= data.paymentOrders[i].checkSplitted.check.number %> (ID: <%= data.paymentOrders[i].checkSplitted.check.id %>-><%= data.paymentOrders[i].checkSplitted.id %>)
-                                <% } %>
-                            </td>
-                            <td>$<%= data.paymentOrders[i].amount %></td>
-                            <td><%= data.paymentOrders[i].paymentDate %></td>
-                            
-                            <td>
-                                <% if(data.paymentOrders[i].billingPeriod.statusId === 0) { %>
-                                <i class="material-icons">calendar_today</i>
-                                <% } %>
-                                <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
-                                <i class="material-icons">lock_open</i>
-                                <% } %>
-                                <% if(data.paymentOrders[i].billingPeriod.statusId === 2) { %>
-                                <i class="material-icons">lock</i>
-                                <% } %>
-                                <% if(data.paymentOrders[i].billingPeriod.statusId === 3) { %>
-                                <i class="material-icons">cancel</i>
-                                <% } %>
-
-                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentOrders[i].billingPeriod.name %></span></a>
-                            </td>
-
-                            <td>
-                                <!--DESHABILITADO-->
-                                <% if(data.paymentOrders[i].statusId === 0) { %>
-                                <i class="material-icons">disabled_by_default</i>
-                                <% } %>
-
-                                <!--PENDIENTE-->
-                                <% if(data.paymentOrders[i].statusId === 1) { %>
-                                <i class="material-icons">assignment</i>
-                                <% } %>
-
-                                <!--EN_PROCESO-->
-                                <% if(data.paymentOrders[i].statusId === 2) { %>
-                                <i class="material-icons">assignment_ind</i>
-                                <% } %>
-
-                                <!--PROCESADO-->
-                                <% if(data.paymentOrders[i].statusId === 3) { %>
-                                <i class="material-icons">assignment_turned_in</i>
-                                <% } %>
-
-                                <!--ANULADO-->
-                                <% if(data.paymentOrders[i].statusId === 4) { %>
-                                <i class="material-icons">assignment_returned</i>
-                                <% } %>
-
-                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentOrders[i].status %></span>
-                            </td>
-
-                            <!-- <td><%#= data.paymentOrders[i].status %></td> -->
-
-                            <td><%= data.paymentOrders[i].user.name %></td>                                
+                            <tr data-id="<%= data.paymentOrders[i].id %>">
+                                <td></td>
+                                <td><%= data.paymentOrders[i].id %></td>
+                                <td><%= data.paymentOrders[i].poNumberFormatted %></td>
+                                <td><%= data.paymentOrders[i].paymentReceipt.supplier.name %></td>
+                                <td><a class="blue-text" href="/expenses/paymentReceipts/info/<%= data.paymentOrders[i].paymentReceipt.id %>">[<%= data.paymentOrders[i].paymentReceipt.receiptType.receiptType %>] <%= data.paymentOrders[i].paymentReceipt.receiptNumber %></a></td>
+                                <td><%= data.paymentOrders[i].paymentReceipt.emissionDate %></td>
+                                <td><%= data.paymentOrders[i].account.accountType.account %> (ID: <%= data.paymentOrders[i].accountId %>)</td>
+                                <td>
+                                    <% if(data.paymentOrders[i].checkId){ %>
+                                        <%= data.paymentOrders[i].checkSplitted.check.number %> (ID: <%= data.paymentOrders[i].checkSplitted.check.id %>-><%= data.paymentOrders[i].checkSplitted.id %>)
+                                    <% } %>
+                                </td>
+                                <td>$<%= data.paymentOrders[i].amount %></td>
+                                <td><%= data.paymentOrders[i].paymentDate %></td>
                                 
-                            <td>
-                                <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
-                                    <a id="button-edit" href="/expenses/paymentOrders/client/<%=data.client.id%>/edit/<%=data.paymentOrders[i].id%>" 
-                                        class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
-                                <% } %>
-                                
-                                <a id="button-print" onclick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>')"
-                                    class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">receipt</i></a>                            
+                                <td>
+                                    <% if(data.paymentOrders[i].billingPeriod.statusId === 0) { %>
+                                    <i class="material-icons">calendar_today</i>
+                                    <% } %>
+                                    <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
+                                    <i class="material-icons">lock_open</i>
+                                    <% } %>
+                                    <% if(data.paymentOrders[i].billingPeriod.statusId === 2) { %>
+                                    <i class="material-icons">lock</i>
+                                    <% } %>
+                                    <% if(data.paymentOrders[i].billingPeriod.statusId === 3) { %>
+                                    <i class="material-icons">cancel</i>
+                                    <% } %>
 
-                                <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
-                                    <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
-                                        data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" data-clientId="<%=data.client.id%>" onclick="deleteDialog(this)">
-                                        <i class="material-icons">delete</i></a>
-                                <% } %>
-                            </td>
+                                    <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentOrders[i].billingPeriod.name %></span></a>
+                                </td>
 
-                        </tr>
+                                <td>
+                                    <!--DESHABILITADO-->
+                                    <% if(data.paymentOrders[i].statusId === 0) { %>
+                                    <i class="material-icons">disabled_by_default</i>
+                                    <% } %>
+
+                                    <!--PENDIENTE-->
+                                    <% if(data.paymentOrders[i].statusId === 1) { %>
+                                    <i class="material-icons">assignment</i>
+                                    <% } %>
+
+                                    <!--EN_PROCESO-->
+                                    <% if(data.paymentOrders[i].statusId === 2) { %>
+                                    <i class="material-icons">assignment_ind</i>
+                                    <% } %>
+
+                                    <!--PROCESADO-->
+                                    <% if(data.paymentOrders[i].statusId === 3) { %>
+                                    <i class="material-icons">assignment_turned_in</i>
+                                    <% } %>
+
+                                    <!--ANULADO-->
+                                    <% if(data.paymentOrders[i].statusId === 4) { %>
+                                    <i class="material-icons">assignment_returned</i>
+                                    <% } %>
+
+                                    <span style="padding-left: 10px; vertical-align: 8px;"><%= data.paymentOrders[i].status %></span>
+                                </td>
+
+                                <!-- <td><%#= data.paymentOrders[i].status %></td> -->
+
+                                <td><%= data.paymentOrders[i].user.name %></td>                                
+                                    
+                                <td>
+                                    <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
+                                        <a id="button-edit" href="/expenses/paymentOrders/client/<%=data.client.id%>/edit/<%=data.paymentOrders[i].id%>" 
+                                            class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                                    <% } %>
+                                    
+                                    <a id="button-print" onclick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>')"
+                                        class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">receipt</i></a>                            
+
+                                    <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
+                                        <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
+                                            data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" data-clientId="<%=data.client.id%>" onclick="deleteDialog(this)">
+                                            <i class="material-icons">delete</i></a>
+                                    <% } %>
+                                </td>
+
+                            </tr>
                         <% } %>
                     </tbody>
                 </table>

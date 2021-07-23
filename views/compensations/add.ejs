@@ -1,0 +1,254 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" id="paymentReceiptForm" method="post" action='/compensations/client/<%=data.client.id%>/new'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Ingrese una nueva compensación</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                  
+                         <div class="input-field col s6">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="accountSelect" required >
+                                <option value="" disabled selected>Seleccione la cuenta</option>
+                                <% for(var i=0; i < data.clientAccounts.length; i++) { %>
+                                    <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                <% } %>
+                            </select>
+                            <label>Cuenta de Origen de los fondos</label>
+                            <input type="hidden" name="accountId" id="accountId" />
+                        </div>
+
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <label for="amount">Importe</label>
+                        </div>
+
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
+                            <label for="dtpEmitted">Fecha</label>
+                            <input type="hidden" name="emissionDate" id="emissionDate" />
+                        </div>
+                                  
+                        <div id="accountInfoDiv" class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="accountInfo" name="accountInfo" type="text" value="" readonly />
+                            <label for="accountInfo">Detalles de la cuenta</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s4">
+                            <i class="material-icons prefix">source</i>
+                            <select id="accountingGroupSelect">
+                            </select>
+                            <label>Grupo de Cuentas</label>
+                            <input type="hidden" name="accountingGroupId" id="accountingGroupId" />
+                        </div>
+                        <div class="input-field col s4">
+                            <select id="accountingImputationSelect">
+                                <option value="" selected disabled>Seleccion Primero el grupo de Cuentas</option>
+                            </select>
+                            <label>Imputacion Contable</label>
+                            <input type="hidden" name="accountingImputationId" id="accountingImputationId" />
+                        </div> 
+                           
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">comments</i>
+                            <textarea id="description" name="description" class="materialize-textarea" required></textarea>
+                            <label for="description">Detalle del servicio por el cual se percibe la compensación</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-action right-align">
+                    <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
+</main>
+
+<%- include ("../partials/footer") %>
+
+<%- include ("../partials/modals/billingPeriod.ejs") %>
+
+<script type="text/javascript" src="/javascripts/accountingImputations.js"></script>
+<script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"))
+        .then(periodId => {
+            
+            if(periodId) { 
+                
+                getBillingPeriodsById(periodId)
+                    .then(period => {
+                
+                        elems = document.querySelectorAll('.datepicker');
+
+                        const maxDate = new Date(period.endDate + " 00:00:00");
+
+                        instances = M.Datepicker.init(elems, {
+                            format: 'dd/mm/yyyy',
+                            autoClose: true,
+                            maxDate: maxDate,
+                            onOpen: function (e) {
+                                var that = this;
+                                that.hasEvent = false;
+                                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                                this.doneBtn.addEventListener('click', Done.bind(that))
+                            },
+                            onClose: function (e) {
+                                var that = this;
+                                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                                this.doneBtn.removeEventListener('click', Done.bind(that))
+                            },
+                            onSelect: function (selectedDate) {
+                                if (this.el.id === 'dtpEmissionDate') {
+                                    document.getElementById('emissionDate').value = this.date.toISOString();
+                                }
+                            }
+                        });
+                    });
+                };
+        });
+
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});
+
+        populateAccountingGroups('accountingGroupSelect');
+
+        document.getElementById('accountSelect').onchange = selectAccount;
+
+        document.getElementById("paymentReceiptForm").addEventListener("submit", validateForm, true);
+
+        let accountingGroupSelect = document.getElementById("accountingGroupSelect").onchange = function (evt) {
+            
+            document.getElementById("accountingGroupId").value = evt.target.value;
+            
+            populateImputations('accountingImputationSelect', evt.target.value)
+            .then((accountingImputationId)=>{
+                document.getElementById("accountingImputationId").value = accountingImputationId;
+            })            
+        };
+
+        let accountingImputationSelect = document.getElementById("accountingImputationSelect").onchange = function (evt) {
+            document.getElementById("accountingImputationId").value = evt.target.value;
+        };
+    });
+
+    async function selectAccount(e){
+            
+        getSelectedAccountDetails(this.value, 'accountInfo');
+
+        const accountId = e.srcElement.options[e.srcElement.selectedIndex].value;
+
+        document.getElementById('accountId').value = accountId;
+            
+        M.updateTextFields();
+    };
+
+
+    async function getSelectedAccountDetails(accountId, infoField) {
+
+        const account = await getClientAccountsInfo(accountId);
+
+        let message = "[" + account.accountType.account + "] " + account.accountType.description;
+
+        if (account.accountType.account.includes("CC$") || account.accountType.account.includes("CA$") || account.accountType.account.includes("CCU$") || account.accountType.account.includes("CAU$")) {
+            message = "[" + account.accountType.account + "]" + " - " + account.bank.name;
+            if (account.cbu) { message = message + " / CBU: " + account.cbu };
+            if (account.accountNumber) { message = message + " / CUENTA: " + account.accountNumber };
+            if (account.accountAlias) { message = message + " / ALIAS: " + account.accountAlias };
+        }
+
+        if (account.comments) { message = message + " - " + account.comments; }
+
+        document.getElementById(infoField).value = message; M.updateTextFields();
+        
+        const amount = document.getElementById('amount');
+
+        if(account.accountType.account === 'VAL') {
+            alert("Las compensaciones no admiten pago con cheques, por favor seleccione otra cuenta")
+        } else {
+            amount.readonly = false;
+            amount.value = 0.00;            
+            amount.classList.add("validate");
+            amount.select();
+            amount.focus();
+        }        
+    }
+    function validateForm(event) {
+        
+        //TODO: validar que la cuenta no sea VAL
+        
+        const emissionDate = document.getElementById('emissionDate').value;
+        
+        const dtpEmissionDate = document.getElementById('dtpEmissionDate').value;
+
+        if(emissionDate === "") {
+
+            if(dtpEmissionDate === "") {
+                event.preventDefault(); return;
+            } else {
+
+                dateParts = dtpEmissionDate.split("/");
+
+                document.getElementById('emissionDate').value = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]).toISOString();
+            }
+        }
+    };
+
+    function Cancel() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on cancel btn:', this.cancelBtn);
+        }
+    }
+    function Done() {
+        if (!this.hasEvent) {
+            this.hasEvent = true;
+            console.log('Clicked on done btn:', this.doneBtn);
+            if (this.date) {
+                if (this.el.id === 'dtpEmissionDate') { document.getElementById('emissionDate').value = this.date.toISOString(); }
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        $('textarea#description').characterCounter();        
+    });  
+</script>
