@@ -23,8 +23,14 @@
                 </div>
             </div>
             <div class="actions">
+                <div class="switch">
+                    <label> Mostrar compensaciones eliminadas
+                        <input id="swShowDeleted" type="checkbox" <% if(params.showAll===true){ %> checked <% } %> onchange="showDeleted();">
+                        <span class="lever"></span>
+                    </label>
+                </div>
                 <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/compensations/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="/compensations/client/<%=data.client.id%>/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
                 <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
@@ -38,6 +44,7 @@
                         <th>Cuenta</th>
                         <th>Importe</th>
                         <th>Fecha</th>
+                        <th>Recibo</th>                        
                         <th>Comentarios</th>
                         <th>Periodo</th>
                         <th>Estado</th>
@@ -49,12 +56,12 @@
                     <% for(var i=0; i < data.compensations.length; i++) { %>
                     <tr data-id="<%= data.compensations[i].id %>">
                         <td><%= data.compensations[i].id %></td>
-                        <td>$<%= data.compensations[i].accountingImputationId %></td>
+                        <td><%= data.compensations[i].accountingImputation.name %></td>
                         <td><%= data.compensations[i].account.accountType.account %> (ID: <%= data.compensations[i].accountId%>)</td>
                         <td>$<%= data.compensations[i].amount %></td>
                         <td><%= data.compensations[i].emissionDate %></td>
+                        <td><%= data.compensations[i].receiptNumberFormatted %></td>
                         <td><%= data.compensations[i].comments %></td>
-
                         <td>
                             <% if(data.compensations[i].billingPeriod.statusId === 0) { %>
                             <i class="material-icons">calendar_today</i>
@@ -69,7 +76,7 @@
                             <i class="material-icons">cancel</i>
                             <% } %>
 
-                            <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.accountTransfers[i].billingPeriod.name %></span></a>
+                            <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.compensations[i].billingPeriod.name %></span></a>
                         </td>
 
                         <td>
@@ -98,7 +105,6 @@
                             <i class="material-icons">assignment_returned</i>
                             <% } %>
 
-
                             <span style="padding-left: 10px; vertical-align: 8px;"><%= data.compensations[i].status %></span>
                         </td>
 
@@ -108,14 +114,17 @@
                             <a href="/compensations/info/<%=data.client.id%>/<%=data.compensations[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">more</i></a>
 
                             <% if(data.compensations[i].statusId!= 4) { %>
-                            <a href="/transfers/edit/<%=data.client.id%>/<%=data.compensations[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" 
-                                data-id="<%=data.compensations[i].id%>" 
-                                data-clientid="<%=data.client.id%>" 
-                                data-value="$<%= data.compensations[i].amount %>" 
-                                data-source="<%= data.compensations[i].account.accountType.account %> [ID:<%= data.compensations[i].accountId%>]" 
-                                onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
-                            <% } %>
+                            
+                                    <a href="/compensations/edit/<%=data.client.id%>/<%=data.compensations[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                            
+                                <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" 
+                                    data-id="<%=data.compensations[i].id%>" 
+                                    data-clientid="<%=data.client.id%>" 
+                                    data-value="$<%= data.compensations[i].amount %>" 
+                                    data-source="<%= data.compensations[i].account.accountType.account %> [ID:<%= data.compensations[i].accountId%>]" 
+                                    data-receipt="<%= data.compensations[i].receiptNumberFormatted %>"
+                                    onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                <% } %>
                         </td>
                     </tr>
                     <% } %>
@@ -130,7 +139,7 @@
 
 </main>
 
-<%#- include ("./modals/delete.ejs") %>
+<%- include ("./modals/delete.ejs") %>
 
 <%- include ("../partials/footer") %>
 
@@ -144,7 +153,7 @@
     function deleteDialog(button) {
         var _elem = document.getElementById('modalDelete');
         var modal = M.Modal.getInstance(_elem);
-        const message = `[ID: ${button.dataset.id}] - ${button.dataset.value} `
+        const message = `[ID: ${button.dataset.id}] - recibo # ${button.dataset.receipt} con valor ${button.dataset.value} de la cuenta ${button.dataset.source}`
         document.getElementById('modalDeleteMessage').textContent = message;
         document.getElementById('modalDeleteCompensationId').value = button.dataset.id;
         document.getElementById('modalDeleteClientId').value = button.dataset.clientid;
@@ -208,12 +217,12 @@
                 {   targets: 4,
                     render: function (data) {
                         if (data)
-                            return moment(data).format('DD/MM/YYYY HH:mm:ss');
+                            return moment(data).format('DD/MM/YYYY');
                         else return "";
                     }, 
                 },
                 {
-                    targets: 5,
+                    targets: 6,
                     visible: true,
                     searchable: false,
                     render: $.fn.dataTable.render.ellipsis(32, true)

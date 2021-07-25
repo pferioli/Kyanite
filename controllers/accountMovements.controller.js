@@ -34,6 +34,11 @@ const AccountTransfer = Model.accountTransfer;
 //modelos saldo periodo anterior
 const MonthlyBalance = Model.monthlyBalance;
 
+//modelos para compensaciones
+const Compensation = Model.compensation;
+const AccountingImputation = Model.accountingImputation;
+const AccountingGroup = Model.accountingGroup;
+
 const Enum = require('enum');
 
 const winston = require('../helpers/winston.helper');
@@ -62,7 +67,8 @@ module.exports.AccountMovementsCategories = class {
             'AJUSTE_SALDO': "J".charCodeAt(0),
             'INVERSION': "V".charCodeAt(0),
             'NOTA_DE_CREDITO': "N".charCodeAt(0),
-            'SALDO_PERIODO_ANTERIOR': "S".charCodeAt(0)
+            'SALDO_PERIODO_ANTERIOR': "S".charCodeAt(0),
+            'COMPENSACION': "M".charCodeAt(0),
         })
     }
 }
@@ -217,6 +223,16 @@ module.exports.showDetails = async function (req, res) {
 
         } break;
 
+        case 'M': { //'Compensaciones'
+
+            const compensation = await Compensation.findByPk(movement.movementId, {
+                include: [{ model: AccountingImputation, include: [{ model: AccountingGroup }] }
+                ]
+            });
+
+            res.send({ client, movement, compensation });
+
+        } break;
 
         case 'Q': { //'Cheque'
         } break;

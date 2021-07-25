@@ -2,10 +2,10 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12" id="paymentReceiptForm" method="post" action='/compensations/client/<%=data.client.id%>/new'>
+        <form class="col s12" id="paymentReceiptForm" method="post" action='/compensations/edit'>
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title">Ingrese una nueva compensación</span>
+                    <span class="card-title">Editar compensación</span>
                     <div class="row" style="margin-top: 20px;">
                         <div class="input-field col s9">
                             <i class="material-icons prefix">location_city</i>
@@ -22,30 +22,34 @@
                     </div>
 
                     <div class="row">
-                  
                          <div class="input-field col s6">
                             <i class="material-icons prefix">account_balance</i>
                             <select id="accountSelect" required >
-                                <option value="" disabled selected>Seleccione la cuenta</option>
+                                <option value="" disabled selected>Seleccione la cuenta</option>                                
                                 <% for(var i=0; i < data.clientAccounts.length; i++) { %>
-                                    <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                    <% if(data.clientAccounts[i].id === data.compensation.accountId) { %>
+                                        <% selectedAccount = true %>
+                                        <option value="<%=data.clientAccounts[i].id%>" selected>[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                    <% } else { %>
+                                        <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                    <% } %>                                    
                                 <% } %>
                             </select>
                             <label>Cuenta de Origen de los fondos</label>
-                            <input type="hidden" name="accountId" id="accountId" />
+                            <input type="hidden" name="accountId" id="accountId" value="<%=data.compensation.accountId%>" />
                         </div>
 
                         <div class="input-field col s3">
                             <i class="material-icons prefix">monetization_on</i>
-                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" required />
+                            <input id="amount" name="amount" type="number" min="0.00" step="0.01" class="validate" value="<%= data.compensation.amount %>" required />
                             <label for="amount">Importe</label>
                         </div>
 
                         <div class="input-field col s3">
                             <i class="material-icons prefix">date_range</i>
-                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required>
+                            <input type="text" class="datepicker" id="dtpEmissionDate" name="dtpEmissionDate" required value="<%= data.compensation.emissionDate %>">
                             <label for="dtpEmitted">Fecha</label>
-                            <input type="hidden" name="emissionDate" id="emissionDate" />
+                            <input type="hidden" name="emissionDate" id="emissionDate" value="<%= data.compensation.emissionDate %>"/>
                         </div>
                                   
                         <div id="accountInfoDiv" class="input-field col s12">
@@ -61,25 +65,27 @@
                             <select id="accountingGroupSelect">
                             </select>
                             <label>Grupo de Cuentas</label>
-                            <input type="hidden" name="accountingGroupId" id="accountingGroupId" />
+                            <input type="hidden" name="accountingGroupId" id="accountingGroupId" value="<%= data.compensation.accountingImputation.accountingGroup.id %>"/>
                         </div>
                         <div class="input-field col s4">
                             <select id="accountingImputationSelect">
                                 <option value="" selected disabled>Seleccion Primero el grupo de Cuentas</option>
                             </select>
                             <label>Imputacion Contable</label>
-                            <input type="hidden" name="accountingImputationId" id="accountingImputationId" />
+                            <input type="hidden" name="accountingImputationId" id="accountingImputationId" value="<%= data.compensation.accountingImputation.id %>" />
                         </div> 
-                           
                     </div>
 
                     <div class="row">
                         <div class="input-field col s12">
                             <i class="material-icons prefix">comments</i>
-                            <textarea id="description" name="comments" class="materialize-textarea" required></textarea>
+                            <textarea id="description" name="comments" class="materialize-textarea" required><%= data.compensation.comments%></textarea>
                             <label for="description">Detalle del servicio por el cual se percibe la compensación</label>
                         </div>
                     </div>
+
+                    <input type="hidden" name="compensationId" id="compensationId" value="<%= data.compensation.id %>" />
+
                 </div>
 
                 <div class="card-action right-align">
@@ -152,23 +158,17 @@
 
         populateAccountingGroups('accountingGroupSelect');
 
+        populateAccountingGroups('accountingGroupSelect', '<%= data.compensation.accountingImputation.accountingGroup.id %>');
+
+        populateImputations('accountingImputationSelect', '<%= data.compensation.accountingImputation.accountingGroup.id %>', '<%= data.compensation.accountingImputation.id %>');
+
         document.getElementById('accountSelect').onchange = selectAccount;
 
         document.getElementById("paymentReceiptForm").addEventListener("submit", validateForm, true);
 
-        let accountingGroupSelect = document.getElementById("accountingGroupSelect").onchange = function (evt) {
-            
-            document.getElementById("accountingGroupId").value = evt.target.value;
-            
-            populateImputations('accountingImputationSelect', evt.target.value)
-            .then((accountingImputationId)=>{
-                document.getElementById("accountingImputationId").value = accountingImputationId;
-            })            
-        };
-
-        let accountingImputationSelect = document.getElementById("accountingImputationSelect").onchange = function (evt) {
-            document.getElementById("accountingImputationId").value = evt.target.value;
-        };
+        const accountId = document.getElementById("accountId").value;
+        getSelectedAccountDetails(accountId, "accountInfo");
+        
     });
 
     async function selectAccount(e){
@@ -199,19 +199,8 @@
         if (account.comments) { message = message + " - " + account.comments; }
 
         document.getElementById(infoField).value = message; M.updateTextFields();
-        
-        const amount = document.getElementById('amount');
-
-        if(account.accountType.account === 'VAL') {
-            alert("Las compensaciones no admiten pago con cheques, por favor seleccione otra cuenta")
-        } else {
-            amount.readonly = false;
-            amount.value = 0.00;            
-            amount.classList.add("validate");
-            amount.select();
-            amount.focus();
-        }        
     }
+    
     function validateForm(event) {
         
         //TODO: validar que la cuenta no sea VAL

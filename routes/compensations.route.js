@@ -11,6 +11,8 @@ router.post("/", function (req, res, next) {
 
     let redirectUrl = '/compensations/client/' + req.body.clientId + '?periodId=' + req.body.periodId
 
+    if (req.query.showAll) redirectUrl = redirectUrl + '&showAll=' + req.query.showAll;
+
     res.redirect(redirectUrl);
 });
 
@@ -18,13 +20,29 @@ router.get("/client/:clientId", function (req, res, next) {
     compensations.listAll(req, res);
 });
 
-router.get("/new/:clientId", function (req, res, next) {
+router.get("/client/:clientId/new", function (req, res, next) {
     compensations.showNewForm(req, res);
 });
 
-router.post("/new/:clientId", function (req, res, next) {
+router.post("/client/:clientId/new", function (req, res, next) {
     compensations.addNew(req, res);
 });
 
+
+router.get("/edit/:clientId/:compensationId", function (req, res, next) {
+    compensations.showEditForm(req, res);
+});
+
+router.get("/info/:clientId/:compensationId", function (req, res, next) {
+    compensations.info(req, res);
+});
+
+router.post("/edit", function (req, res, next) {
+    compensations.edit(req, res);
+});
+
+router.post('/delete', function (req, res, next) {
+    compensations.delete(req, res);
+})
 
 module.exports = router

@@ -49,6 +49,20 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
+        emissionDate: {
+            allowNull: false,
+            type: DataTypes.DATEONLY
+        },
+        receiptNumber: {
+            allowNull: true,
+            type: DataTypes.INTEGER
+        },
+        receiptNumberFormatted: {
+            type: new DataTypes.VIRTUAL(DataTypes.STRING, ['receiptNumber']),
+            get: function () {
+                return new String("00000000" + this.get('receiptNumber')).slice(-8);
+            }
+        },
         comments: {
             allowNull: false,
             type: DataTypes.STRING(512)

@@ -428,6 +428,9 @@
                     if(details.movement.category.toUpperCase() === 'J'){
                         manualAccountAdjustmentDetails(tableRef, details);
                     }
+                    if(details.movement.category.toUpperCase() === 'M'){
+                        compensationDetails(tableRef, details);
+                    }
                 }
             })
 

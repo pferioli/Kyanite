@@ -80,7 +80,8 @@ module.exports.addNew = async function (req, res, next) {
 
     try {
 
-        const accountTransfer = {
+
+        AccountTransfer.create({
             clientId: clientId,
             periodId: req.body.billingPeriodId,
             sourceAccountId: req.body.sourceAccountId,
@@ -90,10 +91,8 @@ module.exports.addNew = async function (req, res, next) {
             comments: req.body.comments,
             statusId: AccountTransferStatus.eStatus.get('pending').value,
             userId: req.user.id
-        }
-
-        AccountTransfer.create(accountTransfer).
-            then(async function (result) {
+        })
+            .then(async function (accountTransfer) {
 
                 //-----------------------------------------------------------------
                 // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
@@ -103,18 +102,22 @@ module.exports.addNew = async function (req, res, next) {
 
                 const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
 
-                const accountMovementOut = await AccountMovement.addMovement(clientId, result.sourceAccountId, result.periodId, (-1) * result.amount,
-                    accountMovementCategory.eStatus.get('TRANSFERENCIA').value, result.id, result.userId)
+                const accountMovementOut = await AccountMovement.addMovement(clientId, accountTransfer.sourceAccountId, accountTransfer.periodId, (-1) * accountTransfer.amount,
+                    accountMovementCategory.eStatus.get('TRANSFERENCIA').value, accountTransfer.id, accountTransfer.userId)
 
-                const accountMovementIn = await AccountMovement.addMovement(clientId, result.destinationAccountId, result.periodId, result.amount,
-                    accountMovementCategory.eStatus.get('TRANSFERENCIA').value, result.id, result.userId)
+                const accountMovementIn = await AccountMovement.addMovement(clientId, accountTransfer.destinationAccountId, accountTransfer.periodId, accountTransfer.amount,
+                    accountMovementCategory.eStatus.get('TRANSFERENCIA').value, accountTransfer.id, accountTransfer.userId)
 
                 if (accountMovementOut === null || accountMovementIn === null) {
                     winston.error(`It was not possible to add account movement record for the transfer (in/out) (ID: ${accountTransfer.id})  - ${err}`);
                     throw new Error("It was not possible to add the transfer records into the account movements table");
                 }
 
-                winston.info(`User #${req.user.id} created succesfully a new account transfer ${JSON.stringify(accountTransfer)} - ${result.id}`)
+                accountTransfer.update({
+                    statusId: AccountTransferStatus.eStatus.get('processed').value
+                });
+
+                winston.info(`User #${req.user.id} created succesfully a new account transfer ${JSON.stringify(accountTransfer)} - ${accountTransfer.id}`)
 
                 req.flash(
                     "success",
@@ -164,6 +167,16 @@ module.exports.delete = async function (req, res, next) {
                 req.flash("warning", "Solo se puede eliminar una transferencia si pertenece al período activo");
                 res.redirect('/transfers/client/' + clientId); return;
             }
+
+            const AccountMovement = require('./accountMovements.controller');
+
+            const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+            await AccountMovement.deleteMovement(accountTransfer.clientId, accountTransfer.sourceAccountId, accountTransfer.periodId,
+                accountMovementCategory.eStatus.get('TRANSFERENCIA').value, accountTransfer.id);
+
+            await AccountMovement.deleteMovement(accountTransfer.clientId, accountTransfer.destinationAccountId, accountTransfer.periodId,
+                accountMovementCategory.eStatus.get('TRANSFERENCIA').value, accountTransfer.id);
 
             accountTransfer.statusId = AccountTransferStatus.eStatus.get('deleted').value;
             accountTransfer.userId = req.user.id;
@@ -280,7 +293,7 @@ module.exports.info = async function (req, res, next) {
         .then(transfer => {
             res.render('transfers/info', {
                 menu: CURRENT_MENU,
-                data: { accountTransfer: transfer },
+                data: { accountTransfer: transfer, client: transfer.client },
             });
         })
         .catch(err => {

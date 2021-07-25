@@ -258,3 +258,31 @@ function manualAccountAdjustmentDetails(tableRef, details) {
     newRow.insertCell(0).appendChild(document.createTextNode("Comentarios"));
     newRow.insertCell(1).appendChild(document.createTextNode(details.accountAdjustment.comments));
 }
+
+function compensationDetails(tableRef, details) {
+
+    newRow = tableRef.insertRow(-1);
+    newRow.insertCell(0).appendChild(document.createTextNode("ID de la compensación"));
+    newRow.insertCell(1).appendChild(document.createTextNode(details.compensation.id));
+
+    newRow = tableRef.insertRow(-1);
+    newRow.insertCell(0).appendChild(document.createTextNode("Importe"));
+    newRow.insertCell(1).appendChild(document.createTextNode("$" + Number.parseFloat(details.compensation.amount).toFixed(2)));
+
+    newRow = tableRef.insertRow(-1);
+    newRow.insertCell(0).appendChild(document.createTextNode("Fecha"));
+    newRow.insertCell(1).appendChild(document.createTextNode(moment(details.compensation.emissionDate).format('DD/MM/YYYY')));
+
+    newRow = tableRef.insertRow(-1);
+    newRow.insertCell(0).appendChild(document.createTextNode("Categoría"));
+    newRow.insertCell(1).appendChild(document.createTextNode(details.compensation.accountingImputation.name));
+
+    newRow = tableRef.insertRow(-1);
+    newRow.insertCell(0).appendChild(document.createTextNode("Comentarios"));
+    newRow.insertCell(1).appendChild(document.createTextNode(details.compensation.comments));
+
+    newRow = tableRef.insertRow(-1);
+    newRow.insertCell(0).appendChild(document.createTextNode("Estado"));
+    newRow.insertCell(1).appendChild(document.createTextNode(details.compensation.status));
+
+}

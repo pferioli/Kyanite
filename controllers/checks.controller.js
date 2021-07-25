@@ -238,8 +238,15 @@ module.exports.delete = async function (req, res, next) {
                 { statusId: SplitCheckStatus.eStatus.get('deleted').value, userId: req.user.id },
                 { where: { checkId: check.id } })
 
-            //TODO: eliminar el movimiento generado en la CC por el ingreso del cheque y el update del saldo
-            
+            //eliminar el movimiento generado en la CC por el ingreso del cheque y el update del saldo
+
+            const AccountMovement = require('./accountMovements.controller');
+
+            const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+            await AccountMovement.deleteMovement(check.clientId, check.accountId, check.periodId,
+                accountMovementCategory.eStatus.get('CHEQUE_EN_CARTERA').value, check.id);
+
             await check.update({ statusId: CheckStatus.eStatus.get('cancelled').value });
 
             req.flash("success", "El cheque fue eliminado exitosamente a la base de datos");
