@@ -24,23 +24,17 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.INTEGER
         },
-        collections: {
+        type: {
             allowNull: false,
-            type: DataTypes.INTEGER,
-            defaultValue: 0
+            type: DataTypes.CHAR(1)
         },
-        payments: {
-            allowNull: false,
-            type: DataTypes.INTEGER,
-            defaultValue: 0
-        },
-        compensations: {
+        currentValue: {
             allowNull: false,
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
         increment: {
-            allowNull: false,
+            defaultValue: null,
             type: DataTypes.INTEGER,
             defaultValue: 1
         },

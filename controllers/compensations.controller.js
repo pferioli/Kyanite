@@ -338,3 +338,27 @@ module.exports.info = async function (req, res, next) {
             res.redirect("/compensations/client/" + clientId);
         })
 }
+
+
+module.exports.createInvoice = function (req, res) {
+
+    const { createSingleReport } = require("../reports/compensations/compensation.report");
+
+    const clientId = req.params.clientId;
+    const compensationId = req.params.compensationId;
+
+    Compensation.findByPk(compensationId, {
+        include: [
+            { model: Client }, { model: BillingPeriod }, { model: User },
+            { model: Account, include: [{ model: AccountType }] },
+            { model: AccountingImputation, include: [{ model: AccountingGroup }] }
+        ],
+        paranoid: false
+    })
+        .then(compensation => {
+            createSingleReport(compensation, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+        })
+        .catch(err => {
+            console.error(err);
+        })
+};

@@ -68,22 +68,20 @@ module.exports.addNew = async function (req, res, next) {
             comments: req.body.comments,
             userId: req.user.id
         })
-            .then(async function (client) {
+            .then(async (client) => {
+
+                console.log(client.id);
 
                 //agregamos automaticamente las secuencias para el numero de OP y de cobranza
 
-                await Sequence.create({ clientId: client.id, type: 'C', currentValue: 0, increment: 1 });
+                await Sequence.create({ clientId: client.id, collections: 0, payments: 0, compensations: 0, increment: 1 });
 
-                await Sequence.create({ clientId: client.id, type: 'P', currentValue: 0, increment: 1 });
-
-                return client;
-            })
-            .then(async function (client) {
                 winston.info(`User #${req.user.id} created succesfully a new client ${JSON.stringify(client)} - ${client.id}`)
+
                 req.flash("success", "El cliente fue agregado exitosamente a la base de datos")
             })
             .catch(function (err) {
-                winston.error(`An error ocurred while user #${req.user.id} tryed to create a new client ${JSON.stringify(client)} - ${err}`)
+                winston.error(`An error ocurred while user #${req.user.id} tryed to create a new client ${JSON.stringify(req.body)} - ${err}`)
                 req.flash("error", "Ocurrio un error y no se pudo agregar al nuevo cliente en la base de datos")
             })
             .finally(() => {

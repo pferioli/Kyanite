@@ -24,6 +24,10 @@ router.get("/client/:clientId/new", function (req, res, next) {
     compensations.showNewForm(req, res);
 });
 
+router.get("/client/:clientId/invoice/:compensationId", function (req, res, next) {
+    compensations.createInvoice(req, res);
+});
+
 router.post("/client/:clientId/new", function (req, res, next) {
     compensations.addNew(req, res);
 });

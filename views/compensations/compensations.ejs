@@ -124,7 +124,11 @@
                                     data-source="<%= data.compensations[i].account.accountType.account %> [ID:<%= data.compensations[i].accountId%>]" 
                                     data-receipt="<%= data.compensations[i].receiptNumberFormatted %>"
                                     onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
-                                <% } %>
+                            <% } %>
+
+                            <a id="button-print" onclick="openInNewTab('/compensations/client/<%=data.client.id%>/invoice/<%=data.compensations[i].id%>')"
+                                        class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.compensations[i].id%>"><i class="material-icons">receipt</i></a>                            
+
                         </td>
                     </tr>
                     <% } %>
@@ -176,6 +180,12 @@
         $('body').append(form);
         $(form).submit();
     }
+
+    function openInNewTab(url) {
+        var redirectWindow = window.open(url, '_blank');
+        redirectWindow.document.title = "Compensacion";
+        redirectWindow.location;
+    };
 
     $(document).ready(function () {
 
