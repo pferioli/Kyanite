@@ -938,7 +938,7 @@ module.exports.collectionsReport = async function (req, res) {
     Collection.findAll({
         where: {
             clientId: clientId,
-            [Op.or]: [{ periodId: period.id }, { updatePeriodId: period.id}]
+            [Op.or]: [{ periodId: period.id }, { updatePeriodId: period.id }]
         },
         include: [{ model: Client }, { model: BillingPeriod },
         { model: User, include: [{ model: Model.userSignature }] },
@@ -955,7 +955,7 @@ module.exports.collectionsReport = async function (req, res) {
                     //where: { accountId: { [Op.ne]: null } }
                 }]
         }],
-        order: [["receiptNumber", "ASC"]]
+        order: [["receiptDate", "ASC"]] //, ["receiptNumber", "ASC"]]
     })
         .then(collections => {
             if (collections.length > 0) {

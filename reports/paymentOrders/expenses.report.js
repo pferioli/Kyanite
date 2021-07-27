@@ -192,6 +192,8 @@ async function generateFooter(doc) {
 
 function populateTable(doc, paymentOrders) {
 
+    amount = { total: 0.00, subTotalGroup: 0.00, subTotal: 0.00 };
+
     let table0 = {
         headers: ['OP', 'Fecha', 'Factura', 'Proveedor', 'Detalle', 'Importe'],
         rows: [],
