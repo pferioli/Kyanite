@@ -303,6 +303,23 @@ module.exports.addNew = async function (req, res, next) {
 
     const clientId = req.params.clientId;
 
+    const checkIfExists = await PaymentReceipt.findOne({
+        where: {
+            clientId: req.body.clientId,
+            supplierId: req.body.supplierId,
+            receiptNumber: req.body.receiptNumber,
+            receiptTypeId: req.body.receiptTypeId,
+            // periodId: req.body.billingPeriodId,
+            // emissionDate: req.body.emissionDate,
+            // amount: req.body.amount,
+        }
+    });
+
+    if (checkIfExists !== null) {
+        req.flash("warning", "La factura o comprobante ya existe en la base de datos");
+        res.redirect('/expenses/paymentReceipts/client/' + clientId); return;
+    }
+
     PaymentReceipt.create(
         {
             clientId: clientId,
@@ -508,3 +525,23 @@ module.exports.getPaymentReceiptById = async function (req, res) {
         res.send(paymentReceipt);
     });
 };
+
+module.exports.checkPaymentReceiptExists = async function (req, res) {
+
+    PaymentReceipt.findOne({
+        where: {
+            clientId: req.body.clientId,
+            supplierId: req.body.supplierId,
+            receiptNumber: req.body.receiptNumber,
+            receiptTypeId: req.body.receiptTypeId,
+            // periodId: req.body.billingPeriodId,
+            // emissionDate: req.body.emissionDate,
+            // amount: req.body.amount,
+        }
+    })
+        .then(paymentReceipt => {
+            res.send(paymentReceipt === null ? {} : paymentReceipt);
+        })
+        .catch(err => { res.send(err); });
+
+}

@@ -11,6 +11,7 @@
                             <i class="material-icons prefix">location_city</i>
                             <input id="client" name="client" type="text" value="<%=data.client.name%> [<%=data.client.internalCode%>]" disabled />
                             <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.client.id%>" />
                         </div>
                         <div class="input-field col s3">
                             <i class="material-icons prefix">calendar_today</i>
@@ -121,6 +122,7 @@
 <script type="text/javascript" src="/javascripts/accountingImputations.js"></script>
 <script type="text/javascript" src="/javascripts/receiptTypes.js"></script>
 <script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
+<script type="text/javascript" src="/javascripts/paymentReceipts.js"></script>
 
 <script>
 
@@ -197,7 +199,7 @@
         };
     });
 
-    function validateForm(event) {
+    async function validateForm(event) {
         
         const emissionDate = document.getElementById('emissionDate').value;
         
@@ -214,6 +216,27 @@
                 document.getElementById('emissionDate').value = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]).toISOString();
             }
         }
+
+        //validamos si ya existe una factura con el mismo numero para el mismo proveedor
+ 
+        // try {
+        //     const paymentReceipt = {
+        //         clientId: document.getElementById('clientId').value,
+        //         receiptNumber: document.getElementById('receiptNumber').value,
+        //         receiptTypeId: document.getElementById('receiptTypeId').value,
+        //         emissionDate: document.getElementById('emissionDate').value,
+        //         amount: document.getElementById("amount").value,
+        //         supplierId: document.getElementById("supplierId").value,
+        //         periodId: document.getElementById('billingPeriodId').value,
+        //     };
+
+        //     const checkIfExists = await checkPaymentReceiptExists(paymentReceipt);
+           
+        // } catch (error) {
+        //     console.error(error);
+        // } finally {
+
+        // }
     };
 
     function Cancel() {

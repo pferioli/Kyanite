@@ -54,7 +54,7 @@ async function getPaymentReceiptById(paymentReceiptId) {
     try {
 
         if (paymentReceiptId === undefined) return;
-        
+
         let url = '/expenses/paymentReceipts/ajax/getPaymentReceiptById/' + paymentReceiptId;
 
         const response = await fetch(url);
@@ -69,3 +69,32 @@ async function getPaymentReceiptById(paymentReceiptId) {
         console.log(err);
     }
 }
+
+async function checkPaymentReceiptExists(paymentReceipt) {
+
+    try {
+
+        if (paymentReceipt === undefined) return;
+
+        let url = `/expenses/paymentReceipts/ajax/checkPaymentReceiptExists`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paymentReceipt)
+        });
+
+        if (response.status == 200) {
+            var data = await response.json();
+            return data;
+        } else {
+            throw "Respuesta incorrecta del servidor"
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}
+

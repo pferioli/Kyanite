@@ -69,6 +69,10 @@ router.get("/ajax/getPaymentReceiptById/:paymentReceipt", function (req, res, ne
     paymentReceiptsController.getPaymentReceiptById(req, res);
 });
 
+router.post("/ajax/checkPaymentReceiptExists", function (req, res, next) {
+    paymentReceiptsController.checkPaymentReceiptExists(req, res);
+});
+
 router.get("/ajax/pending/getSuppliersList/:clientId", function (req, res, next) {
     paymentReceiptsController.getPendingSuppliersList(req, res);
 });

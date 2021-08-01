@@ -294,7 +294,12 @@ module.exports.deleteCollection = async function (req, res) {
 
             UnidentifiedDeposit.findOne({ where: { collectionId: collectionId } })  //buscamos si hay DNIs para esa cobranza y lo ponemos "pendiente"
                 .then(unidentifiedDeposit => {
-                    unidentifiedDeposit.update({ statusId: UnidentifiedDepositStatus.eStatus.get('pending').value })
+                    if (unidentifiedDeposit !== null) {
+                        unidentifiedDeposit.update({ statusId: UnidentifiedDepositStatus.eStatus.get('pending').value })
+                            .then(() => {
+                                winston.info(`unidentified Deposit ${unidentifiedDeposit.id} updated to pending status`)
+                            })
+                    }
                 })
 
             //Para cada uno de los valores ingresados corregimos el movimiento en la CC
@@ -307,8 +312,13 @@ module.exports.deleteCollection = async function (req, res) {
 
                     const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
 
+                    let collectionType = accountMovementCategory.eStatus.get('INGRESO_COBRANZA').value;
+
+                    if (collection.batchNumber)
+                        collectionType = accountMovementCategory.eStatus.get('IMPORTACION_COBRANZA').value
+
                     const accountMovement = await AccountMovement.deleteMovement(clientId, collectionSecurity.accountId,
-                        collection.periodId, accountMovementCategory.eStatus.get('INGRESO_COBRANZA').value, collectionSecurity.id)
+                        collection.periodId, collectionType, collectionSecurity.id)
 
                     if (accountMovement === null) {
                         winston.error(`It was not possible to delete account movement record for the Collection (ID: ${paymentOrder.id})  - ${err}`);
@@ -327,7 +337,7 @@ module.exports.deleteCollection = async function (req, res) {
             throw new error("no record found for collectionId " + collectionId);
         }
 
-    } catch (error) {
+    } catch (err) {
 
         winston.error(`An error ocurred while user #${req.user.id} tryed to delete collection ${collectionId} - ${err} `)
 
