@@ -129,22 +129,22 @@
 
                                 <td>
                                     <% if((data.paymentReceipts[i].statusId === 1)||(data.paymentReceipts[i].statusId === 2)) { %>
-                                        <a href="/expenses/paymentReceipts/edit/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                                        <a href="/expenses/paymentReceipts/edit/<%= data.paymentReceipts[i].id%>" title="editar" class="btn-flat btn-small waves-effect waves-light">
                                             <i class="material-icons">edit</i></a>
                                     <% } %>
 
                                     <% if((data.paymentReceipts[i].statusId === 1)||(data.paymentReceipts[i].statusId === 2)) { %>
-                                        <a href="/expenses/paymentReceipts/client/<%= data.client.id %>/createPaymentOrder/<%= data.paymentReceipts[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                                        <a href="/expenses/paymentReceipts/client/<%= data.client.id %>/createPaymentOrder/<%= data.paymentReceipts[i].id%>" title="crear OP" class="btn-flat btn-small waves-effect waves-light">
                                             <i class="material-icons">check_circle</i></a>
                                     <% } %>
 
                                     <% if(data.paymentReceipts[i].paymentReceiptImage != undefined) { %>
-                                        <a id="button-download" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>">
+                                        <a id="button-download" title="descargar factura" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>">
                                             <i class="material-icons">cloud_download</i></a>
                                     <% } %>
                                     
                                     <% if(data.paymentReceipts[i].statusId === 1) { %>
-                                        <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>"  data-clientId="<%=data.client.id%>"
+                                        <a id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>"  data-clientId="<%=data.client.id%>"
                                             data-value="<%= data.paymentReceipts[i].supplier.name %> [<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                                     <% } %>
                                 </td>
