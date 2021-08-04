@@ -23,9 +23,9 @@
                 </div>
             </div>
             <div class="actions">
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/checks/split/new/<%=data.check.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/checks/split/new/<%=data.check.id%>" id="button-add" title="agregar división" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
 
@@ -83,11 +83,11 @@
                                 
                                 <td>
                                     <% if(data.checks[i].statusId===0) { %>
-                                        <a href="/checks/split/edit/<%=data.checks[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                                        <a href="/checks/split/edit/<%=data.checks[i].id%>" title="editar" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
                                     <% } %>
 
                                     <% if((data.checks[i].statusId===0)||(data.checks[i].statusId===1)) { %>
-                                        <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.check.client.id%>" data-value="$<%= data.checks[i].amount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                        <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.checks[i].id%>" data-clientid="<%=data.check.client.id%>" data-value="$<%= data.checks[i].amount %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                                     <% } %>
                                 </td>
                             </td>                    

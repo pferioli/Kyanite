@@ -24,10 +24,10 @@
                 </div>
             </div>
             <div class="actions">
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/homeOwners/client/<%=data.client.id%>/new" id="button-add" class="waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="/homeOwners/client/<%=data.client.id%>/upload" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/homeOwners/client/<%=data.client.id%>/new" id="button-add" title="agregar propietario" class="waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="/homeOwners/client/<%=data.client.id%>/upload" id="button-upload" title="importar desde archivo" class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
         <!-- <div class="progress" id="progress" style="margin-top: 30px;">
@@ -58,16 +58,16 @@
                         <td><%= data.homeOwners[i].comments %></td>
                         <td><%= Number.parseFloat(data.homeOwners[i].coefficient).toFixed(6)%></td>
                         <td>
-                            <a href="/homeOwners/edit/<%=data.homeOwners[i].id%>?mode=update" class="btn-flat btn-small waves-effect waves-light">
+                            <a href="/homeOwners/edit/<%=data.homeOwners[i].id%>?mode=update" title="editar" class="btn-flat btn-small waves-effect waves-light">
                                 <i class="material-icons">edit</i></a>
 
-                            <a href="/homeOwners/edit/<%=data.homeOwners[i].id%>?mode=transfer" class="btn-flat btn-small waves-effect waves-light">
+                            <a href="/homeOwners/edit/<%=data.homeOwners[i].id%>?mode=transfer" title="transferir titularidad" class="btn-flat btn-small waves-effect waves-light">
                                 <i class="material-icons">home</i></a>
 
-                            <a href="/homeOwners/history/<%=data.homeOwners[i].id%>" class="btn-flat btn-small waves-effect waves-light">
+                            <a href="/homeOwners/history/<%=data.homeOwners[i].id%>" title="historial" class="btn-flat btn-small waves-effect waves-light">
                                 <i class="material-icons">history</i></a>
 
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.homeOwners[i].id%>" data-value="<%= data.homeOwners[i].name %>" data-value2="<%=data.client.id%>" onclick="deleteDialog(this)">
+                            <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.homeOwners[i].id%>" data-value="<%= data.homeOwners[i].name %>" data-value2="<%=data.client.id%>" onclick="deleteDialog(this)">
                                 <i class="material-icons">delete</i></a>
                         </td>
                     </tr>

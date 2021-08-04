@@ -101,22 +101,6 @@ app.use(function (req, res, next) {
 });
 
 //---------------------------------------------------------------------------//
-// CUBE.JS
-//---------------------------------------------------------------------------//
-
-// const CubejsServerCore = require('@cubejs-backend/server-core');
-
-// const options = {
-//   dbType: 'mysql',
-//   devServer: true,
-//   schemaPath: 'schema'
-// };
-
-// const core = CubejsServerCore.create(options);
-
-// core.initApp(app);
-
-//---------------------------------------------------------------------------//
 // ROUTES
 //---------------------------------------------------------------------------//
 

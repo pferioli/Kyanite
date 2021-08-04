@@ -23,15 +23,15 @@
                 </div>
             </div>
             <div class="actions">
-                <div class="switch">
+                <div class="switch" style="margin-top: 3px;">
                     <label> Mostrar compensaciones eliminadas
                         <input id="swShowDeleted" type="checkbox" <% if(params.showAll===true){ %> checked <% } %> onchange="showDeleted();">
                         <span class="lever"></span>
                     </label>
                 </div>
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/compensations/client/<%=data.client.id%>/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/compensations/client/<%=data.client.id%>/new" id="button-add" title="agregar compensación" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
 
@@ -111,13 +111,13 @@
                         <td><%= data.compensations[i].user.name %></td>
 
                         <td>
-                            <a href="/compensations/info/<%=data.client.id%>/<%=data.compensations[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">more</i></a>
+                            <a href="/compensations/info/<%=data.client.id%>/<%=data.compensations[i].id%>" title="información" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">more</i></a>
 
                             <% if(data.compensations[i].statusId!= 4) { %>
                             
-                                    <a href="/compensations/edit/<%=data.client.id%>/<%=data.compensations[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                                    <a href="/compensations/edit/<%=data.client.id%>/<%=data.compensations[i].id%>" title="editar" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
                             
-                                <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" 
+                                <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
                                     data-id="<%=data.compensations[i].id%>" 
                                     data-clientid="<%=data.client.id%>" 
                                     data-value="$<%= data.compensations[i].amount %>" 
@@ -126,7 +126,7 @@
                                     onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                             <% } %>
 
-                            <a id="button-print" onclick="openInNewTab('/compensations/client/<%=data.client.id%>/invoice/<%=data.compensations[i].id%>')"
+                            <a id="button-print" title="imprimir recibo" onclick="openInNewTab('/compensations/client/<%=data.client.id%>/invoice/<%=data.compensations[i].id%>')"
                                         class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.compensations[i].id%>"><i class="material-icons">receipt</i></a>                            
 
                         </td>

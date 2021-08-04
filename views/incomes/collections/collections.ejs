@@ -32,12 +32,12 @@
                         <span class="lever"></span></label>
                 </div>              
 
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/incomes/collections/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="/incomes/collections/import/new/<%=data.client.id%>" id="button-upload" class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>                
-                <a href="/incomes/unidentifiedDeposits/client/<%=data.client.id%>" class="waves-effect btn-flat nopadding"><i class="material-icons">pageview</i></a>
-                <button id="button-report-xls" onClick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/report/download');" class="waves-effect btn-flat nopadding"><i class="material-icons">file_download</i></button>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/incomes/collections/new/<%=data.client.id%>" id="button-add" title="agregar cobranza" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="/incomes/collections/import/new/<%=data.client.id%>" id="button-upload" title="importar desde archivo" class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>                
+                <a href="/incomes/unidentifiedDeposits/client/<%=data.client.id%>" title="depósitos no identificados" class="waves-effect btn-flat nopadding"><i class="material-icons">pageview</i></a>
+                <button id="button-report-xls" title="exportar reporte de cobranzas" onClick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/report/download');" class="waves-effect btn-flat nopadding"><i class="material-icons">file_download</i></button>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             
         </div>
@@ -177,19 +177,19 @@
                             <td><%= data.collections[i].user.name %></td>
 
                             <td>
-                                <a href="/incomes/collections/client/<%=data.client.id%>/details/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> 
+                                <a href="/incomes/collections/client/<%=data.client.id%>/details/<%= data.collections[i].id%>" title="detalles" class="btn-flat btn-small waves-effect waves-light"> 
                                     <i class="material-icons">more</i></a>
                                 
                                 <% if (data.collections[i].Properties.length != 0) { %>
-                                    <a id="button-receipt" class="btn-flat btn-small waves-effect waves-light" 
+                                    <a id="button-receipt" title="imprimir comprobante" class="btn-flat btn-small waves-effect waves-light" 
                                         onclick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/invoice/<%= data.collections[i].id%>')">
                                         <i class="material-icons">receipt</i></a>
                                 <% } %>
                                 
-                                <a href="/incomes/collections/client/<%=data.client.id%>/reassign/<%= data.collections[i].id%>" class="btn-flat btn-small waves-effect waves-light"> 
+                                <a href="/incomes/collections/client/<%=data.client.id%>/reassign/<%= data.collections[i].id%>" title="reasignar" class="btn-flat btn-small waves-effect waves-light"> 
                                     <i class="material-icons">holiday_village</i></a>
 
-                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
+                                <a id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
                                     data-id="<%=data.collections[i].id%>" 
                                     data-value="<%= data.collections[i].receiptNumber %>" 
                                     data-clientId="<%=data.client.id%>"

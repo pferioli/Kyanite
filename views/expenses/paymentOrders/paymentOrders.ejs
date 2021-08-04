@@ -33,13 +33,14 @@
                     <label> Seleccionar todo <input id="swAllProperties" type="checkbox" onchange="selectAllRows(this.checked);">
                         <span class="lever"></span></label>
                 </div>        
-                <button id="button-print" onClick='confirmDialog(this);' class="waves-effect btn-flat nopadding"><i class="material-icons">print</i></button>
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <button id="button-print" title="imprimir" onClick='confirmDialog(this);' class="waves-effect btn-flat nopadding"><i class="material-icons">print</i></button>
                 
-                <a href="/expenses/paymentOrders/client/<%=data.client.id%>/report?periodId=<%=data.periods%>" class="waves-effect btn-flat nopadding"><i class="material-icons">analytics</i></a>
+                <a href="/expenses/paymentOrders/client/<%=data.client.id%>/report?periodId=<%=data.periods%>" title="reporte de liquidación" class="waves-effect btn-flat nopadding"><i class="material-icons">analytics</i></a>
                 
-                <a href="/expenses/paymentReceipts/client/<%=data.client.id%>" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment</i></a>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <a href="/expenses/paymentReceipts/client/<%=data.client.id%>" title="ir a comprobantes" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             </div>
             <div id="hide-dt" style="display:none">
@@ -132,15 +133,15 @@
                                     
                                 <td>
                                     <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
-                                        <a id="button-edit" href="/expenses/paymentOrders/client/<%=data.client.id%>/edit/<%=data.paymentOrders[i].id%>" 
+                                        <a id="button-edit" title="editar" href="/expenses/paymentOrders/client/<%=data.client.id%>/edit/<%=data.paymentOrders[i].id%>" 
                                             class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
                                     <% } %>
                                     
-                                    <a id="button-print" onclick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>')"
+                                    <a id="button-print" title="imprimir recibo" onclick="openInNewTab('/expenses/paymentOrders/client/<%=data.client.id%>/invoice/<%=data.paymentOrders[i].id%>')"
                                         class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentOrders[i].id%>"><i class="material-icons">receipt</i></a>                            
 
                                     <% if(data.paymentOrders[i].billingPeriod.statusId=== 1) { %>
-                                        <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
+                                        <a id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
                                             data-id="<%=data.paymentOrders[i].id%>" data-value="<%= data.paymentOrders[i].poNumber %>" data-clientId="<%=data.client.id%>" onclick="deleteDialog(this)">
                                             <i class="material-icons">delete</i></a>
                                     <% } %>

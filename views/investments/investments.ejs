@@ -23,9 +23,9 @@
                 </div>
             </div>
             <div class="actions">
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a id="button-add" href="/investments/new/<%=data.client.id%>"  class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a id="button-add" title="agregar inversión" href="/investments/new/<%=data.client.id%>"  class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
 
@@ -118,7 +118,7 @@
                                 
                                 <td>
                                     <% if(data.investment[i].statusId===1) { %>
-                                        <a onclick="accreditDialog(this)" class="btn-flat btn-small waves-effect waves-light"
+                                        <button onclick="accreditDialog(this)" title="acreditar intereses" class="btn-flat btn-small waves-effect waves-light"
                                             data-id="<%=data.investment[i].id%>" data-clientid="<%=data.client.id%>" data-periodid="<%=data.investment[i].billingPeriod.id%>">
                                             <i class="material-icons">check_circle</i></a>                                                                            
                                     <% } %>

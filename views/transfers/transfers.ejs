@@ -23,16 +23,16 @@
                 </div>
             </div>
             <div class="actions">
-                <div class="switch">
+                <div class="switch" style="margin-top: 3px;">
                     <label> Mostrar transferencias eliminadas
                         <input id="swShowDeleted" type="checkbox" <% if(params.showAll===true){ %> checked <% } %> onchange="showDeleted();">
                         <span class="lever"></span>
                     </label>
                 </div>
 
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a href="/transfers/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <a href="/transfers/new/<%=data.client.id%>" id="button-add" title="agregar transferencia" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
 
@@ -113,11 +113,11 @@
                         <td><%= data.accountTransfers[i].user.name %></td>
 
                         <td>
-                            <a href="/transfers/info/<%=data.client.id%>/<%=data.accountTransfers[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">more</i></a>
+                            <a href="/transfers/info/<%=data.client.id%>/<%=data.accountTransfers[i].id%>" title="detalles" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">more</i></a>
 
                             <% if(data.accountTransfers[i].statusId!= 4) { %>
-                            <a href="/transfers/edit/<%=data.client.id%>/<%=data.accountTransfers[i].id%>" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
-                            <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.accountTransfers[i].id%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.accountTransfers[i].amount %>" data-source="<%= data.accountTransfers[i].sourceAccount.accountType.account %> [ID:<%= data.accountTransfers[i].sourceAccountId%>]" data-destination="<%= data.accountTransfers[i].destinationAccount.accountType.account %> [ID:<%= data.accountTransfers[i].destinationAccountId%>]" \ onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            <a href="/transfers/edit/<%=data.client.id%>/<%=data.accountTransfers[i].id%>" title="editar" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                            <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.accountTransfers[i].id%>" data-clientid="<%=data.client.id%>" data-value="$<%= data.accountTransfers[i].amount %>" data-source="<%= data.accountTransfers[i].sourceAccount.accountType.account %> [ID:<%= data.accountTransfers[i].sourceAccountId%>]" data-destination="<%= data.accountTransfers[i].destinationAccount.accountType.account %> [ID:<%= data.accountTransfers[i].destinationAccountId%>]" \ onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                             <% } %>
                         </td>
                     </tr>

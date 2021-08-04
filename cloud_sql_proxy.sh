@@ -1,1 +1,1 @@
-/usr/local/bin/cloud_sql_proxy -instances=kyanite-281502:southamerica-east1:kyanite=tcp:3306 -credential_file "./credentials/kyanite-281502-2bd68571b1c7.json"
+/usr/local/bin/cloud_sql_proxy -instances=kyanite-aaii:southamerica-east1:kyanite=tcp:3306 -credential_file "./credentials/kyanite-aaii-00ab4e22614e.json" -dir "/cloudsql"

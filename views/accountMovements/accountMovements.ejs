@@ -27,19 +27,19 @@
             </div>
 
             <div class="actions">
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
                 
                 <% if(data.isFiltered===false) { %>
-                    <a id="button-filter" class="waves-effect btn-flat nopadding" onclick='filterByAccount(this,"<%=data.isFiltered%>")'><i class="material-icons">filter_list</i></a>
+                    <a id="button-filter" title="filtro por cuenta" class="waves-effect btn-flat nopadding" onclick='filterByAccount(this,"<%=data.isFiltered%>")'><i class="material-icons">filter_list</i></a>
                 <% } else { %>
-                    <a id="button-filter" class="waves-effect btn-flat nopadding" onclick='filterByAccount(this,"<%=data.isFiltered%>")'><i class="material-icons red-text">filter_list</i></a>
+                    <a id="button-filter" title="filtro por cuenta" class="waves-effect btn-flat nopadding" onclick='filterByAccount(this,"<%=data.isFiltered%>")'><i class="material-icons red-text">filter_list</i></a>
                 <% } %>
                 
-                <a href="/movements/new/<%=data.client.id%>" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="/movements/new/<%=data.client.id%>" title="agregar movimiento" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
                 
-                <button id="button-report-pdf" onClick="openInNewTab('/movements/client/<%=data.client.id%>/report?periodId=<%=data.periods%>');" class="waves-effect btn-flat nopadding"><i class="material-icons">picture_as_pdf</i></button>
+                <button id="button-report-pdf" title="descargar reporte" onClick="openInNewTab('/movements/client/<%=data.client.id%>/report?periodId=<%=data.periods%>');" class="waves-effect btn-flat nopadding"><i class="material-icons">picture_as_pdf</i></button>
 
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             
         </div>
@@ -116,7 +116,7 @@
                             <td><%= data.movements[i].user.name %></td>
 
                             <td>
-                                <button id="button-details" onclick='movementDetail("<%=data.client.id%>","<%= data.movements[i].id%>")' class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">more</i></a>
+                                <button id="button-details" title="ver detalles" onclick='movementDetail("<%=data.client.id%>","<%= data.movements[i].id%>")' class="btn-flat btn-small waves-effect waves-light"> <i class="material-icons">more</i></a>
                             </td>
                         </tr>
                     <% } %>

@@ -23,9 +23,9 @@
         </div>
       </div>
       <div class="actions">
-        <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-        <a href="/clients/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+        <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+        <a href="/clients/new" id="button-add" title="agregar cliente" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+        <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
       </div>
     </div>
     <!-- <div class="progress" id="progress" style="margin-top: 30px;">
@@ -67,10 +67,10 @@
             <td><%= data.clients[i].lotSize %></td>
 
             <td>
-              <a href="/clients/edit/<%= data.clients[i].id %>" class="btn-flat btn-small waves-effect waves-light">
+              <a href="/clients/edit/<%= data.clients[i].id %>" title="editar" class="btn-flat btn-small waves-effect waves-light">
                 <i class="material-icons">edit</i></a>
 
-              <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.clients[i].id%>" 
+              <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.clients[i].id%>" 
                 data-value="<%= data.clients[i].name %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
             </td>
           </tr>

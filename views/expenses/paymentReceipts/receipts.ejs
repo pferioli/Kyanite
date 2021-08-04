@@ -33,14 +33,14 @@
                         <span class="lever"></span></label>
                 </div>
 
-                <button id="button-reload" onClick="window.location.reload();"
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();"
                     class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
 
-                <a href="/expenses/paymentReceipts/client/<%=data.client.id%>/new" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="/expenses/paymentReceipts/client/<%=data.client.id%>/new" title="agregar comprobante" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
                 
-                <a href="/expenses/paymentOrders/client/<%=data.client.id%>" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment_turned_in</i></a>
+                <a href="/expenses/paymentOrders/client/<%=data.client.id%>" title="ir a órdenes de pago" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment_turned_in</i></a>
 
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             </div>
             <div id="hide-dt" style="display:none">
@@ -139,7 +139,7 @@
                                     <% } %>
 
                                     <% if(data.paymentReceipts[i].paymentReceiptImage != undefined) { %>
-                                        <a id="button-download" title="descargar factura" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>">
+                                        <a id="button-download" title="descargar comprobante" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.paymentReceipts[i].id%>" data-value="<%= data.paymentReceipts[i].receiptNumber %>">
                                             <i class="material-icons">cloud_download</i></a>
                                     <% } %>
                                     

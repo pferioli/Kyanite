@@ -10,9 +10,9 @@
         <div class="table-header">
             <span class="table-title">Notificaciones</span>
             <div class="actions">
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <button id="button-ackAll" onClick="clearAllAlerts();" class="waves-effect btn-flat nopadding"><i class="material-icons">done_all</i></button>
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                <button id="button-ackAll" title="confirmar todas" onClick="clearAllAlerts();" class="waves-effect btn-flat nopadding"><i class="material-icons">done_all</i></button>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
 
@@ -62,7 +62,7 @@
                             <td><%= data.notifications[i].description %></td>
                             <td><%= data.notifications[i].createdAt %></td>
                             <td>
-                                <button id="button-ack" onClick='ackAlert("<%= data.notifications[i].id %>")' class="waves-effect btn-flat nopadding"><i class="material-icons">done</i></button>
+                                <button id="button-ack" title="confirmar" onClick='ackAlert("<%= data.notifications[i].id %>")' class="waves-effect btn-flat nopadding"><i class="material-icons">done</i></button>
                             </td>
                         </tr>
                     <% } %>

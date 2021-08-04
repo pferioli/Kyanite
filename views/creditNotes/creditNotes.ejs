@@ -29,11 +29,11 @@
                         <span class="lever"></span></label>
                 </div>
                 
-                <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>                
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>                
                 
-                <a href="/creditNotes/client/<%=data.client.id%>/new" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                <a href="/creditNotes/client/<%=data.client.id%>/new" title="agregar nota de crédito" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
 
-                <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+                <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             </div>
             <div id="hide-dt" style="display:none">
@@ -114,9 +114,9 @@
                             <td><%= data.creditNotes[i].user.name %></td>                                
                                 
                             <td>
-                                <a id="button-edit" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.creditNotes[i].id%>"><i class="material-icons">edit</i></a>
+                                <a id="button-edit" title="editar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.creditNotes[i].id%>"><i class="material-icons">edit</i></a>
                                 
-                                <a id="button-delete" class="btn-flat btn-small waves-effect waves-light" 
+                                <a id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
                                     data-id="<%=data.creditNotes[i].id%>" data-value="<%= data.creditNotes[i].poNumber %>" data-clientId="<%=data.client.id%>" onclick="deleteDialog(this)">
                                     <i class="material-icons">delete</i></a>
                             </td>

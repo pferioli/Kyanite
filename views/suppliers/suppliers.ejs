@@ -23,10 +23,10 @@
         </div>
       </div>
       <div class="actions">
-        <button id="button-reload" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-        <a href="/suppliers/new" id="button-add" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
-        <a href="#" id="button-search" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
-        <a href="/accountingImputations/settings" id="button-category" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">playlist_add</i></a>
+        <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+        <a href="/suppliers/new" id="button-add" title="agregar proveedor" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+        <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+        <a href="/accountingImputations/settings" id="button-category" title="categorias" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">playlist_add</i></a>
         <!-- <a id="button-category" class="modal-trigger waves-effect btn-flat nopadding" data-target="modalNewSupplierCategory"><i class="material-icons">playlist_add</i></a> -->
       </div>
     </div>
@@ -82,13 +82,13 @@
             <td><%= data.suppliers[i].bankAccount %></td>
 
             <td>
-              <a href="/suppliers/payments/<%= data.suppliers[i].id %>"
+              <a href="/suppliers/payments/<%= data.suppliers[i].id %>" title="cuenta corriente"
                 class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">payments</i></a>
 
-              <a href="/suppliers/edit/<%= data.suppliers[i].id %>"
+              <a href="/suppliers/edit/<%= data.suppliers[i].id %>" title="editar"
                 class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
 
-              <a id="buttonDelete" class="btn-flat btn-small waves-effect waves-light"
+              <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light"
                 data-id="<%=data.suppliers[i].id%>" data-value="<%= data.suppliers[i].name %>"
                 onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
             </td>
