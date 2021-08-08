@@ -59,8 +59,8 @@
                             <td><%= data.investment[i].sourceAccount.accountType.account %> (ID: <%= data.investment[i].sourceAccountId%>)</td>
                             <td><%= data.investment[i].destinationAccount.accountType.account %> (ID: <%= data.investment[i].destinationAccountId%>)</td>
 
-                            <td>$ <%= data.investment[i].creationDate %></td>
-                            <td>$ <%= data.investment[i].expirationDate %></td>
+                            <td><%= data.investment[i].creationDate %></td>
+                            <td><%= data.investment[i].expirationDate %></td>
 
                             <td>
                                 <% if(data.investment[i].billingPeriod.statusId === 0) { %>
@@ -194,7 +194,7 @@
                     },
                     {   targets: [6,7],
                         render: function (data) {
-                            if (data)
+                            if (data && data !== "")
                                 return moment(data).format('DD/MM/YYYY');
                             else return "";
                         }, 

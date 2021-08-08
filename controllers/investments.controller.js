@@ -94,6 +94,13 @@ module.exports.addNew = async function (req, res) {
 
     const clientId = req.body.clientId;
 
+    const investmentCategory = await InvestmentCategory.findByPk(req.body.categoryId);
+
+    if (investmentCategory.hasExpirationDate && req.body.expirationDate === '') {
+        req.flash("error", `La categoría de inversión seleccionada requiere fecha de vencimiento`);
+        res.redirect("/investments/client/" + clientId); return;
+    }
+
     Investment.create({
         clientId: clientId,
         periodId: req.body.billingPeriodId,
@@ -103,7 +110,7 @@ module.exports.addNew = async function (req, res) {
         interests: 0.00,
         categoryId: req.body.categoryId,
         creationDate: req.body.creationDate,
-        expirationDate: req.body.expirationDate,
+        expirationDate: (req.body.expirationDate === '' ? null : req.body.expirationDate),
         comments: req.body.comments,
         statusId: InvestmentsStatus.eStatus.get('pending').value,
         userId: req.user.id
@@ -213,3 +220,11 @@ module.exports.accredit = async function (req, res) {
             res.redirect("/investments/client/" + clientId);
         })
 };
+
+module.exports.getCategoryDetailsById = async function (req, res) {
+    InvestmentCategory.findByPk(req.params.categoryId)
+        .then(investmentCategory => {
+            res.send(investmentCategory);
+        })
+        .catch(err => res.sendStatus(500).send(err));
+}

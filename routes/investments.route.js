@@ -30,4 +30,8 @@ router.post("/accredit", function (req, res, next) {
     investmentsController.accredit(req, res);
 });
 
+router.get("/ajax/getCategoryDetailsById/:categoryId", function (req, res, next) {
+    investmentsController.getCategoryDetailsById(req, res);
+});
+
 module.exports = router

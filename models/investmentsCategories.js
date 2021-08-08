@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             type: DataTypes.STRING
         },
+        hasExpirationDate: {
+            allowNull: false,
+            type: DataTypes.BOOLEAN
+        },
         enabled: {
             allowNull: false,
             type: DataTypes.BOOLEAN

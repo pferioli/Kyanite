@@ -78,7 +78,7 @@
                             <label for="dtpTransferDate">Fecha de creación</label>
                             <input type="hidden" name="creationDate" id="creationDate" />
                         </div>
-                         <div class="input-field col s3">
+                         <div class="input-field col s3" id="expDateDiv" style="display:inherit">
                             <i class="material-icons prefix">date_range</i>
                             <input type="text" class="datepicker" id="dtpExpirationDate" name="dtpExpirationDate" required>
                             <label for="dtpExpirationDate">Fecha de vencimiento</label>
@@ -115,6 +115,7 @@
 
 <script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
 <script type="text/javascript" src="/javascripts/accounts.js"></script>
+<script type="text/javascript" src="/javascripts/investments.js"></script>
 
 <script>
 
@@ -170,6 +171,16 @@
 
         document.getElementById('categorySelect').onchange = async function () {
             document.getElementById('categoryId').value = this.value;
+            const category = await calculateRemainingBalance(this.value);
+            const dtpExpirationDate = document.getElementById('dtpExpirationDate');
+
+            if(category.hasExpirationDate === true) {
+                document.getElementById('expDateDiv').style.display = 'initial';
+            } else {
+                document.getElementById('expDateDiv').style.display = 'none';
+            }
+            dtpExpirationDate.required = category.hasExpirationDate; dtpExpirationDate.value = "";
+            document.getElementById('expirationDate').value = "";
         }
 
         document.getElementById('sourceAccountSelect').onchange = async function () {
@@ -197,14 +208,12 @@
             M.updateTextFields();
 
             document.getElementById('add_button').disabled = true;
-            document.getElementById('add_next_button').disabled = true;
         }
 
         document.getElementById('destinationAccountSelect').onchange = async function () {
             getSelectedAccountDetails(this.value, 'destinationAccountInfo');
             document.getElementById('destinationAccountId').value = this.value;
             document.getElementById('add_button').disabled = false;
-            document.getElementById('add_next_button').disabled = false;
         };
     });
 
