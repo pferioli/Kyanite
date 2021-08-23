@@ -2,93 +2,115 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <div class="card">
-            <div class="card-content">
-                <span class="card-title">Editar transferencia</span>
-                <div class="row" style="margin-top: 20px;">
-                    <div class="input-field col s9">
-                        <i class="material-icons prefix">location_city</i>
-                        <input id="client" name="client" type="text" value="<%=data.accountTransfer.client.name%> [<%=data.accountTransfer.client.internalCode%>]" disabled />
-                        <label for="name">Nombre del Barrio</label>
-                        <input type="hidden" name="clientId" id="clientId" value="<%=data.accountTransfer.client.id%>" />
+        <form class="col s12" method="post" action='/transfers/edit/<%=data.accountTransfer.id%>'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Editar transferencia</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s9">
+                            <i class="material-icons prefix">location_city</i>
+                            <input id="client" name="client" type="text" value="<%=data.accountTransfer.client.name%> [<%=data.accountTransfer.client.internalCode%>]" disabled />
+                            <label for="name">Nombre del Barrio</label>
+                            <input type="hidden" name="clientId" id="clientId" value="<%=data.accountTransfer.client.id%>" />
+                        </div>
+                        <div class="input-field col s3">
+                            <i class="material-icons prefix">calendar_today</i>
+                            <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.accountTransfer.billingPeriod.name%>" disabled />
+                            <label for="billingPeriod">Período de Liquidación</label>
+                            <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.accountTransfer.billingPeriod.id%>" />
+                        </div>
                     </div>
-                    <div class="input-field col s3">
-                        <i class="material-icons prefix">calendar_today</i>
-                        <input id="billingPeriod" name="billingPeriod" type="text" value="<%=data.accountTransfer.billingPeriod.name%>" disabled />
-                        <label for="billingPeriod">Período de Liquidación</label>
-                        <input type="hidden" name="billingPeriodId" id="billingPeriodId" value="<%=data.accountTransfer.billingPeriod.id%>" />
+
+                    <div class="row">
+                        <div class="input-field col s6">
+                                <i class="material-icons prefix">account_balance</i>
+                                <select id="sourceAccountSelect" required>
+                                    <!-- <option value="" disabled selected>Seleccione la cuenta de Origen</option> -->
+                                    <% for(var i=0; i < data.clientAccounts.length; i++) { %>
+                                        <% if(data.clientAccounts[i].id === data.accountTransfer.sourceAccountId) { %>
+                                            <option value="<%=data.clientAccounts[i].id%>" selected>[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                        <% } else { %>
+                                            <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                        <% } %>
+                                    <% } %>
+                                </select>
+                                <label>Cuenta de Origen</label>
+                                <input type="hidden" name="sourceAccountId" id="sourceAccountId" value="<%=data.accountTransfer.sourceAccountId%>"/>
+                            </div>
+                            <div class="input-field col s6">
+                                <i class="material-icons prefix">account_balance</i>
+                                <select id="destinationAccountSelect" required>
+                                    <!-- <option value="" disabled selected>Seleccione la cuenta de Origen primero</option> -->
+                                    <% for(var i=0; i < data.clientAccounts.length; i++) { %>
+                                        <% if(data.clientAccounts[i].id === data.accountTransfer.destinationAccountId) { %>
+                                            <option value="<%=data.clientAccounts[i].id%>" selected>[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>
+                                        <% } else { %>
+                                            <% if(data.clientAccounts[i].id !== data.accountTransfer.sourceAccountId) { %>
+                                                <option value="<%=data.clientAccounts[i].id%>">[<%=data.clientAccounts[i].accountType.account%>] <%=data.clientAccounts[i].accountType.description%> (ID:<%=data.clientAccounts[i].id%>)</option>        
+                                            <% } %>
+                                        <% } %>
+                                    <% } %>
+                                </select>
+                                <label>Cuenta de Destino</label>
+                                <input type="hidden" name="destinationAccountId" id="destinationAccountId" value="<%=data.accountTransfer.destinationAccountId%>"/>
+                            </div>
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="sourceAccountInfo" name="sourceAccountInfo" type="text" value="" readonly />
+                            <label for="sourceAccountInfo">Detalles de la cuenta de Origen</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">info</i>
+                            <input id="destinationAccountInfo" name="destinationAccountInfo" type="text" value="" readonly />
+                            <label for="destinationAccountInfo">Detalles de la cuenta de destino</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">monetization_on</i>
+                            <input id="amount" name="amount" type="text" readonly value="$<%= data.accountTransfer.amount%>" />
+                            <label for="amount">Importe</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix">date_range</i>
+                            <input type="text" id="transferDate" name="transferDate" value="<%= data.accountTransfer.transferDate%>" readonly>
+                            <label for="transferDate">Fecha</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">comment</i>
+                            <textarea id="comments" name="comments" class="materialize-textarea" readonly><%= data.accountTransfer.comments%></textarea>
+                            <label for="comments">Descripcion de la transferencia</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <i class="material-icons prefix prefix">
+                                <!--DESHABILITADO-->
+                                <% if(data.accountTransfer.statusId === 0) { %> disabled_by_default <% } %>
+
+                                <!--PENDIENTE-->
+                                <% if(data.accountTransfer.statusId === 1) { %> assignment <% } %>
+
+                                <!--EN_PROCESO-->
+                                <% if(data.accountTransfer.statusId === 2) { %> assignment_ind <% } %>
+
+                                <!--PROCESADO-->
+                                <% if(data.accountTransfer.statusId === 3) { %> assignment_turned_in <% } %>
+
+                                <!--ANULADO-->
+                                <% if(data.accountTransfer.statusId === 4) { %> assignment_returned<% } %>
+                            </i>
+                            <input type="text" id="status" name="status" value="<%= data.accountTransfer.status%>" readonly>
+                            <label for="status">Estado</label>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="input-field col s6">
-                        <i class="material-icons prefix">account_balance</i>
-                        <input id="sourceAccount" name="sourceAccount" type="text" value="[<%=data.accountTransfer.sourceAccount.accountType.account%>] <%=data.accountTransfer.sourceAccount.accountType.description%> (ID:<%=data.accountTransfer.sourceAccountId%>)" readonly />
-                        <label for="sourceAccount">Cuenta de Origen</label>
-                        <input type="hidden" name="sourceAccountId" id="sourceAccountId" value="<%=data.accountTransfer.sourceAccountId%>" />
-                    </div>
-                    <div class="input-field col s6">
-                        <i class="material-icons prefix">account_balance</i>
-                        <input id="destinationAccount" name="destinationAccount" type="text" value="[<%=data.accountTransfer.destinationAccount.accountType.account%>] <%=data.accountTransfer.destinationAccount.accountType.description%> (ID:<%=data.accountTransfer.destinationAccountId%>)" readonly />
-                        <label for="destinationAccount">Cuenta de Destino</label>
-                        <input type="hidden" name="destinationAccountId" id="destinationAccountId" value="<%=data.accountTransfer.destinationAccountId%>" />
-                    </div>
-                    <div class="input-field col s12">
-                        <i class="material-icons prefix">info</i>
-                        <input id="sourceAccountInfo" name="sourceAccountInfo" type="text" value="" readonly />
-                        <label for="sourceAccountInfo">Detalles de la cuenta de Origen</label>
-                    </div>
-                    <div class="input-field col s12">
-                        <i class="material-icons prefix">info</i>
-                        <input id="destinationAccountInfo" name="destinationAccountInfo" type="text" value="" readonly />
-                        <label for="destinationAccountInfo">Detalles de la cuenta de destino</label>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="input-field col s2">
-                        <i class="material-icons prefix">monetization_on</i>
-                        <input id="amount" name="amount" type="text" readonly value="$<%= data.accountTransfer.amount%>" />
-                        <label for="amount">Importe</label>
-                    </div>
-                    <div class="input-field col s2">
-                        <i class="material-icons prefix">date_range</i>
-                        <input type="text" id="transferDate" name="transferDate" value="<%= data.accountTransfer.transferDate%>" readonly>
-                        <label for="transferDate">Fecha</label>
-                    </div>
-                    <div class="input-field col s6">
-                        <i class="material-icons prefix">comment</i>
-                        <textarea id="comments" name="comments" class="materialize-textarea" readonly><%= data.accountTransfer.comments%></textarea>
-                        <label for="comments">Descripcion de la transferencia</label>
-                    </div>
-                    <div class="input-field col s2">
-                        <i class="material-icons prefix prefix">
-                            <!--DESHABILITADO-->
-                            <% if(data.accountTransfer.statusId === 0) { %> disabled_by_default <% } %>
-
-                            <!--PENDIENTE-->
-                            <% if(data.accountTransfer.statusId === 1) { %> assignment <% } %>
-
-                            <!--EN_PROCESO-->
-                            <% if(data.accountTransfer.statusId === 2) { %> assignment_ind <% } %>
-
-                            <!--PROCESADO-->
-                            <% if(data.accountTransfer.statusId === 3) { %> assignment_turned_in <% } %>
-
-                            <!--ANULADO-->
-                            <% if(data.accountTransfer.statusId === 4) { %> assignment_returned<% } %>
-                        </i>
-                        <input type="text" id="status" name="status" value="<%= data.accountTransfer.status%>" readonly>
-                        <label for="status">Estado</label>
-                    </div>
+                <div class="card-action right-align">
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
                 </div>
             </div>
-
-            <div class="card-action right-align">
-                <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
-            </div>
-        </div>
-
+        </form>
     </div>
     <center>
         <%- include ("../partials/alerts") %>
@@ -99,10 +121,14 @@
 
 <script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
 <script type="text/javascript" src="/javascripts/clientAccounts.js"></script>
+<script type="text/javascript" src="/javascripts/accounts.js"></script>
 
 <script>
 
     document.addEventListener("DOMContentLoaded", function () {
+
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
 
         const clientId = document.getElementById('clientId').value
         const sourceAccountId = document.getElementById('sourceAccountId').value;
@@ -110,6 +136,40 @@
 
         getSelectedAccountDetails(sourceAccountId, 'sourceAccountInfo');
         getSelectedAccountDetails(destinationAccountId, 'destinationAccountInfo');
+        
+        document.getElementById('sourceAccountSelect').onchange = async function () {
+            
+            getSelectedAccountDetails(this.value, 'sourceAccountInfo');
+
+            const accounts = await getClientAccounts(clientId); //, 'destinationAccountSelect', this.value);
+
+            let destinationAccountSelect = document.getElementById('destinationAccountSelect');
+            destinationAccountSelect.options.length = 0;
+            destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione la cuenta de Destino" + "</option>"
+
+            for (i = 0; i < accounts.length; i++) {
+                if (this.value != accounts[i].id) {
+                    destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"" + accounts[i].id + "\">" +
+                        "[" + accounts[i].accountType.account + "] " + accounts[i].accountType.description + " (ID:" + accounts[i].id + ")" + "</option>"
+                } else {
+                }
+            }
+            M.FormSelect.init(destinationAccountSelect, {});
+
+            document.getElementById('sourceAccountId').value = this.value;
+            document.getElementById('destinationAccountInfo').value = "";
+            M.updateTextFields();
+
+            document.getElementById('add_button').disabled = true;
+            document.getElementById('add_next_button').disabled = true;
+        }
+
+        document.getElementById('destinationAccountSelect').onchange = async function () {
+            getSelectedAccountDetails(this.value, 'destinationAccountInfo');
+            document.getElementById('destinationAccountId').value = this.value;
+            document.getElementById('add_button').disabled = false;
+            document.getElementById('add_next_button').disabled = false;
+        };
     });
 
     async function getSelectedAccountDetails(accountId, infoField) {

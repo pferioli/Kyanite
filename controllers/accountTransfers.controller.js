@@ -224,15 +224,18 @@ module.exports.showEditForm = async function (req, res, next) {
         }
 
         if ((transfer.statusId != AccountTransferStatus.eStatus.get('pending').value) &&
-            (transfer.statusId != AccountTransferStatus.eStatus.get('inprogress').value)) {
+            (transfer.statusId != AccountTransferStatus.eStatus.get('inprogress').value) &&
+            (transfer.statusId != AccountTransferStatus.eStatus.get('processed').value)) {
             req.flash("warning", "El estado actual de la transferencia no permite que sea modificada");
             res.redirect("/transfers/client/" + clientId);
             return;
         }
+        const Accounts = await Account.findAll(
+            { where: { clientId: clientId }, include: [{ model: AccountType }] });
 
         res.render('transfers/edit', {
             menu: CURRENT_MENU,
-            data: { accountTransfer: transfer },
+            data: { accountTransfer: transfer, client: transfer.client, clientAccounts: Accounts },
         });
 
     } catch (err) {
@@ -244,38 +247,21 @@ module.exports.showEditForm = async function (req, res, next) {
 
 module.exports.edit = async function (req, res, next) {
 
-    const accountId = req.body.accountId;
+    const transferId = req.params.transferId;
     const clientId = req.body.clientId;
 
-    // let clientAccount = await ClientAccount.findByPk(accountId)
+    //validar que el periodo de liq este ok
 
-    // if (clientAccount) {
+    //hacer el cambio de la transf
 
-    //     clientAccount.clientId = clientId;
-    //     clientAccount.accountTypeId = req.body.accountTypeId;
-    //     clientAccount.bankId = req.body.bankId;
-    //     clientAccount.bankBranch = req.body.bankBranch;
-    //     clientAccount.accountNumber = req.body.accountNumber;
-    //     clientAccount.accountAlias = req.body.accountAlias;
-    //     clientAccount.cbu = req.body.cbu;
-    //     clientAccount.comments = req.body.comments;
-    //     clientAccount.userId = req.user.id;
+    //hacer el cambio en el mov de la cuenta origen
 
-    //     clientAccount.save()
-    //         .then(() => {
-    //             winston.info(`User #${req.user.id} updated succesfully the selected client account ${JSON.stringify(clientAccount)} - ${accountId}`);
-    //             req.flash("success", "La cuenta de cliente fue actualizada exitosamente en la base de datos");
-    //         })
-    //         .catch(err => {
-    //             winston.error(`An error ocurred while updating client account ${JSON.stringify(req.body)} - ${err}`);
-    //             req.flash("error", "Ocurrio un error y no se pudo modificar la cuenta seleccionada en la base de datos");
-    //         })
-    //         .finally(() => { res.redirect("/accounts/" + clientId); })
-    // } else {
-    //     req.flash("error", "Ocurrio un error y no se encontro la cuenta seleccionada en la base de datos");
-    //     winston.error(`Client account not found for updating ${JSON.stringify(req.body)} - ${err}`);
-    //     res.redirect("/accounts/" + clientId);
-    // }
+    //hacer el cambio en el mov de la cuenta destino
+
+    //actualizar los saldos de las dos cuentas
+
+
+    res.redirect("/transfers/client/" + clientId);
 };
 
 module.exports.info = async function (req, res, next) {

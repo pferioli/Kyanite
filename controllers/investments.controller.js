@@ -63,7 +63,7 @@ module.exports.listAll = async function (req, res) {
 
     const client = await Client.findByPk(clientId);
 
-    const investment = await Investment.findAll(options);
+    Investment.findAll(options);
 
     res.render('investments/investments',
         {

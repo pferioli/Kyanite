@@ -75,7 +75,7 @@
 
                 <div class="card-action right-align">
                     <a href="/accounts/<%=data.client.id%>" class="waves-effect waves-light btn" style="margin-right: 30px;"><i class="material-icons right">fact_check</i>Ver Cuentas</a>
-                    <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button>
+                    <!-- <button id="add_next_button" type='submit' class="waves-effect waves-light btn blue" style="margin-right: 10px;" disabled><i class="material-icons right">queue</i>Siguiente</button> -->
                     <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
                 </div>
@@ -144,8 +144,6 @@
             }
         });
 
-
-
         document.getElementById('sourceAccountSelect').onchange = async function () {
             
             getSelectedAccountDetails(this.value, 'sourceAccountInfo');
@@ -156,6 +154,8 @@
             destinationAccountSelect.options.length = 0;
             destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"\" selected disabled>" + "Seleccione la cuenta de Destino" + "</option>"
 
+            //TODO: agregar aca la validacion de que se vuelva a seleccionar el que estaba como original
+            
             for (i = 0; i < accounts.length; i++) {
                 if (this.value != accounts[i].id) {
                     destinationAccountSelect.innerHTML = destinationAccountSelect.innerHTML + "<option value=\"" + accounts[i].id + "\">" +
@@ -169,14 +169,14 @@
             M.updateTextFields();
 
             document.getElementById('add_button').disabled = true;
-            document.getElementById('add_next_button').disabled = true;
+            // document.getElementById('add_next_button').disabled = true;
         }
 
         document.getElementById('destinationAccountSelect').onchange = async function () {
             getSelectedAccountDetails(this.value, 'destinationAccountInfo');
             document.getElementById('destinationAccountId').value = this.value;
             document.getElementById('add_button').disabled = false;
-            document.getElementById('add_next_button').disabled = false;
+            // document.getElementById('add_next_button').disabled = false;
         };
     });
 

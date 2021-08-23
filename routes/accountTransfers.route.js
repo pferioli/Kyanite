@@ -32,7 +32,7 @@ router.get("/info/:clientId/:transferId", function (req, res, next) {
     accountTransfersController.info(req, res);
 });
 
-router.post("/edit", function (req, res, next) {
+router.post("/edit/:transferId", function (req, res, next) {
     accountTransfersController.edit(req, res);
 });
 
