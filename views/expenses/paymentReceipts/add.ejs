@@ -1,7 +1,12 @@
 <%- include ("../../partials/header") %>
 
 <main class="site-content">
+    <center>
+        <%- include ("../../partials/alerts") %>
+    </center>
+        
     <div class="container" style="margin-top: 50px;">
+    
         <form class="col s12" id="paymentReceiptForm" method="post" action='/expenses/paymentReceipts/client/<%=data.client.id%>/new' enctype="multipart/form-data">
             <div class="card">
                 <div class="card-content">
@@ -99,6 +104,9 @@
                             <label for="description">Detalle del servicio o de la factura</label>
                         </div>
                     </div>
+
+                    <input type="hidden" name="submitter" id="submitter" value=""/>
+
                 </div>
 
                 <div class="card-action right-align">
@@ -109,9 +117,6 @@
             </div>
         </form>
     </div>
-    <center>
-        <%- include ("../../partials/alerts") %>
-    </center>
 </main>
 
 <%- include ("../../partials/footer") %>
@@ -201,6 +206,8 @@
 
     async function validateForm(event) {
         
+        document.getElementById('submitter').value = event.submitter.id;
+
         const emissionDate = document.getElementById('emissionDate').value;
         
         const dtpEmissionDate = document.getElementById('dtpEmissionDate').value;

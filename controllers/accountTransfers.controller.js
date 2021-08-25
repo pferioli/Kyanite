@@ -202,68 +202,6 @@ module.exports.delete = async function (req, res, next) {
     };
 };
 
-module.exports.showEditForm = async function (req, res, next) {
-
-    const clientId = req.params.clientId;
-    const transferId = req.params.transferId;
-
-    try {
-
-        const transfer = await AccountTransfer.findByPk(transferId,
-            {
-                include: [{ model: Client }, { model: BillingPeriod },
-                { model: Account, include: [{ model: AccountType }], as: 'sourceAccount' },
-                { model: Account, include: [{ model: AccountType }], as: 'destinationAccount' }],
-                paranoid: false
-            });
-
-        if (transfer === null) {
-            req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
-            winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
-            res.redirect("/transfers/client/" + clientId);
-        }
-
-        if ((transfer.statusId != AccountTransferStatus.eStatus.get('pending').value) &&
-            (transfer.statusId != AccountTransferStatus.eStatus.get('inprogress').value) &&
-            (transfer.statusId != AccountTransferStatus.eStatus.get('processed').value)) {
-            req.flash("warning", "El estado actual de la transferencia no permite que sea modificada");
-            res.redirect("/transfers/client/" + clientId);
-            return;
-        }
-        const Accounts = await Account.findAll(
-            { where: { clientId: clientId }, include: [{ model: AccountType }] });
-
-        res.render('transfers/edit', {
-            menu: CURRENT_MENU,
-            data: { accountTransfer: transfer, client: transfer.client, clientAccounts: Accounts },
-        });
-
-    } catch (err) {
-        req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
-        winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
-        res.redirect("/transfers/client/" + clientId);
-    }
-};
-
-module.exports.edit = async function (req, res, next) {
-
-    const transferId = req.params.transferId;
-    const clientId = req.body.clientId;
-
-    //validar que el periodo de liq este ok
-
-    //hacer el cambio de la transf
-
-    //hacer el cambio en el mov de la cuenta origen
-
-    //hacer el cambio en el mov de la cuenta destino
-
-    //actualizar los saldos de las dos cuentas
-
-
-    res.redirect("/transfers/client/" + clientId);
-};
-
 module.exports.info = async function (req, res, next) {
 
     const clientId = req.params.clientId;
@@ -288,3 +226,162 @@ module.exports.info = async function (req, res, next) {
             res.redirect("/transfers/client" + clientId);
         })
 }
+
+module.exports.showEditForm = async function (req, res, next) {
+
+    const clientId = req.params.clientId;
+    const transferId = req.params.transferId;
+
+    try {
+
+        const accountTransfer = await AccountTransfer.findByPk(transferId,
+            {
+                include: [{ model: Client }, { model: BillingPeriod },
+                { model: Account, include: [{ model: AccountType }], as: 'sourceAccount' },
+                { model: Account, include: [{ model: AccountType }], as: 'destinationAccount' }],
+                paranoid: false
+            });
+
+        if (accountTransfer === null) {
+            req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
+            winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
+            res.redirect("/transfers/client/" + clientId);
+        }
+
+        if ((accountTransfer.statusId != AccountTransferStatus.eStatus.get('pending').value) &&
+            (accountTransfer.statusId != AccountTransferStatus.eStatus.get('inprogress').value) &&
+            (accountTransfer.statusId != AccountTransferStatus.eStatus.get('processed').value)) {
+            req.flash("warning", "El estado actual de la transferencia no permite que sea modificada");
+            res.redirect("/transfers/client/" + clientId);
+            return;
+        }
+
+        const activePeriod = await BillingPeriod.findOne({
+            where: { clientId: clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value },
+            attributes: ['id']
+        });
+
+        if ((!activePeriod) || (activePeriod.id != accountTransfer.periodId)) {
+            req.flash("warning", "Solo se puede eliminar una transferencia si pertenece al período activo");
+            res.redirect('/transfers/client/' + clientId); return;
+        }
+
+        const Accounts = await Account.findAll(
+            { where: { clientId: clientId }, include: [{ model: AccountType }] });
+
+        res.render('transfers/edit', {
+            menu: CURRENT_MENU,
+            data: { accountTransfer: accountTransfer, client: accountTransfer.client, clientAccounts: Accounts },
+        });
+
+    } catch (err) {
+        req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
+        winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
+        res.redirect("/transfers/client/" + clientId);
+    }
+};
+
+module.exports.edit = async function (req, res, next) {
+
+    const accountTransferId = req.params.transferId;
+    const clientId = req.body.clientId;
+
+    // req.flash("warning", "Esta función no se encuentra implementada aun");
+
+    // res.redirect("/transfers/client/" + clientId); return;
+
+    let originalAccountTransfer = await AccountTransfer.findByPk(accountTransferId,
+        {
+            include: [{ model: Client }, { model: BillingPeriod },
+            { model: Account, include: [{ model: AccountType }], as: 'sourceAccount' },
+            { model: Account, include: [{ model: AccountType }], as: 'destinationAccount' }],
+        });
+
+    if (originalAccountTransfer === null) {
+        req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
+        winston.error(`Account transfer not found for showing info ${JSON.stringify(req.body)} - ${err}`);
+        res.redirect("/transfers/client/" + clientId);
+    }
+
+    originalAccountTransfer.update({
+        sourceAccountId: req.body.sourceAccountId,
+        destinationAccountId: req.body.destinationAccountId,
+        amount: req.body.amount,
+        transferDate: req.body.transferDate,
+        comments: req.body.comments,
+        userId: req.user.id
+    })
+        .then(async (updatedAccountTransfer) => {
+
+            const sourceAccountChanged = (originalAccountTransfer.sourceAccountId !== updatedAccountTransfer.sourceAccountId);
+            const destinationAccountChanged = (originalAccountTransfer.destinationAccountId !== updatedAccountTransfer.destinationAccountId);
+            const amountChanged = (originalAccountTransfer.amount !== updatedAccountTransfer.amount);
+
+            const AccountMovement = require('./accountMovements.controller');
+
+            const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+            if (sourceAccountChanged || amountChanged) {
+
+                let sourceAccountMovement = await AccountMovement.findOne({
+                    where: {
+                        clientId: clientId,
+                        periodId: originalAccountTransfer.periodId,
+                        category: String.fromCharCode(accountMovementCategory.eStatus.get('TRANSFERENCIA').value),
+                        movementId: originalAccountTransfer.id,
+                        accountId: originalAccountTransfer.sourceAccountId
+                    }
+                });
+
+                sourceAccountMovement.update({
+                    accountId: updatedAccountTransfer.sourceAccountId,
+                    amount: updatedAccountTransfer.amount
+                }).then(async () => {
+
+                    if (sourceAccountChanged) {
+                        await AccountMovement.fixBalanceMovements(clientId, periodId, originalAccountTransfer.sourceAccountId);
+                    }
+
+                    await AccountMovement.fixBalanceMovements(clientId, periodId, updatedAccountTransfer.sourceAccountId);
+                });
+
+            }
+
+            if (destinationAccountChanged || amountChanged) {
+
+                let destinationAccountMovement = await AccountMovement.findOne({
+                    where: {
+                        clientId: clientId,
+                        periodId: originalAccountTransfer.periodId,
+                        category: String.fromCharCode(accountMovementCategory.eStatus.get('TRANSFERENCIA').value),
+                        movementId: originalAccountTransfer.id,
+                        accountId: originalAccountTransfer.destinationAccountId
+                    }
+                });
+
+                destinationAccountMovement.update({
+                    accountId: updatedAccountTransfer.destinationAccountId,
+                    amount: updatedAccountTransfer.amount
+                }).then(async () => {
+                    if (destinationAccountChanged) {
+                        await AccountMovement.fixBalanceMovements(clientId, periodId, originalAccountTransfer.destinationAccountId);
+                    }
+                    await AccountMovement.fixBalanceMovements(clientId, periodId, updatedAccountTransfer.destinationAccountId);
+                });
+            }
+
+            winston.info(`user #${req.user.id} update the account transfer ${originalAccountTransfer.id}  - ${originalAccountTransfer}`);
+
+
+        })
+
+
+    //hacer el cambio en el mov de la cuenta origen
+
+    //hacer el cambio en el mov de la cuenta destino
+
+    //actualizar los saldos de las dos cuentas
+
+
+    res.redirect("/transfers/client/" + clientId);
+};

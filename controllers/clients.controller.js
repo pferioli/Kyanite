@@ -9,9 +9,13 @@ const winston = require('../helpers/winston.helper');
 const CURRENT_MENU = 'clients'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.populateClients = function (req, res) {
-    Client.findAll({ attributes: ['id', 'name'] }).then(function (clients) {
-        res.send(clients);
-    });
+    Client.findAll({
+        attributes: ['id', 'name'],
+        order: [['name', 'ASC']]
+    })
+        .then(function (clients) {
+            res.send(clients);
+        });
 }
 
 module.exports.listAll = function (req, res, next) {

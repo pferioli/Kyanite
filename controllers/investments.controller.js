@@ -63,13 +63,19 @@ module.exports.listAll = async function (req, res) {
 
     const client = await Client.findByPk(clientId);
 
-    Investment.findAll(options);
-
-    res.render('investments/investments',
-        {
-            menu: CURRENT_MENU,
-            data: { client: client, investment: investment, periods: periods },
-            params: { showAll: showAll }
+    Investment.findAll(options)
+        .then(invesments => {
+            res.render('investments/investments',
+                {
+                    menu: CURRENT_MENU,
+                    data: { client: client, investment: invesments, periods: periods },
+                    params: { showAll: showAll }
+                });
+        })
+        .catch(err => {
+            winston.error(`An error ocurred fetching investments for clientId #${clientId} - ${err}`);
+            req.flash("error", `Ocurrio un error y no fue posible recuperar las inversiones`);
+            res.redirect("/investments"); return;
         });
 };
 

@@ -381,7 +381,13 @@ module.exports.addNew = async function (req, res, next) {
             winston.error(`An error ocurred while user #${req.user.id} tryed to create a new payment receipt ${JSON.stringify(req.body)} - ${err}`);
         })
 
-        .finally(() => { res.redirect('/expenses/paymentReceipts/client/' + clientId); });
+        .finally(() => {
+            if (req.body.submitter === 'add_next_button') {
+                res.redirect('/expenses/paymentReceipts/client/' + clientId + '/new');
+            } else {
+                res.redirect('/expenses/paymentReceipts/client/' + clientId);
+            }
+        });
 };
 
 module.exports.showNewPOForm = async function (req, res) {
