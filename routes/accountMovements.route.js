@@ -42,7 +42,7 @@ router.get("/client/:clientId/report", function (req, res, next) {
     accountMovementsController.createInvoice(req, res);
 });
 
-//https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=19&periodId=55&accountId=125
+//https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=14&periodId=41&accountId=91
 
 router.get("/fixBalance", async function (req, res, next) {
     const clientId = req.query.clientId;
