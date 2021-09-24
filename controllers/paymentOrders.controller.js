@@ -605,7 +605,7 @@ module.exports.edit = async function (req, res, next) {
 
         let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
 
-        if ((Number.parseFloat(paymentOrder.amount) - remainingBalance) <= 0) {
+        if (remainingBalance <= 0) {
             prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
         }
 
