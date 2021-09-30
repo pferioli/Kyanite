@@ -78,7 +78,7 @@
               <% } %>
 
               <% if(data.periods[i].statusId === 0) { %>
-              <a id="buttonDelete" title="eliminar período" class="modal-trigger btn-flat btn-small waves-effect waves-light" data-target="modalDeletePeriod"><i class="material-icons">delete</i></a>
+              <a id="buttonDelete" title="eliminar período" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.periods[i].id%>" data-value="<%= data.periods[i].name %>" data-value2="<%= data.client.id %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
               <% } %>
             </td>
           </tr>
@@ -93,6 +93,7 @@
 <%- include ("./modals/add.ejs") %>
 <%- include ("./modals/open.ejs") %>
 <%- include ("./modals/close.ejs") %>
+<%- include ("./modals/delete.ejs") %>
 
 <%- include("../partials/footer") %>
 
@@ -136,6 +137,16 @@
     document.getElementById('modalCloseMessage').textContent = message;
     document.getElementById('modalClosePeriodId').value = button.dataset.id;
     document.getElementById('modalCloseClientId').value = button.dataset.value2;
+    modal.open();
+  };
+
+  function deleteDialog(button) {
+    var _elem = document.getElementById('modalDeletePeriod');
+    var modal = M.Modal.getInstance(_elem);
+    const message = `se va a realizar la eliminación del período ${button.dataset.value} [ID ${button.dataset.id}].`
+    document.getElementById('modalDeleteMessage').textContent = message;
+    document.getElementById('modalDeletePeriodId').value = button.dataset.id;
+    document.getElementById('modalDeleteClientId').value = button.dataset.value2;
     modal.open();
   };
 

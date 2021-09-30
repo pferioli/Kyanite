@@ -40,4 +40,8 @@ router.post("/open", function (req, res, next) {
     billingPeriodsController.open(req, res);
 });
 
+router.post("/delete", function (req, res, next) {
+    billingPeriodsController.delete(req, res);
+});
+
 module.exports = router;

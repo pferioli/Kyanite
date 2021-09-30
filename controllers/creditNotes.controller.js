@@ -91,14 +91,20 @@ module.exports.showNewForm = async function (req, res) {
     const paymentReceipts = await PaymentReceipt.findAll({
         where: {
             clientId: clientId,
-            statusId: { [Op.in]: [PaymentReceiptStatus.eStatus.get('pending').value, PaymentReceiptStatus.eStatus.get('inprogress').value] }
+            statusId: {
+                [Op.in]: [
+                    PaymentReceiptStatus.eStatus.get('pending').value,
+                    PaymentReceiptStatus.eStatus.get('inprogress').value,
+                    PaymentReceiptStatus.eStatus.get('processed').value
+                ]
+            }
         },
         include: [{ model: Supplier }],
         attributes: ['id']
     });
 
     if (paymentReceipts.length === 0) {
-        req.flash("warning", "No se encontraron facturas en estado pendiente o en progreso para procesar");
+        req.flash("warning", "No se encontraron facturas en estado pendiente, en progreso o procesada, imposible continuar");
         res.redirect(`/creditNotes/client/${clientId}`); return;
     }
 

@@ -476,6 +476,8 @@ module.exports.getPendingSuppliersList = async function (req, res) {
 
 module.exports.pendingBySupplierId = async function (req, res) {
 
+    //TODO: CONFIGURAR QUE SE PUEDA INCLUIR O NO "PROCESSED"
+
     const clientId = req.params.clientId;
     const supplierId = req.params.supplierId;
 
@@ -483,7 +485,11 @@ module.exports.pendingBySupplierId = async function (req, res) {
         {
             where: {
                 statusId: {
-                    [Op.in]: [PaymentReceiptStatus.eStatus.get('pending').value, PaymentReceiptStatus.eStatus.get('inprogress').value]
+                    [Op.in]: [
+                        PaymentReceiptStatus.eStatus.get('pending').value,
+                        PaymentReceiptStatus.eStatus.get('inprogress').value,
+                        PaymentReceiptStatus.eStatus.get('processed').value,
+                    ]
                 },
                 clientId: clientId, supplierId: supplierId
             },

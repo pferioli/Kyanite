@@ -42,6 +42,19 @@ module.exports.create = async function (req, res, next) {
 
     const periodName = ("0" + monthValue + yearValue).substr(-6);
 
+    const existingPeriod = await BillingPeriod.findOne({
+        where: {
+            clientId: clientId,
+            name: periodName
+        }
+    })
+
+    if (existingPeriod) {
+        req.flash("warning", `Ya existe un período con la fechas indicadas para ese intervalo ${existingPeriod.name}`);
+        res.redirect('/periods/' + clientId);
+        return
+    }
+
     BillingPeriod.create(
         {
             clientId: clientId,
@@ -120,6 +133,7 @@ module.exports.open = async function (req, res) {
         period.statusId = BillingPeriodStatus.eStatus.get('opened').value;
         period.openedAt = new Date();
         period.previousPeriodId = previousPeriod !== null ? previousPeriod.id : null;
+        period.userId = req.user.id
 
         const openedPeriod = await period.save()
 
@@ -170,6 +184,7 @@ module.exports.close = async function (req, res, next) {
     period.statusId = BillingPeriodStatus.eStatus.get('closed').value;
     period.closedAt = new Date();
     period.lastPeriod = true;
+    period.userId = req.user.id
 
     period.save()
         .then(() => {
@@ -178,6 +193,45 @@ module.exports.close = async function (req, res, next) {
         .catch(error => {
             winston.error(`an error ocurred when user #${userId} was trying to close the billing period #${id} - ${error}`);
             req.flash("error", "Ocurrio un error grave y no se pudo cerrar el período de liquidación");
+
+        })
+        .finally(() => {
+            res.redirect('/periods/' + clientId);
+        });
+};
+
+module.exports.delete = async function (req, res, next) {
+
+    const userId = req.user.id;
+
+    const clientId = req.body.clientId;
+    const id = req.body.periodId;
+    const period = await BillingPeriod.findByPk(id);
+
+    if (period === null) {
+        res.redirect("/periods/" + clientId); return;
+    }
+
+    if (period.statusId != BillingPeriodStatus.eStatus.get('created').value) {
+        req.flash("warning", "Solo se pueden eliminar períodos de liquidación que esten creados");
+        res.redirect('/periods/' + clientId);
+        return;
+    }
+
+    //Pasamos el periodo a Disabled, marcamos el flag de que fue el ultimo periodo cursado...
+
+    period.statusId = BillingPeriodStatus.eStatus.get('disabled').value;
+    period.userId = req.user.id
+
+    period.save()
+        .then(() => {
+            winston.info(`user #${userId} disabled period #${id} for customer #${clientId}`);
+            req.flash("success", "El período de liquidación fue correctamente deshabilitado");
+
+        })
+        .catch(error => {
+            winston.error(`an error ocurred when user #${userId} was trying to disable the billing period #${id} - ${error}`);
+            req.flash("error", "Ocurrio un error grave y no se pudo deshabilitar el período de liquidación");
 
         })
         .finally(() => {
