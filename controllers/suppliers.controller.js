@@ -10,6 +10,17 @@ const AccountingImputation = Model.accountingImputation;
 
 const SupplierCategory = Model.supplierCategory;
 
+const Client = Model.client;
+const ReceiptType = Model.receiptType;
+const PaymentReceipt = Model.paymentReceipt;
+const PaymentReceiptImage = Model.paymentReceiptImage;
+const PaymentOrder = Model.paymentOrder;
+const BillingPeriod = Model.billingPeriod;
+const Account = Model.account;
+const AccountType = Model.accountType;
+const CheckSplitted = Model.checkSplitted;
+const Check = Model.check;
+
 const winston = require('../helpers/winston.helper');
 
 const CURRENT_MENU = 'suppliers'; module.exports.CURRENT_MENU = CURRENT_MENU;
@@ -266,6 +277,49 @@ module.exports.edit = async function (req, res, next) {
         res.redirect("/suppliers");
     }
 }
+
+module.exports.listPayments = async function (req, res, next) {
+
+    const supplierId = req.body.supplierId;
+    const clientId = req.body.clientId;
+
+    const supplier = await Supplier.findByPk(supplierId);
+    const client = await Client.findByPk(clientId);
+
+    PaymentReceipt.findAll({
+        where: {
+            clientId: clientId,
+            supplierId: supplierId,
+        },
+        include: [
+            { model: Supplier },
+            { model: Client },
+            { model: ReceiptType },
+            { model: BillingPeriod },
+            {
+                model: AccountingImputation,
+                include: [
+                    {
+                        model: AccountingGroup,
+                        as: 'accountingGroup',
+                        attributes: [['name', 'name']],
+                    }
+                ]
+            },
+            {
+                model: PaymentOrder,
+                include: [
+                    { model: CheckSplitted, include: [{ model: Check }] },
+                    { model: Account, include: [{ model: Bank }, { model: AccountType }] }
+                ]
+            }
+        ]
+    }).then(function (paymentReceipts) {
+        res.render("suppliers/payments/payments.ejs", {
+            menu: `${CURRENT_MENU}_payments`, data: { client: client, supplier: supplier, paymentReceipts: paymentReceipts },
+        });
+    });
+};
 
 //------------------ AJAX CALLS ------------------//
 

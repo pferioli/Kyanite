@@ -1,0 +1,314 @@
+<%- include ("../../partials/header") %>
+
+<main class="site-content">
+
+  <center>
+    <%- include ("../../partials/alerts") %>
+  </center>
+
+  <div class="table-container">
+    <div class="table-header">
+      <span class="table-title">Cuenta Corriente Proveedor - <%=data.supplier.name%> [Cliente <%=data.client.internalCode%>]</span><br>
+      <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+        <div class="spinner-layer spinner-green-only">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div>
+          <div class="gap-patch">
+            <div class="circle"></div>
+          </div>
+          <div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+        <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+      </div>
+    </div>
+    <div id="hide-dt" style="display:none">
+      <table id="datatable" class="table display">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Factura</th>
+            <th>Tipo</th>
+            <th>Detalles</th>
+            <th>Importe</th>
+            <th>Imputación</th>
+            <th>Fecha Emisión</th>
+            <th>Estado FC</th>
+            <th>Período</th>
+            <th>Orden de Pago</th>
+            <th>Importe OP</th>
+            <th>Fecha Pago</th>
+            <th>Estado OP</th>
+            <th>Cuenta</th>
+            <th>Numero de Cta</th>
+            <th>CBU</th>
+            <th>Núm. de Cheque</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(var i=0; i < data.paymentReceipts.length; i++) { %>
+                      
+              <!--Si no hay ninguna OP solo hay que mostrar los datos del comprobante-->
+              
+              <% if(data.paymentReceipts[i].paymentOrders.length > 0) { %>
+            
+              <!-- barremos cada una de las OPs -->
+              
+              <% for(var j=0; j < data.paymentReceipts[i].paymentOrders.length; j++) { %>
+                
+                <tr data-id="<%= data.paymentReceipts[i].id %>">
+                  <td><%=data.paymentReceipts[i].id%></td>
+                  <td>[<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%></td>
+                  <td><%=data.paymentReceipts[i].receiptType.name%></td>
+                  <td><%=data.paymentReceipts[i].description%></td>
+                  <td>$<%=data.paymentReceipts[i].amount%></td>
+                  <td><%=data.paymentReceipts[i].accountingImputation.name%></td>
+                  <td><%=data.paymentReceipts[i].emissionDate%></td>
+                  <td><%=data.paymentReceipts[i].statusId%></td>
+                  <td><%=data.paymentReceipts[i].billingPeriod.name%></td>
+                  <td><%=data.paymentReceipts[i].paymentOrders[j].poNumber%></td>
+                  <td>$<%=data.paymentReceipts[i].paymentOrders[j].amount%></td>
+                  <td><%=data.paymentReceipts[i].paymentOrders[j].paymentDate%></td>
+                  <td><%=data.paymentReceipts[i].paymentOrders[j].statusId%></td>
+                  <td><%=data.paymentReceipts[i].paymentOrders[j].account.accountType.account%></td>
+                  <td><%=data.paymentReceipts[i].paymentOrders[j].account.accountNumber%></td>
+                  <td><%=data.paymentReceipts[i].paymentOrders[j].account.cbu%></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              <% } %>
+
+            <% } else { %>
+
+                <tr data-id="<%= data.paymentReceipts[i].id %>">
+                  <td><%=data.paymentReceipts[i].id%></td>
+                  <td>[<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%></td>
+                  <td><%=data.paymentReceipts[i].receiptType.name%></td>
+                  <td><%=data.paymentReceipts[i].description%></td>
+                  <td>$<%=data.paymentReceipts[i].amount%></td>
+                  <td><%=data.paymentReceipts[i].accountingImputation.name%></td>
+                  <td><%=data.paymentReceipts[i].emissionDate%></td>
+                  <td><%=data.paymentReceipts[i].statusId%></td>
+                  <td><%=data.paymentReceipts[i].billingPeriod.name%></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+            <% } %>
+
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<%#- include ("./modals/newCategory.ejs") %>
+
+<%- include ("../../partials/footer") %>
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function () {
+ });
+
+  $(document).ready(function () {
+
+    $('.search-toggle').click(function () {
+      if ($('.hiddensearch').css('display') == 'none')
+        $('.hiddensearch').slideDown();
+      else
+        $('.hiddensearch').slideUp();
+    });
+
+    var table = $('#datatable').dataTable({
+      dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+      oLanguage: {
+        sSearch: '',
+        sSearchPlaceholder: 'Escriba aqui su búsqueda',
+        sInfo: '_START_ -_END_ de _TOTAL_',
+        sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+          '<option value="200">200</option>' +
+          '<option value="500">500</option>' +
+          '<option value="1000">1000</option>' +
+          '<option value="-1">Todos</option>' +
+          '</select></div>'
+      },
+      columnDefs: [
+        {
+          targets: -1,
+          searchable: false,
+          sortable: false,
+          className: "left-align",
+        },
+        {
+          className: "center-align",
+          targets: [0, 1, 2, 3]
+        },
+        {
+          targets: 3,
+          visible: true,
+          searchable: false,
+          render: $.fn.dataTable.render.ellipsis(32, true)
+        },
+        {
+          targets: [4,10],
+          type: 'currency',
+        },
+        {
+          targets: [6,11],
+          render: function (data) {
+          if (data)
+            return moment(data).format('DD/MM/YYYY');
+          else return "";
+          }, 
+        },     
+      ],
+      rowGroup: {
+          dataSrc: [1],
+          startRender: function ( rows, group ) {         
+            if(rows.count()===1)   
+              return group +' / '+rows.count()+' Orden de pago';
+            else
+              return group +' / '+rows.count()+' Ordenes de pago';
+          },
+          endRender: function ( rows, group ) {
+                
+            // Remove the formatting to get integer data for summation
+            var intVal = function ( i ) { 
+              return typeof i === 'string' ? i.replace(/[\$,]/g, '')*1 : typeof i === 'number' ? i : 0; 
+            };
+ 
+            var totalAgreggate = rows
+                    .data()
+                    .pluck(4)
+                    .reduce( function (a, b) {
+                        return intVal(a )+ intVal(b)*1;
+                    }, 0) / rows.count();
+
+            var amountAgreggate = rows.data()
+              .filter( function ( data, index ) {
+                if(data[9] !== "") 
+                  return true;
+                else
+                  return false;
+                })
+              .pluck(10)
+              .reduce(function (a, b) { 
+                return intVal(a) + intVal(b); }, 0 
+              );
+
+              const totalOps = $.fn.dataTable.render.number('.', ',', 2, '$').display( amountAgreggate );
+
+              const balance = $.fn.dataTable.render.number('.', ',', 2, '$').display( totalAgreggate - amountAgreggate );
+ 
+              return $('<tr/>')
+                .append( '<td colspan="5">Subtotal OPs = ' + totalOps + ' -> Saldo Proveedor = <span class="amount">' + balance + '</span></td>')
+                .append( '<td colspan="13"></td>')
+              },
+      },
+      colReorder: true,
+      pageLength: 200,
+      fixedColumns: { 
+        leftColumns: 2 
+      },
+      order: [[0, 'asc']],
+      autowidth: true,
+      scrollY: '500px',
+      scrollX: true,
+      scrollCollapse: true,
+      paging: true,
+      buttons: [
+        {
+          extend: 'colvis',
+          text: 'Columnas',
+        },
+        {
+          extend: 'print',
+          className: '',
+          title: '',
+          // autoPrint: false,
+          customize: function (win) {
+            $(win.document.body)
+              .css('font-size', '10pt')
+              .prepend(
+                '<h4>Title Test</h4>',
+              );
+            $(win.document.body).find('table')
+              .addClass('compact')
+              .css('font-size', 'inherit',);
+          }
+        },
+        {
+          extend: 'excelHtml5',
+          exportOptions: {
+            columns: ':visible(th:not(:last-child))',
+            search: 'applied',
+            order: 'applied'
+          },
+          customize: function (xlsx) {
+            var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+            source.setAttribute('name', 'Proveedores');
+          }
+        },
+        { extend: 'csvHtml5' },
+        { extend: 'copyHtml5' },
+        {
+          text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+          extend: 'pdfHtml5',
+          filename: 'proveedores',
+          orientation: 'landscape',     //portrait
+          pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+          exportOptions: {
+            columns: ':visible',
+            search: 'applied',
+            order: 'applied'
+          }
+        }
+      ],
+      fnInitComplete: function () {
+        $('#hide-dt').show();
+        $('#progress').hide();
+        
+        $(api.column(1).footer()).html('Total');
+
+      },
+      footerCallback: function ( row, data, start, end, display ) {
+            
+                var api = this.api(), data;
+ 
+                // Remove the formatting to get integer data for summation
+                var intVal = function ( i ) { return typeof i === 'string' ? i.replace(/[\$,]/g, '')*1 : typeof i === 'number' ? i : 0; };
+ 
+                // Total over all pages
+                total = api.rows().data().filter( function ( data, index ) {
+                            if(data[9] !== "") 
+                                return true;
+                            else
+                                return false;
+                        })
+                        .pluck(10).reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+ 
+                // Total over this page
+                // pageTotal = api.column(8, { page: 'current'}).data().reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+    
+                // Update footer
+                $(api.column(1).footer()).html($.fn.dataTable.render.number('.', ',', 2, '$').display( total )); //     Number.parseFloat(total).toFixed(2));
+              }
+    });
+  });
+
+</script>

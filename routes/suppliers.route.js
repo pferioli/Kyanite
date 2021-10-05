@@ -43,6 +43,13 @@ router.get("/edit/:id", function (req, res, next) {
   suppliersController.showEditForm(req, res);
 });
 
+router.get("/payments/:supplierId", function (req, res, next) {
+  res.render("suppliers/payments/index", { supplierId: req.params.supplierId })
+})
+
+router.post("/payments", function (req, res, next) {
+  suppliersController.listPayments(req, res);
+})
 //AJAX
 
 router.get("/ajax/raw/:id", function (req, res, next) {

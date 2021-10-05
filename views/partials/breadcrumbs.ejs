@@ -11,8 +11,14 @@
     <a href="/periods" class="breadcrumb">Periodos</a>
 <%}%>
 
-<% if (locals.menu==='suppliers' ) { %>
+<% if ((locals.menu==='suppliers')||(locals.menu==='suppliers_payments')) { %>
     <a href="/suppliers" class="breadcrumb">Proveedores</a>
+     <% if(locals.data) { %>
+        <% if(locals.menu==='suppliers_payments'){%>
+            <a href="/suppliers/payments/<%=data.supplier.id%>" class="breadcrumb">Cuenta Corriente</a>     
+            <a href="/suppliers/payments/<%=data.supplier.id%>?clientId=<%=data.client.id%>" class="breadcrumb"><%=data.client.internalCode%></a>     
+        <% } %>    
+    <% } %>    
 <%}%>
 
 <% if (locals.menu==='homeOwners' ) { %>

@@ -1,0 +1,78 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+    <div class="container" style="margin-top: 50px;">
+        <form class="col s12" method="post" action='/users/new'>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Ingrese un nuevo usuario</span>
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">face</i>
+                            <input id="name" name="name" type="text" value="" required/>
+                            <label for="name">Nombre Completo</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">email</i>
+                            <input id="email" name="email" type="text" value="" required />
+                            <label for="email">Cuenta de correo</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">password</i>
+                            <input id="password" name="password" type="text" value="" required/>
+                            <label for="password">Ingrese una clave</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input id="passwordConfirm" type="text" value="" required />
+                            <label for="passwordConfirm">Repita la clave</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                       
+                        <div class="input-field col s4">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="privilegesSelect" required>
+                                <option value="1" selected>Usuario Administrador - Nivel 1</option>
+                                <option value="2" selected>Usuario Avanzado - Nivel 2</option>
+                                <option value="3" selected>Usuario Regular - Nivel 3</option>
+                            </select>
+                            <label>Seleccione el nivel de privilegios</label>
+                            <input type="hidden" name="securityLevel" id="securityLevel" />
+                        </div>
+                      
+                    </div>
+
+                </div>
+
+                <div class="card-action right-align">
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
+                    <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <center>
+        <%- include ("../partials/alerts") %>
+    </center>
+</main>
+
+<%- include ("../partials/footer") %>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var elems = document.querySelectorAll("select");
+        var instances = M.FormSelect.init(elems, {});
+
+        elems = document.querySelectorAll('.modal');
+        instances = M.Modal.init(elems, {});
+
+    });
+
+</script>
