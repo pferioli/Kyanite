@@ -25,6 +25,9 @@ const winston = require('../helpers/winston.helper');
 
 const CURRENT_MENU = 'suppliers'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
+const PaymentReceiptStatus = require('../utils/statusMessages.util').PaymentReceipt;
+const PaymentOrderStatus = require('../utils/statusMessages.util').PaymentOrder;
+
 module.exports.listAll = function (req, res, next) {
     Supplier.findAll({
         include: [
@@ -286,10 +289,14 @@ module.exports.listPayments = async function (req, res, next) {
     const supplier = await Supplier.findByPk(supplierId);
     const client = await Client.findByPk(clientId);
 
+    const paymentReceiptStatus = [PaymentReceiptStatus.eStatus.get('pending').value, PaymentReceiptStatus.eStatus.get('inprogress').value, PaymentReceiptStatus.eStatus.get('processed').value]
+    const paymentOrdersStatus = [PaymentOrderStatus.eStatus.get('pending').value, PaymentOrderStatus.eStatus.get('inprogress').value, PaymentOrderStatus.eStatus.get('processed').value]
+
     PaymentReceipt.findAll({
         where: {
             clientId: clientId,
             supplierId: supplierId,
+            statusId: { [Op.in]: paymentReceiptStatus }
         },
         include: [
             { model: Supplier },
@@ -310,8 +317,14 @@ module.exports.listPayments = async function (req, res, next) {
                 model: PaymentOrder,
                 include: [
                     { model: CheckSplitted, include: [{ model: Check }] },
-                    { model: Account, include: [{ model: Bank }, { model: AccountType }] }
-                ]
+                    {
+                        model: Account, include: [{ model: Bank }, { model: AccountType }]
+                    }
+                ],
+                where: {
+                    statusId: { [Op.in]: paymentOrdersStatus }
+                },
+                required: false
             }
         ]
     }).then(function (paymentReceipts) {

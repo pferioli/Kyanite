@@ -31,24 +31,17 @@
       <table id="datatable" class="table display">
         <thead>
           <tr>
-            <th>ID</th>
             <th>Factura</th>
-            <th>Tipo</th>
-            <th>Detalles</th>
             <th>Importe</th>
-            <th>Imputación</th>
+            <th>Detalles</th>
             <th>Fecha Emisión</th>
-            <th>Estado FC</th>
-            <th>Período</th>
-            <th>Orden de Pago</th>
-            <th>Importe OP</th>
             <th>Fecha Pago</th>
-            <th>Estado OP</th>
+            <th>Importe OP</th>
+            <th>Orden de Pago</th>
+            <th>Período</th>
             <th>Cuenta</th>
             <th>Numero de Cta</th>
-            <th>CBU</th>
             <th>Núm. de Cheque</th>
-            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -58,50 +51,36 @@
               
               <% if(data.paymentReceipts[i].paymentOrders.length > 0) { %>
             
-              <!-- barremos cada una de las OPs -->
+                <!-- barremos cada una de las OPs -->
               
-              <% for(var j=0; j < data.paymentReceipts[i].paymentOrders.length; j++) { %>
+                <% for(var j=0; j < data.paymentReceipts[i].paymentOrders.length; j++) { %>
                 
-                <tr data-id="<%= data.paymentReceipts[i].id %>">
-                  <td><%=data.paymentReceipts[i].id%></td>
-                  <td>[<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%></td>
-                  <td><%=data.paymentReceipts[i].receiptType.name%></td>
-                  <td><%=data.paymentReceipts[i].description%></td>
-                  <td>$<%=data.paymentReceipts[i].amount%></td>
-                  <td><%=data.paymentReceipts[i].accountingImputation.name%></td>
-                  <td><%=data.paymentReceipts[i].emissionDate%></td>
-                  <td><%=data.paymentReceipts[i].statusId%></td>
-                  <td><%=data.paymentReceipts[i].billingPeriod.name%></td>
-                  <td><%=data.paymentReceipts[i].paymentOrders[j].poNumber%></td>
-                  <td>$<%=data.paymentReceipts[i].paymentOrders[j].amount%></td>
-                  <td><%=data.paymentReceipts[i].paymentOrders[j].paymentDate%></td>
-                  <td><%=data.paymentReceipts[i].paymentOrders[j].statusId%></td>
-                  <td><%=data.paymentReceipts[i].paymentOrders[j].account.accountType.account%></td>
-                  <td><%=data.paymentReceipts[i].paymentOrders[j].account.accountNumber%></td>
-                  <td><%=data.paymentReceipts[i].paymentOrders[j].account.cbu%></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              <% } %>
+                  <tr data-id="<%= data.paymentReceipts[i].id %>">
+                    <td>[<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%></td>
+                    <td>$<%=data.paymentReceipts[i].amount%></td>
+                    <td><%=data.paymentReceipts[i].description%></td>
+                    <td><%=data.paymentReceipts[i].emissionDate%></td>                                    
+                    <td><%=data.paymentReceipts[i].paymentOrders[j].paymentDate%></td>
+                    <td>$<%=data.paymentReceipts[i].paymentOrders[j].amount%></td>
+                    <td><%=data.paymentReceipts[i].paymentOrders[j].poNumberFormatted%></td>
+                    <td><%=data.paymentReceipts[i].billingPeriod.name%></td>
+                    <td><%=data.paymentReceipts[i].paymentOrders[j].account.accountType.account%></td>
+                    <td><%=data.paymentReceipts[i].paymentOrders[j].account.accountNumber%></td>
+                    <td></td>
+                  </tr>
+                <% } %>
 
-            <% } else { %>
+              <% } else { %>
 
                 <tr data-id="<%= data.paymentReceipts[i].id %>">
-                  <td><%=data.paymentReceipts[i].id%></td>
                   <td>[<%=data.paymentReceipts[i].receiptType.receiptType%>] <%=data.paymentReceipts[i].receiptNumber%></td>
-                  <td><%=data.paymentReceipts[i].receiptType.name%></td>
-                  <td><%=data.paymentReceipts[i].description%></td>
                   <td>$<%=data.paymentReceipts[i].amount%></td>
-                  <td><%=data.paymentReceipts[i].accountingImputation.name%></td>
+                  <td><%=data.paymentReceipts[i].description%></td>
                   <td><%=data.paymentReceipts[i].emissionDate%></td>
-                  <td><%=data.paymentReceipts[i].statusId%></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
                   <td><%=data.paymentReceipts[i].billingPeriod.name%></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -110,6 +89,11 @@
 
           <% } %>
         </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="11" style="text-align: left; font-size: medium; font-weight: bold; color: darkmagenta">Total:</th>                       
+          </tr>
+        </tfoot>
       </table>
     </div>
   </div>
@@ -126,6 +110,8 @@
  });
 
   $(document).ready(function () {
+
+    var totalPaymentsReceipts=0;
 
     $('.search-toggle').click(function () {
       if ($('.hiddensearch').css('display') == 'none')
@@ -147,167 +133,130 @@
           '<option value="-1">Todos</option>' +
           '</select></div>'
       },
-      columnDefs: [
-        {
-          targets: -1,
-          searchable: false,
-          sortable: false,
-          className: "left-align",
-        },
+      columnDefs: [ 
         {
           className: "center-align",
-          targets: [0, 1, 2, 3]
+          targets: [0,1]
         },
         {
-          targets: 3,
+          targets: 2,
           visible: true,
           searchable: false,
-          render: $.fn.dataTable.render.ellipsis(32, true)
+          render: $.fn.dataTable.render.ellipsis(80, true)
         },
         {
-          targets: [4,10],
+          targets: [1,6],
           type: 'currency',
         },
         {
-          targets: [6,11],
+          targets: [3,4],
           render: function (data) {
           if (data)
             return moment(data).format('DD/MM/YYYY');
           else return "";
           }, 
-        },     
+        },        
       ],
-      rowGroup: {
-          dataSrc: [1],
-          startRender: function ( rows, group ) {         
-            if(rows.count()===1)   
-              return group +' / '+rows.count()+' Orden de pago';
-            else
-              return group +' / '+rows.count()+' Ordenes de pago';
-          },
-          endRender: function ( rows, group ) {
+      rowsGroup: [  // Always the array (!) of the column-selectors in specified order to which rows groupping is applied
+				            // (column-selector could be any of specified in https://datatables.net/reference/type/column-selector)
+                  0,1,2,3	
+      ],
+      // rowGroup: {
+      //     dataSrc: [0],
+      //     startRender: function ( rows, group ) {         
+      //       switch(rows.count()){
+      //         case 0: {return group + ' / sin órden de pago';} break;
+      //         case 1: {return group + ' / ' + rows.count().toString() + ' órden de pago';} break;
+      //         default:{return group + ' / ' + rows.count().toString() + ' órdenes de pago';} break;
+      //       }                             
+      //     },
+      //     endRender: function ( rows, group ) {
                 
-            // Remove the formatting to get integer data for summation
-            var intVal = function ( i ) { 
-              return typeof i === 'string' ? i.replace(/[\$,]/g, '')*1 : typeof i === 'number' ? i : 0; 
-            };
+      //       // Remove the formatting to get integer data for summation
+      //       var intVal = function ( i ) { 
+      //         return typeof i === 'string' ? i.replace(/[\$,]/g, '')*1 : typeof i === 'number' ? i : 0; 
+      //       };
  
-            var totalAgreggate = rows
-                    .data()
-                    .pluck(4)
-                    .reduce( function (a, b) {
-                        return intVal(a )+ intVal(b)*1;
-                    }, 0) / rows.count();
+      //       var totalAgreggate = rows
+      //               .data()
+      //               .pluck(1)
+      //               .reduce( function (a, b) {
+      //                   return intVal(a )+ intVal(b)*1;
+      //               }, 0) / rows.count();
 
-            var amountAgreggate = rows.data()
-              .filter( function ( data, index ) {
-                if(data[9] !== "") 
-                  return true;
-                else
-                  return false;
-                })
-              .pluck(10)
-              .reduce(function (a, b) { 
-                return intVal(a) + intVal(b); }, 0 
-              );
+      //       var amountAgreggate = rows.data()
+      //         .filter( function ( data, index ) {
+      //           if(data[6] !== "") 
+      //             return true;
+      //           else
+      //             return false;
+      //           })
+      //         .pluck(5)
+      //         .reduce(function (a, b) { 
+      //           return intVal(a) + intVal(b); }, 0 
+      //         );
 
-              const totalOps = $.fn.dataTable.render.number('.', ',', 2, '$').display( amountAgreggate );
+      //         totalPaymentsReceipts+=totalAgreggate;
 
-              const balance = $.fn.dataTable.render.number('.', ',', 2, '$').display( totalAgreggate - amountAgreggate );
+      //         let balance = totalAgreggate - amountAgreggate;
+
+      //         if((balance <=0.001)&&(balance >=-0.001)) balance=0;
  
-              return $('<tr/>')
-                .append( '<td colspan="5">Subtotal OPs = ' + totalOps + ' -> Saldo Proveedor = <span class="amount">' + balance + '</span></td>')
-                .append( '<td colspan="13"></td>')
-              },
-      },
+      //         return $('<tr/>')
+      //           .append( '<td colspan="11">Subtotal OPs = <span class="amount">' + $.fn.dataTable.render.number('.', ',', 2, '$').display( amountAgreggate ) + 
+      //             '</span> // Saldo Proveedor = <span class="amount">' + $.fn.dataTable.render.number('.', ',', 2, '$').display( balance ) + '</span></td>')
+      //         },
+      // },      
       colReorder: true,
       pageLength: 200,
       fixedColumns: { 
-        leftColumns: 2 
+        leftColumns: 3
       },
       order: [[0, 'asc']],
       autowidth: true,
-      scrollY: '500px',
+      //scrollY: '500px',
       scrollX: true,
       scrollCollapse: true,
       paging: true,
-      buttons: [
-        {
-          extend: 'colvis',
-          text: 'Columnas',
-        },
-        {
-          extend: 'print',
-          className: '',
-          title: '',
-          // autoPrint: false,
-          customize: function (win) {
-            $(win.document.body)
-              .css('font-size', '10pt')
-              .prepend(
-                '<h4>Title Test</h4>',
-              );
-            $(win.document.body).find('table')
-              .addClass('compact')
-              .css('font-size', 'inherit',);
-          }
-        },
-        {
-          extend: 'excelHtml5',
-          exportOptions: {
-            columns: ':visible(th:not(:last-child))',
-            search: 'applied',
-            order: 'applied'
-          },
-          customize: function (xlsx) {
-            var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
-            source.setAttribute('name', 'Proveedores');
-          }
-        },
-        { extend: 'csvHtml5' },
-        { extend: 'copyHtml5' },
-        {
-          text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
-          extend: 'pdfHtml5',
-          filename: 'proveedores',
-          orientation: 'landscape',     //portrait
-          pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
-          exportOptions: {
-            columns: ':visible',
-            search: 'applied',
-            order: 'applied'
-          }
-        }
-      ],
       fnInitComplete: function () {
         $('#hide-dt').show();
         $('#progress').hide();
-        
-        $(api.column(1).footer()).html('Total');
-
       },
-      footerCallback: function ( row, data, start, end, display ) {
+      "footerCallback": function ( row, data, start, end, display ) {
             
-                var api = this.api(), data;
+        var api = this.api(), data;
  
-                // Remove the formatting to get integer data for summation
-                var intVal = function ( i ) { return typeof i === 'string' ? i.replace(/[\$,]/g, '')*1 : typeof i === 'number' ? i : 0; };
+        // Remove the formatting to get integer data for summation
+        var intVal = function ( i ) { return typeof i === 'string' ? i.replace(/[\$,]/g, '')*1 : typeof i === 'number' ? i : 0; };
  
-                // Total over all pages
-                total = api.rows().data().filter( function ( data, index ) {
-                            if(data[9] !== "") 
-                                return true;
-                            else
-                                return false;
-                        })
-                        .pluck(10).reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+        // Total over all pages
+        //totalPaymentsReceipts = api.column(1).data().reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+
+        totalPaymentsOrders = api.column(5).data().reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
  
-                // Total over this page
-                // pageTotal = api.column(8, { page: 'current'}).data().reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
-    
-                // Update footer
-                $(api.column(1).footer()).html($.fn.dataTable.render.number('.', ',', 2, '$').display( total )); //     Number.parseFloat(total).toFixed(2));
-              }
+        //totalPaymentsReceipts = api.column(1).data().reduce( function (a, b) { return intVal(a) + intVal(b); }, 0 );
+
+        let prevPaymentReceipt = "", totalPaymentsReceipts=0;
+        
+        for(const mRow of data){
+          const paymentReceiptNumber = mRow[0];
+          const paymentReceiptAmount = intVal(mRow[1]);
+          if(paymentReceiptNumber !== prevPaymentReceipt){
+            prevPaymentReceipt=paymentReceiptNumber;
+            totalPaymentsReceipts+=paymentReceiptAmount;
+          }
+        }
+        console.log("total = " + totalPaymentsReceipts)
+        
+        let balance = totalPaymentsReceipts-totalPaymentsOrders;
+
+        if((balance <=0.001)&&(balance >=-0.001)) balance=0;
+
+        // Update footer
+        $(api.column(1).footer()).html("Total Comprobantes: " + $.fn.dataTable.render.number('.', ',', 2, '$').display( totalPaymentsReceipts ) + 
+        " // Total OPs: " + $.fn.dataTable.render.number('.', ',', 2, '$').display( totalPaymentsOrders ) +
+        " // Saldo Proveedor: " + $.fn.dataTable.render.number('.', ',', 2, '$').display( balance ));
+      }
     });
   });
 
