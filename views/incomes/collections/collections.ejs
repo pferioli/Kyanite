@@ -82,6 +82,7 @@
                                 <% if (data.collections[i].Properties.length===0) { %>
                                     DNI
                                 <% } else if (data.collections[i].Properties.length===1) { %>
+                                    <% console.log(data.collections[i].id, data.collections[i].Properties) %>
                                     <%= data.collections[i].Properties[0].homeOwner.property %>
                                 <% } else { %>
                                     <% let properties = [] %>                                    

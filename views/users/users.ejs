@@ -92,6 +92,8 @@
                         <td>
                             <a href="/users/edit/<%=data.users[i].id%>" title="editar" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
                             
+                            <a id="button2FA" title="administrar 2FA" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.users[i].id%>" onclick="manage2fa(this)"><i class="material-icons">qr_code</i></a>
+
                             <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.users[i].id%>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
                         </td>
                     </tr>
@@ -122,10 +124,19 @@
 
     function showDeleted() {
         const swShowDeleted = document.getElementById('swShowDeleted').checked;
-        
         const redirectUrl = '/users?showAll=' + swShowDeleted;
+    }
 
-      
+    function manage2fa(button) {
+
+        const userId = button.dataset.id;
+
+        var form = $('<form action="/users/manage2fa" method="post">' +
+            '<input type="hidden" name="userId" value="' + userId + '"></input>' +
+            '</form>');
+
+        $('body').append(form);
+        $(form).submit();
     }
 
     $(document).ready(function () {

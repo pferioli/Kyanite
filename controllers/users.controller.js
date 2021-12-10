@@ -9,6 +9,8 @@ const UserAvatar = Model.userAvatar;
 
 const winston = require('../helpers/winston.helper');
 
+const UserPrivilegeLevel = require('../utils/userPrivilegeLevel.util').UserPrivilegeLevel;
+
 const CURRENT_MENU = 'users'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 module.exports.listAll = function (req, res) {
@@ -49,4 +51,36 @@ module.exports.addNew = async function (req, res, next) {
 
     req.flash("success", "El nuevo usuario fue agregado exitosamente");
     res.redirect('/users/new');
+}
+
+
+module.exports.manage2fa = async function (req, res, next) {
+
+    const userId = Number(req.body.userId);
+
+    if (req.user.id !== userId) {
+
+        if (req.user.securityLevel !== UserPrivilegeLevel.eLevel.get('ADMINISTRATOR').value) {
+            req.flash("warning", "Privilegios insuficientes, por favor contacte a un administrador");
+            res.redirect('/users');
+            return;
+        }
+    }
+
+    User.findByPk(userId)
+        .then(user => {
+
+            if (user.secret) {
+
+                user.secret = null;
+
+                user.save().then(() => {
+                    req.flash("success", "El segundo factor de autenticacion se eliminó exitosamente");
+                    res.redirect('/users');
+                })
+
+            } else {
+                res.redirect('/auth/setup2fa');
+            }
+        })
 }

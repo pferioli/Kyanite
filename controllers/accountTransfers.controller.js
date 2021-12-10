@@ -80,7 +80,6 @@ module.exports.addNew = async function (req, res, next) {
 
     try {
 
-
         AccountTransfer.create({
             clientId: clientId,
             periodId: req.body.billingPeriodId,
@@ -372,16 +371,7 @@ module.exports.edit = async function (req, res, next) {
 
             winston.info(`user #${req.user.id} update the account transfer ${originalAccountTransfer.id}  - ${originalAccountTransfer}`);
 
-
         })
-
-
-    //hacer el cambio en el mov de la cuenta origen
-
-    //hacer el cambio en el mov de la cuenta destino
-
-    //actualizar los saldos de las dos cuentas
-
 
     res.redirect("/transfers/client/" + clientId);
 };

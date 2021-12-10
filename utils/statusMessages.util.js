@@ -148,11 +148,11 @@ module.exports.Investments = class {
     constructor() { }
 
     static get Status() {
-        return ["Pendiente", "Creado", "Renovado", "Expirado", "Acreditado", "Anulado"];
+        return ["Pendiente", "Creado", "Renovado", "Expirado", "Acreditado", "Anulado", "Rescatado"];
     }
 
     static get eStatus() {
-        return new Enum({ 'pending': 0, 'created': 1, 'renewed': 2, 'expired': 3, 'accredited': 4, 'cancelled': 5 })
+        return new Enum({ 'pending': 0, 'created': 1, 'renewed': 2, 'expired': 3, 'accredited': 4, 'cancelled': 5, 'rescued':6 })
     }
 }
 

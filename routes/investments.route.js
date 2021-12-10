@@ -30,6 +30,14 @@ router.post("/accredit", function (req, res, next) {
     investmentsController.accredit(req, res);
 });
 
+router.post("/rescue/:id", function (req, res, next) {
+    investmentsController.listAllRescues(req, res);
+});
+
+router.post("/rescue/new", function (req, res, next) {
+    investmentsController.rescue(req, res);
+});
+
 router.get("/ajax/getCategoryDetailsById/:categoryId", function (req, res, next) {
     investmentsController.getCategoryDetailsById(req, res);
 });

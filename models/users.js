@@ -2,6 +2,9 @@
 const {
   Model
 } = require('sequelize');
+
+const UserPrivilegeLevel = require('../utils/userPrivilegeLevel.util').UserPrivilegeLevel;
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -50,6 +53,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false
     },
+    privilegeName: {
+      type: new DataTypes.VIRTUAL(DataTypes.STRING, ['securityLevel']),
+      get: function () {
+        return (UserPrivilegeLevel.Level[this.get('securityLevel')])
+      },
+    }
   }, {
     sequelize,
     modelName: 'user',

@@ -126,29 +126,57 @@
         elems = document.querySelectorAll('.modal');
         instances = M.Modal.init(elems, {});       
         
-        elems = document.querySelectorAll('.datepicker');
-        instances = M.Datepicker.init(elems, {
-            format: 'dd/mm/yyyy',
-            autoClose: true,
-            onOpen: function (e) {
-                var that = this;
-                that.hasEvent = false;
-                this.cancelBtn.addEventListener('click', Cancel.bind(that))
-                this.doneBtn.addEventListener('click', Done.bind(that))
-            },
-            onClose: function (e) {
-                var that = this;
-                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
-                this.doneBtn.removeEventListener('click', Done.bind(that))
-            },
-            onSelect: function (selectedDate) {
-                if (this.el.id === 'dtpPaymentDate') {
-                    document.getElementById('paymentDate').value = this.date.toISOString();
-                }
-            }
-        });
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"), false)
+        .then(periodId => {
+            
+            if(periodId) { 
+                 getBillingPeriodsById(periodId)
+                    .then(period => {
+                        
+                        const maxDate = new Date(period.endDate + " 00:00:00");
+                        const minDate = new Date(period.startDate + " 00:00:00");
 
-        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
+                        let defaultDate = new Date();
+
+                        if(defaultDate>maxDate){
+                            defaultDate = maxDate
+                        }
+
+                        elems = document.querySelectorAll('.datepicker');
+
+                        instances = M.Datepicker.init(elems, {
+                            format: 'dd/mm/yyyy',
+                            autoClose: true,
+                            minDate: minDate,
+                            maxDate: maxDate,
+                            defaultDate: defaultDate,
+                            onOpen: function (e) {
+                                var that = this;
+                                that.hasEvent = false;
+                                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                                this.doneBtn.addEventListener('click', Done.bind(that))
+                            },
+                            onClose: function (e) {
+                                var that = this;
+                                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                                this.doneBtn.removeEventListener('click', Done.bind(that))
+                            },
+                            onSelect: function (selectedDate) {
+                                if (this.el.id === 'dtpPaymentDate') {
+                                    document.getElementById('paymentDate').value = this.date.toISOString();
+                                }
+                            },
+                            i18n: {
+                                months: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+                                monthsShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Set", "Oct", "Nov", "Dic"],
+                                weekdays: ["Domingo","Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
+                                weekdaysShort: ["Dom","Lun", "Mar", "Mie", "Jue", "Vie", "Sab"],
+                                weekdaysAbbrev: ["D","L", "M", "M", "J", "V", "S"]
+                            }
+                        });
+                    })
+                }
+        })
 
         document.getElementById('accountSelect').onchange = selectAccount;
     

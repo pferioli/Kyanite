@@ -19,6 +19,10 @@ router.post("/new", function (req, res, next) {
     usersController.addNew(req, res);
 });
 
+router.post("/manage2fa", function (req, res, next) {
+    usersController.manage2fa(req, res);
+});
+
 module.exports = router
 
 

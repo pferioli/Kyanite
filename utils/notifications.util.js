@@ -1,6 +1,5 @@
 const Enum = require('enum');
 
-
 module.exports = class Notifications {
 
     constructor() {

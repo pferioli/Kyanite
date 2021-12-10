@@ -129,6 +129,11 @@
 <script type="text/javascript" src="/javascripts/splittedChecks.js"></script>
 <script type="text/javascript" src="/javascripts/paymentOrders.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" 
+    integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" 
+    referrerpolicy="no-referrer">
+</script>
+
 <script>
     
     const d = htmlDecode("<%=data.paymentOrder.paymentDate%>").split("-");
@@ -138,32 +143,62 @@
     document.addEventListener("DOMContentLoaded", async function () {
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
-
-        elems = document.querySelectorAll('.datepicker');
-        instances = M.Datepicker.init(elems, {
-            format: 'dd/mm/yyyy',
-            autoClose: true,
-            onOpen: function (e) {
-                var that = this;
-                that.hasEvent = false;
-                this.cancelBtn.addEventListener('click', Cancel.bind(that))
-                this.doneBtn.addEventListener('click', Done.bind(that))
-            },
-            onClose: function (e) {
-                var that = this;
-                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
-                this.doneBtn.removeEventListener('click', Done.bind(that))
-            },
-            onSelect: function (selectedDate) {
-                if (this.el.id === 'dtpEmissionDate') {
-                    document.getElementById('emissionDate').value = this.date.toISOString();
-                }
-            },
-            defaultDate: new Date(d[0],d[1]-1,d[2]),
-            setDefaultDate: true
-        });
-
         
+        document.getElementById('dtpPaymentDate').value = moment(document.getElementById('paymentDate').value).format("DD/MM/YYYY");
+        
+        getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"), false)
+        .then(periodId => {
+            
+            if(periodId) { 
+                 getBillingPeriodsById(periodId)
+                    .then(period => {
+                        
+                        const maxDate = new Date(period.endDate + " 00:00:00");
+                        const minDate = new Date(period.startDate + " 00:00:00");
+
+                        let defaultDate = moment("<%=data.paymentOrder.paymentDate%>").format("DD/MM/YYYY")
+
+                        if(defaultDate>maxDate){
+                            defaultDate = maxDate
+                        }
+                        
+                        elems = document.querySelectorAll('.datepicker');
+
+                        instances = M.Datepicker.init(elems, {
+                            format: 'dd/mm/yyyy',
+                            autoClose: true,
+                            minDate: minDate,
+                            maxDate: maxDate,
+                            defaultDate: defaultDate, //new Date(d[0],d[1]-1,d[2]),
+                            setDefaultDate: true,
+                            onOpen: function (e) {
+                                var that = this;
+                                that.hasEvent = false;
+                                this.cancelBtn.addEventListener('click', Cancel.bind(that))
+                                this.doneBtn.addEventListener('click', Done.bind(that))
+                            },
+                            onClose: function (e) {
+                                var that = this;
+                                this.cancelBtn.removeEventListener('click', Cancel.bind(that))
+                                this.doneBtn.removeEventListener('click', Done.bind(that))
+                            },
+                            onSelect: function (selectedDate) {
+                                if (this.el.id === 'dtpPaymentDate') {
+                                    document.getElementById('paymentDate').value = this.date.toISOString();
+                                }
+                            },
+                            i18n: {
+                                months: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+                                monthsShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Set", "Oct", "Nov", "Dic"],
+                                weekdays: ["Domingo","Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
+                                weekdaysShort: ["Dom","Lun", "Mar", "Mie", "Jue", "Vie", "Sab"],
+                                weekdaysAbbrev: ["D","L", "M", "M", "J", "V", "S"]
+                            }
+                        });
+                    })
+                }
+        })
+                
         getActiveBillingPeriod(htmlDecode("<%=data.client.id%>"));
 
         document.getElementById('accountSelect').onchange = selectAccount;

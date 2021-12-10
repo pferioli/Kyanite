@@ -227,6 +227,10 @@ module.exports.accredit = async function (req, res) {
         })
 };
 
+module.exports.listAllRescues = async function (req, res) {
+
+}
+
 module.exports.getCategoryDetailsById = async function (req, res) {
     InvestmentCategory.findByPk(req.params.categoryId)
         .then(investmentCategory => {

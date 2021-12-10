@@ -1,14 +1,14 @@
-<%- include ("../partials/header") %>
+<%- include ("../../partials/header") %>
 
 <main class="site-content">
 
     <center>
-        <%- include ("../partials/alerts") %>
+        <%- include ("../../partials/alerts") %>
     </center>
 
     <div class="table-container">
         <div class="table-header">
-            <span class="table-title">Inversiones - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
+            <span class="table-title">Rescate FI - [<%=data.client.internalCode%>] <span style="font-weight: bold;"><%=data.client.name%></span></span>
             <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
                 <div class="spinner-layer spinner-green-only">
                     <div class="circle-clipper left">
@@ -24,7 +24,6 @@
             </div>
             <div class="actions">
                 <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
-                <a id="button-add" title="agregar inversión" href="/investments/new/<%=data.client.id%>"  class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
                 <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
@@ -34,101 +33,12 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Tipo</th>
-                        <th>Importe</th>
-                        <th>Intereses</th>
-                        <th>Cuenta Banco</th>
-                        <th>Cuenta PF</th>
-                        <th>Fecha Creación</th>
-                        <th>Fecha Vencimiento</th>
-                        <th>Período</th>
-                        <th>Estado</th>
-                        <th>Comentarios</th>
-                        <th>Usuario</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% for(var i=0; i < data.investment.length; i++) { %>
                         <tr data-id="<%= data.investment[i].id %>">
                             <td><%= data.investment[i].id %></td>
-                            <td><%= data.investment[i].depositType.description %></td>
-                            <td>$ <%= data.investment[i].amount %></td>
-                            <td>$ <%= data.investment[i].interests %></td>
-
-                            <td><%= data.investment[i].sourceAccount.accountType.account %> (ID: <%= data.investment[i].sourceAccountId%>)</td>
-                            <td><%= data.investment[i].destinationAccount.accountType.account %> (ID: <%= data.investment[i].destinationAccountId%>)</td>
-
-                            <td><%= data.investment[i].creationDate %></td>
-                            <td><%= data.investment[i].expirationDate %></td>
-
-                            <td>
-                                <% if(data.investment[i].billingPeriod.statusId === 0) { %>
-                                <i class="material-icons">calendar_today</i>
-                                <% } %>
-                                <% if(data.investment[i].billingPeriod.statusId=== 1) { %>
-                                <i class="material-icons">lock_open</i>
-                                <% } %>
-                                <% if(data.investment[i].billingPeriod.statusId === 2) { %>
-                                <i class="material-icons">lock</i>
-                                <% } %>
-                                <% if(data.investment[i].billingPeriod.statusId === 3) { %>
-                                <i class="material-icons">cancel</i>
-                                <% } %>
-
-                                <a href="/periods/<%=data.client.id%>"><span style="padding-left: 10px; vertical-align: 8px;"><%= data.investment[i].billingPeriod.name %></span></a>
-                            </td>
-
-                            <td>
-                                <!--PENDIENTE-->
-                                <% if(data.investment[i].statusId===0) { %>
-                                    <i class="material-icons">pending</i>
-                                <% } %>
-
-                                <!--CREADO-->
-                                <% if(data.investment[i].statusId===1) { %>
-                                    <i class="material-icons">trending_up</i>
-                                <% } %>
-
-                                <!--RENOVADO-->
-                                <% if(data.investment[i].statusId===2) { %>
-                                    <i class="material-icons">update</i>
-                                <% } %>
-
-                                <!--EXPIRADO-->
-                                <% if(data.investment[i].statusId===3) { %>
-                                    <i class="material-icons">free_cancellation</i>
-                                <% } %>
-
-                                <!--COMPLETADO-->
-                                <% if(data.investment[i].statusId===4) { %>
-                                    <i class="material-icons">savings</i>
-                                <% } %>
-
-                                <!--CANCELADO-->
-                                <% if(data.investment[i].statusId===5) { %>
-                                    <i class="material-icons">delete_outline</i>
-                                <% } %>
-
-                                <!--RESCATADO-->
-                                <% if(data.investment[i].statusId===6) { %>
-                                    <i class="material-icons">paid</i>
-                                <% } %>
-
-                                <span style="padding-left: 10px; vertical-align: 8px;"><%= data.investment[i].status %></span>
-                            </td>                    
-
-                            <td><%= data.investment[i].comments %></td>
-                                
-                            <td><%= data.investment[i].user.name %></td>
-                                
-                            <td>
-                                <% if(data.investment[i].statusId===1) { %>
-                                    <button onclick="accreditDialog(this)" title="acreditar intereses" class="btn-flat btn-small waves-effect waves-light"
-                                        data-id="<%=data.investment[i].id%>" data-clientid="<%=data.client.id%>" data-periodid="<%=data.investment[i].billingPeriod.id%>">
-                                        <i class="material-icons">check_circle</i></button>                                                                                                                
-                                <% } %>
-                            </td>
                         </tr>
                     <% } %>
                 </tbody>

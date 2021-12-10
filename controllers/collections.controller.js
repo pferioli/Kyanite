@@ -74,7 +74,7 @@ module.exports.listAll = async function (req, res) {
             statusId: { [Op.in]: status }
         },
         include: [{ model: BillingPeriod }, { model: User },
-        { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] }
+        { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner, paranoid: false }] }
         ],
     };
 
