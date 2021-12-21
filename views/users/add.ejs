@@ -2,54 +2,52 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12" method="post" action='/users/new'>
+        <form class="col s12" id="formAddUser" method="post" action='/users/new'> <!--onsubmit="return validate()-->
             <div class="card">
                 <div class="card-content">
                     <span class="card-title">Ingrese un nuevo usuario</span>
                     <div class="row" style="margin-top: 20px;">
-                        <div class="input-field col s12">
+                        <div class="input-field col s8">
                             <i class="material-icons prefix">face</i>
                             <input id="name" name="name" type="text" value="" required/>
                             <label for="name">Nombre Completo</label>
                         </div>
-                        <div class="input-field col s12">
+                        <div class="input-field col s4">
+                            <i class="material-icons prefix">account_balance</i>
+                            <select id="privilegesSelect" required>
+                                <option value="1">Usuario Administrador - Nivel 1</option>
+                                <option value="2">Usuario Avanzado - Nivel 2</option>
+                                <option value="3" selected>Usuario Regular - Nivel 3</option>
+                            </select>
+                            <label>Seleccione el nivel de privilegios</label>
+                            <input type="hidden" name="securityLevel" id="securityLevel" value="3" />
+                        </div>
+                    </div>
+                    
+                    <div class='row'>
+                        <div class="input-field col s6">
                             <i class="material-icons prefix">email</i>
                             <input id="email" name="email" type="text" value="" required />
                             <label for="email">Cuenta de correo</label>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="input-field col s6">
+                         <div class='input-field col s3'>
                             <i class="material-icons prefix">password</i>
-                            <input id="password" name="password" type="text" value="" required/>
-                            <label for="password">Ingrese una clave</label>
+                            <input type='password' name='password' id='password' class='validate' type='password' required />
+                            <label for='password'>Nueva contraseña</label>
+                            <p id="passwordStrength" style="text-align:center; color:#e0e0e0; font-size:smaller"></p>
                         </div>
-                        <div class="input-field col s6">
-                            <input id="passwordConfirm" type="text" value="" required />
-                            <label for="passwordConfirm">Repita la clave</label>
+
+                        <div class='input-field col s3'>
+                            <input type='password' id='passwordConfirm' class="validate" type='password' required />
+                            <label for='passwordConfirm'>Confirmar contraseña</label>
+                            <span class="helper-text" data-error="la contraseña no coincide"></span>
                         </div>
                     </div>
-
-                    <div class="row">
-                       
-                        <div class="input-field col s4">
-                            <i class="material-icons prefix">account_balance</i>
-                            <select id="privilegesSelect" required>
-                                <option value="1" selected>Usuario Administrador - Nivel 1</option>
-                                <option value="2" selected>Usuario Avanzado - Nivel 2</option>
-                                <option value="3" selected>Usuario Regular - Nivel 3</option>
-                            </select>
-                            <label>Seleccione el nivel de privilegios</label>
-                            <input type="hidden" name="securityLevel" id="securityLevel" />
-                        </div>
-                      
-                    </div>
-
                 </div>
 
                 <div class="card-action right-align">
-                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;" disabled><i class="material-icons right">save</i>Guardar</button>
+                    <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Guardar</button>
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
                 </div>
             </div>
@@ -63,16 +61,79 @@
 
 <%- include ("../partials/footer") %>
 
+<script type="text/javascript" src="/javascripts/passwordStrength.js"></script>
+
 <script>
 
     document.addEventListener("DOMContentLoaded", function () {
+
+        var nScore = "";
 
         var elems = document.querySelectorAll("select");
         var instances = M.FormSelect.init(elems, {});
 
         elems = document.querySelectorAll('.modal');
         instances = M.Modal.init(elems, {});
+    
+        document.getElementById('password').onkeypress = function (e) {
+            nScore = runPassword(this.value, 'passwordStrength');
+        }
+        
+        document.getElementById('privilegesSelect').onchange = async function () {
+            document.getElementById('securityLevel').value = this.value;
+        };
 
+        document.getElementById("formAddUser").addEventListener("submit", function(e) {
+            if(validate()===false)
+                e.preventDefault();
+        });
+
+        $("#password").on("focusout", function (e) {
+            if ($(this).val() != $("#passwordConfirm").val()) {
+                $("#passwordConfirm").removeClass("valid").addClass("invalid");
+            } else {
+                $("#passwordConfirm").removeClass("invalid").addClass("valid");
+            }
+        });
+
+        $("#passwordConfirm").on("keyup", function (e) {
+            if ($("#password").val() != $(this).val()) {
+                $(this).removeClass("valid").addClass("invalid");
+            } else {
+                $(this).removeClass("invalid").addClass("valid");
+            }
+        });
+
+        function validate() {
+            let password = document.getElementById('password');
+            let passwordConfirm = document.getElementById('passwordConfirm');
+
+            document.getElementById('passwordStrength').innerHTML = "";
+
+            if (password.value != passwordConfirm.value) {
+                password.value = '';
+                password.classList.remove("valid");
+                password.focus();
+                passwordConfirm.value = '';
+                passwordConfirm.classList.remove("valid");
+                M.updateTextFields();
+                M.toast({ html: 'Las contraseña ingresadas no coinciden, verifique que ambas sean iguales para continuar', classes: 'rounded' })
+                return false;
+            }
+
+            if (nScore != 'veryStrong' && nScore != 'strong') {
+                password.value = '';
+                password.classList.remove("valid");
+                password.focus();
+                passwordConfirm.value = '';
+                passwordConfirm.classList.remove("valid");
+                M.updateTextFields();
+                M.toast({ html: 'La contraseña ingresada no cumple con el standard de seguridad, por favor ingrese una nueva clave', classes: 'rounded' });
+                return false;
+            }
+
+            return true;
+        }
     });
 
 </script>

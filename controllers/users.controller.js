@@ -7,6 +7,8 @@ const User = Model.user;
 const UserSignature = Model.userSignature;
 const UserAvatar = Model.userAvatar;
 
+const bcrypt = require('bcrypt');
+
 const winston = require('../helpers/winston.helper');
 
 const UserPrivilegeLevel = require('../utils/userPrivilegeLevel.util').UserPrivilegeLevel;
@@ -49,8 +51,38 @@ module.exports.showNewForm = async function (req, res, next) {
 
 module.exports.addNew = async function (req, res, next) {
 
-    req.flash("success", "El nuevo usuario fue agregado exitosamente");
-    res.redirect('/users/new');
+    const existingUser = await User.findOne({ where: { email: req.body.email } });
+
+    if (existingUser) {
+        req.flash("warning", "El usuario ya existe en la base de datos");
+        res.redirect('/users');
+        return;
+
+    }
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+    User.create({
+        name: req.body.name,
+        email: req.body.email,
+        password: hashedPassword,
+        securityLevel: req.body.securityLevel,
+        enabled: true,
+        secret: null,
+        mustChange: true
+    })
+        .then(newUser => {
+            winston.info(`a new user ${newUser.email} added to database by userId ${req.user.id}`);
+            req.flash("success", "El nuevo usuario fue agregado exitosamente");
+            res.redirect('/users');
+        })
+        .catch(err => {
+            winston.error(`It was not possible to add a new user - ${err}`);
+            req.flash("error", "Ocurrio un error y no se pudo agregar el usuario");
+            res.redirect('/users');
+
+        })
+
 }
 
 
