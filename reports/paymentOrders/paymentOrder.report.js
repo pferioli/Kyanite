@@ -7,6 +7,8 @@ const PaymentOrderStatus = require('../../utils/statusMessages.util').PaymentOrd
 
 // const fs = require('fs');
 
+const { webSocket } = require('../../bin/server');
+
 const image_folder = path.join(__dirname, "..", "..", "public", "images")
 
 function createReport(doc, paymentOrder) {
@@ -70,6 +72,8 @@ function createSingleReport(paymentOrder, res) {
 
 function createMultipleReport(paymentOrders, res) {
 
+    webSocket.io.emit("paymentOrdersPrint", JSON.stringify({ status: 'started' }));
+
     let doc = new PDFDocument(
         {
             size: "A4",
@@ -92,7 +96,15 @@ function createMultipleReport(paymentOrders, res) {
         doc.addPage();
 
         createReport(doc, paymentOrder);
+
+        let progress = Number.parseInt(Number.parseFloat((i + 1) / paymentOrders.length) * 100);
+
+        webSocket.io.emit("paymentOrdersPrint", JSON.stringify({ status: 'inprogress', progress: progress }));
+
+        //console.log(progress.toFixed(2))
     }
+
+    webSocket.io.emit("paymentOrdersPrint", JSON.stringify({ status: 'finished' }));
 
     const reportName = "recibos_ordenes_de_pago.pdf"
 

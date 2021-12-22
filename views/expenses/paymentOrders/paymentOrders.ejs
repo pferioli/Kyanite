@@ -42,7 +42,12 @@
                 <a href="/expenses/paymentReceipts/client/<%=data.client.id%>" title="ir a comprobantes" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">assignment</i></a>
                 <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
+        </div>
+
+            <div id="progressBar2" class="progress" style="margin-top: 10px; display:none"> 
+                <div id="determinate" class="determinate" style="width: 0%"></div>
             </div>
+
             <div id="hide-dt" style="display:none">
                 <table id="datatable" class="table display">
                     <thead>
@@ -168,7 +173,11 @@
 
 <%- include ("../../partials/footer") %>
 
+<script src="/socket.io/socket.io.js"></script>
+
 <script>
+
+    var socket = io();
 
     var handler = 0;
 
@@ -227,6 +236,8 @@
 
     function printSelectedprintPaymentOrders(clientId, periodId){
         
+        $('#progressBar2').show();
+
         var table = $('#datatable').DataTable();
         
         var rows = table.rows( { selected: true } );
@@ -256,6 +267,9 @@
             document.body.appendChild(a);
             a.click();
         })
+         .finally(()=>{
+            $('#progressBar2').hide();
+        })        
     }
 
     function selectAllRows(e){
@@ -268,6 +282,25 @@
         }
     };
 
+    socket.on('paymentOrdersPrint', function(msg){
+        
+        let message = JSON.parse(msg)
+        
+        if(message.status==="started"){
+            $('#determinate').css('width', '0%');
+        }
+
+        if(message.status==="inprogress"){
+            const progress = message.progress;
+            $('#determinate').css('width', `${progress}%`);
+        }
+        
+        if(message.status==="finished"){
+            $('#determinate').css('width', '100%');
+        }
+        
+        //console.log(msg);
+    });
     $(document).ready(function () {
 
         $('.search-toggle').click(function () {

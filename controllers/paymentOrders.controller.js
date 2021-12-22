@@ -249,10 +249,13 @@ module.exports.printPaymentOrders = function (req, res) {
             ]
         })
         .then(paymentOrder => {
-            createMultipleReport(paymentOrder, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+            winston.info(`OPs file report creation on user ${req.user.id} request started for the following ids ${paymentOrderIds.join()}`);
+            createMultipleReport(paymentOrder, res);
+            winston.info(`OPs file report creation on user ${req.user.id} finished`);
+
         })
         .catch(err => {
-            console.error(err);
+            winston.error(`the OPs pdf file report creation failed - ${err}`);
         })
 };
 

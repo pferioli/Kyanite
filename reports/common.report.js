@@ -54,8 +54,19 @@ module.exports.generateSignature = function (doc, user, config) {
 
     try {
 
-        if (user.userSignature)
-            doc.image(user.userSignature.image, (startLine1 + (lineSize / 2) - (150 / 2)), signatureHeight - 60, { width: 150 })
+        if (user.userSignature) {
+
+            const sizeOf = require('image-size')
+
+            const dimensions = sizeOf.imageSize(user.userSignature.image);
+
+            const widthScale = (dimensions.width * 0.75) / 150;
+
+            const vertOffset = (dimensions.height * 0.75) / widthScale;
+
+            doc.image(user.userSignature.image, (startLine1 + (lineSize / 2) - (150 / 2)), signatureHeight - vertOffset + 10, { width: 150 })
+
+        }
 
     } catch (error) {
         console.log(error);
