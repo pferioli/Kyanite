@@ -413,7 +413,7 @@ module.exports.deletePaymentOrder = async function (clientId, paymentOrderId) {
 
     let paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('pending').value;
 
-    if (paymentReceipt.amount > remainingBalance) {
+    if (remainingBalance > 0) {
         paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('inprogress').value;
     }
 
