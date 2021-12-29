@@ -19,9 +19,28 @@ router.post("/new", function (req, res, next) {
     usersController.addNew(req, res);
 });
 
-router.post("/manage2fa", function (req, res, next) {
-    usersController.manage2fa(req, res);
+router.post("/delete", function (req, res, next) {
+    usersController.deleteUser(req, res);
+})
+
+router.post("/restore", function (req, res, next) {
+    usersController.restoreUser(req, res);
+})
+
+router.post("/disable2fa", function (req, res, next) {
+    usersController.disable2fa(req, res);
 });
+
+router.post("/enable2fa", function (req, res, next) {
+    usersController.enable2fa(req, res);
+});
+
+// router.post('/send2fa', async function (req, res) {
+
+
+//     res.send(resp);
+
+// })
 
 module.exports = router
 

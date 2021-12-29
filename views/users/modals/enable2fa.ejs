@@ -1,0 +1,16 @@
+<div id="modalEnable2FA" class="modal">
+    <form action="users/enable2fa" method="post">
+        <div class="modal-content">
+            <div class="row">
+                <h5>Habilitar 2FA ?</h5>
+            </div>
+            <div id="modal2faMessage" class="center-left"></div>
+            <p>si continua se habilitara el 2FA para el usuario seleccionado, un mail le sera enviado con el QR, esta seguro que desea continuar ?</p>
+            <input type="hidden" name="userId" id="modalEnable2faUserId" value="" />
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn tile" type="submit" value="SUBMIT">Aceptar</button>
+            <a class="modal-close waves-effect waves-red btn red" style="margin-left: 10px; margin-right: 20px;">Cancelar</a>
+        </div>
+    </form>
+</div>

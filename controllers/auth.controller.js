@@ -77,6 +77,7 @@ module.exports.decodeJWT = async function (req, res) {
         bcrypt.hash(req.body.password, 10, function (err, hash) {
 
             user.password = hash
+            user.mustChange = false
 
             user.save().then(() => {
 
@@ -109,30 +110,39 @@ module.exports.decodeJWT = async function (req, res) {
 // TWO-FACTOR AUTHENTICATION -- GOOGLE AUTHENTICATOR
 //---------------------------------------------------------------------------//
 
-module.exports.setup2fa = async function (req, res) {
+module.exports.generate2fa = async function (user) {
 
     var key = randomKey(10);
 
-    if (req.user.secret) {
-        key = req.user.secret;
+    if (user.secret) {
+        key = user.secret;
     }
 
     var encodedKey = base32.encode(key);
 
     // generate QR code for scanning into Google Authenticator
     // reference: https://code.google.com/p/google-authenticator/wiki/KeyUriFormat
-    var otpUrl = 'otpauth://totp/' + req.user.email
+    var otpUrl = 'otpauth://totp/' + user.email
         + '?secret=' + encodedKey + '&period=30' + `&issuer=${encodeURIComponent('AAII Kyanite')}`;
 
     var qrImage = 'https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=' + encodeURIComponent(otpUrl);
 
-    if (!req.user.secret) {
-        let user = await User.findByPk(req.user.id);
-        user.secret = key;
-        await user.save();
-    }
+    return { user: user, key: encodedKey, qrImage: qrImage };
+}
 
-    res.render('login/totp/setup.ejs', { user: req.user, key: encodedKey, qrImage: qrImage });
+module.exports.setup2fa = async function (req, res) {
+
+    this.generate2fa(req.user)
+        .then(async response => {
+
+            //TODO: agregar secret al usuario en la base
+            // if (!response.user.secret) {
+            //     let user = await User.findByPk(user.id);
+            //     user.secret = key;
+            //     await user.save();
+            // }
+            res.render('login/totp/setup.ejs', { user: req.user, key: encodedKey, qrImage: qrImage });
+        })
 };
 
 function randomKey(len) {

@@ -32,3 +32,17 @@ module.exports.sendEmailPasswordChange = async function (name, mailto, url) {
         'h:X-Mailgun-Variables': `{ "name": "${name}", "url": "${url}" }`
     });
 }
+
+module.exports.sendEmail2faSetup = async function (mailto, gen2fa) {
+
+    const response = await mg.messages().send({
+        to: mailto,
+        from: process.env.MAILFROM,
+        subject: 'el 2FA fue habilitado para su cuenta',
+        template: "setup2fa",
+        inline: [`${resources}/aaii.png`, `${resources}/email.png`],
+        'h:X-Mailgun-Variables': `{ "name": "${gen2fa.user.name}","key":"${gen2fa.key}","qr":"${gen2fa.qrImage}"}`
+    })
+
+    return response;
+}

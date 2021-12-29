@@ -20,7 +20,12 @@ module.exports.listAll = function (req, res) {
     const autoRefresh = (req.query.refresh === undefined || req.query.refresh.toLowerCase() === 'false' ? false : true);
     const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
 
-    User.findAll().then(users => {
+    const attributes = ['id', 'email', 'name', 'securityLevel', 'createdAt', 'updatedAt', 'deletedAt', 'mustChange', 'secret']
+
+    User.findAll({
+        attributes: attributes,
+        paranoid: false
+    }).then(users => {
 
         res.render('users/users',
             {
@@ -85,8 +90,48 @@ module.exports.addNew = async function (req, res, next) {
 
 }
 
+module.exports.enable2fa = async function (req, res, next) {
 
-module.exports.manage2fa = async function (req, res, next) {
+    const mailgun = require('../helpers/mailgun.helper')
+
+    const userId = Number(req.body.userId);
+
+    if (req.user.id !== userId) {
+
+        if (req.user.securityLevel !== UserPrivilegeLevel.eLevel.get('ADMINISTRATOR').value) {
+            req.flash("warning", "Privilegios insuficientes, por favor contacte a un administrador");
+            res.redirect('/users');
+            return;
+        }
+    }
+
+    User.findByPk(userId)
+        .then(async user => {
+
+            const gen2fa = await require('./auth.controller').generate2fa(user);
+
+            mailgun.sendEmail2faSetup(user.email, gen2fa)
+                .then(async mgResp => {
+
+                    //{id: '<20211229022155.b6857940e9df7ae9@mg.dtronix.com.ar>', message: 'Queued. Thank you.'}
+
+                    if (!gen2fa.user.secret) {
+
+                        await user.update({ secret: gen2fa.key }); //FIXME: el secret que guarda no parece estar ok
+
+                        req.flash("success", "Se envío un correo al usuario con el QR para que registre el token");
+                        res.redirect('/users');
+                    }
+                })
+        })
+        .catch(err => {
+            req.flash("error", "Ocurrio un error buscando el usuario en la base de datos");
+            res.redirect('/users');
+        })
+
+}
+
+module.exports.disable2fa = async function (req, res, next) {
 
     const userId = Number(req.body.userId);
 
@@ -114,5 +159,47 @@ module.exports.manage2fa = async function (req, res, next) {
             } else {
                 res.redirect('/auth/setup2fa');
             }
+        })
+}
+
+module.exports.restoreUser = async function (req, res) {
+
+    const userId = Number(req.body.userId);
+
+    User.findByPk(userId, { paranoid: false })
+        .then(async user => {
+
+            await user.restore();
+
+            winston.error(`user ${userId} was successfully reactivated on request of user #${req.user.id}`);
+            req.flash("success", "El usuario fue rehabilitado exitosamente");
+        })
+        .catch(err => {
+            winston.error(`It was not possible to reactivate user ${userId} on request of user #${req.user.id} - ${err}`);
+            req.flash("error", "No fue posible rehabilitar el usuario en la base de datos");
+        })
+        .finally(() => {
+            res.redirect('/users');
+        })
+}
+
+module.exports.deleteUser = async function (req, res) {
+
+    const userId = Number(req.body.userId);
+
+    User.findByPk(userId, { paranoid: false })
+        .then(async user => {
+
+            await user.destroy();
+
+            winston.error(`user ${userId} was successfully deleted on request of user #${req.user.id}`);
+            req.flash("success", "El usuario fue deshabilitado exitosamente");
+        })
+        .catch(err => {
+            winston.error(`It was not possible to delete user ${userId} on request of user #${req.user.id} - ${err}`);
+            req.flash("error", "No fue posible deshabilitar el usuario en la base de datos");
+        })
+        .finally(() => {
+            res.redirect('/users');
         })
 }

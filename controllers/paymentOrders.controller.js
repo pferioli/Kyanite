@@ -405,6 +405,7 @@ module.exports.deletePaymentOrder = async function (clientId, paymentOrderId) {
         statusId: PaymentOrderStatus.eStatus.get('deleted').value
     });
 
+
     //cambiamos el estado del comprobante a pending o inprogress segun el saldo
 
     const paymentReceipt = await PaymentReceipt.findByPk(paymentOrder.paymentReceiptId);
@@ -413,9 +414,13 @@ module.exports.deletePaymentOrder = async function (clientId, paymentOrderId) {
 
     let paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('pending').value;
 
-    if (remainingBalance > 0) {
+    if (remainingBalance <= 0) {
+        paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('processed').value;
+    } else if (remainingBalance < Number(paymentReceipt.amount)) {
         paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('inprogress').value;
     }
+
+    winston.info(`The payment receipt  id #${paymentReceipt} for PO #${paymentOrderId} has a remaining balance of ${remainingBalance}, changing status to ${paymentReceiptStatusId}`);
 
     await paymentReceipt.update({ statusId: paymentReceiptStatusId });
 
@@ -439,7 +444,11 @@ module.exports.deletePO = async function (req, res) {
 
     try {
 
+        winston.info(`User #${req.user.id} requested to delete PO ${paymentOrderId}`);
+
         const paymentOrder = await this.deletePaymentOrder(clientId, paymentOrderId);
+
+        winston.info(`PO ${paymentOrderId} delete successfully by user ${req.user.id}`);
 
         req.flash("success", `La OP #${paymentOrder.poNumber} fue anulada correctamente`);
 
@@ -606,13 +615,21 @@ module.exports.edit = async function (req, res, next) {
 
         const paymentReceipt = await PaymentReceipt.findByPk(paymentOrder.paymentReceiptId)
 
-        let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
+        let paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('pending').value;
 
         if (remainingBalance <= 0) {
-            prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
+            paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('processed').value;
+        } else if (remainingBalance < Number(paymentReceipt.amount)) {
+            paymentReceiptStatusId = PaymentReceiptStatus.eStatus.get('inprogress').value;
         }
 
-        await paymentReceipt.update({ statusId: prStatus });
+        // if (remainingBalance <= 0) {
+        //     prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
+        // }
+
+        await paymentReceipt.update({ statusId: paymentReceiptStatusId });
+
+        winston.info(`The payment receipt  id #${paymentReceipt} for PO #${paymentOrderId} has a remaining balance of ${remainingBalance}, changing status to ${paymentReceiptStatusId}`);
 
         req.flash("success", `La OP ${paymentOrder.poNumber} fue modificada existosamente`);
 

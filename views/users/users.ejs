@@ -36,11 +36,11 @@
                         <th>ID</th>
                         <th>Nombre</th>
                         <th>Email</th>
-                        <th>Privilegios</th>
                         <th>Fecha de alta</th>
                         <th>Última Actualización</th>
                         <th>2FA</th>
                         <th>Estado</th>
+                        <th>Privilegios</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -50,6 +50,27 @@
                         <td><%= data.users[i].id %></td>
                         <td><%= data.users[i].name %></td>
                         <td><%= data.users[i].email %></td>
+                                                 
+                        <td><%= data.users[i].createdAt %></td>
+                        <td><%= data.users[i].updatedAt %></td>
+                        <td>
+                            <% if(data.users[i].enabled2fa){ %>
+                                <i class="material-icons">toggle_on</i> <span style="padding-left: 10px; vertical-align: 8px;">Activo</span>
+                            <% } else { %>
+                                <i class="material-icons">toggle_off</i><span style="padding-left: 10px; vertical-align: 8px;">Deshabilitado</span>
+                            <% } %>
+                                                    
+                        <td>
+                            <% if(data.users[i].deletedAt){ %>
+                                <i class="material-icons">person_off</i><span style="padding-left: 10px; vertical-align: 8px;">Deshabilitado</span>
+                            <% }  else { %>
+                                <% if(data.users[i].mustChange) { %>
+                                    <i class="material-icons">password</i><span style="padding-left: 10px; vertical-align: 8px;">Clave expirada</span>
+                                <% } else { %>
+                                    <i class="material-icons">verified_user</i><span style="padding-left: 10px; vertical-align: 8px;">Activo</span>
+                                <% } %>
+                            <% } %>                            
+                        </td>
                         <td>
                              <!--HIGH-->
                             <% if(data.users[i].securityLevel === 1) { %>
@@ -67,34 +88,23 @@
                             <% } %>
 
                             <span style="padding-left: 10px; vertical-align: 8px;">nivel <%= data.users[i].securityLevel %></span>
-                        </td>                                              
-                        <td><%= data.users[i].createdAt %></td>
-                        <td><%= data.users[i].updatedAt %></td>
-                        <td>
-                            <% if(data.users[i].secret){ %>
-                                activo
-                            <% } else { %>
-                                deshabilitado
-                            <% } %>
-                                                    
-                        <td>
-                            <% if(data.users[i].deletedAt){ %>
-                                inactivo
-                            <% }  else { %>
-                                <% if(data.users[i].mustChange) { %>
-                                    cambiar clave
-                                <% } else { %>
-                                    activo
-                                <% } %>
-                            <% } %>                            
-                        </td>
-
+                        </td>                     
                         <td>
                             <a href="/users/edit/<%=data.users[i].id%>" title="editar" class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
                             
-                            <a id="button2FA" title="administrar 2FA" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.users[i].id%>" onclick="manage2fa(this)"><i class="material-icons">qr_code</i></a>
+                            <a id="button2FA" title="administrar 2FA" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.users[i].id%>" 
+                                data-enabled2fa= "<%=data.users[i].enabled2fa%>" 
+                                onclick="manage2fa(this)"><i class="material-icons">qr_code</i></a>
 
-                            <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.users[i].id%>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                            <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
+                                data-id="<%=data.users[i].id%>" data-deleted="<%=data.users[i].deletedAt%>" onclick="deleteDialog(this)">
+                                <i class="material-icons">
+                                    <% if(data.users[i].deletedAt){ %>
+                                        restore_from_trash
+                                    <% } else { %>
+                                        delete
+                                    <% } %>
+                                </i></a>
                         </td>
                     </tr>
                     <% } %>
@@ -108,6 +118,12 @@
 
 <%- include ("../partials/footer") %>
 
+<%- include ("./modals/disable2fa") %>
+<%- include ("./modals/enable2fa") %>
+
+<%- include ("./modals/delete") %>
+<%- include ("./modals/restore") %>
+
 <script>
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -116,9 +132,16 @@
     });
 
     function deleteDialog(button) {
-        var _elem = document.getElementById('modalDelete');
+        
+        if(button.dataset.deleted) {
+            var _elem = document.getElementById('modalRestore');
+            document.getElementById('modalRestoreUserId').value = button.dataset.id;
+        } else {
+            var _elem = document.getElementById('modalDelete');
+            document.getElementById('modalDeleteUserId').value = button.dataset.id;
+        }    
+
         var modal = M.Modal.getInstance(_elem);
-        document.getElementById('modalDeleteUserId').value = button.dataset.id;
         modal.open();
     };
 
@@ -129,15 +152,31 @@
 
     function manage2fa(button) {
 
-        const userId = button.dataset.id;
+        const enabled2fa = button.dataset.enabled2fa;
+ console.log(enabled2fa); //FIXME: siempre ejecuta el disable
+        if(enabled2fa === true){
+            var _elem = document.getElementById('modalDisable2FA');
+            document.getElementById('modalDisable2faUserId').value = button.dataset.id;
+        } else {
+             var _elem = document.getElementById('modalEnable2FA');
+            document.getElementById('modalEnable2faUserId').value = button.dataset.id;
+        }
+        
+        var modal = M.Modal.getInstance(_elem);
+        modal.open();
+    };
 
-        var form = $('<form action="/users/manage2fa" method="post">' +
-            '<input type="hidden" name="userId" value="' + userId + '"></input>' +
-            '</form>');
+    // function manage2fa(button) {
 
-        $('body').append(form);
-        $(form).submit();
-    }
+    //     const userId = button.dataset.id;
+
+    //     var form = $('<form action="/users/manage2fa" method="post">' +
+    //         '<input type="hidden" name="userId" value="' + userId + '"></input>' +
+    //         '</form>');
+
+    //     $('body').append(form);
+    //     $(form).submit();
+    // }
 
     $(document).ready(function () {
 
@@ -172,7 +211,7 @@
                     className: "center-align",
                     targets: [0, 1, 2]
                 },            
-                {   targets: [4,5],
+                {   targets: [3,4],
                     render: function (data) {
                         if (data)
                             return moment(data).format('DD/MM/YYYY');

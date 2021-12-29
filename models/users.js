@@ -57,8 +57,18 @@ module.exports = (sequelize, DataTypes) => {
       type: new DataTypes.VIRTUAL(DataTypes.STRING, ['securityLevel']),
       get: function () {
         return (UserPrivilegeLevel.Level[this.get('securityLevel')])
+      }
+    },
+    enabled2fa: {
+      type: new DataTypes.VIRTUAL(DataTypes.BOOLEAN, ['secret']),
+      get: function () {
+        if (this.get('secret')) {
+          return true
+        } else {
+          return false
+        }
       },
-    }
+    },
   }, {
     sequelize,
     modelName: 'user',
