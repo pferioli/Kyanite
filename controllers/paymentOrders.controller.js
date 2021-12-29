@@ -291,8 +291,6 @@ module.exports.createPaymentOrder = async function (paymentOrder, callback) {
     const clientId = paymentOrder.clientId;
     const receiptId = paymentOrder.receiptId;
 
-    let remainingBalance = await this.calculateRemainingBalance(receiptId);
-
     PaymentOrder.create(
         {
             paymentReceiptId: receiptId,
@@ -365,11 +363,17 @@ module.exports.createPaymentOrder = async function (paymentOrder, callback) {
                     PaymentReceipt.findByPk(receiptId)
                         .then((paymentReceipt) => {
 
+                            let remainingBalance = await this.calculateRemainingBalance(receiptId);
+
                             let prStatus = PaymentReceiptStatus.eStatus.get('inprogress').value;
 
-                            if ((remainingBalance - Number.parseFloat(paymentOrder.amount)) <= 0) {
+                            //if ((remainingBalance - Number.parseFloat(paymentOrder.amount)) <= 0) {
+
+                            if (remainingBalance <= 0) {
                                 prStatus = PaymentReceiptStatus.eStatus.get('processed').value;
                             }
+
+                            winston.info(`PO ${poNumber} (id #${paymentOrder.id}) remaining balance is $${remainingBalance.toFixed(2)}, new status for payment receipt is ${prStatus}`);
 
                             paymentReceipt.update({ statusId: prStatus })
                                 .then(() => {

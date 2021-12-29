@@ -152,8 +152,8 @@
 
     function manage2fa(button) {
 
-        const enabled2fa = button.dataset.enabled2fa;
- console.log(enabled2fa); //FIXME: siempre ejecuta el disable
+        const enabled2fa = (button.dataset.enabled2fa.toLowerCase() === 'true');
+
         if(enabled2fa === true){
             var _elem = document.getElementById('modalDisable2FA');
             document.getElementById('modalDisable2faUserId').value = button.dataset.id;

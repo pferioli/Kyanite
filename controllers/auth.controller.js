@@ -127,7 +127,7 @@ module.exports.generate2fa = async function (user) {
 
     var qrImage = 'https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=' + encodeURIComponent(otpUrl);
 
-    return { user: user, key: encodedKey, qrImage: qrImage };
+    return { user: user, key: key, encodedKey: encodedKey, qrImage: qrImage };
 }
 
 module.exports.setup2fa = async function (req, res) {
@@ -135,13 +135,26 @@ module.exports.setup2fa = async function (req, res) {
     this.generate2fa(req.user)
         .then(async response => {
 
-            //TODO: agregar secret al usuario en la base
-            // if (!response.user.secret) {
-            //     let user = await User.findByPk(user.id);
-            //     user.secret = key;
-            //     await user.save();
-            // }
-            res.render('login/totp/setup.ejs', { user: req.user, key: encodedKey, qrImage: qrImage });
+            User.findByPk(req.user.id).then(user => {
+
+                if (user.secret) {
+                    req.flash("warning", "Ya tiene establecido un token, primero debe deshabilitarlo para generar uno nuevo");
+                    res.redirect('/users');
+                    return
+                }
+
+                user.secret = response.key;
+
+                user.save().then(() => {
+                    res.render('login/totp/setup.ejs', { user: req.user, key: response.encodedKey, qrImage: response.qrImage });
+                }).catch(err => {
+                    req.flash("error", "Ocurrio un error y no se pudo cambiar establecer un nuevo token");
+                    res.redirect('/');
+                })
+            }).catch(() => {
+                req.flash("error", "Ocurrio un error y no se pudo cambiar establecer un nuevo token");
+                res.redirect('/');
+            })
         })
 };
 

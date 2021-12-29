@@ -96,39 +96,41 @@ module.exports.enable2fa = async function (req, res, next) {
 
     const userId = Number(req.body.userId);
 
-    if (req.user.id !== userId) {
+    if (req.user.id !== userId) { //if it's not the same user, send QR using email to dest user
 
         if (req.user.securityLevel !== UserPrivilegeLevel.eLevel.get('ADMINISTRATOR').value) {
             req.flash("warning", "Privilegios insuficientes, por favor contacte a un administrador");
             res.redirect('/users');
             return;
         }
+
+        User.findByPk(userId)
+            .then(async user => {
+
+                const gen2fa = await require('./auth.controller').generate2fa(user);
+
+                mailgun.sendEmail2faSetup(user.email, gen2fa)
+                    .then(async mgResp => {
+
+                        //{id: '<20211229022155.b6857940e9df7ae9@mg.dtronix.com.ar>', message: 'Queued. Thank you.'}
+
+                        if (!gen2fa.user.secret) {
+
+                            await user.update({ secret: gen2fa.key }); //FIXME: el secret que guarda no parece estar ok
+
+                            req.flash("success", "Se envío un correo al usuario con el QR para que registre el token");
+                            res.redirect('/users');
+                        }
+                    })
+            })
+            .catch(err => {
+                req.flash("error", "Ocurrio un error buscando el usuario en la base de datos");
+                res.redirect('/users');
+            })
+
+    } else {
+        res.redirect('/auth/setup2fa'); //for the same user, use QR in the screen
     }
-
-    User.findByPk(userId)
-        .then(async user => {
-
-            const gen2fa = await require('./auth.controller').generate2fa(user);
-
-            mailgun.sendEmail2faSetup(user.email, gen2fa)
-                .then(async mgResp => {
-
-                    //{id: '<20211229022155.b6857940e9df7ae9@mg.dtronix.com.ar>', message: 'Queued. Thank you.'}
-
-                    if (!gen2fa.user.secret) {
-
-                        await user.update({ secret: gen2fa.key }); //FIXME: el secret que guarda no parece estar ok
-
-                        req.flash("success", "Se envío un correo al usuario con el QR para que registre el token");
-                        res.redirect('/users');
-                    }
-                })
-        })
-        .catch(err => {
-            req.flash("error", "Ocurrio un error buscando el usuario en la base de datos");
-            res.redirect('/users');
-        })
-
 }
 
 module.exports.disable2fa = async function (req, res, next) {
