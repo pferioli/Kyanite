@@ -361,7 +361,7 @@ module.exports.createPaymentOrder = async function (paymentOrder, callback) {
                     }
 
                     PaymentReceipt.findByPk(receiptId)
-                        .then((paymentReceipt) => {
+                        .then(async paymentReceipt => {
 
                             let remainingBalance = await this.calculateRemainingBalance(receiptId);
 
