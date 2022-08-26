@@ -42,4 +42,7 @@ router.get("/ajax/getCategoryDetailsById/:categoryId", function (req, res, next)
     investmentsController.getCategoryDetailsById(req, res);
 });
 
+router.get("/vencimiento", function (req, res) {
+    investmentsController.vencimiento(req, res);
+})
 module.exports = router

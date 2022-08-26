@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const { QueryTypes } = require('sequelize');
+const { QueryTypes, query } = require('sequelize');
 const Op = require('sequelize').Op
 const Model = require('../models')
 
@@ -21,6 +21,17 @@ const InvestmentsStatus = require('../utils/statusMessages.util').Investments;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
 const Notifications = require('../utils/notifications.util');
+
+module.exports.vencimiento = async function (req, res) {
+
+    const db = require('../models')
+
+    const investments = await db.sequelize.query(
+        "SELECT *, DATEDIFF(expirationDate ,NOW()) as expirationDays FROM `investments` where DATEDIFF(expirationDate ,NOW()) between 0 and 5;",
+        { type: QueryTypes.SELECT });
+
+    res.send(JSON.stringify(investments))
+}
 
 module.exports.listAll = async function (req, res) {
 

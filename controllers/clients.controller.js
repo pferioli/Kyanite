@@ -19,12 +19,18 @@ module.exports.populateClients = function (req, res) {
 }
 
 module.exports.listAll = function (req, res, next) {
+
+    const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
+
     Client.findAll({
         include: [{
             model: TaxCategory
-        }]
+        }],
+        paranoid: !showAll
     }).then(function (clients) {
-        res.render("clients/clients.ejs", { menu: CURRENT_MENU, data: { clients } });
+        res.render("clients/clients.ejs", {
+            menu: CURRENT_MENU, data: { clients }, params: { showAll: showAll }
+        });
     });
 };
 
@@ -218,6 +224,32 @@ module.exports.delete = async function (req, res, next) {
                     "Ocurrio un error y no se pudo eliminar el cliente de la base de datos"
                 )
                 winston.error(`an error ocurred when user "${req.user.id} tryed to delete client #${clientId} - ${err}`);
+            })
+            .finally(function () {
+                res.redirect("/clients");
+            })
+    }
+};
+
+module.exports.undelete = async function (req, res, next) {
+    const clientId = req.body.clientId;
+    const client = await Client.findByPk(clientId, { paranoid: false });
+    if (client) {
+        console.log(client)
+        client.restore()
+            .then(() => {
+                req.flash(
+                    "success",
+                    "El cliente fue reestablecido exitosamente en la base de datos"
+                )
+                winston.info(`client #${clientId} was restored by user #${req.user.id} `);
+            })
+            .catch(err => {
+                req.flash(
+                    "error",
+                    "Ocurrio un error y no se pudo restablecer el cliente en la base de datos"
+                )
+                winston.error(`an error ocurred when user "${req.user.id} tryed to restore client #${clientId} - ${err}`);
             })
             .finally(function () {
                 res.redirect("/clients");

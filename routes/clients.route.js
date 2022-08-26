@@ -23,6 +23,10 @@ router.post('/delete', function (req, res, next) {
   clientsController.delete(req, res);
 })
 
+router.post('/undelete', function (req, res, next) {
+  clientsController.undelete(req, res);
+})
+
 router.get("/info/:id", function (req, res, next) {
   clientsController.info(req, res);
 });

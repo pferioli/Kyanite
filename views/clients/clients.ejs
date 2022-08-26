@@ -23,6 +23,10 @@
         </div>
       </div>
       <div class="actions">
+        <div class="switch" style="margin-top: 3px;">
+          <label> Mostrar deshabilitados <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
+          <span class="lever"></span></label>
+        </div>           
         <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
         <a href="/clients/new" id="button-add" title="agregar cliente" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
         <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
@@ -46,6 +50,7 @@
             <th>Correo Electronico</th>
             <th>Cant UF</th>
             <th>Lote</th>
+            <th>Activo</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -65,13 +70,27 @@
             <td><%= data.clients[i].email %></td>
             <td><%= data.clients[i].functionalUnitsCount %></td>
             <td><%= data.clients[i].lotSize %></td>
+ 
+            <td>
+            <% if(data.clients[i].deletedAt === null) {%>
+              <i class="material-icons green-text darken-3">check_circle</i>
+            <% } else { %>
+              <i class="material-icons grey-text lighten-1">cancel</i>
+            <% } %>              
+
+            </td>
 
             <td>
               <a href="/clients/edit/<%= data.clients[i].id %>" title="editar" class="btn-flat btn-small waves-effect waves-light">
                 <i class="material-icons">edit</i></a>
 
-              <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.clients[i].id%>" 
-                data-value="<%= data.clients[i].name %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+              <% if(data.clients[i].deletedAt === null) {%>
+                <a id="buttonDelete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.clients[i].id%>" 
+                  data-value="<%= data.clients[i].name %>" onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+              <% } else { %>
+                <a id="buttonUndelete" title="restablecer" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.clients[i].id%>" 
+                  data-value="<%= data.clients[i].name %>" onclick="undeleteDialog(this)"><i class="material-icons">restore_from_trash</i></a>
+              <% } %>              
             </td>
           </tr>
           <% } %>
@@ -83,6 +102,7 @@
 </main>
 
 <%- include ("./modals/delete.ejs") %>
+<%- include ("./modals/undelete.ejs") %>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -98,6 +118,23 @@
     document.getElementById('modalDeleteClientId').value = button.dataset.id;
     modal.open();
   };
+
+  function undeleteDialog(button) {
+    var _elem = document.getElementById('modalUndelete');
+    var modal = M.Modal.getInstance(_elem);
+    const message = `[ID: ${button.dataset.id}] - ${button.dataset.value}`
+    document.getElementById('modalUndeleteMessage').textContent = message;
+    document.getElementById('modalUndeleteClientId').value = button.dataset.id;
+    modal.open();
+  };
+
+  function reloadPage() {
+        const swStatus = document.getElementById('swStatus').checked;
+      
+        const redirectUrl = '/clients?showAll=' + swStatus;
+
+        window.location = redirectUrl;
+    }
 
   $(document).ready(function () {
 

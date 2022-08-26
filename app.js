@@ -188,6 +188,8 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
+const crons = require('./crons/investments.cron');
+
 const hasFullICU = (() => {
   try {
     const january = new Date(9e8);
