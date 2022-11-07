@@ -66,7 +66,7 @@ module.exports.listAll = async function (req, res) {
         {
             model: PaymentReceipt, where: { clientId: clientId }, include: [{ model: ReceiptType }, { model: Supplier }],
         },
-        { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
+        { model: BillingPeriod }, { model: Account, paranoid:false, include: [{ model: AccountType }] }, { model: User }],
     };
 
     const client = await Client.findByPk(clientId);
