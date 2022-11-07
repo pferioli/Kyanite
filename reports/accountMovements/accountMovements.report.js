@@ -195,6 +195,11 @@ function populateTable(doc, movements) {
                 .fontSize(12)
                 .font("Helvetica-Bold");
 
+            if (movement.account.isDeleted) {
+                const height = doc.currentLineHeight();
+                doc.strike(doc.page.margins.left, doc.y, doc.widthOfString(groupName), height)
+            }
+
             if (doc.y + 10 * common.heightMeassure(doc, groupName, { align: "left" }) > maxY)
                 doc.addPage();
 

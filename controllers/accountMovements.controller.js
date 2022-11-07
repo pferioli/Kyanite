@@ -429,7 +429,7 @@ module.exports.createInvoice = async function (req, res) {
         where: {
             clientId: clientId, periodId: periodId
         },
-        include: [{ model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
+        include: [{ model: BillingPeriod }, { model: Account, paranoid: false, include: [{ model: AccountType }] }, { model: User }],
         order: [
             ['accountId', 'ASC'], ['createdAt', 'ASC'], ['id', 'ASC'],
         ]
