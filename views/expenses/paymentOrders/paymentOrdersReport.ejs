@@ -51,6 +51,7 @@
                     </thead>
                     <tbody>
                         <% for(var i=0; i < data.paymentOrders.length; i++) { %>
+                            <% console.log(data.paymentOrders[i].id);  %> 
                         <tr data-id="<%= data.paymentOrders[i].id %>">
                             <td><%= data.paymentOrders[i].paymentReceipt.accountingImputation.accountingGroup.name %></td>
                             <td><%= data.paymentOrders[i].paymentReceipt.accountingImputation.name %></td>

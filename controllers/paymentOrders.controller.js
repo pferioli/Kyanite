@@ -66,7 +66,7 @@ module.exports.listAll = async function (req, res) {
         {
             model: PaymentReceipt, where: { clientId: clientId }, include: [{ model: ReceiptType }, { model: Supplier }],
         },
-        { model: BillingPeriod }, { model: Account, paranoid:false, include: [{ model: AccountType }] }, { model: User }],
+        { model: BillingPeriod }, { model: Account, paranoid: false, include: [{ model: AccountType }] }, { model: User }],
     };
 
     const client = await Client.findByPk(clientId);
@@ -95,7 +95,7 @@ async function getExpensesReportRecords(clientId, periods) {
                 where: { clientId: clientId },
                 include: [{ model: ReceiptType }, { model: Supplier }, { model: AccountingImputation, include: [{ model: AccountingGroup }] }],
             },
-            { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }
+            { model: BillingPeriod }, { model: Account, paranoid: false, include: [{ model: AccountType }] }
         ],
         order: [
             [{ model: PaymentReceipt }, { model: AccountingImputation }, 'groupId', 'ASC'],
@@ -219,7 +219,7 @@ module.exports.createInvoice = function (req, res) {
             {
                 model: PaymentReceipt, include: [{ model: Client }, { model: Supplier }, { model: ReceiptType }, { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
             },
-            { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] }, { model: Account, include: [{ model: AccountType }, { model: Bank }] },
+            { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] }, { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }] },
             { model: CheckSplitted, include: [{ model: Check }] }
         ]
     })
@@ -244,7 +244,7 @@ module.exports.printPaymentOrders = function (req, res) {
                 {
                     model: PaymentReceipt, include: [{ model: Client }, { model: Supplier }, { model: ReceiptType }, { model: AccountingImputation, include: [{ model: AccountingGroup }] }]
                 },
-                { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] }, { model: Account, include: [{ model: AccountType }, { model: Bank }] },
+                { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] }, { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }] },
                 { model: CheckSplitted, include: [{ model: Check }] }
             ]
         })
@@ -519,7 +519,7 @@ module.exports.showEditForm = async function (req, res) {
         {
             model: PaymentReceipt, where: { clientId: clientId }, include: [{ model: ReceiptType }, { model: Supplier }, { model: Client }],
         },
-        { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
+        { model: BillingPeriod }, { model: Account, paranoid: false, include: [{ model: AccountType }] }, { model: User }],
     });
 
     const clientAccounts = await Account.findAll({ include: [{ model: AccountType }], where: { clientId: paymentOrder.paymentReceipt.client.id } });
