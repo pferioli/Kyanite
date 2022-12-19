@@ -326,7 +326,8 @@ module.exports.listPayments = async function (req, res, next) {
                 },
                 required: false
             }
-        ]
+        ],
+        paranoid: false
     }).then(function (paymentReceipts) {
         res.render("suppliers/payments/payments.ejs", {
             menu: `${CURRENT_MENU}_payments`, data: { client: client, supplier: supplier, paymentReceipts: paymentReceipts },
