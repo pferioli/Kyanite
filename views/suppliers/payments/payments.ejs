@@ -64,8 +64,16 @@
                     <td>$<%=data.paymentReceipts[i].paymentOrders[j].amount%></td>
                     <td><%=data.paymentReceipts[i].paymentOrders[j].poNumberFormatted%></td>
                     <td><%=data.paymentReceipts[i].billingPeriod.name%></td>
-                    <td><%=data.paymentReceipts[i].paymentOrders[j].account.accountType.account%></td>
-                    <td><%=data.paymentReceipts[i].paymentOrders[j].account.accountNumber%></td>
+                    <td>
+                      <% if (data.paymentReceipts[i].paymentOrders[j].account) { %>
+                        <%=data.paymentReceipts[i].paymentOrders[j].account.accountType.account%>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (data.paymentReceipts[i].paymentOrders[j].account) { %>
+                        <%=data.paymentReceipts[i].paymentOrders[j].account.accountNumber%>
+                      <% } %>
+                    </td>
                     <td></td>
                   </tr>
                 <% } %>

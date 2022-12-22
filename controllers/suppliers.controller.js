@@ -318,7 +318,7 @@ module.exports.listPayments = async function (req, res, next) {
                 include: [
                     { model: CheckSplitted, include: [{ model: Check }] },
                     {
-                        model: Account, include: [{ model: Bank }, { model: AccountType }]
+                        model: Account, paranoid: false, include: [{ model: Bank }, { model: AccountType }]
                     }
                 ],
                 where: {
@@ -327,7 +327,6 @@ module.exports.listPayments = async function (req, res, next) {
                 required: false
             }
         ],
-        paranoid: false
     }).then(function (paymentReceipts) {
         res.render("suppliers/payments/payments.ejs", {
             menu: `${CURRENT_MENU}_payments`, data: { client: client, supplier: supplier, paymentReceipts: paymentReceipts },
