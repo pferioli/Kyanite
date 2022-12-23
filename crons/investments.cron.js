@@ -2,7 +2,7 @@ const cron = require('node-cron');
 
 const expirationDateReminder = require('../controllers/investments.controller').expirationDateReminder
 
-cron.schedule('0 9 * * 1-5', () => {
+cron.schedule('0 9 * * *', () => {
     expirationDateReminder();
 }, {
     scheduled: true,

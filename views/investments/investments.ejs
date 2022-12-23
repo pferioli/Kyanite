@@ -97,7 +97,7 @@
 
                                 <!--EXPIRADO-->
                                 <% if(data.investment[i].statusId===3) { %>
-                                    <i class="material-icons">free_cancellation</i>
+                                    <i class="material-icons red-text">free_cancellation</i>
                                 <% } %>
 
                                 <!--COMPLETADO-->
@@ -123,7 +123,7 @@
                             <td><%= data.investment[i].user.name %></td>
                                 
                             <td>
-                                <% if(data.investment[i].statusId===1) { %>
+                                <% if((data.investment[i].statusId===1)||(data.investment[i].statusId===3)) { %>
                                     <button onclick="accreditDialog(this)" title="acreditar intereses" class="btn-flat btn-small waves-effect waves-light"
                                         data-id="<%=data.investment[i].id%>" data-clientid="<%=data.client.id%>" data-periodid="<%=data.investment[i].billingPeriod.id%>">
                                         <i class="material-icons">check_circle</i></button>                                                                                                                

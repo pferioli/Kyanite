@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 const Sequelize = require('sequelize');
 const { QueryTypes, query } = require('sequelize');
 const Op = require('sequelize').Op
@@ -227,7 +229,7 @@ module.exports.accredit = async function (req, res) {
                 userId: userId
             });
 
-            winston.info(`Fixed-Term desposit ${investment.id}updated succesfully`)
+            winston.info(`Fixed-Term desposit ${investment.id} updated succesfully`)
             req.flash("success", `Los intereses del plazo fijo ha sido acreditados correctamente`)
         })
         .catch(err => {
@@ -253,23 +255,74 @@ module.exports.getCategoryDetailsById = async function (req, res) {
 }
 
 module.exports.expirationDateReminder = async () => {
-    console.log('running a task every minute');
 
-    const startDate = new Date();
-    const endDate = new Date().setDate(startDate.getDate() + 2);
+    winston.info(`executing expiration investments reminder`)
+
+    var startDate = moment();
+    startDate = startDate.subtract(2, "days");
+    startDate = startDate.format("YYYY-MM-DD");
+
+    var endDate = moment();
+    endDate = endDate.add(2, "days");
+    endDate = endDate.format("YYYY-MM-DD");
+
+    winston.info(`searching created or expired investments from ${startDate} to ${endDate}`);
 
     Investment.findAll({
         where: {
             expirationDate: {
-                $between: [startDate, endDate]
+                [Op.between]: [startDate, endDate]
+            },
+            statusId: {
+                [Op.or]: [InvestmentsStatus.eStatus.get('created').value, InvestmentsStatus.eStatus.get('expired').value]
             }
         },
         include: [
             { model: Client }
         ]
-    }).then(investments => {
-        console.log(JSON.stringify(investments));
+    }).then(async investments => {
 
-        mailgun.sendEmailInvestmentExpiration('pferioli@gmail.com', investments);
+        if (investments.length === 0) return;
+
+        //antes de mandar las notificaciones, pasamos a "expired" todos aquellos PFs que tengan "expired===true"
+
+        for (const investment of investments) {
+            if (investment.expired === true) {
+                try {
+                    await investment.update({
+                        statusId: InvestmentsStatus.eStatus.get('expired').value,
+                    });
+
+                    winston.info(`Fixed-Term desposit ${investment.id} updated succesfully to expired`)
+
+                } catch (error) {
+                    winston.error(`It was not possible to update the status of ${investment.id} to expired - ${error}`);
+                }
+            }
+        }
+
+        // console.log(JSON.stringify(investments));
+
+        // generamos el listado de todos los usuarios habilitados del sistema para enviarles el mail
+
+        //TODO: aca deberiamos buscar de una tabla de config
+
+        const getAllActiveUsers = require('./users.controller').getAllActiveUsers;
+
+        const users = await getAllActiveUsers();
+
+        const emails = users.map(element => element.email)
+
+        mailgun.sendEmailInvestmentExpiration(emails, investments);
+
+        //si hay elementos que ya expiraron, entonces la notificacion del sistema sale CRITICAL...
+
+        const critical = investments.find(element => element.expired === true);
+
+        if (critical) {
+            (new Notifications).critical('fixedTermDeposits', `tiene (${investments.length}) inversiones próximas a vencer`)
+        } else {
+            (new Notifications).warning('fixedTermDeposits', `tiene (${investments.length}) inversiones vencidas o próximas a vencer`)
+        }
     })
 }

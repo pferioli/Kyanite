@@ -1,5 +1,7 @@
 'use strict';
 
+const moment = require('moment');
+
 const {
     Model
 } = require('sequelize');
@@ -66,6 +68,29 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             type: DataTypes.DATEONLY,
             defaultValue: null
+        },
+        remainingDays: {
+            type: new DataTypes.VIRTUAL(DataTypes.INTEGER, ['expirationDate']),
+            get: function () {
+                const expirationDate = moment(this.get('expirationDate'));
+                const now = moment();
+                const diff = expirationDate.diff(now, 'days');
+                return diff;
+            }
+        },
+        expired: {
+            type: new DataTypes.VIRTUAL(DataTypes.BOOLEAN, ['expirationDate', 'statusId']),
+            get: function () {
+                const expirationDate = moment(this.get('expirationDate'));
+                const now = moment();
+                const diff = expirationDate.diff(now, 'days');
+
+                if (((diff < 0) && (this.get('statusId') === InvestmentsStatus.eStatus.get('created').value)) || (this.get('statusId') === InvestmentsStatus.eStatus.get('expired').value)) {
+                    return true;
+                } else {
+                    return false
+                }
+            }
         },
         comments: {
             allowNull: false,

@@ -205,3 +205,19 @@ module.exports.deleteUser = async function (req, res) {
             res.redirect('/users');
         })
 }
+
+module.exports.getAllActiveUsers = async function () {
+
+    const attributes = ['id', 'email', 'name', 'securityLevel', 'createdAt', 'updatedAt']
+
+    return User.findAll({
+        attributes: attributes,
+        paranoid: false,
+        where: {
+            enabled: true
+        }
+    }).then(users => {
+        return users
+    })
+
+}

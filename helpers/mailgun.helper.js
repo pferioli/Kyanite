@@ -55,7 +55,7 @@ module.exports.sendEmailInvestmentExpiration = async function (mailto, investmen
         from: process.env.MAILFROM,
         subject: 'alerta de inversiones próximas a vencer',
         template: "investments_reminder",
-        inline: [`${resources}/aaii.png`, `${resources}/email.png`],
+        inline: [`${resources}/email.png`],
         'h:X-Mailgun-Template-Variables': `{ "investments": ${JSON.stringify(investments)}, "count": "${investments.length}" }`
     })
 
