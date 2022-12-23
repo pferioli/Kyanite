@@ -268,7 +268,7 @@ module.exports.expirationDateReminder = async () => {
             { model: Client }
         ]
     }).then(investments => {
-        image.pngconsole.log(JSON.stringify(investments));
+        console.log(JSON.stringify(investments));
 
         mailgun.sendEmailInvestmentExpiration('pferioli@gmail.com', investments);
     })
