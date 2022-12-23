@@ -1,0 +1,206 @@
+<%- include ("../partials/header") %>
+
+<main class="site-content">
+
+  <center>
+    <%- include ("../partials/alerts") %>
+  </center>
+
+  <div class="table-container">
+    <div class=" table-header">
+      <span class="table-title">Períodos de Liquidación activos</span>
+      <div class="preloader-wrapper small active" id="progress" style="margin-left: 30px;">
+        <div class="spinner-layer spinner-green-only">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div>
+          <div class="gap-patch">
+            <div class="circle"></div>
+          </div>
+          <div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
+      </div>
+    </div>
+    <!-- <div class="progress" id="progress" style="margin-top: 30px;">
+      <div class="indeterminate"></div>
+    </div> -->
+    <div id="hide-dt" style="display:none">
+      <table id="datatable" class="table display">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Estado</th>
+            <th>Cliente</th>
+            <th>Nombre</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+            <th>Abierto</th>
+            <th>Usuario</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for(var i=0; i < data.periods.length; i++) { %>
+          <% console.log(JSON.stringify(data.periods[i].client)) %>
+          <tr data-id="<%= data.periods[i].id %>">
+            <td><%= data.periods[i].id %></td>
+            <td>
+              <% if(data.periods[i].statusId === 0) { %>
+              <i class="material-icons">calendar_today</i>
+              <% } %>
+              <% if(data.periods[i].statusId === 1) { %>
+              <i class="material-icons green-text">lock_open</i>
+              <% } %>
+              <% if(data.periods[i].statusId === 2) { %>
+              <i class="material-icons deep-orange-text lighten-1">lock</i>
+              <% } %>
+              <% if(data.periods[i].statusId === 3) { %>
+              <i class="material-icons">cancel</i>
+              <% } %>
+            </td>
+            <td>
+              <% if (data.periods[i].client) { %>
+                <a class="blue-text" href="/periods/<%= data.periods[i].client.id %>"><%= data.periods[i].client.name %></a>                
+              <% } %>
+            </td>
+            <td><%= data.periods[i].name %></td>
+            <td><%= data.periods[i].startDate %></td>
+            <td><%= data.periods[i].endDate %></td>
+            <td><%= data.periods[i].openedAt %></td>
+            <td><%= data.periods[i].user.name %></td>           
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<%- include("../partials/footer") %>
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function () {
+
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems,
+      {
+        dismissible: true,
+        onOpenStart: (e) => {
+          //console.log("Open Start");
+        },
+        onOpenEnd: (e) => {
+          //console.log("Open End");
+        },
+        onCloseStart: (e) => {
+          //console.log("Close Start");
+        },
+        onCloseEnd: (e) => {
+          //console.log("Close End");
+        }
+      });
+  });
+
+  // $('#ExportReporttoExcel').on('click', function () {
+  //   $('.buttons-excel').click()
+  // });
+
+  $(document).ready(function () {
+
+    $('.search-toggle').click(function () {
+      if ($('.hiddensearch').css('display') == 'none')
+        $('.hiddensearch').slideDown();
+      else
+        $('.hiddensearch').slideUp();
+    });
+
+    var table = $('#datatable').dataTable({
+      dom: "<'hiddensearch'f'>tr<'table-footer'Blip'>",
+      oLanguage: {
+        sSearch: '',
+        sSearchPlaceholder: 'Escriba aqui su búsqueda',
+        sInfo: '_START_ -_END_ de _TOTAL_',
+        sLengthMenu: '<span style="margin-left:20px">Filas por página:</span><select class="browser-default">' +
+          '<option value="50">50</option>' +
+          '<option value="100">100</option>' +
+          '<option value="200">200</option>' +
+          '<option value="-1">Todos</option>' +
+          '</select></div>'
+      },
+      columnDefs: [
+        {
+          targets: -1,
+          searchable: false,
+          sortable: false
+        },
+        {
+          className: "center-align",
+          targets: 0
+        }
+      ],
+      colReorder: true,
+      pageLength: 50,
+      order: [[2, 'asc'],[3,'asc']],
+      autowidth: true,
+      paging: true,
+      buttons: [
+        {
+          extend: 'colvis',
+          text: 'Columnas',
+        },
+        {
+          extend: 'print',
+          className: '',
+          title: '',
+          // autoPrint: false,
+          customize: function (win) {
+            $(win.document.body)
+              .css('font-size', '10pt')
+              .prepend(
+                '<h4>Title Test</h4>',
+              );
+            $(win.document.body).find('table')
+              .addClass('compact')
+              .css('font-size', 'inherit',);
+          }
+        },
+        {
+          extend: 'excelHtml5',
+          exportOptions: {
+            columns: ':visible(th:not(:last-child))',
+            search: 'applied',
+            order: 'applied'
+          },
+          customize: function (xlsx) {
+            var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
+            source.setAttribute('name', 'periodosLiquidacion');
+          }
+        },
+        { extend: 'csvHtml5' },
+        { extend: 'copyHtml5' },
+        {
+          text: 'PDF',   //https://codepen.io/vaucher/pen/wjwdMK
+          extend: 'pdfHtml5',
+          filename: 'periodosLiquidacion',
+          orientation: 'landscape',     //portrait
+          pageSize: 'A4',               //A3 , A5 , A6 , legal , letter
+          exportOptions: {
+            columns: ':visible',
+            search: 'applied',
+            order: 'applied'
+          }
+        }
+      ],
+      fnInitComplete: function () {
+        $('#hide-dt').show();
+        $('#progress').hide();
+      },
+    });
+  });
+
+</script>

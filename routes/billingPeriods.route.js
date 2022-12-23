@@ -12,6 +12,10 @@ router.post("/", function (req, res, next) {
     res.redirect("/periods/" + clientId);
 });
 
+router.get("/active", function (req, res, next) {
+    billingPeriodsController.getAllActive(req, res);
+});
+
 router.get("/active/:clientId", function (req, res, next) {
     billingPeriodsController.getActive(req, res);
 });
@@ -27,6 +31,7 @@ router.get("/byId/:periodId", function (req, res, next) {
 router.get("/:clientId", function (req, res, next) {
     billingPeriodsController.listAll(req, res);
 });
+
 
 router.post("/new", function (req, res, next) {
     billingPeriodsController.create(req, res);

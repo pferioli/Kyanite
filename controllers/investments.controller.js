@@ -13,6 +13,8 @@ const InvestmentCategory = Model.investmentCategory;
 
 const winston = require('../helpers/winston.helper');
 
+const mailgun = require('../helpers/mailgun.helper');
+
 const CURRENT_MENU = 'investments';
 
 module.exports.CURRENT_MENU = CURRENT_MENU;
@@ -248,4 +250,26 @@ module.exports.getCategoryDetailsById = async function (req, res) {
             res.send(investmentCategory);
         })
         .catch(err => res.sendStatus(500).send(err));
+}
+
+module.exports.expirationDateReminder = async () => {
+    console.log('running a task every minute');
+
+    const startDate = new Date();
+    const endDate = new Date().setDate(startDate.getDate() + 2);
+
+    Investment.findAll({
+        where: {
+            expirationDate: {
+                $between: [startDate, endDate]
+            }
+        },
+        include: [
+            { model: Client }
+        ]
+    }).then(investments => {
+        image.pngconsole.log(JSON.stringify(investments));
+
+        mailgun.sendEmailInvestmentExpiration('pferioli@gmail.com', investments);
+    })
 }

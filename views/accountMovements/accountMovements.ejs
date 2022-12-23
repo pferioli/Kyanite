@@ -27,8 +27,14 @@
             </div>
 
             <div class="actions">
-                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
                 
+                <div class="switch" style="margin-top: 3px;">
+                    <label> Mostrar eliminados <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
+                        <span class="lever"></span></label>
+                </div>         
+
+                <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+
                 <% if(data.isFiltered===false) { %>
                     <a id="button-filter" title="filtro por cuenta" class="waves-effect btn-flat nopadding" onclick='filterByAccount(this,"<%=data.isFiltered%>")'><i class="material-icons">filter_list</i></a>
                 <% } else { %>
@@ -164,6 +170,21 @@
         redirectWindow.location;
     };
     
+    function reloadPage() {
+        const swStatus = document.getElementById('swStatus').checked;
+        const clientId = document.getElementById('clientId').value;
+        const periodId = document.getElementById('periodId').value;
+
+        const redirectUrl = `/movements/client/${clientId}?periodId=${periodId}&showAll=${swStatus}`;
+
+        var form = $('<form action="' + redirectUrl + '" method="post">' +
+            '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
+            '<input type="hidden" name="periodId" value="' + periodId + '"></input>' +
+            '</form>');
+
+        $('body').append(form);
+        $(form).submit();
+    }
     async function clientAccountSelector(fieldId, clientId){
 
         let selectField = document.getElementById(fieldId);

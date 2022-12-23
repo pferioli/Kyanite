@@ -24,6 +24,13 @@ router.get("/client/:clientId", function (req, res, next) {
     accountMovementsController.listAll(req, res);
 });
 
+router.post("/client/:clientId", function (req, res, next) {
+    const clientId = req.params.clientId;
+    const periodId = req.query.periodId;
+    const showAll = req.query.showAll;
+    res.redirect(`/movements/client/${clientId}?periodId=${periodId}&showAll=${showAll}`)
+});
+
 router.get("/client/:clientId/details/:movementId", function (req, res, next) {
     accountMovementsController.showDetails(req, res);
 });

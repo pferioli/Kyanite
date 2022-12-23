@@ -1,5 +1,10 @@
 const cron = require('node-cron');
 
-cron.schedule('* * * * *', () => {
-    console.log('running a task every minute');
+const expirationDateReminder = require('../controllers/investments.controller').expirationDateReminder
+
+cron.schedule('*/15 * * * * 1-5', () => {
+    expirationDateReminder();
+}, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires"
 });

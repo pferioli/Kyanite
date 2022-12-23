@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             BillingPeriod.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            BillingPeriod.hasOne(models.client, { foreignKey: 'id', sourceKey: 'clientId' })
         }
     };
 

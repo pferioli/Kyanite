@@ -26,6 +26,11 @@
     <li><a class="white-text" href="/accounts"><i class="material-icons">fact_check</i>Cuentas</a></li>
 </ul>
 
+<ul id="BillingPeriods" class="dropdown-content black">
+    <li><a class="white-text" href="/periods"><i class="material-icons">event</i>Por cliente</a></li>
+    <li><a class="white-text" href="/periods/active"><i class="material-icons">date_range</i>Abiertos</a></li>
+</ul>
+
 <nav>
     <div class="nav-wrapper grey darken-4">
         <a href="#" data-target="slide-out" class="sidenav-trigger show-on-large"><i class="material-icons">menu</i></a>
@@ -51,9 +56,14 @@
             <!-- <li id="li_expenses"><a href="/expenses/paymentReceipts"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Egresos">receipt</i></a></li>-->
             <!-- <li id="li_accounts_banks"><a href="/accounts"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Cajas y Bancos">account_balance</i></a></li> -->
 
-            <li id="li_periods">
+            <!-- <li id="li_periods">
                 <a href="/periods"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Periodos">event</i></a>
+            </li> -->
+            
+            <li id="li_periods">
+                <a id="dropdownBillingPeriods" class="dropdown-trigger" data-target="BillingPeriods"><i class="material-icons">event<i class="material-icons right" style="margin-left: 0px; margin-right: -10px;">arrow_drop_down</i></i></a>
             </li>
+
             <li id="li_clients">
                 <a href="/clients"><i class="material-icons tooltipped" data-position="bottom" data-delay="50" data-tooltip="Clientes">location_city</i></a>
             </li>
@@ -103,7 +113,7 @@
     });
 
     $(document).ready(function () {
-        $('#dropdownIncomes,#dropdownExpenses,#dropdownBanksAndAccounts').dropdown({
+        $('#dropdownIncomes,#dropdownExpenses,#dropdownBanksAndAccounts,#dropdownBillingPeriods').dropdown({
             coverTrigger: false, constrainWidth: false, hover: true
         });
     });

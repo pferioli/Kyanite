@@ -46,3 +46,18 @@ module.exports.sendEmail2faSetup = async function (mailto, gen2fa) {
 
     return response;
 }
+
+
+module.exports.sendEmailInvestmentExpiration = async function (mailto, investments) {
+
+    const response = await mg.messages().send({
+        to: mailto,
+        from: process.env.MAILFROM,
+        subject: 'alerta de inversiones próximas a vencer',
+        template: "investments_reminder",
+        inline: [`${resources}/aaii.png`, `${resources}/email.png`],
+        'h:X-Mailgun-Template-Variables': `{ "investments": ${JSON.stringify(investments)}, "count": "${investments.length}" }`
+    })
+
+    return response;
+}

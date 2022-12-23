@@ -1,3 +1,4 @@
+const Op = require('sequelize').Op;
 const Model = require('../models')
 const BillingPeriod = Model.billingPeriod;
 const User = Model.user;
@@ -29,6 +30,30 @@ module.exports.listAll = async function (req, res, next) {
         });
     });
 };
+
+module.exports.getAllActive = async function (req, res, next) {
+
+    BillingPeriod.findAll({
+        where: { statusId: BillingPeriodStatus.eStatus.get('opened').value },
+        order: [
+            ['startDate', 'DESC']
+        ],
+        include: [
+            {
+                model: Client,
+                where: {
+                    deletedAt:
+                        { [Op.eq]: null }
+                }
+            },
+            { model: User }]
+    }).then(function (periods) {
+        res.render('billingPeriods/activePeriods', {
+            menu: CURRENT_MENU,
+            data: { periods: periods },
+        });
+    });
+}
 
 module.exports.create = async function (req, res, next) {
 

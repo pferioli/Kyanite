@@ -100,6 +100,12 @@ function paymentOrderDetails(tableRef, details) {
     newRow = tableRef.insertRow(-1);
     newRow.insertCell(0).appendChild(document.createTextNode("Estado de la órden de Pago"));
     newRow.insertCell(1).appendChild(document.createTextNode(details.paymentOrder.status));
+
+    if (details.movement.deletedAt) {
+        newRow = tableRef.insertRow(-1);
+        newRow.insertCell(0).appendChild(document.createTextNode("Fecha de Eliminación"));
+        newRow.insertCell(1).appendChild(document.createTextNode(moment(details.movement.deletedAt).format('DD/MM/YYYY HH:mm:ss')));
+    }
 }
 
 

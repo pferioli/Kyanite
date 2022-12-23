@@ -77,6 +77,8 @@ module.exports.listAll = async function (req, res, next) {
 
     const clientId = req.params.clientId || req.body.clientId;
 
+    const showAll = (req.query.showAll === undefined || req.query.showAll.toLowerCase() === 'false' ? false : true);
+
     const client = await Client.findByPk(clientId);
 
     let periods = [];
@@ -123,12 +125,12 @@ module.exports.listAll = async function (req, res, next) {
             }
         },
         include: [{ model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }],
-        paranoid: false
+        paranoid: (showAll === true ? false : true)
     };
 
     AccountMovement.findAll(options).then(function (movements) {
         res.render('accountMovements/accountMovements', {
-            menu: CURRENT_MENU,
+            menu: CURRENT_MENU, params: { showAll: showAll },
             data: { movements: movements, client: client, periods: periods, accountId: accountIds, isFiltered: isFiltered },
         });
     });
@@ -144,7 +146,8 @@ module.exports.showDetails = async function (req, res) {
     const movement = await AccountMovement.findByPk(movementId, {
         include: [
             { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }
-        ]
+        ],
+        paranoid: false
     });
 
     if (movement === null) {
