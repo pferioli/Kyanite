@@ -6,6 +6,7 @@ const BillingPeriod = Model.billingPeriod;
 const AccountTransfer = Model.accountTransfer;
 const Account = Model.account;
 const AccountType = Model.accountType;
+const Bank = Model.bank;
 
 const AccountTransferStatus = require('../utils/statusMessages.util').AccountTransfer;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
@@ -374,4 +375,34 @@ module.exports.edit = async function (req, res, next) {
         })
 
     res.redirect("/transfers/client/" + clientId);
+};
+
+module.exports.printReceipt = async function (req, res, next) {
+
+    const accountTransferId = req.params.transferId;
+    const clientId = req.params.clientId;
+
+    const { createSingleReport } = require("../reports/accountTransfers/accountTransfer.report");
+
+    AccountTransfer.findByPk(accountTransferId,
+        {
+            include: [{ model: Client }, { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] },
+            { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'sourceAccount' },
+            { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'destinationAccount' }],
+        })
+        .then(originalAccountTransfer => {
+
+            if (originalAccountTransfer === null) {
+                throw new Error('not found')
+            }
+
+            createSingleReport(originalAccountTransfer, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+
+        })
+        .catch(err => {
+            req.flash("error", "Ocurrio un error y no se encontro la transferencia seleccionada en la base de datos");
+            winston.error(`Account transfer not found for showing info #${accountTransferId} - ${err}`);
+            res.redirect("/transfers/client/" + clientId);
+        })
+
 };

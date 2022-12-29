@@ -32,6 +32,10 @@ router.get("/info/:clientId/:transferId", function (req, res, next) {
     accountTransfersController.info(req, res);
 });
 
+router.get("/print/:clientId/:transferId", function (req, res, next) {
+    accountTransfersController.printReceipt(req, res);
+});
+
 router.post("/edit/:transferId", function (req, res, next) {
     accountTransfersController.edit(req, res);
 });
