@@ -21,7 +21,7 @@ function createReport(doc, paymentOrder) {
     paymentSection(doc, paymentOrder, 470);
 
     common.generateSignature(doc, paymentOrder.user, { linesize: 174, startLine: 80, signatureHeight: 735 });
-    common.generateGenericSignature(doc, { linesize: 174, startLine: 350, signatureHeight: 735 });
+    common.generateGenericSignature(doc, { linesize: 174, startLine: 350, signatureHeight: 735 }, "firma del proveedor");
 
     generateFooter(doc);
 

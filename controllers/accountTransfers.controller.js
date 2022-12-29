@@ -390,13 +390,13 @@ module.exports.printReceipt = async function (req, res, next) {
             { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'sourceAccount' },
             { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'destinationAccount' }],
         })
-        .then(originalAccountTransfer => {
+        .then(accountTransfer => {
 
-            if (originalAccountTransfer === null) {
+            if (accountTransfer === null) {
                 throw new Error('not found')
             }
 
-            createSingleReport(originalAccountTransfer, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+            createSingleReport(accountTransfer, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
 
         })
         .catch(err => {

@@ -12,6 +12,7 @@ const AccountType = Model.accountType;
 const User = Model.user;
 const Investment = Model.investment;
 const InvestmentCategory = Model.investmentCategory;
+const Bank = Model.bank;
 
 const winston = require('../helpers/winston.helper');
 
@@ -326,3 +327,36 @@ module.exports.expirationDateReminder = async () => {
         }
     })
 }
+
+
+module.exports.printReceipt = async function (req, res, next) {
+
+    const investmentId = req.params.id;
+    const clientId = req.params.clientId;
+
+    const { createSingleReport } = require("../reports/investments/investments.report");
+
+    Investment.findByPk(investmentId,
+        {
+            include: [{ model: Client }, { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] },
+            { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'sourceAccount' },
+            { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'destinationAccount' },
+            { model: InvestmentCategory, as: "depositType" },
+            ],
+        })
+        .then(investment => {
+
+            if (investment === null) {
+                throw new Error('not found')
+            }
+
+            createSingleReport(investment, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+
+        })
+        .catch(err => {
+            req.flash("error", "Ocurrio un error y no se encontro la inversión seleccionada en la base de datos");
+            winston.error(`Investment not found for showing info #${investmentId} - ${err}`);
+            res.redirect("/investments/client/" + clientId);
+        })
+
+};

@@ -121,7 +121,7 @@ module.exports.generateSignature = function (doc, user, config) {
         );
 }
 
-module.exports.generateGenericSignature = function (doc, config) {
+module.exports.generateGenericSignature = function (doc, config, message) {
 
     const lineSize = config.linesize; //174;
     const startLine1 = config.startLine; //350;
@@ -148,7 +148,7 @@ module.exports.generateGenericSignature = function (doc, config) {
         .fontSize(8)
         .fill('#021c27')
         .text(
-            "firma del proveedor",
+            (message === undefined ? "firma y aclaración" : message),
             startLine1,
             signatureHeight + 5,
             {

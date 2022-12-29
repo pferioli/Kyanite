@@ -38,6 +38,10 @@ router.post("/rescue/new", function (req, res, next) {
     investmentsController.rescue(req, res);
 });
 
+router.get("/print/:clientId/:id", function (req, res, next) {
+    investmentsController.printReceipt(req, res);
+});
+
 router.get("/ajax/getCategoryDetailsById/:categoryId", function (req, res, next) {
     investmentsController.getCategoryDetailsById(req, res);
 });
