@@ -45,8 +45,8 @@ module.exports.listAll = async function (req, res, next) {
             },
         },
         include: [{ model: Client }, { model: BillingPeriod }, { model: User },
-        { model: Account, required: false, include: [{ model: AccountType }], as: 'sourceAccount' },
-        { model: Account, required: false, include: [{ model: AccountType }], as: 'destinationAccount' }
+        { model: Account, paranoid:false, required: false, include: [{ model: AccountType }], as: 'sourceAccount' },
+        { model: Account, paranoid:false, required: false, include: [{ model: AccountType }], as: 'destinationAccount' }
         ],
         paranoid: !showAll
     };
