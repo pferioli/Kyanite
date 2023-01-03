@@ -55,7 +55,7 @@
     "request": "^2.88.2",
     "sequelize": "^6.3.4",
     "serve-favicon": "^2.5.0",
-    "socket.io": "^4.1.2",
+    "socket.io": "^4.5.4",
     "strip-bom-stream": "^4.0.0",
     "thirty-two": "^1.0.2",
     "underscore": "^1.12.1",

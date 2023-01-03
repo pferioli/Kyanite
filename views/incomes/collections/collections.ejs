@@ -27,25 +27,43 @@
             </div>
 
             <div class="actions">
+                
                 <div class="switch" style="margin-top: 3px;">
                     <label> Mostrar todos los estados <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
                         <span class="lever"></span></label>
-                </div>              
-
+                </div>     
+                
+                <div class="switch" style="margin-top: 3px;">
+                    <label> Seleccionar todo <input id="swAllProperties" type="checkbox" onchange="selectAllRows(this.checked);">
+                        <span class="lever"></span></label>
+                </div>        
+                
                 <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                
                 <a href="/incomes/collections/new/<%=data.client.id%>" id="button-add" title="agregar cobranza" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                
+                <button id="button-delete" title="eliminar" onClick="deleteMultipleDialog(this)" class="waves-effect btn-flat nopadding" data-clientId="<%=data.client.id%>"><i class="material-icons">delete</i></button>
+                
                 <a href="/incomes/collections/import/new/<%=data.client.id%>" id="button-upload" title="importar desde archivo" class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>                
+                
                 <a href="/incomes/unidentifiedDeposits/client/<%=data.client.id%>" title="depósitos no identificados" class="waves-effect btn-flat nopadding"><i class="material-icons">pageview</i></a>
+                
                 <button id="button-report-xls" title="exportar reporte de cobranzas" onClick="openInNewTab('/incomes/collections/client/<%=data.client.id%>/report/download');" class="waves-effect btn-flat nopadding"><i class="material-icons">file_download</i></button>
+                
                 <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
             
         </div>
         
+        <div id="progressBar2" class="progress" style="margin-top: 10px; display:none"> 
+            <div id="determinate" class="determinate" style="width: 0%"></div>
+        </div>
+
         <div id="hide-dt" style="display:none">
             <table id="datatable" class="table display">
                 <thead>
                     <tr>
+                        <th></th>
                         <th>ID</th>
                         <th>Tipo</th>
                         <th>Propiedad</th>
@@ -66,6 +84,7 @@
                 <tbody>
                     <% for(var i=0; i < data.collections.length; i++) { %>
                         <tr data-id="<%= data.collections[i].id %>">
+                            <td></td>
                             <td><%= data.collections[i].id %></td>
                             
                             <td>
@@ -213,10 +232,17 @@
 </main>
 
 <%- include ("./modals/delete.ejs") %>
+<%- include ("./modals/deleteMultiple.ejs") %>
 
 <%- include ("../../partials/footer") %>
 
+<script src="/socket.io/socket.io.js"></script>
+
 <script>
+
+    console.log(window.location.host);
+
+    var socket = io(`${window.location.host}`, {transports: ['websocket']});
 
     var handler = 0;
 
@@ -235,6 +261,106 @@
             handler = enableAutoRefresh();
         }
 
+        document.getElementById('buttonAcceptDeleteMultiple').onclick = deleteSelectedCollections;
+
+    });
+
+    function deleteMultipleDialog(button) {
+        var _elem = document.getElementById('modalDeleteMultiple');
+        var modal = M.Modal.getInstance(_elem);
+        const rowsCount = getSelectedRowsInTable().length;
+        if(rowsCount===0) { alert('no se selecciono ninguna cobranza para eliminar'); return }
+        document.getElementById('modalDeleteMultipleMessage').innerHTML = `se van a eliminar ${rowsCount} cobranza(s)`;
+        modal.open();
+    }
+
+    function getSelectedRowsInTable(){
+        
+        var table = $('#datatable').DataTable();
+        
+        var rows = table.rows( { selected: true } );
+
+        let list = [];
+
+        for(i=0; i<rows.count(); i++){
+            list.push(rows.data()[i][1]);
+        }
+        return list;
+    }
+
+    function deleteSelectedCollections(button){
+        
+        $('#progressBar2').show();
+
+        const clientId = document.getElementById("clientId").value;
+        
+        const periodId = document.getElementById("periodId").value;
+
+        const selectedRows = getSelectedRowsInTable();
+
+        const redirectUrl = '/incomes/collections/delete/multiple';
+
+        var form = $('<form action="' + redirectUrl + '" method="post">' +
+            '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
+            '<input type="hidden" name="collectionIds" value="' + selectedRows.toString() + '"></input>' +
+            '</form>');
+
+        $('body').append(form);
+        $(form).submit();
+
+        // var postData = { "clientId": clientId, "periodId": periodId, "collectionIds": selectedRows }; 
+    
+        // fetch(redirectUrl, {
+        //     body: JSON.stringify(postData),
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json; charset=utf-8'
+        //     },
+        // })
+        // .then(response => response.json())
+        // .then(response => {
+        //     if(response.ok === true){
+        //         alert("se eliminaron correctamente")
+        //     } else {
+        //         alert("ocurrio un error")
+        //     }
+        // })
+        // .finally(()=>{            
+        //     $('#progressBar2').hide(); reloadPage();
+        // })
+    }
+
+    function selectAllRows(e){
+        var table = $('#datatable').DataTable();
+
+        if(e === true) {
+            table.rows().select();
+        } else {
+            table.rows().deselect();
+        }
+    };
+
+    socket.on('collectionsDelete', function(msg){
+        
+        let message = JSON.parse(msg)
+        
+        $('#progressBar2').show();
+
+        if(message.status==="started"){
+            $('#determinate').css('width', '0%');
+        }
+
+        if(message.status==="inprogress"){
+            const progress = message.progress;
+            $('#determinate').css('width', `${progress}%`);
+        }
+        
+        if(message.status==="finished"){
+            $('#determinate').css('width', '100%');
+            $('#progressBar2').hide(); reloadPage();
+        }
+        
+        console.log(msg);
     });
 
     function deleteDialog(button) {
@@ -292,15 +418,20 @@
                     className: "left-align",
                 },
                 {
-                    className: "center-align",
-                    targets: [0,1,2,3,4,5]
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets: 0
                 },
                 {
-                    targets: [6,7,8],
+                    className: "center-align",
+                    targets: [0,1,2,3,4,5,6]
+                },
+                {
+                    targets: [7,8,9],
                     type: 'currency',
                 },
                 {
-                    targets: 9,
+                    targets: 10,
                     visible: true,
                     searchable: false,
                     render: $.fn.dataTable.render.ellipsis(32, true)
@@ -308,20 +439,24 @@
                     //     return type === 'display' ? '<div title="' + full.description + '">' + data : data;
                     // }
                 },            
-                 {   targets: 10,
+                 {   targets: 11,
                     render: function (data) {
                         if (data)
                             return moment(data).format('DD/MM/YYYY');
                         else return "";
                     }, 
                 },    
-            ],            
+            ],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            },          
             colReorder: true,
             fixedColumns: {
-                leftColumns: 4
+                leftColumns: 5
             },
             pageLength: 200,
-            order: [[0, 'asc']],
+            order: [[1, 'asc']],
             autowidth: true,
             scrollY: '500px',
             scrollX: true,

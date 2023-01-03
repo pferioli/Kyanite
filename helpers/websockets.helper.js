@@ -7,7 +7,7 @@ module.exports = class SocketHelper {
 
     constructor(httpsServer) {
 
-        this.io = new Server(httpsServer, {});
+        this.io = new Server(httpsServer);
 
         console.log("socket.io : " + this.io.httpServer.listening);
 

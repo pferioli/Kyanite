@@ -40,6 +40,7 @@ const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 const UnidentifiedDepositStatus = require('../utils/statusMessages.util').UnidentifiedDeposit;
 
 const Notifications = require('../utils/notifications.util');
+const { isArray, isString } = require('underscore');
 
 module.exports.listAll = async function (req, res) {
 
@@ -266,6 +267,72 @@ module.exports.addNew = async function (req, res, next) {
 
 };
 
+module.exports.deleteMultipleCollections = async function (req, res) {
+
+    const { webSocket } = require('../bin/server');
+
+    const clientId = req.body.clientId;
+
+    var collectionIds;
+
+    if (isArray(req.body.collectionIds) === true) {
+        collectionIds = req.body.collectionIds;
+    } else if (isString(req.body.collectionIds) === true) {
+        collectionIds = req.body.collectionIds.split(',');
+    };
+
+    // res.status(200).send("OK");
+
+    try {
+
+        webSocket.io.emit("collectionsDelete", JSON.stringify({ status: 'started' }));
+
+        const timer = ms => new Promise(res => setTimeout(res, ms))
+
+        for (i = 0; i < collectionIds.length; i++) {
+
+            const collectionId = collectionIds[i];
+
+            const collection = await Collection.findByPk(collectionId, {
+                include: [
+                    { model: BillingPeriod }, { model: User },
+                    { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
+                    { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
+            })
+
+            if (collection.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
+                // req.flash("warning", "Solo pueden ser anuladas cobranzas dentro del periodo en curso");
+                // res.redirect('/incomes/collections/client/' + clientId); return;
+            }
+
+            let progress = Number.parseInt(Number.parseFloat((i + 1) / collectionIds.length) * 100);
+
+            webSocket.io.emit("collectionsDelete", JSON.stringify({ status: 'inprogress', progress: progress }));
+
+            // await timer(500); // then the created Promise can be awaited
+        }
+
+        webSocket.io.emit("collectionsDelete", JSON.stringify({ status: 'finished' }));
+
+        winston.info(`multiple collections ${collectionIds} deleted succesfully by user #${req.user.id}`)
+
+        req.flash("success", "las cobranzas seleccionadas fueron anuladas exitosamente en la base de datos");
+
+        // res.json({ status: "success", message: "las cobranzas seleccionadas fueron anuladas exitosamente en la base de datos" })
+
+    } catch (error) {
+
+        winston.error(`An error ocurred while user #${req.user.id} tryed to delete multiple collections ${collectionIds} - ${err} `)
+
+        req.flash("error", "Ocurrio un error y no se pudieron anular las cobranzas en la base de datos");
+
+        // res.json({ status: "error", message: "Ocurrio un error y no se pudieron anular las cobranzas en la base de datos" })
+    }
+    finally {
+        res.redirect('/incomes/collections/client/' + clientId);
+    }
+}
+
 module.exports.deleteCollection = async function (req, res) {
 
     const clientId = req.body.clientId;
@@ -274,7 +341,7 @@ module.exports.deleteCollection = async function (req, res) {
 
     try {
 
-        const client = await Client.findByPk(clientId);
+        // const client = await Client.findByPk(clientId);
 
         const collection = await Collection.findByPk(collectionId, {
             include: [

@@ -53,6 +53,10 @@ router.post("/new/:clientId", function (req, res, next) {
     collectionsController.addNew(req, res);
 });
 
+router.post("/delete/multiple", function (req, res, next) {
+    collectionsController.deleteMultipleCollections(req, res);
+});
+
 router.post("/delete", function (req, res, next) {
     collectionsController.deleteCollection(req, res);
 });
