@@ -104,6 +104,10 @@ app.use(function (req, res, next) {
 // ROUTES
 //---------------------------------------------------------------------------//
 
+app.use('/_ah', require('./routes/gae.route'));
+
+app.use('/crons', require('./routes/crons.route'));
+
 app.use('/auth', require('./routes/auth.route'));
 
 //--- from here, all routes require an authenticated user...
