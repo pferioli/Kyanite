@@ -287,23 +287,13 @@ module.exports.deleteMultipleCollections = async function (req, res) {
 
         webSocket.io.emit("collectionsDelete", JSON.stringify({ status: 'started' }));
 
-        const timer = ms => new Promise(res => setTimeout(res, ms))
+        // const timer = ms => new Promise(res => setTimeout(res, ms))
 
         for (i = 0; i < collectionIds.length; i++) {
 
             const collectionId = collectionIds[i];
 
-            const collection = await Collection.findByPk(collectionId, {
-                include: [
-                    { model: BillingPeriod }, { model: User },
-                    { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
-                    { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
-            })
-
-            if (collection.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
-                // req.flash("warning", "Solo pueden ser anuladas cobranzas dentro del periodo en curso");
-                // res.redirect('/incomes/collections/client/' + clientId); return;
-            }
+            await _deleteCollection(clientId, collectionId);
 
             let progress = Number.parseInt(Number.parseFloat((i + 1) / collectionIds.length) * 100);
 
@@ -333,6 +323,68 @@ module.exports.deleteMultipleCollections = async function (req, res) {
     }
 }
 
+async function _deleteCollection(clientId, collectionId) {
+
+    // const client = await Client.findByPk(clientId);
+
+    const collection = await Collection.findByPk(collectionId, {
+        include: [
+            { model: BillingPeriod }, { model: User },
+            { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
+            { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
+    })
+
+    if (collection.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
+        throw new Error("collections can only be deleted within and opened billing period")
+    }
+
+    if (collection !== null) {
+
+        await collection.update({ statusId: CollectionStatus.eStatus.get('deleted').value });   //cambiamos el estado de la cobranza como "anulada"
+
+        UnidentifiedDeposit.findOne({ where: { collectionId: collectionId } })  //buscamos si hay DNIs para esa cobranza y lo ponemos "pendiente"
+            .then(unidentifiedDeposit => {
+                if (unidentifiedDeposit !== null) {
+                    unidentifiedDeposit.update({ statusId: UnidentifiedDepositStatus.eStatus.get('pending').value })
+                        .then(() => {
+                            winston.info(`unidentified Deposit ${unidentifiedDeposit.id} updated to pending status`)
+                        })
+                }
+            })
+
+        //Para cada uno de los valores ingresados corregimos el movimiento en la CC
+
+        for (const collectionSecurity of collection.Securities) {
+
+            if (collectionSecurity.type != 'CH') {
+
+                const AccountMovement = require('./accountMovements.controller');
+
+                const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                let collectionType = accountMovementCategory.eStatus.get('INGRESO_COBRANZA').value;
+
+                if (collection.batchNumber)
+                    collectionType = accountMovementCategory.eStatus.get('IMPORTACION_COBRANZA').value
+
+                const accountMovement = await AccountMovement.deleteMovement(clientId, collectionSecurity.accountId,
+                    collection.periodId, collectionType, collectionSecurity.id)
+
+                if (accountMovement === null) {
+                    winston.error(`It was not possible to delete account movement record for the Collection (ID: ${paymentOrder.id})  - ${err}`);
+                    throw new Error("It was not possible to add the collection into the account movements table");
+                }
+
+                AccountMovement.fixBalanceMovements(clientId, collection.periodId, collectionSecurity.accountId);
+            }
+        }
+
+    } else {
+        throw new error("no record found for collectionId " + collectionId);
+    }
+
+}
+
 module.exports.deleteCollection = async function (req, res) {
 
     const clientId = req.body.clientId;
@@ -341,68 +393,11 @@ module.exports.deleteCollection = async function (req, res) {
 
     try {
 
-        // const client = await Client.findByPk(clientId);
+        await _deleteCollection(clientId, collectionId);
 
-        const collection = await Collection.findByPk(collectionId, {
-            include: [
-                { model: BillingPeriod }, { model: User },
-                { model: CollectionProperty, as: "Properties", include: [{ model: HomeOwner }] },
-                { model: CollectionConcept, as: "Concepts" }, { model: CollectionSecurity, as: "Securities" }],
-        })
+        winston.info(`collection ${collectionId} deleted succesfully by user #${req.user.id}`)
 
-        if (collection.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
-            req.flash("warning", "Solo pueden ser anuladas cobranzas dentro del periodo en curso");
-            res.redirect('/incomes/collections/client/' + clientId); return;
-        }
-
-        if (collection !== null) {
-
-            await collection.update({ statusId: CollectionStatus.eStatus.get('deleted').value });   //cambiamos el estado de la cobranza como "anulada"
-
-            UnidentifiedDeposit.findOne({ where: { collectionId: collectionId } })  //buscamos si hay DNIs para esa cobranza y lo ponemos "pendiente"
-                .then(unidentifiedDeposit => {
-                    if (unidentifiedDeposit !== null) {
-                        unidentifiedDeposit.update({ statusId: UnidentifiedDepositStatus.eStatus.get('pending').value })
-                            .then(() => {
-                                winston.info(`unidentified Deposit ${unidentifiedDeposit.id} updated to pending status`)
-                            })
-                    }
-                })
-
-            //Para cada uno de los valores ingresados corregimos el movimiento en la CC
-
-            for (const collectionSecurity of collection.Securities) {
-
-                if (collectionSecurity.type != 'CH') {
-
-                    const AccountMovement = require('./accountMovements.controller');
-
-                    const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
-
-                    let collectionType = accountMovementCategory.eStatus.get('INGRESO_COBRANZA').value;
-
-                    if (collection.batchNumber)
-                        collectionType = accountMovementCategory.eStatus.get('IMPORTACION_COBRANZA').value
-
-                    const accountMovement = await AccountMovement.deleteMovement(clientId, collectionSecurity.accountId,
-                        collection.periodId, collectionType, collectionSecurity.id)
-
-                    if (accountMovement === null) {
-                        winston.error(`It was not possible to delete account movement record for the Collection (ID: ${paymentOrder.id})  - ${err}`);
-                        throw new Error("It was not possible to add the collection into the account movements table");
-                    }
-
-                    AccountMovement.fixBalanceMovements(clientId, collection.periodId, collectionSecurity.accountId);
-                }
-            }
-
-            winston.info(`collection ${collectionId} deleted succesfully by user #${req.user.id}`)
-
-            req.flash("success", "la cobranza fue anulada exitosamente en la base de datos");
-
-        } else {
-            throw new error("no record found for collectionId " + collectionId);
-        }
+        req.flash("success", "la cobranza fue anulada exitosamente en la base de datos");
 
     } catch (err) {
 
