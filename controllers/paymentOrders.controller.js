@@ -442,9 +442,9 @@ module.exports.deletePaymentOrder = async function (clientId, paymentOrderId) {
 
 module.exports.deletePO = async function (req, res) {
 
-    const paymentOrderId = req.body.paymentOrderId;
-
     const clientId = req.body.clientId;
+
+    const paymentOrderId = req.body.paymentOrderId;
 
     try {
 
@@ -452,7 +452,7 @@ module.exports.deletePO = async function (req, res) {
 
         const paymentOrder = await this.deletePaymentOrder(clientId, paymentOrderId);
 
-        winston.info(`PO ${paymentOrderId} delete successfully by user ${req.user.id}`);
+        winston.info(`PO ${paymentOrderId} deleted successfully by user ${req.user.id}`);
 
         req.flash("success", `La OP #${paymentOrder.poNumber} fue anulada correctamente`);
 

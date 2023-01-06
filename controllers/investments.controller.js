@@ -8,6 +8,7 @@ const Model = require('../models')
 const Client = Model.client;
 const BillingPeriod = Model.billingPeriod;
 const Account = Model.account;
+const AccountMovement = Model.accountMovement;
 const AccountType = Model.accountType;
 const User = Model.user;
 const Investment = Model.investment;
@@ -26,6 +27,7 @@ const InvestmentsStatus = require('../utils/statusMessages.util').Investments;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
 
 const Notifications = require('../utils/notifications.util');
+const { invert } = require('underscore');
 
 module.exports.vencimiento = async function (req, res) {
 
@@ -328,7 +330,6 @@ module.exports.expirationDateReminder = async () => {
     })
 }
 
-
 module.exports.printReceipt = async function (req, res, next) {
 
     const investmentId = req.params.id;
@@ -360,3 +361,274 @@ module.exports.printReceipt = async function (req, res, next) {
         })
 
 };
+
+module.exports.showEditForm = async function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    const investmentId = req.params.investmentId;
+
+    try {
+        const client = await Client.findByPk(clientId);
+
+        const Accounts = await Account.findAll(
+            { where: { clientId: clientId }, include: [{ model: AccountType }] });
+
+        // const period = await BillingPeriod.findOne({
+        //     where: { clientId: req.params.clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value }
+        // });
+
+        const investmentsCategories = await InvestmentCategory.findAll({ where: { enabled: true } });
+
+        const investment = await Investment.findByPk(investmentId, {
+            include: [{ model: Client }, { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] },
+            { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'sourceAccount' },
+            { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'destinationAccount' },
+            { model: InvestmentCategory, as: "depositType" },
+            ],
+        });
+
+        if (investment.statusId === InvestmentsStatus.eStatus.get('accredited').value) {
+            req.flash("warning", "La edicion de inversiones acreditadas aun no se encuentra implementada");
+            res.redirect("/investments/client/" + clientId); return;
+        }
+
+        if (investment.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
+            req.flash("warning", "La inversión que quiere modificar pertenece a un período finalizado");
+            res.redirect("/investments/client/" + clientId); return;
+        }
+
+        res.render('investments/edit', { menu: CURRENT_MENU, data: { client: client, clientAccounts: Accounts, categories: investmentsCategories, investment } });
+
+    } catch (error) {
+        req.flash("error", "Ocurrio un error y no se puede modificar la inversion en la base de datos");
+        winston.error(`An error ocurred while user #${req.user.id} tryed to update the Investment #${investmentId} - ${err}`);
+        res.redirect("/investments/client/" + clientId);
+    }
+};
+
+module.exports.edit = async function (req, res, next) {
+
+    const clientId = req.params.clientId;
+
+    const investmentId = req.params.investmentId;
+
+    try {
+
+        const investment = await Investment.findByPk(investmentId,
+            {
+                include: [{ model: Client }, { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] },
+                { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'sourceAccount' },
+                { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'destinationAccount' },
+                { model: InvestmentCategory, as: "depositType" },
+                ],
+            });
+
+        if (investment === null) {
+            req.flash("error", "La inversión que quiere modificar no se encuentra en la base de datos");
+            res.redirect("/investments/client/" + clientId); return;
+        }
+
+        if (investment.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
+            req.flash("warning", "La inversión que quiere modificar pertenece a un período finalizado");
+            res.redirect("/investments/client/" + clientId); return;
+        };
+
+        if ((investment.statusId === InvestmentsStatus.eStatus.get('created').value) || (investment.statusId === InvestmentsStatus.eStatus.get('expired').value)) {
+
+            //validamos si difiere el importe o algunas de las cuentas, origen o destino...
+
+            let updateMovSource = false, updateMovDestination = false;
+
+            const amount = parseFloat(req.body.amount.replace(/[^0-9\.-]+/g, ""));
+
+            if (parseFloat(investment.amount) !== amount) {
+                updateMovSource = true; updateMovDestination = true;
+            }
+
+            if (investment.sourceAccountId !== req.body.sourceAccountId) { updateMovSource = true; }
+            if (investment.destinationAccountId !== req.body.destinationAccountId) { updateMovDestination = true; }
+
+            const originalSourceAccountId = investment.sourceAccountId;
+            const originalDestinationAccountId = investment.destinationAccountId;
+
+            if (updateMovSource === true) {     // CTA. ORIGEN
+
+                //Busco el Movimiento en la CC...
+
+                const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                let accountMovement = await AccountMovement.findOne({
+                    where: {
+                        clientId: clientId,
+                        periodId: investment.periodId,
+                        category: String.fromCharCode(accountMovementCategory.eStatus.get('INVERSION').value),
+                        movementId: investment.id,
+                        accountId: investment.sourceAccountId,
+                    }
+                });
+
+                if (accountMovement === null) { throw new Error('cannot find account movement in database'); }
+
+                //Actualizamos el movimiento en la CC...
+
+                accountMovement = await accountMovement.update({
+                    accountId: req.body.sourceAccountId,
+                    amount: (-1) * amount,
+                    userId: req.user.id
+                })
+
+                if (originalSourceAccountId !== Number(req.body.sourceAccountId)) {
+
+                    const originalAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, investment.periodId, originalSourceAccountId);
+
+                    const newAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, investment.periodId, req.body.sourceAccountId);
+
+                    winston.info(`balance for original account ${originalAccount} and the new account ${newAccount} fixed on user #${req.user.id} investment #${investmentId} update request`);
+
+                } else {
+
+                    const originalAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, investment.periodId, originalSourceAccountId);
+
+                    winston.info(`balance for original account ${originalAccount} fixed on user #${req.user.id} investment #${investmentId} update request`);
+                }
+            }
+
+            if (updateMovDestination === true) {    // CTA. DESTINO
+
+                //Busco el Movimiento en la CC...
+
+                const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                let accountMovement = await AccountMovement.findOne({
+                    where: {
+                        clientId: clientId,
+                        periodId: investment.periodId,
+                        category: String.fromCharCode(accountMovementCategory.eStatus.get('INVERSION').value),
+                        movementId: investment.id,
+                        accountId: investment.destinationAccountId,
+                    }
+                });
+
+                if (accountMovement === null) { throw new Error('cannot find account movement in database'); }
+
+                //Actualizamos el movimiento en la CC...
+
+                accountMovement = await accountMovement.update({
+                    accountId: req.body.destinationAccountId,
+                    amount: amount,
+                    userId: req.user.id
+                })
+
+                if (originalDestinationAccountId !== Number(req.body.destinationAccountId)) {
+
+                    const originalAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, investment.periodId, originalDestinationAccountId);
+
+                    const newAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, investment.periodId, req.body.destinationAccountId);
+
+                    winston.info(`balance for original account ${originalAccount} and the new account ${newAccount} fixed on user #${req.user.id} investment #${investmentId} update request`);
+
+                } else {
+
+                    const originalAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, investment.periodId, originalDestinationAccountId);
+
+                    winston.info(`balance for original account ${originalAccount} fixed on user #${req.user.id} investment #${investmentId} update request`);
+                }
+            }
+
+            await investment.update({
+                sourceAccountId: req.body.sourceAccountId,
+                destinationAccountId: req.body.destinationAccountId,
+                amount: amount,
+                categoryId: req.body.categoryId,
+                creationDate: req.body.creationDate,
+                expirationDate: (req.body.expirationDate === '' ? null : req.body.expirationDate),
+                comments: req.body.comments,
+                userId: req.user.id
+            });
+        }
+
+        winston.info(`Investment ${investment.id} updated succesfully`)
+        req.flash("success", `La inversión fue actualizada correctamente`)
+
+    } catch (err) {
+        req.flash("error", "Ocurrio un error y no se pudo modificar la inversion en la base de datos");
+        winston.error(`An error ocurred while user #${req.user.id} tryed to update the Investment #${investmentId} - ${err}`);
+    } finally {
+        res.redirect("/investments/client/" + clientId);
+    }
+}
+
+module.exports.delete = async function (req, res) {
+
+    const clientId = req.body.clientId;
+
+    const investmentId = req.body.investmentId;
+
+    try {
+
+        winston.info(`User #${req.user.id} requested to delete investment ${investmentId}`);
+
+        const investment = await Investment.findByPk(investmentId, {
+            include: [{ model: Client }, { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] },
+            { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'sourceAccount' },
+            { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'destinationAccount' },
+            { model: InvestmentCategory, as: "depositType" },
+            ],
+        });
+
+        if (investment.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
+            req.flash("error", "La inversión que quiere modificar pertenece a un período finalizado");
+            res.redirect("/investments/client/" + clientId); return;
+        }
+
+        if ((investment.statusId !== InvestmentsStatus.eStatus.get('pending').value) && (investment.statusId !== InvestmentsStatus.eStatus.get('created').value)) {
+            req.flash("error", "Solo se pueden eliminar inversiones que se encuentren en estado pendiente o creado");
+            res.redirect("/investments/client/" + clientId); return;
+        }
+
+        //------------------------------------------------------------------------
+        // eliminamos el movimiento de la CC del barrio - cuenta Origen & Destino
+        //------------------------------------------------------------------------
+
+        const AccountMovement = require('./accountMovements.controller');
+
+        const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+        const accountMovementSource = await AccountMovement.deleteMovement(clientId, investment.sourceAccountId, investment.periodId,
+            accountMovementCategory.eStatus.get('INVERSION').value, investment.id);
+
+        if (accountMovementSource === null) {
+            winston.error(`It was not possible to delente the account movement record for the source account ID: ${investment.sourceAccountId}`);
+            throw new Error("It was not possible to add the FTD into the account movements table");
+        }
+
+        const accountMovementDestination = await AccountMovement.deleteMovement(clientId, investment.destinationAccountId, investment.periodId,
+            accountMovementCategory.eStatus.get('INVERSION').value, investment.id);
+
+        if (accountMovementDestination === null) {
+            winston.error(`It was not possible to delente the account movement record for the source account ID: ${investment.destinationAccountId}`);
+            throw new Error("It was not possible to add the FTD into the account movements table");
+        }
+        // Finalmente pasamos la inversion como eliminada
+
+        await investment.update({
+            statusId: InvestmentsStatus.eStatus.get('cancelled').value,
+        });
+
+        //---------------------------------------------------------------------
+
+        winston.info(`Investment ${investmentId} deleted successfully by user ${req.user.id}`);
+
+        req.flash("success", `La inversion #${investment.id} fue anulada correctamente`);
+
+    } catch (err) {
+
+        req.flash("error", "Ocurrio un error y no se pudo anular correctamente el registro de la inversión en la base de datos");
+
+        winston.error(`An error ocurred while user #${req.user.id} deleted the investment ${investmentId} - ${err}`);
+
+    } finally {
+        res.redirect("/investments/client/" + clientId);
+    }
+}

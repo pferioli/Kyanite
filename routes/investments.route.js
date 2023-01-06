@@ -34,6 +34,18 @@ router.post("/rescue/:id", function (req, res, next) {
     investmentsController.listAllRescues(req, res);
 });
 
+router.get('/client/:clientId/edit/:investmentId', function (req, res, next) {
+    investmentsController.showEditForm(req, res);
+})
+
+router.post('/client/:clientId/edit/:investmentId', function (req, res, next) {
+    investmentsController.edit(req, res);
+})
+
+router.post("/delete", function (req, res, next) {
+    investmentsController.delete(req, res);
+});
+
 router.post("/rescue/new", function (req, res, next) {
     investmentsController.rescue(req, res);
 });
