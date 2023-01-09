@@ -129,21 +129,21 @@
 
                                 <!-- created / expired / accredited -->
                                 <% if((data.investment[i].statusId===1)||(data.investment[i].statusId===3)||(data.investment[i].statusId===4)) { %>
-                                    <a id="button-edit" title="editar" href="/investments/client/<%=data.client.id%>/edit/<%=data.investment[i].id%>" 
-                                        class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
+                                    
+                                    <button onclick="accreditDialog(this)" title="acreditar intereses" class="btn-flat btn-small waves-effect waves-light" 
+                                        data-id="<%=data.investment[i].id%>" data-clientid="<%=data.client.id%>" data-periodid="<%=data.investment[i].billingPeriod.id%>">
+                                            <i class="material-icons">check_circle</i></button>
                                 <% } %>
 
                                 <!-- created / expired -->
                                 <% if((data.investment[i].statusId===1)||(data.investment[i].statusId===3)) { %>
-                                    
-                                    <button onclick="accreditDialog(this)" title="acreditar intereses" class="btn-flat btn-small waves-effect waves-light" 
-                                        data-id="<%=data.investment[i].id%>" data-clientid="<%=data.client.id%>" data-periodid="<%=data.investment[i].billingPeriod.id%>">
-                                            <i class="material-icons">check_circle</i></button>                                                                                                                
+                                    <a id="button-edit" title="editar" href="/investments/client/<%=data.client.id%>/edit/<%=data.investment[i].id%>" 
+                                        class="btn-flat btn-small waves-effect waves-light"><i class="material-icons">edit</i></a>
 
-                                            <button id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light"
+                                    <button id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light"
                                         data-id="<%=data.investment[i].id%>" data-clientid="<%=data.client.id%>" data-periodid="<%=data.investment[i].billingPeriod.id%>" 
                                         data-value="<%=data.investment[i].amount%>" onclick="deleteDialog(this)">
-                                            <i class="material-icons">delete</i></button>                                                                                                                
+                                            <i class="material-icons">delete</i></button>
                                 <% } %>
 
                             </td>

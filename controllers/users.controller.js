@@ -62,7 +62,6 @@ module.exports.addNew = async function (req, res, next) {
         req.flash("warning", "El usuario ya existe en la base de datos");
         res.redirect('/users');
         return;
-
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -79,15 +78,13 @@ module.exports.addNew = async function (req, res, next) {
         .then(newUser => {
             winston.info(`a new user ${newUser.email} added to database by userId ${req.user.id}`);
             req.flash("success", "El nuevo usuario fue agregado exitosamente");
-            res.redirect('/users');
         })
         .catch(err => {
             winston.error(`It was not possible to add a new user - ${err}`);
             req.flash("error", "Ocurrio un error y no se pudo agregar el usuario");
+        }).finally(() => {
             res.redirect('/users');
-
         })
-
 }
 
 module.exports.enable2fa = async function (req, res, next) {

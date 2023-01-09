@@ -190,54 +190,109 @@ module.exports.accredit = async function (req, res) {
 
     const userId = req.user.id;
 
-    Investment.findByPk(depositId)
+    Investment.findByPk(depositId, {
+        include: [{ model: Client }, { model: BillingPeriod }, { model: User, include: [{ model: Model.userSignature }] },
+        { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'sourceAccount' },
+        { model: Account, paranoid: false, include: [{ model: AccountType }, { model: Bank }], as: 'destinationAccount' },
+        { model: InvestmentCategory, as: "depositType" },
+        ],
+    })
         .then(async investment => {
 
             let amount = parseFloat(investment.amount) + parseFloat(req.body.interests);
 
             const activePeriod = await BillingPeriod.findOne({
-                where: { clientId: clientId, statusId: 1 },
+                where: { clientId: clientId, statusId: BillingPeriodStatus.eStatus.get('opened').value },
                 attributes: ['id']
             });
 
-            //-----------------------------------------------------------------
-            // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
-            //-----------------------------------------------------------------
+            //si esta en estado "creada" o "expirada", acreditamos los intereses...
 
-            const AccountMovement = require('./accountMovements.controller');
+            if ((investment.statusId === InvestmentsStatus.eStatus.get('created').value) || (investment.statusId === InvestmentsStatus.eStatus.get('expired').value)) {
 
-            const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+                //-----------------------------------------------------------------
+                // <----- REGISTRAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
+                //-----------------------------------------------------------------
 
-            //en el movimiento saliente de la cuenta de PF, solo se contempla el valor original del mismo sin los intereses
+                const AccountMovement = require('./accountMovements.controller');
 
-            let accountMovementDestination = await AccountMovement.addMovement(clientId, investment.destinationAccountId, activePeriod.id, (-1) * investment.amount,
-                accountMovementCategory.eStatus.get('INVERSION').value, investment.id, userId);
+                const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
 
-            if (accountMovementDestination === null) {
-                winston.error(`It was not possible to add account movement record for the investment destination account ID: ${investment.destinationAccountId}`);
-                throw new Error("It was not possible to add the investment into the account movements table");
+                //en el movimiento saliente de la cuenta de PF, solo se contempla el valor original del mismo sin los intereses
+
+                let accountMovementDestination = await AccountMovement.addMovement(clientId, investment.destinationAccountId, activePeriod.id, (-1) * investment.amount,
+                    accountMovementCategory.eStatus.get('INVERSION').value, investment.id, userId);
+
+                if (accountMovementDestination === null) {
+                    winston.error(`It was not possible to add account movement record for the investment destination account ID: ${investment.destinationAccountId}`);
+                    throw new Error("It was not possible to add the investment into the account movements table");
+                }
+
+                const accountMovementSource = await AccountMovement.addMovement(clientId, investment.sourceAccountId, activePeriod.id, amount,
+                    accountMovementCategory.eStatus.get('INVERSION').value, investment.id, userId);
+
+                if (accountMovementSource === null) {
+                    winston.error(`It was not possible to add account movement record for the investment source account ID: ${investment.sourceAccountId}`);
+                    throw new Error("It was not possible to add the investment into the account movements table");
+                }
+
+                await investment.update({
+                    interests: parseFloat(req.body.interests.replace(/[^0-9\.-]+/g, "")),
+                    statusId: InvestmentsStatus.eStatus.get('accredited').value,
+                    userId: userId
+                });
+
+                winston.info(`Fixed-Term desposit ${investment.id} updated succesfully`)
+                req.flash("success", `Los intereses del plazo fijo han sido acreditados correctamente`); return;
+
             }
 
-            const accountMovementSource = await AccountMovement.addMovement(clientId, investment.sourceAccountId, activePeriod.id, amount,
-                accountMovementCategory.eStatus.get('INVERSION').value, investment.id, userId);
+            //si la inversion es un PF y esta "acreditada", solo podemos editar los intereses...
 
-            if (accountMovementSource === null) {
-                winston.error(`It was not possible to add account movement record for the investment source account ID: ${investment.sourceAccountId}`);
-                throw new Error("It was not possible to add the investment into the account movements table");
+            if (investment.statusId === InvestmentsStatus.eStatus.get('accredited').value) {
+
+                const accountMovementCategory = require('./accountMovements.controller').AccountMovementsCategories;
+
+                //-------------------------------------------------------------
+                // <----- ACTUALIZAMOS EL MOVIMIENTO EN LA CC DEL BARRIO ----->
+                //-------------------------------------------------------------
+
+                let accountMovement = await AccountMovement.findOne({
+                    where: {
+                        clientId: clientId,
+                        periodId: activePeriod.id,
+                        category: String.fromCharCode(accountMovementCategory.eStatus.get('INVERSION').value),
+                        movementId: investment.id,
+                        accountId: investment.sourceAccountId,
+                    }
+                });
+
+                if (accountMovement === null) { throw new Error('cannot find account movement in database'); }
+
+                //Actualizamos el movimiento en la CC...
+
+                accountMovement = await accountMovement.update({
+                    amount: amount,
+                    userId: req.user.id
+                })
+
+                await investment.update({
+                    interests: parseFloat(req.body.interests.replace(/[^0-9\.-]+/g, "")),
+                    userId: userId
+                });
+
+                const sourceAccount = await require('./accountMovements.controller').fixBalanceMovements(clientId, activePeriod.id, investment.sourceAccountId);
+
+                winston.info(`balance for account ${investment.sourceAccountId} fixed on user #${req.user.id} investment #${investment.id} update request`);
+
+                winston.info(`Fixed-Term desposit ${investment.id} interests updated succesfully`)
+                req.flash("success", `Los intereses del plazo fijo han sido actualizado correctamente`); return;
             }
 
-            await investment.update({
-                interests: parseFloat(req.body.interests.replace(/[^0-9\.-]+/g, "")),
-                statusId: InvestmentsStatus.eStatus.get('accredited').value,
-                userId: userId
-            });
-
-            winston.info(`Fixed-Term desposit ${investment.id} updated succesfully`)
-            req.flash("success", `Los intereses del plazo fijo ha sido acreditados correctamente`)
         })
         .catch(err => {
-            winston.error(`An error ocurred while user #${req.user.id} tryed to update a new FTD interests ${JSON.stringify(req.body)} - ${err} `)
-            req.flash("error", "Ocurrio un error y no se pudo acreditar los intereses el plazo fijo seleccionado");
+            winston.error(`An error ocurred while user #${req.user.id} tryed to update a new FTD interests ${JSON.stringify(req.body)} - ${err}`)
+            req.flash("error", "Ocurrio un error y no se pudo acreditar los intereses del plazo fijo seleccionado");
 
         })
         .finally(() => {
@@ -388,17 +443,26 @@ module.exports.showEditForm = async function (req, res) {
             ],
         });
 
-        if (investment.statusId === InvestmentsStatus.eStatus.get('accredited').value) {
-            req.flash("warning", "La edicion de inversiones acreditadas aun no se encuentra implementada");
-            res.redirect("/investments/client/" + clientId); return;
-        }
-
+        //solo permitimos editar inversiones en un periodo de facturacion abierto
         if (investment.billingPeriod.statusId !== BillingPeriodStatus.eStatus.get('opened').value) {
             req.flash("warning", "La inversión que quiere modificar pertenece a un período finalizado");
             res.redirect("/investments/client/" + clientId); return;
         }
 
-        res.render('investments/edit', { menu: CURRENT_MENU, data: { client: client, clientAccounts: Accounts, categories: investmentsCategories, investment } });
+        //si la inversion es un PF y esta "acreditada", solo podemos editar los intereses
+        if (investment.statusId === InvestmentsStatus.eStatus.get('accredited').value) {
+            req.flash("warning", "La edicion de inversiones acreditadas no está permitida");
+            res.redirect("/investments/client/" + clientId); return;
+        }
+
+        //si esta en estado "creada" o "expirada", cargamos el form de edicion con los campos permitidos
+        if ((investment.statusId === InvestmentsStatus.eStatus.get('created').value) || (investment.statusId === InvestmentsStatus.eStatus.get('expired').value)) {
+            res.render('investments/edit', { menu: CURRENT_MENU, data: { client: client, clientAccounts: Accounts, categories: investmentsCategories, investment } }); return;
+        }
+
+        //si esta en eun estado diferente a los anteriores, no se puede editar
+        req.flash("warning", "La edicion de inversiones no esta permitida para el estado actual");
+        res.redirect("/investments/client/" + clientId); return;
 
     } catch (error) {
         req.flash("error", "Ocurrio un error y no se puede modificar la inversion en la base de datos");
