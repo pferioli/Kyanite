@@ -61,34 +61,22 @@ module.exports.addNew = async function (req, res, next) {
 
         Account.create(clientAccount).
             then(function (result) {
-                winston.info(`User #${req.user.id} created succesfully a new client account ${JSON.stringify(clientAccount)} - ${result.id}`)
-                req.flash(
-                    "success",
-                    "Una nueva cuenta de cliente fue agregada exitosamente a la base de datos"
-                )
+                winston.info(`User #${req.user.id} created succesfully a new client account ${JSON.stringify(clientAccount)} - ${result.id}`);
+                req.flash("success", "Una nueva cuenta de cliente fue agregada exitosamente a la base de datos");
             })
             .catch(function (err) {
-                winston.error(`An error ocurred while user #${req.user.id} tryed to create a new client account ${JSON.stringify(clientAccount)} - ${err}`)
-                req.flash(
-                    "error",
-                    "Ocurrio un error y no se pudo agregar la nueva cuente de cliente en la base de datos"
-                )
+                winston.error(`An error ocurred while user #${req.user.id} tryed to create a new client account ${JSON.stringify(clientAccount)} - ${err}`);
+                req.flash("error", "Ocurrio un error y no se pudo agregar la nueva cuente de cliente en la base de datos");
             })
             .finally(() => {
                 res.redirect('/accounts/client/' + clientId);
             })
 
     } catch (error) {
-        req.flash(
-            "error",
-            "Ocurrio un error y no se pudo crear la nueva cuenta de cliente en la base de datos"
-        );
-
         winston.error(`An error ocurred while creating new client account ${JSON.stringify(req.body)} - ${err}`);
-
+        req.flash("error", "Ocurrio un error y no se pudo crear la nueva cuenta de cliente en la base de datos");
         res.redirect('/accounts/client/' + clientId);
     }
-
 };
 
 module.exports.delete = async function (req, res, next) {
@@ -169,8 +157,8 @@ module.exports.edit = async function (req, res, next) {
             })
             .finally(() => { res.redirect('/accounts/client/' + clientId); })
     } else {
-        req.flash("error", "Ocurrio un error y no se encontro la cuenta seleccionada en la base de datos");
         winston.error(`Client account not found for updating ${JSON.stringify(req.body)} - ${err}`);
+        req.flash("error", "Ocurrio un error y no se encontro la cuenta seleccionada en la base de datos");
         res.redirect('/accounts/client/' + clientId);
     }
 };
@@ -231,8 +219,8 @@ module.exports.newAccountType = async function (req, res, next) {
 
         })
         .catch(err => {
-            req.flash("error", "Ocurrio un error y no se pudo agregar el nuevo tipo de cuenta la base de datos");
             winston.error(`New account type could not be added to database ${JSON.stringify(req.body)} - ${err}`);
+            req.flash("error", "Ocurrio un error y no se pudo agregar el nuevo tipo de cuenta la base de datos");
             res.redirect('/accounts/client/' + clientId);
         })
 

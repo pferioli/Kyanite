@@ -2,77 +2,85 @@
 
 <main class="site-content">
     <div class="container" style="margin-top: 50px;">
-        <form class="col s12" id="formAddUser" method="post" action='/users/new' enctype="multipart/form-data"> <!--onsubmit="return validate()-->
+        <form class="col s12" id="formEditUser" method="post" action='/users/edit' enctype="multipart/form-data"> <!--onsubmit="return validate()-->
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title">Ingrese un nuevo usuario</span>
+                    <span class="card-title">Editar propiedades del usuario</span>
+                    
+                    <input type="hidden" name="userId" id="userId" value="<%=data.user.id%>" />
+
                     <div class="row" style="margin-top: 20px;">
-                        <div class="col s12">
-                            <div class="input-field col s8">
-                                <i class="material-icons prefix">face</i>
-                                <input id="name" name="name" type="text" value="" required/>
-                                <label for="name">Nombre Completo</label>
-                            </div>
-                            <div class="input-field col s4">
-                                <i class="material-icons prefix">account_balance</i>
-                                <select id="privilegesSelect" required>
-                                    <option value="1">Usuario Administrador - Nivel 1</option>
-                                    <option value="2">Usuario Avanzado - Nivel 2</option>
-                                    <option value="3" selected>Usuario Regular - Nivel 3</option>
-                                </select>
-                                <label>Seleccione el nivel de privilegios</label>
-                                <input type="hidden" name="securityLevel" id="securityLevel" value="3" />
-                            </div>
+                        <div class="input-field col s8">
+                            <i class="material-icons prefix">face</i>
+                            <input id="name" name="name" type="text" value="<%=data.user.name%>" required/>
+                            <label for="name">Nombre Completo</label>
+                        </div>
+                        <div class="input-field col s4">
+                            <i class="material-icons prefix">account_balance</i>
+                            <%# console.log(data.user.securityLevel); console.log(locals.user.securityLevel); %>
+                            <select id="privilegesSelect" required <% if (locals.user) { if(locals.user.securityLevel !== 1) { %> disabled <% } } %> >
+                                <option value="1" <% if(data.user.securityLevel === 1) { %> selected <% } %> >Usuario Administrador - Nivel 1</option>
+                                <option value="2" <% if(data.user.securityLevel === 2) { %> selected <% } %> >Usuario Avanzado - Nivel 2</option>
+                                <option value="3" <% if(data.user.securityLevel === 3) { %> selected <% } %> >Usuario Regular - Nivel 3</option>
+                            </select>
+                            <label>Seleccione el nivel de privilegios</label>
+                            <input type="hidden" name="securityLevel" id="securityLevel" value="<%=data.user.securityLevel%>" />
                         </div>
                     </div>
                     
                     <div class='row'>
                         <div class="col s7">
-                            
                             <div class="input-field col s12">
                                 <i class="material-icons prefix">email</i>
-                                <input id="email" name="email" type="text" value="" required />
+                                <input id="email" name="email" type="text" value="<%=data.user.email%>" required />
                                 <label for="email">Cuenta de correo</label>
                             </div>
 
                             <div class='input-field col s6'>
                                 <i class="material-icons prefix">password</i>
-                                <input type='password' name='password' id='password' class='validate' type='password' required />
+                                <input type='password' name='password' id='password' class='validate' type='password' />
                                 <label for='password'>Nueva contraseña</label>
                                 <p id="passwordStrength" style="text-align:center; color:#e0e0e0; font-size:smaller"></p>
                             </div>
 
                             <div class='input-field col s6'>
-                                <input type='password' id='passwordConfirm' class="validate" type='password' required/>
+                                <input type='password' id='passwordConfirm' class="validate" type='password' />
                                 <label for='passwordConfirm'>Confirmar contraseña</label>
                                 <span class="helper-text" data-error="la contraseña no coincide"></span>
                             </div>
                             
                             <div class="col s12">
-                                <div class="file-field input-field">
-                                    <div class="btn">
-                                        <span>Firma</span>
-                                            <input type="file" accept="image/png" name="attachment" id="attachment" onchange="signatureLoaded(this)">
-                                    </div>
-                                    <div class="file-path-wrapper">
-                                        <input class="file-path validate" type="text">
-                                        <label>Imagen de la firma</label>
+                                <div class="col s10">
+                                    <div class="file-field input-field">
+                                        <div class="btn">
+                                            <span>Firma</span>
+                                                <input type="file" accept="image/png" name="attachment" id="attachment" onchange="signatureLoaded(this)">
+                                        </div>
+                                        <div class="file-path-wrapper">
+                                            <input class="file-path validate" type="text">
+                                            <label>Imagen de la firma</label>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>                            
+                                <div class="col s2">
+                                    <div class="switch" style="margin-top: 3px;">
+                                        <label>Eliminar firma<input id="swClearSignature" type="checkbox" name="clearSignature">
+                                            <span class="lever"></span></label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        
+
                         <div class="col s5">
                             <div class="row">
-                                <img class="materialboxed" id="signatureImg" width="500" height="250" src='/images/no-signature.png'
+                                <img class="materialboxed" id="signatureImg" width="500" height="250" src='<%=data.signature%>'
                                     style=" display: flex; align-items: center; justify-content: center; border: 2px solid #dbe4ed; padding: 10px;"  >
                             </div>                            
                         </div>
                     </div>
-
                 </div>
 
-                <div class="card-action right-align">                  
+                <div class="card-action right-align">
                     <button id="add_button" type='submit' class="waves-effect waves-light btn green" style="margin-right: 10px;"><i class="material-icons right">save</i>Guardar</button>
                     <button action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="waves-effect waves-light btn red"><i class="material-icons right">cancel</i>Volver</button>
                 </div>
@@ -91,6 +99,10 @@
 
 <script>
     
+    $(document).ready(function(){
+        $('.materialboxed').materialbox();
+    });
+ 
     async function signatureLoaded(evt){
         const imgInput = document.getElementById("attachment");
         const [file] = imgInput.files
@@ -102,7 +114,6 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-   
         var nScore = "";
 
         var elems = document.querySelectorAll("select");
@@ -143,6 +154,8 @@
         function validate() {
             let password = document.getElementById('password');
             let passwordConfirm = document.getElementById('passwordConfirm');
+
+            if(password.value === "") return true;    //no se solicito el cambio de password
 
             document.getElementById('passwordStrength').innerHTML = "";
 

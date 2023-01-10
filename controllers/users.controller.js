@@ -8,10 +8,15 @@ const UserSignature = Model.userSignature;
 const UserAvatar = Model.userAvatar;
 
 const bcrypt = require('bcrypt');
+const path = require('path');
 
 const winston = require('../helpers/winston.helper');
+const { hashPassword } = require('./auth.controller');
+const { readFileSync } = require('fs');
 
 const UserPrivilegeLevel = require('../utils/userPrivilegeLevel.util').UserPrivilegeLevel;
+
+const ADMINISTRATOR = UserPrivilegeLevel.eLevel.get('ADMINISTRATOR').value;
 
 const CURRENT_MENU = 'users'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
@@ -50,11 +55,23 @@ module.exports.getAvatar = function (req, res) {
 
 module.exports.showNewForm = async function (req, res, next) {
 
+    if (req.user.securityLevel !== ADMINISTRATOR) {
+        req.flash("warning", "No tiene permisos suficientes para agregar usuarios");
+        res.redirect('/users');
+        return;
+    }
+
     res.render("users/add.ejs", { menu: CURRENT_MENU, data: {} });
 };
 
 
 module.exports.addNew = async function (req, res, next) {
+
+    if (req.user.securityLevel !== ADMINISTRATOR) {
+        req.flash("warning", "No tiene permisos suficientes para agregar usuarios");
+        res.redirect('/users');
+        return;
+    }
 
     const existingUser = await User.findOne({ where: { email: req.body.email } });
 
@@ -75,7 +92,15 @@ module.exports.addNew = async function (req, res, next) {
         secret: null,
         mustChange: true
     })
-        .then(newUser => {
+        .then(async newUser => {
+
+            if (req.file) {
+                await UserSignature.create({
+                    userId: newUser.id,
+                    image: req.file.buffer
+                })
+            }
+
             winston.info(`a new user ${newUser.email} added to database by userId ${req.user.id}`);
             req.flash("success", "El nuevo usuario fue agregado exitosamente");
         })
@@ -83,6 +108,122 @@ module.exports.addNew = async function (req, res, next) {
             winston.error(`It was not possible to add a new user - ${err}`);
             req.flash("error", "Ocurrio un error y no se pudo agregar el usuario");
         }).finally(() => {
+            res.redirect('/users');
+        })
+}
+
+module.exports.showEditForm = async function (req, res, next) {
+
+    const userId = Number(req.params.userId);
+
+    if (req.user.id !== userId && req.user.securityLevel !== ADMINISTRATOR) {
+        req.flash("warning", "No tiene permisos suficientes para modificar usuarios");
+        res.redirect('/users');
+        return;
+    }
+
+    const user = await User.findByPk(userId, {
+        include: [{ model: Model.userSignature }]
+    });
+
+    if (user === null) {
+        req.flash("error", "El usuario no existe en la base de datos");
+        res.redirect('/users');
+        return;
+    }
+
+    let signatureImage = undefined;
+
+    if (user.userSignature) {
+        signatureImage = "data:image/png;base64," + user.userSignature.image.toString("base64");
+    } else {
+        const noSignaturaImage = path.join(__dirname, "..", "public", "images", "no-signature.png");
+        signatureImage = "data:image/png;base64," + readFileSync(noSignaturaImage).toString('base64');
+    }
+
+    res.render("users/edit.ejs", { menu: CURRENT_MENU, data: { user, signature: signatureImage } });
+}
+
+module.exports.edit = async function (req, res, next) {
+
+    const userId = Number(req.body.userId); let isAdmin = false;
+
+    if (!userId) {
+        req.flash("error", "El identificador del usuario es invalido");
+        res.redirect('/users');
+        return;
+
+    }
+    // si el usuario no es administrador solo puede cambiar sus propio usuario...
+
+    if (req.user.securityLevel !== ADMINISTRATOR) {
+
+        if (req.user.id !== userId) {
+            req.flash("warning", "No tiene permisos suficientes para modificar usuarios");
+            res.redirect('/users');
+            return;
+        }
+    } else {    //ADMIN
+        isAdmin = true;
+    }
+
+    User.findByPk(userId)
+        .then(async user => {
+
+            if (user === null) {
+                req.flash("error", "No existe ningun usuario en la base de datos con ese ID");
+                res.redirect('/users');
+                return;
+            }
+
+            let updatedUser = {
+                name: req.body.name,
+                email: req.body.email,
+            }
+
+            if (req.body.clearSignature.toLowerCase() === 'on') {
+                await UserSignature.destroy({ where: { userId: user.id } });
+            } else {
+
+                if (req.file) {
+
+                    const signature = await UserSignature.findOne({ where: { userId: user.id } });
+
+                    if (signature !== null) {
+                        await UserSignature.update({
+                            userId: user.id,
+                            image: req.file.buffer
+                        })
+                    } else {
+                        await UserSignature.create({
+                            userId: user.id,
+                            image: req.file.buffer
+                        })
+                    }
+                }
+            }
+
+            if (isAdmin) {
+                updatedUser.securityLevel = req.body.securityLevel;
+            }
+
+            if (req.body.password) {
+                const hashedPassword = await bcrypt.hash(req.body.password, 10);
+                updatedUser.password = hashedPassword;
+            }
+
+            try {
+                await user.update(updatedUser);
+                req.flash("success", "El nuevo usuario fue agregado exitosamente");
+            } catch (error) {
+                throw error
+            }
+        })
+        .catch(err => {
+            winston.error(`It was not possible to edit the user #${userId} - ${err}`);
+            req.flash("error", "Ocurrio un error editando el usuario en la base de datos");
+        })
+        .finally(() => {
             res.redirect('/users');
         })
 }
