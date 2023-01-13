@@ -7,6 +7,7 @@ const Multer = require('multer');
 // https://github.com/GoogleCloudPlatform/google-cloud-node/blob/master/docs/authentication.md
 // These environment variables are set automatically on Google App Engine
 const { Storage } = require('@google-cloud/storage');
+const { fstat } = require('fs');
 
 const storageoptions = {
     projectId: process.env.GOOGLE_CLOUD_PROJECT,
@@ -65,6 +66,27 @@ async function writeFileToGCS(req, gcsFileName, gcsBucketName) {
         });
     });
 };
+
+async function readExcelFileFromGCS(gcsFileName, gcsBucketName) {
+
+    const GCLOUD_STORAGE_BUCKET = gcsBucketName;
+
+    const bucket = storage.bucket(GCLOUD_STORAGE_BUCKET);
+
+    const file = bucket.file(gcsFileName);
+
+    // const downloadFile = await file.download();
+
+    const blobStream = await file.createReadStream() //stream is created
+
+    const Excel = require('exceljs');
+
+    const workbook = new Excel.Workbook();
+
+    await workbook.xlsx.read(blobStream);
+
+    return workbook;
+}
 
 async function readCollectionsFileFromGCS(gcsFileName, gcsBucketName) {
 
@@ -144,7 +166,7 @@ async function readPropertyFileFromGCS(gcsFileName, gcsBucketName) {
                             case 'telefono': { return "phone" };
                             case 'correo': { return "email" };
                             case 'cuil': { return "cuil" };
-                            case 'comentarios': { return "comments" };                            
+                            case 'comentarios': { return "comments" };
                         }
                     }
                 }));
@@ -168,5 +190,6 @@ module.exports = {
     multer,
     sendUploadToGCS: writeFileToGCS,
     readCollectionsFileFromGCS: readCollectionsFileFromGCS,
-    readPropertyFileFromGCS: readPropertyFileFromGCS
+    readPropertyFileFromGCS: readPropertyFileFromGCS,
+    readExcelFileFromGCS: readExcelFileFromGCS
 };

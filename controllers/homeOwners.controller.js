@@ -379,6 +379,61 @@ module.exports.importHomeOwners = async function (req, res) {
     res.redirect(`/homeOwners/client/${clientId}`);
 }
 
+// module.exports.showCurrentAccountsReportForm = async function (req, res) {
+//     const clientId = req.params.clientId;
+//     res.render()
+// }
+
+module.exports.currentAccountsReport = async function (req, res) {
+
+    const clientId = req.params.clientId;
+
+    const gcs = require('../helpers/gcs.helper');
+
+    const filename = "Cash Flow Los Arces - vs2.xlsx"
+
+    const gcsFileName = `homeowners/cashflow/${filename}`;
+
+    const gcsBucketName = `${process.env.GOOGLE_CLOUD_PROJECT}_bucket`;
+
+    try {
+
+        const client = await Client.findByPk(clientId);
+
+        if (client.internalCode.toUpperCase() === "ARC") {  //los Arces
+
+            const sourceWorkBook = await gcs.readExcelFileFromGCS(gcsFileName, gcsBucketName);
+
+            var worksheet = sourceWorkBook.getWorksheet("CUENTA CORRIENTES DESDE 11-2022");
+
+            let sourceRows = [];
+
+            await worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
+                console.log("Row " + rowNumber + " = " + JSON.stringify(row.values));
+                if (rowNumber === 1 && row.values[1] === "PERIODO") {
+                    console.log("Skipping headers from excel file...")
+                } else {
+                    sourceRows.push({ rowNumber: rowNumber, rowValues: row.values })
+                }
+            });
+
+            const report = require('../reports/homeOwners/currentAccount/currentAccountsExcel.ARC.report');
+
+            report.generateExcel(client, sourceRows, req.user, res);
+
+            return;
+        }
+
+        req.flash("warning", "no hay definido ningun reporte para el cliente solicitado");
+        res.redirect(`/homeOwners/client/${clientId}`);
+
+    } catch (error) {
+        winston.error(`An error ocurred creating the currentAccount report for client #${clientId} - ${err}`)
+        req.flash("error", "ocurrio un error y no se pudo crear el reporte solicitado");
+        res.redirect(`/homeOwners/client/${clientId}`);
+    }
+}
+
 //------------------ AJAX CALLS ------------------//
 
 module.exports.getHomeOwnersByClient = async function (req, res, next) {

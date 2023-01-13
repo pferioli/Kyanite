@@ -32,6 +32,12 @@ router.get("/client/:clientId", function (req, res, next) {
     homeOwnersController.listAll(req, res);
 });
 
+//reporte de cuenta corriente de propietarios
+
+router.get("/client/:clientId/reports/currentAccounts/", function (req, res, next) {
+    homeOwnersController.currentAccountsReport(req, res);
+});
+
 router.get("/edit/:id", function (req, res, next) {
     homeOwnersController.showEditForm(req, res);
 });
@@ -64,5 +70,6 @@ router.get("/ajax/getByClient/:clientId", function (req, res, next) {
 router.get("/ajax/getById/:homeOwnerId", function (req, res, next) {
     homeOwnersController.getHomeOwnerById(req, res);
 });
+
 
 module.exports = router;

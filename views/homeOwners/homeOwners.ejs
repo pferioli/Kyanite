@@ -24,15 +24,22 @@
                 </div>
             </div>
             <div class="actions">
+                
                 <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>
+                
                 <a href="/homeOwners/client/<%=data.client.id%>/new" id="button-add" title="agregar propietario" class="waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
+                
                 <a href="/homeOwners/client/<%=data.client.id%>/upload" id="button-upload" title="importar desde archivo" class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>
+                
+                <a href="/homeOwners/client/<%=data.client.id%>/reports/currentAccounts" id="button-currentAccounts" 
+                    title="reporte de cuenta corriente" class="waves-effect btn-flat nopadding">
+                    <i class="material-icons">summarize</i>
+                </a>
+                
                 <a href="#" id="button-search" title="buscar" class="search-toggle waves-effect btn-flat nopadding"><i class="material-icons">search</i></a>
             </div>
         </div>
-        <!-- <div class="progress" id="progress" style="margin-top: 30px;">
-        <div class="indeterminate"></div>
-        </div> -->
+
         <div id="hide-dt" style="display:none">
             <table id="datatable" class="table display">
                 <thead>
@@ -129,13 +136,15 @@
                 },
                 {
                     className: "center-align",
-                    targets: 0
+                    targets: 1 
                 },
             ],
-            colReorder: true,
             pageLength: 200,
-            order: [[0, 'asc']],
+            order: [[1, 'asc']],
             autowidth: true,
+            scrollY: '500px',
+            scrollX: true,
+            scrollCollapse: true,
             paging: true,
             buttons: [
                 {
@@ -167,7 +176,7 @@
                     },
                     customize: function (xlsx) {
                         var source = xlsx.xl['workbook.xml'].getElementsByTagName('sheet')[0];
-                        source.setAttribute('name', 'Proveedores');
+                        source.setAttribute('name', 'Propietarios');
                     }
                 },
                 { extend: 'csvHtml5' },
