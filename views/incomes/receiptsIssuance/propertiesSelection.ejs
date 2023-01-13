@@ -59,7 +59,7 @@
                 <tbody>
                     <% for(var i=0; i < data.collections.length; i++) { %>
                         <tr data-id="<%= data.collections[i].id %>">
-                            <td></td>                                                        
+                            <td></td>           
                             <td><%= data.collections[i].id %></td>
                             <td>
                                 <% if(data.collections[i].receiptNumber === null) { %>
@@ -71,10 +71,25 @@
                                     <%=mainReceiptNumber%>-<%=subReceiptNumber%>
                                 <% } %>
                             </td>
-                            <td><%= data.collections[i].homeOwner.property %></td>                        
-                            <td><%= data.collections[i].homeOwner.name %></td>
+                            <td>
+                                <% if (data.collections[i].homeOwner) { %>                                    
+                                    <% if (data.collections[i].homeOwner.deletedAt === null) { %>
+                                        <%= data.collections[i].homeOwner.property %>
+                                    <% } else { %>
+                                        <s><%= data.collections[i].homeOwner.property %> (#<%= data.collections[i].homeOwner.id %>)</s>
+                                    <% } %>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (data.collections[i].homeOwner) { %>                                    
+                                    <% if (data.collections[i].homeOwner.deletedAt === null) { %>
+                                        <%= data.collections[i].homeOwner.name %>
+                                    <% } else { %>
+                                        <s><%= data.collections[i].homeOwner.name %></s>
+                                    <% } %>
+                                <% } %>
+                            </td>
                             <td><%= data.collections[i].collection.receiptDate %></td>
-
                             <td>
                                 <% if(data.collections[i].collection.billingPeriod.statusId === 0) { %>
                                 <i class="material-icons">calendar_today</i>

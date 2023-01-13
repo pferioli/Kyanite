@@ -47,7 +47,7 @@ module.exports.listAll = async function (req, res) {
 
     let options = {
         include: [
-            { model: HomeOwner }, { model: User },
+            { model: HomeOwner, paranoid: false }, { model: User },
             {
                 model: Collection,
                 where: {
@@ -97,7 +97,7 @@ module.exports.printReceipts = async function (req, res) {
 
     let options = {
         include: [
-            { model: HomeOwner }, { model: User },
+            { model: HomeOwner, paranoid: false }, { model: User },
             {
                 model: Collection,
                 where: {
