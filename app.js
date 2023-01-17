@@ -87,6 +87,7 @@ app.use(
     },
   })
 );
+
 app.use(flash());
 
 passport(app);  //set passport strategy
@@ -175,6 +176,12 @@ app.get("/check_version", function (req, res) {
 
   res.send({ "env": env, "database": config.database, "backend": { "name": pkgJson.name, "version": pkgJson.version } })
 });
+
+//Add me after the express-session middleware    
+// app.use((req, res, next) => {
+//   req.session.referrer = req.protocol + '://' + req.get('host') + req.originalUrl;
+//   next();
+// });
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

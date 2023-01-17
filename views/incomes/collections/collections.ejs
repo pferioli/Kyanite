@@ -42,7 +42,11 @@
                 
                 <a href="/incomes/collections/new/<%=data.client.id%>" id="button-add" title="agregar cobranza" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
                 
-                <button id="button-delete" title="eliminar" onClick="deleteMultipleDialog(this)" class="waves-effect btn-flat nopadding" data-clientId="<%=data.client.id%>"><i class="material-icons">delete</i></button>
+                <% if(locals.user.securityLevel === 1) { %>
+                    <button id="button-delete" title="eliminar" onClick="deleteMultipleDialog(this)" class="waves-effect btn-flat nopadding" data-clientId="<%=data.client.id%>">
+                        <i class="material-icons">delete</i>
+                    </button>
+                <% } %>
                 
                 <a href="/incomes/collections/import/new/<%=data.client.id%>" id="button-upload" title="importar desde archivo" class="waves-effect btn-flat nopadding"><i class="material-icons">cloud_upload</i></a>                
                 
@@ -209,11 +213,15 @@
                                 <a href="/incomes/collections/client/<%=data.client.id%>/reassign/<%= data.collections[i].id%>" title="reasignar" class="btn-flat btn-small waves-effect waves-light"> 
                                     <i class="material-icons">holiday_village</i></a>
 
-                                <a id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
-                                    data-id="<%=data.collections[i].id%>" 
-                                    data-value="<%= data.collections[i].receiptNumber %>" 
-                                    data-clientId="<%=data.client.id%>"
-                                    onclick="deleteDialog(this)"><i class="material-icons">delete</i></a>
+                                <% if(locals.user.securityLevel === 1) { %>
+                                    <a id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
+                                        data-id="<%=data.collections[i].id%>" 
+                                        data-value="<%= data.collections[i].receiptNumber %>" 
+                                        data-clientId="<%=data.client.id%>"
+                                        onclick="deleteDialog(this)">
+                                        <i class="material-icons">delete</i>
+                                    </a>
+                                <% } %>
                             </td>
                         </tr>
                         <% } %>

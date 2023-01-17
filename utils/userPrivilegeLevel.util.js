@@ -13,6 +13,7 @@ module.exports.UserPrivilegeLevel = class {
             'ADMINISTRATOR': 1,
             'ADVANCED': 2,
             'REGULAR': 3,
+            'ALL': 9,
         })
     }
 }
