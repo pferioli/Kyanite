@@ -54,7 +54,7 @@
     "path": "^0.12.7",
     "pdfkit": "^0.11.0",
     "request": "^2.88.2",
-    "sequelize": "^6.3.4",
+    "sequelize": "^6.29.0",
     "serve-favicon": "^2.5.0",
     "socket.io": "^4.5.4",
     "strip-bom-stream": "^4.0.0",
