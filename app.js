@@ -43,15 +43,15 @@ winston.info(`welcome to kyanite, starting app in ${process.env.NODE_ENV} enviro
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 
-require('@google-cloud/debug-agent').start({
-  projectId: process.env.GOOGLE_CLOUD_PROJECT,
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-  serviceContext: {
-    service: pjson.name,
-    version: pjson.version,
-    enableCanary: true,
-  }
-});
+// require('@google-cloud/debug-agent').start({
+//   projectId: process.env.GOOGLE_CLOUD_PROJECT,
+//   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+//   serviceContext: {
+//     service: pjson.name,
+//     version: pjson.version,
+//     enableCanary: true,
+//   }
+// });
 
 //---------------------------------------------------------------------------//
 

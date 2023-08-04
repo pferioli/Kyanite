@@ -97,7 +97,7 @@ router.post("/import/killActiveSessions", lastVisitedUrl(), function (req, res) 
 
 //IMPORT --> AJAX
 
-router.get("/import/status/:controlId", lastVisitedUrl(), function (req, res) {   //AJAX
+router.get("/import/status/:controlId", function (req, res) {   //AJAX
     collectionsController.checkImportProcess(req, res);
 });
 
