@@ -204,7 +204,6 @@ module.exports.downloadExpensesReport = async function (req, res) {
             winston.error(`An error ocurred creating the pdf expenses report file - ${error}`);
         }
     }
-
 };
 
 module.exports.createInvoice = function (req, res) {

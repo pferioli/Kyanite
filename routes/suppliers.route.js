@@ -50,6 +50,11 @@ router.get("/payments/:supplierId", function (req, res, next) {
 router.post("/payments", function (req, res, next) {
   suppliersController.listPayments(req, res);
 })
+
+router.get("/payments/report/:supplierId", function (req, res, next) {
+  suppliersController.createBalanceReport(req, res);
+})
+
 //AJAX
 
 router.get("/ajax/raw/:id", function (req, res, next) {

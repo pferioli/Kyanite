@@ -1,3 +1,5 @@
+const _ = require('underscore');
+
 const Op = require('sequelize').Op
 
 const Model = require('../models')
@@ -21,12 +23,15 @@ const AccountType = Model.accountType;
 const CheckSplitted = Model.checkSplitted;
 const Check = Model.check;
 
+const CreditNote = Model.creditNote;
+
 const winston = require('../helpers/winston.helper');
 
 const CURRENT_MENU = 'suppliers'; module.exports.CURRENT_MENU = CURRENT_MENU;
 
 const PaymentReceiptStatus = require('../utils/statusMessages.util').PaymentReceipt;
 const PaymentOrderStatus = require('../utils/statusMessages.util').PaymentOrder;
+const CreditNoteStatus = require('../utils/statusMessages.util').CreditNote;
 
 module.exports.listAll = function (req, res, next) {
     Supplier.findAll({
@@ -332,6 +337,153 @@ module.exports.listPayments = async function (req, res, next) {
             menu: `${CURRENT_MENU}_payments`, data: { client: client, supplier: supplier, paymentReceipts: paymentReceipts },
         });
     });
+};
+
+module.exports.createBalanceReport = async function (req, res) {
+
+    const clientId = req.query.clientId;
+
+    const supplierId = req.params.supplierId;
+
+    // const { dateFrom, dateUntil } = req.query;
+
+    try {
+
+        const client = await Client.findByPk(clientId);
+
+        const supplier = await Supplier.findByPk(supplierId);
+
+        let supplierAccountMovements = [];
+
+        let paymentReceipts = await PaymentReceipt.findAll({
+            include: [{
+                model: ReceiptType
+            }],
+            where: {
+                clientId: clientId,
+                supplierId: supplierId,
+                statusId: {
+                    [Op.in]: [
+                        PaymentReceiptStatus.eStatus.get('pending').value,
+                        PaymentReceiptStatus.eStatus.get('inprogress').value,
+                        PaymentReceiptStatus.eStatus.get('processed').value
+                    ]
+                }
+            }
+        })
+
+        for (const paymentReceipt of paymentReceipts) {
+            supplierAccountMovements.push({
+                date: paymentReceipt.emissionDate,
+                receiptType: paymentReceipt.receiptType.name,
+                receiptNumber: paymentReceipt.receiptNumber,
+                type: undefined,
+                poNumber: undefined,
+                account: undefined,
+                amount: paymentReceipt.amount
+            })
+        };
+
+        paymentReceipts = undefined;    //to free up memory
+
+        let paymentOrders = await PaymentOrder.findAll({
+            include: [
+                {
+                    model: PaymentReceipt,
+                    include: { model: ReceiptType },
+                    where: {
+                        clientId: clientId,
+                        supplierId: supplierId,
+                    }
+                },
+                { model: Account, include: [{ model: AccountType }] }
+            ],
+            where: {
+                amount: {
+                    [Op.gte]: 0
+                },
+                statusId: {
+                    [Op.in]: [
+                        PaymentOrderStatus.eStatus.get('pending').value,
+                        PaymentOrderStatus.eStatus.get('inprogress').value,
+                        PaymentOrderStatus.eStatus.get('processed').value
+                    ]
+                }
+            }
+        })
+
+        for (const paymentOrder of paymentOrders) {
+
+            let account = (paymentOrder.account.bankId ?
+                `(${paymentOrder.account.accountType.account}) ${paymentOrder.account.accountNumber}` :
+                `(${paymentOrder.account.accountType.account}) ${paymentOrder.account.accountType.description}`);
+
+            supplierAccountMovements.push({
+                date: paymentOrder.paymentDate,
+                receiptType: paymentOrder.paymentReceipt.receiptType.name,
+                receiptNumber: paymentOrder.paymentReceipt.receiptNumber,
+                type: 'O/P',
+                poNumber: paymentOrder.poNumber,
+                account: account,
+                amount: (paymentOrder.amount * (-1))
+            })
+        };
+
+        paymentOrders = undefined;
+
+        let creditNotes = await CreditNote.findAll({
+            include: [
+                {
+                    model: PaymentReceipt,
+                    include: { model: ReceiptType },
+                    where: {
+                        clientId: clientId,
+                        supplierId: supplierId,
+                    }
+                },
+                { model: PaymentOrder, include: { model: Account, include: [{ model: AccountType }] } }
+            ],
+            where: {
+                statusId: {
+                    [Op.in]: [
+                        CreditNoteStatus.eStatus.get('pending').value,
+                        CreditNoteStatus.eStatus.get('inprogress').value,
+                        CreditNoteStatus.eStatus.get('processed').value
+                    ]
+                }
+            }
+        })
+
+        for (const creditNote of creditNotes) {
+
+            let account = (creditNote.paymentOrder.account.bankId ?
+                `(${creditNote.paymentOrder.account.accountType.account}) ${creditNote.paymentOrder.account.accountNumber}` :
+                `(${creditNote.paymentOrder.account.accountType.account}) ${creditNote.paymentOrder.account.accountType.description}`);
+
+            supplierAccountMovements.push({
+                date: creditNote.emissionDate,
+                receiptType: creditNote.paymentReceipt.receiptType.name,
+                receiptNumber: creditNote.paymentReceipt.receiptNumber,
+                type: 'N/C',
+                poNumber: creditNote.paymentOrder.poNumber,
+                account: account,
+                amount: creditNote.amount
+            })
+        };
+        creditNotes = undefined;
+
+        const supplierAccountMovementsSortedByDate = _.sortBy(supplierAccountMovements, 'date'); supplierAccountMovements = undefined;
+
+        const { createReport } = require("../reports/suppliers/suppliersBalance.report");
+
+        createReport(supplier, client, supplierAccountMovementsSortedByDate, req.user, res); //, path.join(__dirname, "..", "public", "invoice.pdf"))
+
+    } catch (error) {
+        winston.error(`An error ocurred on supplier balance report - ${error}`);
+        req.flash("error", "Ocurrio un error y no se pudo generar el reporte de cuenta corriente del proveedor");
+        res.redirect("/suppliers");
+    }
+
 };
 
 //------------------ AJAX CALLS ------------------//
