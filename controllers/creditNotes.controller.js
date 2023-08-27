@@ -7,6 +7,7 @@ const PaymentReceipt = Model.paymentReceipt;
 const PaymentReceiptImage = Model.paymentReceiptImage;
 const PaymentOrder = Model.paymentOrder;
 const CreditNote = Model.creditNote;
+const CreditNoteParent = Model.creditNoteParent;
 const BillingPeriod = Model.billingPeriod;
 const Bank = Model.bank;
 const Account = Model.account;
@@ -69,13 +70,22 @@ module.exports.listAll = async function (req, res) {
             {
                 model: PaymentReceipt, where: { clientId: clientId }, include: [{ model: ReceiptType }, { model: Supplier }],
             },
-            { model: PaymentOrder }, { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User }
+            { model: PaymentOrder }, { model: BillingPeriod }, { model: Account, include: [{ model: AccountType }] }, { model: User },
+            { model: CreditNoteParent, include: [{ model: PaymentOrder }] }
         ],
     };
 
     const client = await Client.findByPk(clientId);
 
     const creditNotes = await CreditNote.findAll(options);
+
+    // const creditNotesParent = await CreditNoteParent.findAll({
+    //     where: { parentPaymentOrderId: 14998 },
+    //     include: [
+    //         { model: CreditNote }]
+    // });
+
+    // console.log(creditNotesParent);
 
     res.render('creditNotes/creditNotes',
         {
@@ -189,3 +199,92 @@ module.exports.addNew = async function (req, res, next) {
             res.redirect(`/creditNotes/client/${clientId}`);
         })
 }
+
+// module.exports.fixCreditNotes = async function (req, res) {
+
+//     const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+
+//     let creditNotesArr = []
+
+//     const csvWriter = createCsvWriter({
+//         path: '/Users/ferioli/Projects/kyanite/examples/notasCredito.csv',
+//         header: [
+//             { id: 'receiptId', title: 'ID-FC' },
+//             { id: 'receiptNumber', title: 'FC' },
+//             { id: 'opType', title: 'TIPO' },
+//             { id: 'poId', title: 'ID-PO' },
+//             { id: 'poNumberFormatted', title: 'PO' },
+//             { id: 'accountId', title: 'CTA' },
+//             { id: 'amount', title: 'IMPORTE' },
+//             { id: 'supplier', title: "PROVEEDOR" },
+//             { id: 'client', title: "CLIENTE" },
+//             { id: 'parentPaymentOrderId', title: "PO/NC" }
+
+//         ]
+//     });
+
+//     try {
+//         let creditNotes = await CreditNote.findAll({
+//             include: { model: PaymentOrder, include: { model: Account, include: [{ model: AccountType }] } }
+//         })
+
+//         const creditNotesTmp = _.uniq(creditNotes, 'paymentReceiptId');
+
+//         for (const creditNote of creditNotesTmp) {
+
+//             let paymentReceipt = await PaymentReceipt.findByPk(creditNote.paymentReceiptId, {
+//                 include: { model: ReceiptType, model: Client },
+//                 // { model: PaymentOrder, include: { model: Account, include: [{ model: AccountType }] } }
+//             })
+
+//             const supplier = await Supplier.findByPk(paymentReceipt.supplierId);
+
+//             const paymentOrders = await PaymentOrder.findAll({
+//                 where: {
+//                     PaymentReceiptId: paymentReceipt.id,
+//                     accountId: creditNote.accountId
+//                 }
+//             })
+
+//             const addCreditNoteParent = (paymentOrders.length === 2);
+
+//             for (const paymentOrder of paymentOrders) {
+//                 try {
+
+//                     let record = {
+//                         receiptId: creditNote.paymentReceiptId,
+//                         receiptNumber: paymentReceipt.receiptNumber,
+//                         opType: (paymentOrder.amount >= 0 ? 'OP' : 'NC'),
+//                         poNumberFormatted: paymentOrder.poNumberFormatted,
+//                         poId: paymentOrder.id,
+//                         accountId: paymentOrder.accountId,
+//                         amount: paymentOrder.amount,
+//                         supplier: supplier.name,
+//                         client: (paymentReceipt.client ? paymentReceipt.client.name : "")
+//                     }
+
+//                     if ((record.opType === 'OP') && (addCreditNoteParent === true)) {
+//                         record.parentPaymentOrderId = creditNote.paymentOrder.id.toString() + " (" + creditNote.paymentOrder.poNumberFormatted + ")";
+//                     } else {
+//                         record.parentPaymentOrderId = ""
+//                     }
+
+//                     creditNotesArr.push(record);
+
+//                 } catch (error) {
+//                     console.error(error)
+//                 }
+//             }
+//         }
+
+//         csvWriter.writeRecords(creditNotesArr)       // returns a promise
+//             .then(() => {
+//                 console.log('...Done');
+//             });
+
+//     } catch (error) {
+//         req.flash("error", "Ocurrio un error");
+//     } finally {
+//         res.redirect("/suppliers");
+//     }
+// }

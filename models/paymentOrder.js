@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
             PaymentOrder.hasOne(models.paymentReceipt, { foreignKey: 'id', sourceKey: 'paymentReceiptId' })
             PaymentOrder.hasOne(models.checkSplitted, { foreignKey: 'id', sourceKey: 'checkId' })
             PaymentOrder.hasOne(models.user, { foreignKey: 'id', sourceKey: 'userId' })
+            PaymentOrder.hasMany(models.creditNoteParent, { sourceKey: 'id', /* keyType: 'paymentOrderId' */ })
         }
     };
 

@@ -17,6 +17,8 @@ const CheckSplitted = Model.checkSplitted;
 const Check = Model.check;
 const Supplier = Model.supplier;
 const User = Model.user;
+const CreditNote = Model.creditNote;
+const CreditNoteParent = Model.creditNoteParent
 
 const db = require('../models/index');
 
@@ -31,6 +33,7 @@ const PaymentReceiptStatus = require('../utils/statusMessages.util').PaymentRece
 const SplitCheckStatus = require('../utils/statusMessages.util').SplitCheck;
 const CheckStatus = require('../utils/statusMessages.util').Check;
 const BillingPeriodStatus = require('../utils/statusMessages.util').BillingPeriod;
+const CreditNoteStatus = require('../utils/statusMessages.util').CreditNote;
 
 module.exports.listAll = async function (req, res) {
 
@@ -60,13 +63,19 @@ module.exports.listAll = async function (req, res) {
             periodId: {
                 [Op.in]: periods
             },
-            statusId: { [Op.in]: status }
+            statusId: { [Op.in]: status },
         },
-        include: [{ model: CheckSplitted, include: [{ model: Check }] },
-        {
-            model: PaymentReceipt, where: { clientId: clientId }, include: [{ model: ReceiptType }, { model: Supplier }],
-        },
-        { model: BillingPeriod }, { model: Account, paranoid: false, include: [{ model: AccountType }] }, { model: User }],
+        include: [
+            { model: CheckSplitted, include: [{ model: Check }] },
+            {
+                model: PaymentReceipt, where: { clientId: clientId }, include: [{ model: ReceiptType }, { model: Supplier }],
+            },
+            { model: BillingPeriod }, { model: Account, paranoid: false, include: [{ model: AccountType }] },
+            {
+                model: CreditNoteParent, include: [{ model: CreditNote }]
+            },
+            { model: User },
+        ],
     };
 
     const client = await Client.findByPk(clientId);

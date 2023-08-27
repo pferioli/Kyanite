@@ -28,7 +28,9 @@
                     <label> Mostrar notas de crédito anuladas <input id="swStatus" type="checkbox" onchange="reloadPage();" <% if(params.showAll===true){%> checked <% } %>>
                         <span class="lever"></span></label>
                 </div>
-                
+            
+                <!-- <a href="/creditNotes/fixCreditNotes" id="button-fix" title="arreglar NC" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">bug_report</i></a> -->
+
                 <button id="button-reload" title="actualizar" onClick="window.location.reload();" class="waves-effect btn-flat nopadding"><i class="material-icons">refresh</i></button>                
                 
                 <a href="/creditNotes/client/<%=data.client.id%>/new" title="agregar nota de crédito" class="modal-trigger waves-effect btn-flat nopadding"><i class="material-icons">add_box</i></a>
@@ -41,7 +43,8 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>OP</th>
+                            <th>OP/NC</th>
+                            <th>OP(S)</th>                        
                             <th>Proveedor</th>
                             <th>Factura</th>
                             <th>Fecha de Emisión</th>
@@ -58,6 +61,14 @@
                         <tr data-id="<%= data.creditNotes[i].id %>">
                             <td><%= data.creditNotes[i].id %></td>
                             <td><%= data.creditNotes[i].paymentOrder.poNumberFormatted %></td>
+                            <td>
+                                <% for(var j=0; j < data.creditNotes[i].creditNoteParents.length; j++) { %>
+                                    <% if(j>0) { %> , <% } %>
+                                    <a class="blue-text" href="/expenses/paymentOrders/client/<%=data.creditNotes[i].clientId%>?periodId=<%=data.creditNotes[i].creditNoteParents[j].paymentOrder.periodId%>">
+                                        <%=data.creditNotes[i].creditNoteParents[j].paymentOrder.poNumberFormatted%>
+                                    </a>
+                                <% } %>
+                            </td>
                             <td><%= data.creditNotes[i].paymentReceipt.supplier.name %></td>
                             <td><a class="blue-text" href="/expenses/paymentReceipts/info/<%= data.creditNotes[i].paymentReceipt.id %>">[<%= data.creditNotes[i].paymentReceipt.receiptType.receiptType %>] <%= data.creditNotes[i].paymentReceipt.receiptNumber %></a></td>
                             <td><%= data.creditNotes[i].emissionDate %></td>
@@ -217,7 +228,7 @@
                     className: "center-align",
                     targets: 0
                 },                
-                {   targets: [4],
+                {   targets: [5],
                     render: function (data) {
                         if (data)
                             return moment(data).format('DD/MM/YYYY');
@@ -225,7 +236,7 @@
                     }, 
                 },
                 {
-                    targets: 6,
+                    targets: 7,
                     type: 'currency',
                 },
             //     {

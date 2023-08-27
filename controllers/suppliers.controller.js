@@ -24,6 +24,7 @@ const CheckSplitted = Model.checkSplitted;
 const Check = Model.check;
 
 const CreditNote = Model.creditNote;
+const CreditNoteParent = Model.creditNoteParent;
 
 const winston = require('../helpers/winston.helper');
 
@@ -355,6 +356,8 @@ module.exports.createBalanceReport = async function (req, res) {
 
         let supplierAccountMovements = [];
 
+        //----- RECIBOS -----
+
         let paymentReceipts = await PaymentReceipt.findAll({
             include: [{
                 model: ReceiptType
@@ -375,7 +378,7 @@ module.exports.createBalanceReport = async function (req, res) {
         for (const paymentReceipt of paymentReceipts) {
             supplierAccountMovements.push({
                 date: paymentReceipt.emissionDate,
-                receiptType: paymentReceipt.receiptType.name,
+                receiptType: paymentReceipt.receiptType.receiptType,
                 receiptNumber: paymentReceipt.receiptNumber,
                 type: undefined,
                 poNumber: undefined,
@@ -385,6 +388,8 @@ module.exports.createBalanceReport = async function (req, res) {
         };
 
         paymentReceipts = undefined;    //to free up memory
+
+        //----- ORDENES DE PAGO -----
 
         let paymentOrders = await PaymentOrder.findAll({
             include: [
@@ -396,11 +401,14 @@ module.exports.createBalanceReport = async function (req, res) {
                         supplierId: supplierId,
                     }
                 },
-                { model: Account, include: [{ model: AccountType }] }
+                { model: Account, include: [{ model: AccountType }] },
+                {
+                    model: CreditNoteParent, include: [{ model: CreditNote }]
+                },
             ],
             where: {
                 amount: {
-                    [Op.gte]: 0
+                    [Op.gte]: 0 //excluimos las OPs negativas que corresponden a NCs
                 },
                 statusId: {
                     [Op.in]: [
@@ -420,57 +428,17 @@ module.exports.createBalanceReport = async function (req, res) {
 
             supplierAccountMovements.push({
                 date: paymentOrder.paymentDate,
-                receiptType: paymentOrder.paymentReceipt.receiptType.name,
+                receiptType: paymentOrder.paymentReceipt.receiptType.receiptType,
                 receiptNumber: paymentOrder.paymentReceipt.receiptNumber,
                 type: 'O/P',
                 poNumber: paymentOrder.poNumber,
                 account: account,
-                amount: (paymentOrder.amount * (-1))
+                amount: (paymentOrder.amount * (-1)),
+                creditNotes: paymentOrder.creditNoteParents
             })
         };
 
-        paymentOrders = undefined;
-
-        let creditNotes = await CreditNote.findAll({
-            include: [
-                {
-                    model: PaymentReceipt,
-                    include: { model: ReceiptType },
-                    where: {
-                        clientId: clientId,
-                        supplierId: supplierId,
-                    }
-                },
-                { model: PaymentOrder, include: { model: Account, include: [{ model: AccountType }] } }
-            ],
-            where: {
-                statusId: {
-                    [Op.in]: [
-                        CreditNoteStatus.eStatus.get('pending').value,
-                        CreditNoteStatus.eStatus.get('inprogress').value,
-                        CreditNoteStatus.eStatus.get('processed').value
-                    ]
-                }
-            }
-        })
-
-        for (const creditNote of creditNotes) {
-
-            let account = (creditNote.paymentOrder.account.bankId ?
-                `(${creditNote.paymentOrder.account.accountType.account}) ${creditNote.paymentOrder.account.accountNumber}` :
-                `(${creditNote.paymentOrder.account.accountType.account}) ${creditNote.paymentOrder.account.accountType.description}`);
-
-            supplierAccountMovements.push({
-                date: creditNote.emissionDate,
-                receiptType: creditNote.paymentReceipt.receiptType.name,
-                receiptNumber: creditNote.paymentReceipt.receiptNumber,
-                type: 'N/C',
-                poNumber: creditNote.paymentOrder.poNumber,
-                account: account,
-                amount: creditNote.amount
-            })
-        };
-        creditNotes = undefined;
+        paymentOrders = undefined;    //to free up memory
 
         const supplierAccountMovementsSortedByDate = _.sortBy(supplierAccountMovements, 'date'); supplierAccountMovements = undefined;
 
@@ -483,7 +451,6 @@ module.exports.createBalanceReport = async function (req, res) {
         req.flash("error", "Ocurrio un error y no se pudo generar el reporte de cuenta corriente del proveedor");
         res.redirect("/suppliers");
     }
-
 };
 
 //------------------ AJAX CALLS ------------------//
