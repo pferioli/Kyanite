@@ -64,4 +64,14 @@ router.get('/ajax/calculateRemainingBalance/:receiptId', function (req, res, nex
 })
 
 
+router.get('/ajax/byReceiptId/:receiptId', function (req, res, next) {
+    paymentOrdersController.byReceiptId(req.params.receiptId)
+        .then(paymentOrders => {
+            res.json(paymentOrders);
+        })
+        .catch(err => {
+            res.sendStatus(500).send(err)
+        })
+})
+
 module.exports = router;

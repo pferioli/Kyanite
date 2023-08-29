@@ -33,8 +33,4 @@ router.post('/delete', function (req, res, next) {
     creditNotesController.deletePO(req, res);
 })
 
-// router.get("/fixCreditNotes", function (req, res, next) {
-//   suppliersController.fixCreditNotes(req, res);
-// })
-
 module.exports = router;

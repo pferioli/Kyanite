@@ -403,7 +403,15 @@ module.exports.createBalanceReport = async function (req, res) {
                 },
                 { model: Account, include: [{ model: AccountType }] },
                 {
-                    model: CreditNoteParent, include: [{ model: CreditNote }]
+                    model: CreditNoteParent,
+                    include: [
+                        {
+                            model: CreditNote, include: [
+                                {
+                                    model: PaymentOrder,
+                                    include: [{ model: Account, include: [{ model: AccountType }] }]
+                                }]
+                        }]
                 },
             ],
             where: {

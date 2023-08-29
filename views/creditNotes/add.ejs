@@ -21,7 +21,7 @@
                     </div>
 
                      <div class="row">
-                        <div class="input-field col s7">
+                        <div class="input-field col s8">
                             <i class="material-icons prefix">storefront</i>
                             <select id="supplierSelect">
                                 <option value="" disabled selected>Seleccione un proveedor</option>
@@ -32,7 +32,7 @@
                             <label>Nombre del Proveedor</label>
                             <input type="hidden" name="supplierId" id="supplierId" />
                         </div>
-                        <div class="input-field col s5">
+                        <div class="input-field col s4">
                             <i class="material-icons prefix">receipt_long</i>
                             <select id="paymentReceiptSelect">
                                 <option value="" disabled selected>Seleccione un proveedor primero</option>
@@ -40,7 +40,7 @@
                             <label for="paymentReceiptSelect">Factura o Comprobante</label>
                             <input type="hidden" name="receiptId" id="receiptId" />
                         </div>
-                         <div class="input-field col s9">
+                         <div class="input-field col s5">
                             <i class="material-icons prefix">info</i>
                             <input id="paymentReceiptDescription" type="text" value="" readonly />
                             <label for="paymentReceiptDescription">Detalle del servicio o de la factura</label>
@@ -49,7 +49,15 @@
                             <i class="material-icons prefix">monetization_on</i>
                             <input id="paymentReceiptAmount"  type="number" min="0.00" step="0.01" class="validate" readonly />
                             <label for="amount">Importe de la factura</label>
-                        </div>                      
+                        </div>     
+                         <div class="input-field col s4">
+                            <i class="material-icons prefix">assignment_turned_in</i>
+                            <select multiple id="paymentOrdersSelect">
+                                <option value="" disabled selected>Seleccione una factura primero</option>
+                            </select>
+                            <label for="paymentOrdersSelect">Ordenes de Pago</label>
+                            <input type="hidden" name="paymentOrderId" id="paymentOrderId" />
+                        </div>                 
                     </div>
 
                     <div class="row">                        
@@ -116,6 +124,7 @@
 <script type="text/javascript" src="/javascripts/billingPeriods.js"></script>
 <script type="text/javascript" src="/javascripts/accounts.js"></script>
 <script type="text/javascript" src="/javascripts/paymentReceipts.js"></script>
+<script type="text/javascript" src="/javascripts/paymentOrders.js"></script>
 
 <script>
 
@@ -174,11 +183,18 @@
                     }
                     
                     M.updateTextFields();
+
+                    populatePaymentOrders(paymentReceipt.id); //Buscamos las OPs para esa factura                  
                 })        
         };
         
-        M.updateTextFields();
+        const paymentOrdersSelect = document.getElementById("paymentOrdersSelect");
+        
+        paymentOrdersSelect.addEventListener('change', (event) => {
+            $('#paymentOrderId').val($('#paymentOrdersSelect').val());
+        });
 
+        M.updateTextFields();
     });
 
     function Cancel() {
@@ -196,7 +212,6 @@
             }
         }
     }
-
 
     async function populatePaymentReceipts(e){
         
@@ -250,4 +265,38 @@
         document.getElementById(infoField).value = message; M.updateTextFields();        
     }
   
+    async function populatePaymentOrders(paymentReceiptId){
+        
+        document.getElementById('paymentOrderId').value = "";
+
+        const paymentOrdersSelect = document.getElementById('paymentOrdersSelect');
+        
+        getPaymentOrdersByReceiptId(paymentReceiptId)
+            .then(paymentOrders => {
+
+                paymentOrdersSelect.innerHTML = "";
+        
+                //paymentOrdersSelect.innerHTML = '<option value="" disabled selected>Seleccione una factura</option>'
+
+                let markAsSelected = (paymentOrders.length === 1 ? "selected" : "");
+                
+                for (const element of paymentOrders) {
+                    
+                    paymentOrdersSelect.innerHTML += "<option value=\"" + element.id + "\" " + markAsSelected + " >" + `${element.poNumber} ($${element.amount})`  + "</option>";
+                 
+                    if(markAsSelected === "selected") {
+                        document.getElementById('paymentOrderId').value = element.id;
+                    }
+
+                    markAsSelected = "";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            })
+            .finally(() => {
+               M.FormSelect.init(paymentOrdersSelect, {});
+            })
+    }
+
 </script>

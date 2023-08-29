@@ -29,8 +29,10 @@ module.exports.widthMeassure = function (doc, text, options) {
 }
 
 module.exports.formatCurrency = function (number) {
+    const _number = Math.abs(number) < 0.001 ? 0.00 : number;
+
     return new Intl.NumberFormat('es',
-        { currency: 'ARS', style: 'currency', currencyDisplay: 'narrowSymbol', /*currencyDisplay: "symbol"*/ }).format(number);
+        { currency: 'ARS', style: 'currency', currencyDisplay: 'narrowSymbol', /*currencyDisplay: "symbol"*/ }).format(_number);
 }
 
 module.exports.formatDateTime = function (date) {

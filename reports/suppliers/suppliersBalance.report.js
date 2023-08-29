@@ -18,7 +18,7 @@ function createReport(supplier, client, accountMovements, user, res) {
     let doc = new PDFDocument(
         {
             size: "A4",
-            margin: 50,
+            margin: 35, //50,
             layout: 'portrait', // can be 'landscape'
             info: {
                 Title: 'Cuenta Corriente Proveedor',
@@ -175,47 +175,98 @@ function populateTable(doc, accountMovements) {
     amount = { totalSupplier: 0.00, totalClient: 0.00, subTotal: 0.00 };
 
     let table = {
-        headers: ['Fecha', 'Factura', 'OP', 'NC', 'Cuenta', 'Importe', 'Saldo'],
+        headers: ['Fecha', 'Factura', 'OP', 'NC', 'Cuenta', 'Facturado', 'Abonado', 'Saldo'],
         rows: [],
         columns: [
             { width: '10%', align: 'center' }, //Fecha
             { width: '16%', align: 'center' }, //FC
-            { width: '10%', align: 'center' }, //OP
-            { width: '10%', align: 'center' }, //NC
-            { width: '24%', align: 'left' }, //CTA
-            { width: '15%', align: 'right' }, //IMPORTE
+            { width: '6%', align: 'center' }, //OP
+            { width: '6%', align: 'center' }, //NC
+            { width: '15%', align: 'left' }, //CTA
+            { width: '15%', align: 'right' }, //FACTURADO
+            { width: '15%', align: 'right' }, //ABONADO
             { width: '15%', align: 'right' }, //SALDO
         ]
     };
 
     const add_row = (accountMovement) => {
 
-        amount.subTotal += Number.parseFloat(accountMovement.amount);
+        let creditNotes = []; creditNotesAmount = 0; let movementAmount = 0;
 
-        let creditNotes = []; creditNotesAmount = 0;
+        if (accountMovement.type === undefined) {   // -----> FACTURA
 
-        if (accountMovement.type === undefined)
             amount.totalSupplier += Number.parseFloat(accountMovement.amount); //Comprobantes (Facturado)
-        else {
+
+            movementAmount = Number.parseFloat(accountMovement.amount);
+
+            amount.subTotal += Number.parseFloat(movementAmount);
+
+            table.rows.push(
+                [
+                    common.formatDate(accountMovement.date),
+                    accountMovement.receiptType + " " + accountMovement.receiptNumber,
+                    (accountMovement.poNumber ? accountMovement.poNumber : ""),
+                    creditNotes.join(),
+                    (accountMovement.account ? accountMovement.account : ""),
+                    common.formatCurrency(movementAmount),
+                    "", //common.formatCurrency(0),
+                    common.formatCurrency(amount.subTotal),
+                ]);
+
+
+        } else {    // -----> OPs y NCs
+
+            // NOTAS DE CREDITO
+
             for (const creditNote of accountMovement.creditNotes) {
+
                 creditNotes.push(creditNote.creditNote.id); creditNotesAmount += Number.parseFloat(creditNote.creditNote.amount);
+
+                const creditNoteAmount = Number.parseFloat(creditNote.creditNote.amount) * (-1);
+
+                amount.subTotal += creditNoteAmount;
+
+                let account = (creditNote.creditNote.paymentOrder.account.bankId ?
+                    `(${creditNote.creditNote.paymentOrder.account.accountType.account}) ${creditNote.creditNote.paymentOrder.account.accountNumber}` :
+                    `(${creditNote.creditNote.paymentOrder.account.accountType.account}) ${creditNote.creditNote.paymentOrder.account.accountType.description}`);
+
+                table.rows.push(
+                    [
+                        common.formatDate(creditNote.creditNote.emissionDate),
+                        accountMovement.receiptType + " " + accountMovement.receiptNumber,
+                        (creditNote.creditNote.paymentOrderId ? creditNote.creditNote.paymentOrder.poNumber : ""),
+                        creditNote.creditNote.id,
+                        (creditNote.creditNote.accountId ? account : ""),
+                        common.formatCurrency(Number.parseFloat(creditNoteAmount)),
+                        "", //common.formatCurrency(0),
+                        common.formatCurrency(amount.subTotal),
+                    ]);
+
+                amount.totalClient += Number.parseFloat(creditNoteAmount) * (-1); //OPs y NCs (Abonado)   //si es una OP hay que restarle las NCs
+
             }
-            //si es una OP hay que restarle las NCs
-            amount.totalClient += Number.parseFloat(accountMovement.amount) * (-1); //OPs y NCs (Abonado)
+
+            //ORDEN DE PAGO
+            
+            movementAmount = Number.parseFloat(accountMovement.amount) + creditNotesAmount;
+
+            amount.subTotal += Number.parseFloat(movementAmount);
+
+            amount.totalClient += Number.parseFloat(movementAmount) * (-1); //OPs y NCs (Abonado)   //si es una OP hay que restarle las NCs
+
+            table.rows.push(
+                [
+                    common.formatDate(accountMovement.date),
+                    accountMovement.receiptType + " " + accountMovement.receiptNumber,
+                    (accountMovement.poNumber ? /*accountMovement.type + " " + */ accountMovement.poNumber : ""),
+                    creditNotes.join(),
+                    (accountMovement.account ? accountMovement.account : ""),
+                    "", //common.formatCurrency(0),
+                    common.formatCurrency(movementAmount),
+                    common.formatCurrency(amount.subTotal),
+                ]);
+
         }
-
-        table.rows.push(
-            [
-                common.formatDate(accountMovement.date),
-                accountMovement.receiptType + " " + accountMovement.receiptNumber,
-                (accountMovement.poNumber ? /*accountMovement.type + " " + */ accountMovement.poNumber : ""),
-                creditNotes.join(),
-                (accountMovement.account ? accountMovement.account : ""),
-                common.formatCurrency(accountMovement.amount + (creditNotesAmount)),
-                common.formatCurrency(amount.subTotal),
-            ]);
-
-
     }
 
     let index = 0;

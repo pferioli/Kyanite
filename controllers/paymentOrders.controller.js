@@ -656,3 +656,27 @@ module.exports.edit = async function (req, res, next) {
     }
 
 }
+
+//------------------ AJAX CALLS ------------------//
+
+module.exports.byReceiptId = async function (paymentReceiptId) {
+
+    // const paymentReceipt = await PaymentReceipt.findByPk(paymentReceiptId)
+
+    const paymentOrders = await PaymentOrder.findAll(
+        {
+            where: {
+                paymentReceiptId: paymentReceiptId,
+                amount: { [Op.gte]: 0 },
+                statusId: {
+                    [Op.in]: [
+                        PaymentOrderStatus.eStatus.get('pending').value,
+                        PaymentOrderStatus.eStatus.get('inprogress').value,
+                        PaymentOrderStatus.eStatus.get('processed').value
+                    ]
+                }
+            }
+        });
+
+    return paymentOrders;
+}
