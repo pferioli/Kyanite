@@ -401,7 +401,9 @@ module.exports.createBalanceReport = async function (req, res) {
                         supplierId: supplierId,
                     }
                 },
-                { model: Account, include: [{ model: AccountType }] },
+                {
+                    model: Account, include: [{ model: AccountType }], paranoid: false
+                },
                 {
                     model: CreditNoteParent,
                     include: [

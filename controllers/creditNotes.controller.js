@@ -129,7 +129,8 @@ module.exports.showNewForm = async function (req, res) {
     supplierIds = _.uniq(supplierIds);  //eliminamos si hay proveedores duplicados
 
     const suppliers = await Supplier.findAll({
-        where: { id: { [Op.in]: supplierIds } }
+        where: { id: { [Op.in]: supplierIds } }, order: [['name', 'ASC']],
+
     })
 
     const accounts = await Account.findAll({ include: [{ model: AccountType }], where: { clientId: clientId } });
@@ -141,7 +142,7 @@ module.exports.addNew = async function (req, res, next) {
 
     const clientId = req.params.clientId;
 
-    const paymentOrderIds = req.body.paymentOrderId.toString().split();
+    const paymentOrderIds = req.body.paymentOrderId.toString().split(",");
 
     CreditNote.create({
         clientId: clientId,
