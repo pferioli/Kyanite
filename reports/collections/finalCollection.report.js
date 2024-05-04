@@ -1,4 +1,7 @@
 const PDFDocument = require("pdfkit");
+
+const QRCode = require('qrcode');
+
 const path = require("path");
 
 const image_folder = path.join(__dirname, "..", "..", "public", "images")
@@ -42,9 +45,11 @@ async function createReport(collections, res) {
 
         generateMessage(doc, collection);
 
-        const qrURL = 'https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=' + encodeURIComponent(collection.collection.securityCode);
+        const qrImage = await QRCode.toDataURL(collection.collection.securityCode)
 
-        const qrImage = await fetchImage(qrURL);
+        // const qrURL = 'https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=' + encodeURIComponent(collection.collection.securityCode);
+
+        // const qrImage = await fetchImage(qrURL);
 
         doc.image(qrImage, 490, 110, { width: 55, height: 55 });
 

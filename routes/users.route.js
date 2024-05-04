@@ -47,10 +47,7 @@ router.post("/enable2fa", function (req, res, next) {
 });
 
 // router.post('/send2fa', async function (req, res) {
-
-
 //     res.send(resp);
-
 // })
 
 module.exports = router

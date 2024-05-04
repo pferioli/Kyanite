@@ -443,13 +443,13 @@ module.exports.reassingCollection = async function (req, res) {
             await collectionProperty.update({ propertyId: property.homeOwnerId })
         }
 
-        winston.info(`properties reassigned successfully for collection ${collectionId} by user #${req.user.id}`)
+        winston.info(`properties reassigned successfully by user #${req.user.id}`)
 
         req.flash("success", "las propiedades fueron actualizadas exitosamente");
 
     } catch (error) {
 
-        winston.error(`An error ocurred while user #${req.user.id} tryed to reassign properties for collection ${collectionId} - ${err} `)
+        winston.error(`An error ocurred while user #${req.user.id} tryed to reassign properties - ${err} `)
 
         req.flash("error", "Ocurrio un error y no se pudo reasignar las propiedades de la cobranza en la base de datos");
 

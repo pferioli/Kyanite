@@ -87,8 +87,9 @@ module.exports = function (app) {
 
     passport.use('local-topt', new TotpStrategy({ codeField: 'otpToken', window: 30 },
         function (user, done) {
-            if (!user.secret)
+            if (!user.secret) {
                 return done('missing secret');
+            }                
             return done(null, user.secret, 30);
         }
     ));

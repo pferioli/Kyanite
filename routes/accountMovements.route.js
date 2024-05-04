@@ -49,9 +49,9 @@ router.get("/client/:clientId/report", function (req, res, next) {
     accountMovementsController.createInvoice(req, res);
 });
 
-//https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=14&periodId=41&accountId=91
+//https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=8&periodId=651&accountId=43
 
-//https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=23&periodId=312&accountId=171
+//https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=24&periodId=799&accountId=174
 
 router.get("/fixBalance", async function (req, res, next) {
     const clientId = req.query.clientId;

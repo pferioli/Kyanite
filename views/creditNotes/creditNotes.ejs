@@ -125,11 +125,10 @@
                             <td><%= data.creditNotes[i].user.name %></td>                                
                                 
                             <td>
-                                <a id="button-edit" title="editar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.creditNotes[i].id%>"><i class="material-icons">edit</i></a>
-                                
-                                <a id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
-                                    data-id="<%=data.creditNotes[i].id%>" data-value="<%= data.creditNotes[i].poNumber %>" data-clientId="<%=data.client.id%>" onclick="deleteDialog(this)">
-                                    <i class="material-icons">delete</i></a>
+                                <a id="button-edit" title="editar" class="btn-flat btn-small waves-effect waves-light" data-id="<%=data.creditNotes[i].id%>"><i class="material-icons">edit</i></a>                                                                
+                                <!--    <a id="button-delete" title="eliminar" class="btn-flat btn-small waves-effect waves-light" 
+                                    data-id="<#%=data.creditNotes[i].id%>" data-value="<#%= data.creditNotes[i].poNumber %>" data-clientId="<#%=data.client.id%>" onclick="deleteDialog(this)">
+                                    <i class="material-icons">delete</i></a> -->
                             </td>
 
                         </tr>
@@ -174,7 +173,7 @@
         const clientId = document.getElementById('clientId').value;
         const periodId = document.getElementById('periodId').value;
 
-        const redirectUrl = '/expenses/paymentOrders?showAll=' + swStatus;
+        const redirectUrl = '/creditNotes/client/'+clientId+'?showAll=' + swStatus;
 
         var form = $('<form action="' + redirectUrl + '" method="post">' +
             '<input type="hidden" name="clientId" value="' + clientId + '"></input>' +
@@ -319,3 +318,4 @@
         });
     });
 </script>
+

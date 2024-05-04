@@ -2,6 +2,9 @@ const jwt = require('jwt-simple');
 const bcrypt = require('bcrypt');
 const base32 = require('thirty-two');
 
+// const speakeasy = require("speakeasy");
+const QRCode = require('qrcode');
+
 const mailgun = require('../helpers/mailgun.helper');
 const winston = require('../helpers/winston.helper');
 
@@ -112,6 +115,12 @@ module.exports.decodeJWT = async function (req, res) {
 
 module.exports.generate2fa = async function (user) {
 
+    // const secret = speakeasy.generateSecret({ length: 10 });
+
+    // const otpUrl = speakeasy.otpauthURL({
+    //     secret: (user.secret ? base32.encode(user.secret) : secret.base32), label: user.email, algorithm: 'sha512', issuer: "AAII Kyanite", period: 30
+    // });
+
     var key = randomKey(10);
 
     if (user.secret) {
@@ -120,14 +129,13 @@ module.exports.generate2fa = async function (user) {
 
     var encodedKey = base32.encode(key);
 
-    // generate QR code for scanning into Google Authenticator
-    // reference: https://code.google.com/p/google-authenticator/wiki/KeyUriFormat
-    var otpUrl = 'otpauth://totp/' + user.email
-        + '?secret=' + encodedKey + '&period=30' + `&issuer=${encodeURIComponent('AAII Kyanite')}`;
+    var otpUrl = 'otpauth://totp/' + user.email + '?secret=' + encodedKey + '&period=30' + `&issuer=${encodeURIComponent('AAII Kyanite')}`;
 
-    var qrImage = 'https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=' + encodeURIComponent(otpUrl);
+    const dataUrl = await QRCode.toDataURL(otpUrl)
 
-    return { user: user, key: key, encodedKey: encodedKey, qrImage: qrImage };
+    // console.debug(dataUrl);
+
+    return { user: user, key: key, encodedKey: encodedKey, qrImage: dataUrl };
 }
 
 module.exports.setup2fa = async function (req, res) {

@@ -21,6 +21,10 @@ router.get('/client/:clientId', function (req, res, next) {
     creditNotesController.listAll(req, res);
 })
 
+router.post('/client/:clientId', function (req, res, next) {
+    creditNotesController.listAll(req, res);
+})
+
 router.get('/client/:clientId/new', function (req, res, next) {
     creditNotesController.showNewForm(req, res);
 });
