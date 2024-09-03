@@ -51,14 +51,14 @@ module.exports = (sequelize, DataTypes) => {
         },
         amountConcepts: {
             allowNull: false,
-            type: DataTypes.DECIMAL(10, 2)
+            type: DataTypes.DECIMAL(18, 2)
         },
         amountSecurities: {
             allowNull: false,
-            type: DataTypes.DECIMAL(10, 2)
+            type: DataTypes.DECIMAL(18, 2)
         },
         balance: {
-            type: new DataTypes.VIRTUAL(DataTypes.DECIMAL(10, 2)),
+            type: new DataTypes.VIRTUAL(DataTypes.DECIMAL(18, 2)),
             get: function () {
                 return this.get('amountConcepts') - this.get('amountSecurities');
             }

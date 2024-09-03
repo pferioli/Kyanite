@@ -44,11 +44,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         amount: {
             allowNull: false,
-            type: DataTypes.DECIMAL(10, 2)
+            type: DataTypes.DECIMAL(18, 2)
         },
         balance: {
             allowNull: true,
-            type: DataTypes.DECIMAL(10, 2)
+            type: DataTypes.DECIMAL(18, 2)
         },
         movementId: {
             allowNull: false,

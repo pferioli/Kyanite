@@ -125,6 +125,7 @@ module.exports.addNew = async function (req, res) {
         res.redirect("/investments/client/" + clientId); return;
     }
 
+    
     Investment.create({
         clientId: clientId,
         periodId: req.body.billingPeriodId,

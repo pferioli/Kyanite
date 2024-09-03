@@ -50,11 +50,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         amount: {
             allowNull: false,
-            type: DataTypes.DECIMAL(10, 2)
+            type: DataTypes.DECIMAL(18, 2)
         },
         interests: {
             allowNull: false,
-            type: DataTypes.DECIMAL(10, 2)
+            type: DataTypes.DECIMAL(18, 2)
         },
         categoryId: {
             allowNull: false,
