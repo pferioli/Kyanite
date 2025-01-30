@@ -63,4 +63,24 @@ router.get("/fixBalance", async function (req, res, next) {
     res.send({ totalBalance: totalBalance });
 })
 
+
+router.get("/fixMonthlyBalance", async function (req, res, next) {
+    const clientId = req.query.clientId;
+    const periodId = req.query.periodId;
+    const accountId = req.query.accountId;
+
+    const totalBalance = await accountMovementsController.fixBalanceMovements(clientId, periodId, accountId);
+
+    res.send({ totalBalance: totalBalance });
+})
 module.exports = router;
+
+
+/*
+
+https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=9&periodId=905&accountId=52
+https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=9&periodId=905&accountId=56
+https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=9&periodId=905&accountId=57
+https://kyanite-aaii.rj.r.appspot.com/movements/fixBalance?clientId=9&periodId=905&accountId=58
+
+*/

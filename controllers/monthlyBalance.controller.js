@@ -86,7 +86,7 @@ module.exports.openMonthlyBalance = async function (clientId, periodId, previous
     }
 };
 
-module.exports.closeMonthlyBalance = async function (clientId, periodId) {
+module.exports.closeMonthlyBalance = async function (clientId, periodId, accountId) {
 
     let totalAmount = 0.00; let totalMovements = 0;
 
@@ -96,9 +96,13 @@ module.exports.closeMonthlyBalance = async function (clientId, periodId) {
 
         accountIds = [];
 
-        for (const account of accounts) {
-            accountIds.push(account.id);
-        };
+        if (accountId) {
+            accountIds.push(accountId);
+        } else {
+            for (const account of accounts) {
+                accountIds.push(Number(account.id));
+            };
+        }
 
         const monthlyBalance = await AccountMovement.findAll(
             {
@@ -119,7 +123,7 @@ module.exports.closeMonthlyBalance = async function (clientId, periodId) {
                 movements: 0
             };
 
-            const index = _.findIndex(monthlyBalance, { accountId: accountId });
+            const index = _.findIndex(monthlyBalance, { accountId: Number(accountId) });
 
             if (index >= 0) {
                 mBalance.amount = monthlyBalance[index].totalAmount;
