@@ -6,3 +6,4 @@ config/
 credentials/
 logs/
 ssl/development/
+/database

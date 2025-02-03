@@ -627,6 +627,10 @@ module.exports.importCollections = async function (req, res) {
 
                                         if (invalidAccountId === false) {
 
+                                            const amountNumber = parseFloat(readResult[index].amount.replace(/\./g, '').replace(',', '.'));
+                                            
+                                            // const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amountNumber);
+                                            
                                             collection = await CollectionImport.create({
                                                 clientCode: readResult[index].clientCode.toUpperCase(),
                                                 propertyType: readResult[index].propertyType.toUpperCase(),
@@ -636,7 +640,7 @@ module.exports.importCollections = async function (req, res) {
                                                 conceptDesc: readResult[index].concept,
                                                 valueType: valueType,
                                                 valueDesc: readResult[index].value,
-                                                amount: readResult[index].amount.replace(".", '').replace(",", '.'),
+                                                amount: amountNumber,
                                                 date: moment(readResult[index].date, "DD/MM/YYYY").toDate(),
                                                 controlId: importCtrl.id
                                             });
