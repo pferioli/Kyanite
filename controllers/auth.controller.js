@@ -17,6 +17,10 @@ module.exports.hashPassword = function (req, res) {
     });
 }
 
+const path = require("path");
+
+const resources = path.join(__dirname, "..", "public", "images")
+
 module.exports.encodeJWT = async function (req, res) {
 
     if ((req.body.email === undefined) || (req.body.email.length === 0)) {
@@ -131,11 +135,20 @@ module.exports.generate2fa = async function (user) {
 
     var otpUrl = 'otpauth://totp/' + user.email + '?secret=' + encodedKey + '&period=30' + `&issuer=${encodeURIComponent('AAII Kyanite')}`;
 
-    const dataUrl = await QRCode.toDataURL(otpUrl)
+    try {
+        const qrFile = `qr${user.id}.png`;
 
-    // console.debug(dataUrl);
+        const _qrFile = await QRCode.toFile(`${resources}/QRs/${qrFile}`, otpUrl)
 
-    return { user: user, key: key, encodedKey: encodedKey, qrImage: dataUrl };
+        const dataUrl = await QRCode.toDataURL(otpUrl)
+
+        console.debug(dataUrl);
+
+        return { user: user, key: key, encodedKey: encodedKey, qrImage: dataUrl, qrFile: qrFile };
+
+    } catch (error) {
+        return { user: user, key: key, encodedKey: encodedKey, qrImage: null, qrFile: null };
+    }
 }
 
 module.exports.setup2fa = async function (req, res) {

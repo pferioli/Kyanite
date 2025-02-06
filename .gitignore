@@ -7,3 +7,4 @@ credentials/
 logs/
 ssl/development/
 /database
+/public/images/QRs

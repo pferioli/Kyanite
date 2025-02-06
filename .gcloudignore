@@ -17,3 +17,5 @@
 node_modules/
 server/certs/
 logs/
+database/
+public/images/QRs/*

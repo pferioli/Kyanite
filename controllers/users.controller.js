@@ -181,7 +181,7 @@ module.exports.edit = async function (req, res, next) {
                 email: req.body.email,
             }
 
-            if (req.body.clearSignature.toLowerCase() === 'on') {
+            if (req.body.clearSignature?.toLowerCase() === 'on') {
                 await UserSignature.destroy({ where: { userId: user.id } });
             } else {
 

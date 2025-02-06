@@ -52,7 +52,7 @@
     "passport-totp": "0.0.2",
     "path": "^0.12.7",
     "pdfkit": "^0.11.0",
-    "qrcode": "^1.5.3",
+    "qrcode": "^1.5.4",
     "request": "^2.88.2",
     "sequelize": "^6.3.4",
     "serve-favicon": "^2.5.0",

@@ -40,8 +40,8 @@ module.exports.sendEmail2faSetup = async function (mailto, gen2fa) {
         from: process.env.MAILFROM,
         subject: 'el 2FA fue habilitado para su cuenta',
         template: "setup2fa",
-        inline: [`${resources}/aaii.png`, `${resources}/email.png`],
-        'h:X-Mailgun-Variables': `{ "name": "${gen2fa.user.name}","key":"${gen2fa.key}","qr":"${gen2fa.qrImage}"}`
+        inline: [`${resources}/aaii.png`, `${resources}/email.png`, `${resources}/QRs/${gen2fa.qrFile}`],
+        'h:X-Mailgun-Variables': `{ "name": "${gen2fa.user.name}","key":"${gen2fa.key}","qr":"${gen2fa.qrImage}", "qrFile":"${gen2fa.qrFile}" }`
     })
 
     return response;
